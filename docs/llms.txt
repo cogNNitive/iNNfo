@@ -1,0 +1,9 @@
+# cogNNitive
+
+> Central hub for the iNNv0 FORMAT ecosystem. Open, detect, and edit FORMAT models.
+
+# Generator: https://skills.innv0.com/innv0-web-design-guide
+
+Pages:
+- [Home](https://innv0.github.io/cogNNitive/index.md): cogNNitive landing page
+- [About](https://innv0.github.io/cogNNitive/about.md): Architecture, packages, and apps

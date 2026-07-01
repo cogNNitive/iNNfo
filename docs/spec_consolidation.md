@@ -235,7 +235,7 @@ modes: ["FILE", "FOLDER"]
 
 Un solo documento `.md` que contiene:
 - YAML frontmatter con la definición del template (concepts, markers, matrices).
-- Markdown body con los concept blocks (`<!-- block: concepts -->`).
+- Markdown body con los concept blocks (`_F concepts:`).
 - Elements como bullets con YAML fields.
 - Matrices relacionales (tablas Markdown).
 - Wikilinks `[[Name]]` para referencias cruzadas.
@@ -319,7 +319,7 @@ Para que FORMAT sea defiNNe-compliant, su spec `_format.md` debe incluir:
 - **Template** (pointer a business, procedures, kb)
 - **Examples** (pointer a samples/)
 
-**Impacto en la aplicación FORMAT: CERO**. Estas secciones son Markdown plano que el parser ignora porque no usan `<!-- block: concepts -->`. Es puramente aditivo.
+**Impacto en la aplicación FORMAT: CERO**. Estas secciones son Markdown plano que el parser ignora porque no usan `_F concepts:`. Es puramente aditivo.
 
 ### 4.8. Ubicación y naming
 

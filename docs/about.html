@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — cogNNitive</title>
+  <meta name="description" content="Learn about cogNNitive, the central hub for the iNNv0 FORMAT ecosystem — architecture, packages, and apps.">
+  <meta name="generator" content="https://skills.innv0.com/innv0-web-design-guide">
+  <link rel="canonical" href="https://innv0.github.io/cogNNitive/about">
+  <link rel="alternate" type="text/markdown" href="/about.md">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/analytics.js" defer></script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebSite","name":"cogNNitive","url":"https://innv0.github.io/cogNNitive/","description":"Central hub for the iNNv0 FORMAT ecosystem. Launcher, format-core, and spec chain.","author":{"@type":"Organization","name":"iNNv0"},"inLanguage":"en","isAccessibleForFree":true}
+  </script>
+</head>
+<body>
+<header class="header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="/" class="logo">cogNNitive <span>hub</span></a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/about" aria-current="page">About</a>
+        <a href="/documentation">Docs</a>
+        <a href="https://innv0.com/contact?ref=cogNNitive" target="_blank" rel="noopener noreferrer">Contact</a>
+      </nav>
+      <a href="/documentation" class="btn btn-primary header-cta">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h1>About <span class="serif-accent">cogNNitive</span></h1>
+        <p>The monorepo that ties the iNNv0 FORMAT ecosystem together.</p>
+      </div>
+
+      <div style="max-width:720px;margin:0 auto;">
+        <h2 style="font-size:22px;margin-bottom:var(--space-md);">Architecture</h2>
+        <p style="margin-bottom:var(--space-lg);">cogNNitive is organized as a npm workspaces monorepo with two main areas:</p>
+
+        <div style="background:var(--canvas-inert);border:1px solid var(--border-soft);border-radius:var(--radius);padding:var(--space-lg);margin-bottom:var(--space-xl);font-family:var(--mono);font-size:14px;line-height:1.8;">
+          cogNNitive/<br/>
+          ├── apps/<br/>
+          │&nbsp;&nbsp; └── launcher/ &nbsp;&nbsp;<span style="color:var(--ink-muted);font-family:var(--sans);font-size:12px;">// Vue 3 + Vite drop-zone app</span><br/>
+          ├── packages/<br/>
+          │&nbsp;&nbsp; └── format-core/ <span style="color:var(--ink-muted);font-family:var(--sans);font-size:12px;">// TS parser, resolver, validator</span><br/>
+          ├── specs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-muted);font-family:var(--sans);font-size:12px;">// Specification files</span><br/>
+          ├── models/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-muted);font-family:var(--sans);font-size:12px;">// Example models</span><br/>
+          └── docs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--ink-muted);font-family:var(--sans);font-size:12px;">// This website</span>
+        </div>
+
+        <h2 style="font-size:22px;margin-bottom:var(--space-md);">Packages</h2>
+
+        <div class="card" style="margin-bottom:var(--space-md);">
+          <span class="card-tag">@innv0/format-core v0.1.0</span>
+          <h3 style="margin-top:var(--space-sm);">format-core</h3>
+          <p>Framework-agnostic TypeScript library with a unified parser for FILE and FOLDER modes, model types, a validator against template schemas, and IO drivers for both modes.</p>
+        </div>
+
+        <h2 style="font-size:22px;margin-bottom:var(--space-md);margin-top:var(--space-xl);">Apps</h2>
+
+        <div class="card" style="margin-bottom:var(--space-md);">
+          <span class="card-tag">@innv0/launcher v0.1.0</span>
+          <h3 style="margin-top:var(--space-sm);">cogNNitive Launcher</h3>
+          <p>A Vue 3 application with drag-and-drop zone that reads FORMAT frontmatter, detects FILE/FOLDER/BOTH mode, and routes to the appropriate editor (file-format or folder-format).</p>
+        </div>
+
+        <h2 style="font-size:22px;margin-bottom:var(--space-md);margin-top:var(--space-xl);">Specifications</h2>
+        <p style="margin-bottom:var(--space-lg);">The ecosystem defines four specification levels, each building on the previous:</p>
+
+        <div class="grid-2" style="margin-bottom:var(--space-xl);">
+          <div class="card">
+            <span class="card-tag">Level 0</span>
+            <h3 style="margin-top:var(--space-sm);font-size:18px;">defiNNe</h3>
+            <p>Meta-specification: structure, SemVer, RFC 2119. The root of the chain.</p>
+          </div>
+          <div class="card">
+            <span class="card-tag">Level 1</span>
+            <h3 style="margin-top:var(--space-sm);font-size:18px;">FORMAT</h3>
+            <p>Central specification with FILE (single document) and FOLDER (node-as-folder) modes.</p>
+          </div>
+          <div class="card">
+            <span class="card-tag">Level 2</span>
+            <h3 style="margin-top:var(--space-sm);font-size:18px;">Templates</h3>
+            <p>business, procedures, kb — each declares concepts, markers, and relationship types.</p>
+          </div>
+          <div class="card">
+            <span class="card-tag">Level 3</span>
+            <h3 style="margin-top:var(--space-sm);font-size:18px;">Models</h3>
+            <p>Concrete instances like Ghostbusters or TeamKB. Lightweight — just data and parent pointer.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="section section-inert">
+    <div class="container">
+      <div class="section-header">
+        <h2>Get in <span class="serif-accent">Touch</span></h2>
+        <p>Contributions, questions, ideas — we're always open.</p>
+      </div>
+      <div class="contact-links" style="text-align:center;padding:var(--space-xl) var(--space-lg);">
+        <a href="https://innv0.com/contact?ref=cogNNitive" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Contact Us</a>
+        <span class="contact-url-display" style="display:block;margin-top:var(--space-md);font-size:14px;color:var(--ink-muted);word-break:break-all;">https://innv0.com/contact?ref=cogNNitive</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="logo">cogNNitive</a>
+        <p>Central hub for the iNNv0 FORMAT ecosystem.</p>
+      </div>
+      <div>
+        <h4>Ecosystem</h4>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/documentation">Documentation</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>iNNv0</h4>
+        <ul>
+          <li><a href="https://innv0.com" target="_blank">innv0.com</a></li>
+          <li><a href="https://github.com/innV0" target="_blank">GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 iNNv0. All rights reserved.</span>
+      <span class="credit">Creado con <a href="https://skills.innv0.com/innv0-web-design-guide">iNNv0 web design skill</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

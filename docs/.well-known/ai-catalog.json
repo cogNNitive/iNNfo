@@ -1,0 +1,10 @@
+{
+  "@context": "https://schema.org",
+  "@type": "DataCatalog",
+  "name": "cogNNitive",
+  "description": "Central hub for the iNNv0 FORMAT ecosystem.",
+  "generator": {
+    "@type": "SoftwareApplication",
+    "url": "https://skills.innv0.com/innv0-web-design-guide"
+  }
+}
