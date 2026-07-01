@@ -3,8 +3,8 @@ specification_version: "V_0-1-0"
 specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/kb_V_0-1-0_FORMAT.md"
 level: 2
 parent:
-  name: "FORMAT_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/FORMAT_V_0-1-0_FORMAT.md"
+  name: "FORMAT_V_0-1-1"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md"
 title: "Knowledge Base Template"
 mode: "FOLDER"
 last_updated: "2026-07-01"
@@ -163,7 +163,7 @@ To create a knowledge base model, create a directory with the canonical name and
 ```yaml
 ---
 specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
+specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.1/FORMAT_V_0-1-1_FORMAT.md"
 level: 3
 parent:
   name: "kb_V_0-1-0"

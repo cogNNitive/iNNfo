@@ -3,8 +3,8 @@ specification_version: "V_0-1-0"
 specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/procedures_V_0-1-0_FORMAT.md"
 level: 2
 parent:
-  name: "FORMAT_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/FORMAT_V_0-1-0_FORMAT.md"
+  name: "FORMAT_V_0-1-1"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md"
 title: "Procedures Template"
 mode: "FILE"
 last_updated: "2026-07-01"
@@ -177,7 +177,7 @@ To create a procedures model, create a level 3 FILE mode document with:
 ```yaml
 ---
 specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
+specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.1/FORMAT_V_0-1-1_FORMAT.md"
 level: 3
 parent:
   name: "procedures_V_0-1-0"
@@ -190,7 +190,7 @@ mode: "FILE"
 > [!NOTE]
 > This is a **FORMAT document**...
 
-# <!-- block: concepts --> index
+# _F concepts: index
 * [[Procedure]]
 * [[Work]]
 * [[Artifact]]
@@ -199,11 +199,11 @@ mode: "FILE"
 * [[Position]]
 * [[Person]]
 
-# <!-- block: concepts --> Procedure
+# _F concepts: Procedure
 Description of the overall procedure.
 
-# <!-- block: concepts --> Work
-1. <!-- block: Work --> Step Name
+# _F concepts: Work
+1. _F Work: Step Name
   ```yaml
   step_type: "task"
   next: "Next Step Name"
@@ -211,11 +211,11 @@ Description of the overall procedure.
   ```
   Step description.
 
-# <!-- block: concepts --> Artifact
-* <!-- block: Artifact --> Artifact Name
+# _F concepts: Artifact
+* _F Artifact: Artifact Name
   Description of the artifact.
 
-# <!-- block: matrices --> work-roles matrix
+# _F matrices: work-roles matrix
 | Work \ Roles | Role Name |
 | :--- | :---: |
 | Step Name | Responsible |
@@ -230,7 +230,7 @@ Description of the overall procedure.
   📄 Onboarding_V_0-1-0_procedures_FORMAT.md
   📁 specs/
     📄 procedures_V_0-1-0_FORMAT.md
-    📄 FORMAT_V_0-1-0_FORMAT.md
+    📄 FORMAT_V_0-1-1_FORMAT.md
     📄 defiNNe_V_0-1-0_FORMAT.md
 ```
 
@@ -244,7 +244,7 @@ parent:
 
 # This template's parent:
 parent:
-  name: "FORMAT_V_0-1-0"
+  name: "FORMAT_V_0-1-1"
   url: "..."   # → resolves to FORMAT spec
 
 # FORMAT's parent:

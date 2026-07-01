@@ -3,8 +3,8 @@ specification_version: "V_0-1-0"
 specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/business_V_0-1-0_FORMAT.md"
 level: 2
 parent:
-  name: "FORMAT_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/FORMAT_V_0-1-0_FORMAT.md"
+  name: "FORMAT_V_0-1-1"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md"
 title: "Business Template"
 mode: "FILE"
 last_updated: "2026-07-01T00:00:00.000Z"
@@ -644,7 +644,7 @@ To create a business model, create a level 3 FILE mode document with:
 ```yaml
 ---
 specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
+specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.1/FORMAT_V_0-1-1_FORMAT.md"
 level: 3
 parent:
   name: "business_V_0-1-0"
@@ -657,7 +657,7 @@ mode: "FILE"
 > [!NOTE]
 > This is a **FORMAT document**...
 
-# <!-- block: concepts --> index
+# _F concepts: index
 * [[Market]]
   * [[Stakeholders]]
   * [[Segments]]
@@ -665,14 +665,14 @@ mode: "FILE"
     * [[Value propositions]]
 ...
 
-# <!-- block: concepts --> Business summary
+# _F concepts: Business summary
 Your business summary here.
 
-# <!-- block: concepts --> stakeholders
-* <!-- block: Stakeholders --> Stakeholder Name
+# _F concepts: stakeholders
+* _F Stakeholders: Stakeholder Name
   Description and details.
 
-# <!-- block: matrices --> problems-value propositions matrix
+# _F matrices: problems-value propositions matrix
 | Problems \ Value propositions | VP1 | VP2 |
 | :--- | :---: | :---: |
 | Problem 1 | Max | High |
@@ -691,7 +691,7 @@ When a model named `Acme_V_0-1-0_business_FORMAT.md` is loaded for the first tim
   📄 Acme_V_0-1-0_business_FORMAT.md
   📁 specs/
     📄 business_V_0-1-0_FORMAT.md    ← this file (downloaded from parent.url)
-    📄 FORMAT_V_0-1-0_FORMAT.md       ← downloaded from this file's parent.url
+    📄 FORMAT_V_0-1-1_FORMAT.md       ← downloaded from this file's parent.url
     📄 defiNNe_V_0-1-0_FORMAT.md      ← downloaded from FORMAT's parent.url
 ```
 
@@ -705,7 +705,7 @@ parent:
 
 # This template's parent:
 parent:
-  name: "FORMAT_V_0-1-0"
+  name: "FORMAT_V_0-1-1"
   url: "..."   # → resolves to FORMAT spec
 
 # FORMAT's parent:

@@ -147,8 +147,8 @@ specification_version: "V_x-y-z"
 specification_url: "<immutable-URL>"
 level: 2
 parent:
-  name: "FORMAT_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
+  name: "FORMAT_V_0-1-1"
+  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.1/FORMAT_V_0-1-1_FORMAT.md"
 title: "..."
 mode: "FILE | FOLDER"
 concepts: [...]
@@ -267,10 +267,10 @@ mode: "FILE"
 > [!NOTE]
 > This is a **FORMAT document**...
 
-# <!-- block: concepts --> index
+# _F concepts: index
 ...
 
-# <!-- block: concepts --> ConceptName
+# _F concepts: ConceptName
 ...
 ```
 
@@ -288,13 +288,13 @@ parent:
 
 # business_V_0-1-0 (level 2)
 parent:
-  name: "FORMAT_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
+  name: "FORMAT_V_0-1-1"
+  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.1/FORMAT_V_0-1-1_FORMAT.md"
 
-# FORMAT_V_0-1-0 (level 1)
+# FORMAT_V_0-1-1 (level 1)
 parent:
   name: "defiNNe_V_0-1-0"
-   url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md"
 
 
 # defiNNe_V_0-1-0 (level 0)
@@ -308,6 +308,6 @@ parent:
   📄 Ghostbusters_V_0-1-0_business_FORMAT.md
   📁 specs/
     📄 business_V_0-1-0_FORMAT.md
-    📄 FORMAT_V_0-1-0_FORMAT.md
+    📄 FORMAT_V_0-1-1_FORMAT.md
     📄 defiNNe_V_0-1-0_FORMAT.md
 ```
