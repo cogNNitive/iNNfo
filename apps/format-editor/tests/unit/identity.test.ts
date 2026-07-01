@@ -24,6 +24,19 @@ describe('identity', () => {
     expect(collisions[0].parentQualifiedId).toBeNull()
   })
 
+  it('disambiguates the colliding qualified id instead of reusing the first one (R11 — no silent overwrite)', () => {
+    const registry = new IdentityRegistry()
+    const first = registry.register(null, 'Alpha')
+    const second = registry.register(null, 'Alpha')
+
+    expect(first).toBe('Alpha')
+    expect(second).not.toBe(first)
+    expect(second).toBe('Alpha#2')
+
+    const third = registry.register(null, 'Alpha')
+    expect(third).toBe('Alpha#3')
+  })
+
   it('resolves cross-branch same-name nodes to distinct qualified paths', () => {
     const registry = new IdentityRegistry()
     const parent1 = registry.register(null, 'Parent1')

@@ -12,26 +12,37 @@ export interface CollisionDiagnostic {
  */
 export class IdentityRegistry {
   private siblingNames = new Map<string | null, Set<string>>()
+  private occurrenceCounts = new Map<string, number>()
   private collisions: CollisionDiagnostic[] = []
 
   /**
    * Registers a node name under its parent's qualified id (null for root).
-   * Returns the qualified id for this node, and flags a collision
-   * diagnostic (without throwing) if the sibling name already exists.
+   * Returns the qualified id for this node. If the sibling name already
+   * exists (collision), flags a collision diagnostic (without throwing)
+   * AND disambiguates the returned qualified id with an occurrence suffix
+   * (e.g. `Parent/Alpha#2`) so the colliding node still gets a unique,
+   * retrievable graph key instead of silently overwriting the first one (R11).
    */
   register(parentQualifiedId: string | null, name: string): string {
     const siblings = this.siblingNames.get(parentQualifiedId) ?? new Set<string>()
+    const baseQualifiedId = buildQualifiedId(parentQualifiedId, name)
+
     if (siblings.has(name)) {
       this.collisions.push({
         parentQualifiedId,
         name,
         message: `Duplicate sibling name "${name}" under ${parentQualifiedId ?? '<root>'}`,
       })
+      const nextOccurrence = (this.occurrenceCounts.get(baseQualifiedId) ?? 1) + 1
+      this.occurrenceCounts.set(baseQualifiedId, nextOccurrence)
+      return `${baseQualifiedId}#${nextOccurrence}`
     }
+
     siblings.add(name)
     this.siblingNames.set(parentQualifiedId, siblings)
+    this.occurrenceCounts.set(baseQualifiedId, 1)
 
-    return buildQualifiedId(parentQualifiedId, name)
+    return baseQualifiedId
   }
 
   getCollisions(): CollisionDiagnostic[] {

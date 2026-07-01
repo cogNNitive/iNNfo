@@ -24,11 +24,11 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses Comprehe
 
 exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V_0-1-0_business_FORMAT.md into a normalized graph snapshot 1`] = `
 {
-  "issueCount": 0,
-  "nodeCount": 132,
+  "issueCount": 5,
+  "nodeCount": 137,
   "nodes": [
     {
-      "childCount": 131,
+      "childCount": 136,
       "fieldKeys": [],
       "id": "FORMAT_V_0-1-0_business",
       "markerKeys": [],
@@ -203,8 +203,8 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "childCount": 0,
       "fieldKeys": [
         "description",
-        "projection",
-        "type",
+        "revenue_model",
+        "status",
         "weight",
       ],
       "id": "FORMAT_V_0-1-0_business/Business Template Cloud",
@@ -212,7 +212,7 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "name": "Business Template Cloud",
       "parentId": "FORMAT_V_0-1-0_business",
       "storageMode": "FILE",
-      "type": "Revenue",
+      "type": "Offerings",
     },
     {
       "childCount": 0,
@@ -226,6 +226,21 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "parentId": "FORMAT_V_0-1-0_business",
       "storageMode": "FILE",
       "type": "Activities",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "description",
+        "projection",
+        "type",
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-0_business/Business Template Cloud#2",
+      "markerKeys": [],
+      "name": "Business Template Cloud",
+      "parentId": "FORMAT_V_0-1-0_business",
+      "storageMode": "FILE",
+      "type": "Revenue",
     },
     {
       "childCount": 0,
@@ -751,6 +766,7 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
     {
       "childCount": 0,
       "fieldKeys": [
+        "frequency",
         "weight",
       ],
       "id": "FORMAT_V_0-1-0_business/Enterprise Sales",
@@ -758,7 +774,7 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "name": "Enterprise Sales",
       "parentId": "FORMAT_V_0-1-0_business",
       "storageMode": "FILE",
-      "type": "Functions",
+      "type": "Activities",
     },
     {
       "childCount": 0,
@@ -791,12 +807,39 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
     {
       "childCount": 0,
       "fieldKeys": [
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-0_business/Enterprise Sales#2",
+      "markerKeys": [],
+      "name": "Enterprise Sales",
+      "parentId": "FORMAT_V_0-1-0_business",
+      "storageMode": "FILE",
+      "type": "Functions",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "description",
+        "revenue_model",
+        "status",
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-0_business/Enterprise Suite",
+      "markerKeys": [],
+      "name": "Enterprise Suite",
+      "parentId": "FORMAT_V_0-1-0_business",
+      "storageMode": "FILE",
+      "type": "Offerings",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
         "constraints",
         "price",
         "target",
         "weight",
       ],
-      "id": "FORMAT_V_0-1-0_business/Enterprise Suite",
+      "id": "FORMAT_V_0-1-0_business/Enterprise Suite#2",
       "markerKeys": [],
       "name": "Enterprise Suite",
       "parentId": "FORMAT_V_0-1-0_business",
@@ -1430,8 +1473,8 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "childCount": 0,
       "fieldKeys": [
         "description",
-        "projection",
-        "type",
+        "revenue_model",
+        "status",
         "weight",
       ],
       "id": "FORMAT_V_0-1-0_business/Procedures Template Cloud",
@@ -1439,7 +1482,7 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "name": "Procedures Template Cloud",
       "parentId": "FORMAT_V_0-1-0_business",
       "storageMode": "FILE",
-      "type": "Revenue",
+      "type": "Offerings",
     },
     {
       "childCount": 0,
@@ -1453,6 +1496,21 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "parentId": "FORMAT_V_0-1-0_business",
       "storageMode": "FILE",
       "type": "Activities",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "description",
+        "projection",
+        "type",
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-0_business/Procedures Template Cloud#2",
+      "markerKeys": [],
+      "name": "Procedures Template Cloud",
+      "parentId": "FORMAT_V_0-1-0_business",
+      "storageMode": "FILE",
+      "type": "Revenue",
     },
     {
       "childCount": 0,
@@ -1525,11 +1583,26 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "childCount": 0,
       "fieldKeys": [
         "description",
+        "revenue_model",
+        "status",
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-0_business/Professional Services",
+      "markerKeys": [],
+      "name": "Professional Services",
+      "parentId": "FORMAT_V_0-1-0_business",
+      "storageMode": "FILE",
+      "type": "Offerings",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "description",
         "projection",
         "type",
         "weight",
       ],
-      "id": "FORMAT_V_0-1-0_business/Professional Services",
+      "id": "FORMAT_V_0-1-0_business/Professional Services#2",
       "markerKeys": [],
       "name": "Professional Services",
       "parentId": "FORMAT_V_0-1-0_business",
@@ -1846,11 +1919,11 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
 
 exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V_0-1-1_business_FORMAT.md into a normalized graph snapshot 1`] = `
 {
-  "issueCount": 0,
-  "nodeCount": 132,
+  "issueCount": 5,
+  "nodeCount": 137,
   "nodes": [
     {
-      "childCount": 131,
+      "childCount": 136,
       "fieldKeys": [],
       "id": "FORMAT_V_0-1-1_business",
       "markerKeys": [],
@@ -2025,8 +2098,8 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "childCount": 0,
       "fieldKeys": [
         "description",
-        "projection",
-        "type",
+        "revenue_model",
+        "status",
         "weight",
       ],
       "id": "FORMAT_V_0-1-1_business/Business Template Cloud",
@@ -2034,7 +2107,7 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "name": "Business Template Cloud",
       "parentId": "FORMAT_V_0-1-1_business",
       "storageMode": "FILE",
-      "type": "Revenue",
+      "type": "Offerings",
     },
     {
       "childCount": 0,
@@ -2048,6 +2121,21 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "parentId": "FORMAT_V_0-1-1_business",
       "storageMode": "FILE",
       "type": "Activities",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "description",
+        "projection",
+        "type",
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-1_business/Business Template Cloud#2",
+      "markerKeys": [],
+      "name": "Business Template Cloud",
+      "parentId": "FORMAT_V_0-1-1_business",
+      "storageMode": "FILE",
+      "type": "Revenue",
     },
     {
       "childCount": 0,
@@ -2573,6 +2661,7 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
     {
       "childCount": 0,
       "fieldKeys": [
+        "frequency",
         "weight",
       ],
       "id": "FORMAT_V_0-1-1_business/Enterprise Sales",
@@ -2580,7 +2669,7 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "name": "Enterprise Sales",
       "parentId": "FORMAT_V_0-1-1_business",
       "storageMode": "FILE",
-      "type": "Functions",
+      "type": "Activities",
     },
     {
       "childCount": 0,
@@ -2613,12 +2702,39 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
     {
       "childCount": 0,
       "fieldKeys": [
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-1_business/Enterprise Sales#2",
+      "markerKeys": [],
+      "name": "Enterprise Sales",
+      "parentId": "FORMAT_V_0-1-1_business",
+      "storageMode": "FILE",
+      "type": "Functions",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "description",
+        "revenue_model",
+        "status",
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-1_business/Enterprise Suite",
+      "markerKeys": [],
+      "name": "Enterprise Suite",
+      "parentId": "FORMAT_V_0-1-1_business",
+      "storageMode": "FILE",
+      "type": "Offerings",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
         "constraints",
         "price",
         "target",
         "weight",
       ],
-      "id": "FORMAT_V_0-1-1_business/Enterprise Suite",
+      "id": "FORMAT_V_0-1-1_business/Enterprise Suite#2",
       "markerKeys": [],
       "name": "Enterprise Suite",
       "parentId": "FORMAT_V_0-1-1_business",
@@ -3252,8 +3368,8 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "childCount": 0,
       "fieldKeys": [
         "description",
-        "projection",
-        "type",
+        "revenue_model",
+        "status",
         "weight",
       ],
       "id": "FORMAT_V_0-1-1_business/Procedures Template Cloud",
@@ -3261,7 +3377,7 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "name": "Procedures Template Cloud",
       "parentId": "FORMAT_V_0-1-1_business",
       "storageMode": "FILE",
-      "type": "Revenue",
+      "type": "Offerings",
     },
     {
       "childCount": 0,
@@ -3275,6 +3391,21 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "parentId": "FORMAT_V_0-1-1_business",
       "storageMode": "FILE",
       "type": "Activities",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "description",
+        "projection",
+        "type",
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-1_business/Procedures Template Cloud#2",
+      "markerKeys": [],
+      "name": "Procedures Template Cloud",
+      "parentId": "FORMAT_V_0-1-1_business",
+      "storageMode": "FILE",
+      "type": "Revenue",
     },
     {
       "childCount": 0,
@@ -3347,11 +3478,26 @@ exports[`recursiveParser golden: frozen models/* FILE fixtures > parses FORMAT_V
       "childCount": 0,
       "fieldKeys": [
         "description",
+        "revenue_model",
+        "status",
+        "weight",
+      ],
+      "id": "FORMAT_V_0-1-1_business/Professional Services",
+      "markerKeys": [],
+      "name": "Professional Services",
+      "parentId": "FORMAT_V_0-1-1_business",
+      "storageMode": "FILE",
+      "type": "Offerings",
+    },
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "description",
         "projection",
         "type",
         "weight",
       ],
-      "id": "FORMAT_V_0-1-1_business/Professional Services",
+      "id": "FORMAT_V_0-1-1_business/Professional Services#2",
       "markerKeys": [],
       "name": "Professional Services",
       "parentId": "FORMAT_V_0-1-1_business",

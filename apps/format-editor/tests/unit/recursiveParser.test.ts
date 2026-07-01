@@ -66,4 +66,46 @@ describe('recursiveParser: recursive read across mixed tree', () => {
     expect(names).toContain('Healthy')
     expect(names).not.toContain('Broken')
   })
+
+  it('reports a collision issue AND keeps both nodes when two nested elements share a name (R11)', async () => {
+    const formatWithDuplicateElements = `---
+specification_version: "V_0-1-1"
+specification_url: "https://example.test/specs/business_V_0-1-1_FORMAT.md"
+level: 3
+parent:
+  name: "business_V_0-1-1"
+  url: "https://example.test/specs/business_V_0-1-1_FORMAT.md"
+model_version: "V_0-0-1"
+title: "Dup Elements"
+mode: "FOLDER"
+---
+
+# _F Problems
+
+* _F Problems: Alpha
+  Description of the first Alpha problem.
+
+* _F Problems: Alpha
+  Description of the second Alpha problem (duplicate sibling name).
+`
+
+    const tree: FakeTree = {
+      Root: {
+        '_FORMAT.md': formatWithDuplicateElements,
+      },
+    }
+
+    const root = buildFakeTree('workspace', tree)
+    const result = await recursiveParse(root)
+
+    const collisionIssues = result.issues.filter((i) => i.message.includes('Duplicate sibling name'))
+    expect(collisionIssues.length).toBeGreaterThan(0)
+    expect(collisionIssues[0]!.message).toContain('Alpha')
+
+    // Both colliding nodes must survive in the graph (no silent overwrite).
+    const alphaNodes = Object.values(result.nodes).filter((n) => n.name === 'Alpha')
+    expect(alphaNodes).toHaveLength(2)
+    // Their ids (graph keys) must be distinct so both are retrievable.
+    expect(alphaNodes[0]!.id).not.toBe(alphaNodes[1]!.id)
+  })
 })

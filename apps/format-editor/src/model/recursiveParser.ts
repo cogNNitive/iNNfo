@@ -272,5 +272,15 @@ export async function recursiveParse(root: DirectoryHandleLike): Promise<Recursi
     }
   }
 
+  // Surface identity collisions (duplicate sibling names, R11) as parse
+  // issues so callers can't silently lose data — both colliding nodes
+  // still exist in `ctx.nodes` under disambiguated qualified ids.
+  for (const collision of ctx.identity.getCollisions()) {
+    ctx.issues.push({
+      path: collision.parentQualifiedId ?? '<root>',
+      message: collision.message,
+    })
+  }
+
   return { nodes: ctx.nodes, rootIds, issues: ctx.issues }
 }
