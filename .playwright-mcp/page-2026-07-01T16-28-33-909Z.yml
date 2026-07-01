@@ -1,0 +1,23 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "cogNNitive" [level=1] [ref=e6] [cursor=pointer]
+      - generic [ref=e7]: launcher
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e36]:
+        - generic [ref=e38]: FOLDER
+        - heading "Test Folder Mode" [level=2] [ref=e39]
+        - paragraph [ref=e40]:
+          - text: "Specification:"
+          - strong [ref=e41]: V_0-1-0
+        - link "Open in folder-format" [ref=e43] [cursor=pointer]:
+          - /url: http://localhost:5174/
+          - text: Open in
+          - strong [ref=e44]: folder-format
+      - button "Load another" [ref=e46] [cursor=pointer]
+  - contentinfo [ref=e21]:
+    - paragraph [ref=e23]:
+      - link "cogNNitive" [ref=e24] [cursor=pointer]:
+        - /url: https://github.com/innV0/cogNNitive
+      - text: — iNNv0 FORMAT ecosystem

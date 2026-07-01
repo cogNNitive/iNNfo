@@ -137,6 +137,11 @@ code, pre, .mono {
   text-decoration: none;
 }
 
+.btn-lg {
+  padding: 16px 36px;
+  font-size: 18px;
+}
+
 .btn:hover {
   opacity: 0.85;
 }

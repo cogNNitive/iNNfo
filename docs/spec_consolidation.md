@@ -235,7 +235,7 @@ modes: ["FILE", "FOLDER"]
 
 Un solo documento `.md` que contiene:
 - YAML frontmatter con la definición del template (concepts, markers, matrices).
-- Markdown body con los concept blocks (`_F concepts:`).
+- Markdown body con los concept blocks (`_F <ConceptName>`).
 - Elements como bullets con YAML fields.
 - Matrices relacionales (tablas Markdown).
 - Wikilinks `[[Name]]` para referencias cruzadas.
@@ -319,7 +319,7 @@ Para que FORMAT sea defiNNe-compliant, su spec `_format.md` debe incluir:
 - **Template** (pointer a business, procedures, kb)
 - **Examples** (pointer a samples/)
 
-**Impacto en la aplicación FORMAT: CERO**. Estas secciones son Markdown plano que el parser ignora porque no usan `_F concepts:`. Es puramente aditivo.
+**Impacto en la aplicación FORMAT: CERO**. Estas secciones son Markdown plano que el parser ignora porque no usan `_F <ConceptName>`. Es puramente aditivo.
 
 ### 4.8. Ubicación y naming
 
@@ -852,8 +852,8 @@ No se fusionan las UIs (costoso, diferentes frameworks). En su lugar se crea una
 | `defiNNe.md` | `0.1.1` | `V_0-2-0` | `0` | *(ninguno)* |
 | `_format.md` (FORMAT) | `V_0-1-0` | `V_0-2-0` | `1` | `"defiNNe_V_0-2-0"` |
 | `iNNfo.defiNNe.md` | `1.1.0` | *(desaparece como spec)* | — | — |
-| `business_V_0-1-0_FORMAT.md` | `V_0-1-0` | `V_1-0-0` | `2` | `"FORMAT_V_0-2-0"` |
-| `procedures_V_0-1-0_FORMAT.md` | `V_0-1-0` | `V_1-0-0` | `2` | `"FORMAT_V_0-2-0"` |
+| `business_V_0-1-1_FORMAT.md` | `V_0-1-1` | `V_1-0-0` | `2` | `"FORMAT_V_0-2-0"` |
+| `procedures_V_0-1-1_FORMAT.md` | `V_0-1-1` | `V_1-0-0` | `2` | `"FORMAT_V_0-2-0"` |
 | Modelos (`Ghostbusters_V_...`) | `V_x-y-z` | Sin cambios | `3` | `"<template>_V_x-y-z"` |
 | Skills | `1.0` | `V_1-0-0` | — | — |
 

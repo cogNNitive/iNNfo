@@ -16,13 +16,13 @@ mode: "FILE"
 
 # My Model
 
-_F concepts: Strategy
+_F Strategy
 
 * _F Strategy: Core Objective
   * type: text
   * value: "Build the next generation of..."
 
-_F concepts: Metrics
+_F Metrics
 
 * _F Metrics: KPI
   * type: text

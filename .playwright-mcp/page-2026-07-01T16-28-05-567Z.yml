@@ -1,0 +1,23 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - heading "cogNNitive" [level=1] [ref=e6] [cursor=pointer]
+      - generic [ref=e7]: launcher
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e12]: FILE
+        - heading "Test File Mode" [level=2] [ref=e13]
+        - paragraph [ref=e14]:
+          - text: "Specification:"
+          - strong [ref=e15]: V_0-1-0
+        - link "Open in file-format" [ref=e17] [cursor=pointer]:
+          - /url: https://format.innv0.com/app?file=file-mode.md
+          - text: Open in
+          - strong [ref=e18]: file-format
+      - button "Load another" [ref=e20] [cursor=pointer]
+  - contentinfo [ref=e21]:
+    - paragraph [ref=e23]:
+      - link "cogNNitive" [ref=e24] [cursor=pointer]:
+        - /url: https://github.com/innV0/cogNNitive
+      - text: — iNNv0 FORMAT ecosystem

@@ -50,7 +50,7 @@ El sistema propone una cadena de herencia piramidal estricta de 4 niveles ($0 \t
 3.  **Falta de tipado de datos en el frontmatter:**
     Los marcadores en `business` (L2) solo declaran `name` y `symbol` (ej. `weight` con `*`). Sin embargo, en el modelo L3 se evalúan con números enteros (`9`, `7`) y en otros casos con su propio símbolo (`!`). El template no provee información sobre si un marcador es de tipo entero, boolean, o un rango específico ($1 \dots 10$). Toda esa regla de negocio está escrita en prosa en el Markdown, invisible para un parser estructurado.
 4.  **Mapeo semántico de tipos de concepto (`text` vs `weight`):**
-    ¿Cómo sabe el parser que el bloque `# _F concepts: Business summary` (tipo `text`) contiene texto libre y no lleva bullets con comentarios HTML `_F ...:`, mientras que `# _F concepts: Problems` (tipo `weight`) sí los requiere? La especificación de Nivel 1 (`FORMAT`) no detalla las reglas de parsing del cuerpo de Markdown asociadas a cada tipo de concepto.
+    ¿Cómo sabe el parser que el bloque `# _F Business summary` (tipo `text`) contiene texto libre y no lleva bullets con comentarios HTML `_F ...:`, mientras que `# _F Problems` (tipo `weight`) sí los requiere? La especificación de Nivel 1 (`FORMAT`) no detalla las reglas de parsing del cuerpo de Markdown asociadas a cada tipo de concepto.
 5.  **El misterio de `specification_url` en el Nivel 3:**
     Según defiNNe (§5.4), un modelo L3 debe poner en su campo `specification_url` la URL de la especificación de Nivel 1 (`FORMAT`). Esto es absurdo. Si el modelo es un entregable de datos de un proyecto, su `specification_url` debería apuntar a sí mismo para persistencia, o no tenerlo, ya que el link con el esquema se hace mediante el `parent` (que apunta al template L2).
 

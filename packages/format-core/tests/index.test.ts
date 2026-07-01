@@ -39,7 +39,7 @@ describe('FORMAT (level 1)', () => {
 });
 
 describe('business template (level 2)', () => {
-  const content = readSpec('business_V_0-1-0_FORMAT.md');
+  const content = readSpec('business_V_0-1-1_FORMAT.md');
   const fm = parseFrontmatter(content)!;
 
   it('parses frontmatter', () => {
@@ -62,14 +62,14 @@ describe('business template (level 2)', () => {
 });
 
 describe('Ghostbusters model (level 3)', () => {
-  const content = readModel('Ghostbusters_V_0-1-0_business_FORMAT.md');
+  const content = readModel('Ghostbusters_V_0-1-1_business_FORMAT.md');
   const model = parseModel(content);
   const fm = model.frontmatter;
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(3);
-    expect(fm.parent!.name).toBe('business_V_0-1-0');
-    expect(fm.model_version).toBe('V_0-1-0');
+    expect(fm.parent!.name).toBe('business_V_0-1-1');
+    expect(fm.model_version).toBe('V_0-1-1');
     expect(fm.mode).toBe('FILE');
   });
 
@@ -108,15 +108,15 @@ describe('Ghostbusters model (level 3)', () => {
   it('serializes and re-parses correctly', async () => {
     const { serializeModel } = await import('../src/index');
     const serialized = serializeModel(model);
-    expect(serialized).toContain('specification_version: "V_0-1-0"');
-    expect(serialized).toContain('# _F concepts: Stakeholders');
+    expect(serialized).toContain('specification_version: "V_0-1-1"');
+    expect(serialized).toContain('# _F Stakeholders');
     expect(serialized).toContain('# _F matrices: problems-value propositions matrix');
     expect(serialized).toContain('* _F Stakeholders:');
   });
 });
 
 describe('procedures template (level 2)', () => {
-  const content = readSpec('procedures_V_0-1-0_FORMAT.md');
+  const content = readSpec('procedures_V_0-1-1_FORMAT.md');
   const fm = parseFrontmatter(content)!;
 
   it('parses frontmatter', () => {
@@ -130,7 +130,7 @@ describe('procedures template (level 2)', () => {
 });
 
 describe('kb template (level 2, FOLDER mode)', () => {
-  const content = readSpec('kb_V_0-1-0_FORMAT.md');
+  const content = readSpec('kb_V_0-1-1_FORMAT.md');
   const fm = parseFrontmatter(content)!;
 
   it('parses frontmatter', () => {
@@ -145,13 +145,13 @@ describe('kb template (level 2, FOLDER mode)', () => {
 
 describe('validator', () => {
   it('validates Ghostbusters against business template', () => {
-    const modelContent = readModel('Ghostbusters_V_0-1-0_business_FORMAT.md');
-    const templateContent = readSpec('business_V_0-1-0_FORMAT.md');
+    const modelContent = readModel('Ghostbusters_V_0-1-1_business_FORMAT.md');
+    const templateContent = readSpec('business_V_0-1-1_FORMAT.md');
     const model = parseModel(modelContent);
     const templateFm = parseFrontmatter(templateContent)!;
 
     const result = validateModel(model, {
-      name: 'business_V_0-1-0',
+      name: 'business_V_0-1-1',
       level: 2,
       parentName: 'FORMAT_V_0-1-1',
       frontmatter: templateFm,
@@ -163,15 +163,15 @@ describe('validator', () => {
   });
 
   it('rejects model with unknown concept', () => {
-    const modelContent = readModel('Ghostbusters_V_0-1-0_business_FORMAT.md');
-    const templateContent = readSpec('business_V_0-1-0_FORMAT.md');
+    const modelContent = readModel('Ghostbusters_V_0-1-1_business_FORMAT.md');
+    const templateContent = readSpec('business_V_0-1-1_FORMAT.md');
     const model = parseModel(modelContent);
     const templateFm = parseFrontmatter(templateContent)!;
 
     model.elements.set('NonExistentConcept', [{ type: 'NonExistentConcept', name: 'Test', description: '', fields: {}, markers: {} }]);
 
     const result = validateModel(model, {
-      name: 'business_V_0-1-0',
+      name: 'business_V_0-1-1',
       level: 2,
       parentName: 'FORMAT_V_0-1-1',
       frontmatter: templateFm,
@@ -184,7 +184,7 @@ describe('validator', () => {
 });
 
 describe('extended parser features', () => {
-  const content = readModel('Ghostbusters_V_0-1-0_business_FORMAT.md');
+  const content = readModel('Ghostbusters_V_0-1-1_business_FORMAT.md');
   const model = parseModel(content);
 
   it('buildHierarchyTree returns tree from taxonomy', () => {

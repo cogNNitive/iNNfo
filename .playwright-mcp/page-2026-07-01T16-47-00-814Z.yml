@@ -1,0 +1,76 @@
+- generic [ref=e2]:
+  - main [ref=e8]:
+    - generic [ref=e11]:
+      - generic [ref=e13]:
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - heading "Knowledge Model" [level=2] [ref=e17]
+            - generic [ref=e19]:
+              - button "Sync" [ref=e20] [cursor=pointer]:
+                - img [ref=e21]
+                - generic [ref=e26]: Sync
+              - button [ref=e27] [cursor=pointer]:
+                - img [ref=e28]
+          - generic [ref=e33]:
+            - img [ref=e34]
+            - paragraph [ref=e36]: No project folders found.
+        - generic [ref=e38]:
+          - heading "System Context" [level=2] [ref=e40]
+          - generic [ref=e44]:
+            - img [ref=e45]
+            - paragraph [ref=e47]: No project folders found.
+      - separator [ref=e48]
+      - generic [ref=e53]:
+        - tablist [ref=e54]:
+          - tab "Home" [selected] [ref=e55] [cursor=pointer]
+          - tab "Metamodel" [ref=e56] [cursor=pointer]
+          - tab "App" [ref=e57] [cursor=pointer]
+          - tab "Health" [ref=e58] [cursor=pointer]
+        - tabpanel "Home" [ref=e59]:
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - img [ref=e62]
+              - generic [ref=e65]: iNNfo
+            - generic [ref=e67]:
+              - generic [ref=e68]:
+                - generic [ref=e69]:
+                  - img [ref=e70]
+                  - heading "Getting Started Checklist" [level=3] [ref=e73]
+                - generic [ref=e74]: 17% Complete
+              - generic [ref=e77]:
+                - generic [ref=e78]:
+                  - img [ref=e80]
+                  - generic [ref=e82]: Connect Folder
+                - generic [ref=e83]:
+                  - img [ref=e85]
+                  - generic [ref=e87]: Initialize Workspace
+                - generic [ref=e88]:
+                  - img [ref=e90]
+                  - generic [ref=e92]: Connect Intelligence
+                - generic [ref=e93]:
+                  - img [ref=e95]
+                  - generic [ref=e97]: Create Model Structure
+                - generic [ref=e98]:
+                  - img [ref=e100]
+                  - generic [ref=e103]: Verify & Test
+                - generic [ref=e104]:
+                  - img [ref=e106]
+                  - generic [ref=e108]: Explore Features
+            - generic [ref=e110]:
+              - button "Open Existing Project Load a folder containing an existing iNNfo knowledge base." [ref=e111] [cursor=pointer]:
+                - img [ref=e113]
+                - generic [ref=e115]:
+                  - heading "Open Existing Project" [level=3] [ref=e116]
+                  - paragraph [ref=e117]: Load a folder containing an existing iNNfo knowledge base.
+              - button "Start New Project Initialize a fresh workspace and build from scratch." [ref=e118] [cursor=pointer]:
+                - img [ref=e121]
+                - generic [ref=e122]:
+                  - heading "Start New Project" [level=3] [ref=e123]
+                  - paragraph [ref=e124]: Initialize a fresh workspace and build from scratch.
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e125]:
+        - img [ref=e127]
+        - generic [ref=e129]:
+          - generic [ref=e130]: Health Panel Available!
+          - generic [ref=e131]: Monitor your model quality

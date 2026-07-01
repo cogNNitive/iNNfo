@@ -4,20 +4,25 @@ The Launcher is a Vue 3 + Vite application that serves as the entry point for th
 
 ## How it works
 
-1. **Drop or select** — drag a `.md` file or an entire folder onto the drop zone, or use the file/folder picker buttons
-2. **Detect mode** — the Launcher reads the FORMAT frontmatter using `@innv0/format-core`'s `parseFrontmatter` and identifies the mode: `FILE`, `FOLDER`, or `BOTH`
-3. **Launch editor** — depending on the detected mode, it opens the model in the appropriate editor (file-format for FILE mode, folder-format for FOLDER mode)
+1. **Open a folder** — click "Abrir carpeta" or drag a folder onto the drop zone
+2. **Scan & validate** — the Launcher scans every markdown file using `@innv0/format-core`, identifies FORMAT-compliant folders (`_FORMAT.md`) and files (`.md` with FORMAT frontmatter)
+3. **Explore** — the contents are displayed in a visual browser:
+   - **Folders** — subdirectories with `_FORMAT.md` (folder-format compliant)
+   - **Documents** — markdown files with their title and FORMAT mode
+4. **Open** — click any item to open it in the appropriate editor:
+   - Folder → **folder-format** (transparent to the user)
+   - File → **file-format**
 
-## Detection Logic
+## Folder structure
 
-| Input | Detected Mode | Action |
-|-------|--------------|--------|
-| Single `.md` with `mode: FILE` | FILE | Open in file-format |
-| Single `.md` with `mode: FOLDER` | FOLDER | Open in folder-format |
-| Single `.md` with `mode: [FILE, FOLDER]` | BOTH | Show both options |
-| Folder with `_FORMAT.md` having `mode: FOLDER` | FOLDER | Open in folder-format |
-| Folder with `_FORMAT.md` having `mode: FILE` | FILE | Open in file-format |
-| No valid frontmatter | NONE | Show error |
+```
+root/
+├── _FORMAT.md              ← root model (validated with full report)
+├── architecture/
+│   └── _FORMAT.md          ← subfolder compliant (folder-format)
+├── requirements.md         ← standalone file (file-format)
+└── notes.md                ← may or may not have FORMAT frontmatter
+```
 
 ## Configuration
 

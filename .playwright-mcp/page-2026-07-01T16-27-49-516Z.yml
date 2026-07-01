@@ -1,0 +1,99 @@
+- generic [active] [ref=e1]:
+  - link "View source on Github" [ref=e2] [cursor=pointer]:
+    - /url: https://github.com/innV0/cogNNitive
+    - img [ref=e3]
+  - main [ref=e7]:
+    - button "Menu" [ref=e8] [cursor=pointer]
+    - complementary [ref=e13]:
+      - searchbox "Search text" [ref=e16]
+      - heading "cogNNitive" [level=1] [ref=e17]:
+        - link "cogNNitive" [ref=e18] [cursor=pointer]:
+          - /url: /documentation/
+      - list [ref=e20]:
+        - listitem [ref=e21]:
+          - link "Home" [ref=e22] [cursor=pointer]:
+            - /url: "#/README"
+        - listitem [ref=e23]:
+          - link "Launcher" [ref=e24] [cursor=pointer]:
+            - /url: "#/launcher"
+        - listitem [ref=e25]:
+          - link "format-core" [ref=e26] [cursor=pointer]:
+            - /url: "#/format-core"
+        - listitem [ref=e27]:
+          - link "Ecosystem" [ref=e28] [cursor=pointer]:
+            - /url: "#/ecosystem"
+        - listitem [ref=e29]:
+          - link "Usage" [ref=e30] [cursor=pointer]:
+            - /url: "#/usage"
+    - article [ref=e32]:
+      - heading "cogNNitive Documentation" [level=1] [ref=e33]:
+        - link "cogNNitive Documentation" [ref=e34] [cursor=pointer]:
+          - /url: "#/?id=cognnitive-documentation"
+      - paragraph [ref=e35]: Welcome to the cogNNitive documentation. cogNNitive is the monorepo that powers the iNNv0 FORMAT ecosystem.
+      - heading "Quick Start" [level=2] [ref=e36]:
+        - link "Quick Start" [ref=e37] [cursor=pointer]:
+          - /url: "#/?id=quick-start"
+      - generic [ref=e38]:
+        - code [ref=e39]: "# Install dependencies npm install # Start the Launcher dev server npm run dev -w @innv0/launcher # Build format-core npm run build -w @innv0/format-core"
+        - text: bash
+      - heading "Sections" [level=2] [ref=e40]:
+        - link "Sections" [ref=e41] [cursor=pointer]:
+          - /url: "#/?id=sections"
+      - heading "Launcher" [level=3] [ref=e42]:
+        - link:
+          - /url: "#/?id=launcher"
+        - link "Launcher" [ref=e43] [cursor=pointer]:
+          - /url: "#/launcher"
+      - paragraph [ref=e44]: The cogNNitive Launcher is a Vue 3 application that detects FORMAT model modes (FILE or FOLDER) and routes them to the correct editor. Drag-and-drop or pick a file/folder.
+      - heading "format-core" [level=3] [ref=e45]:
+        - link:
+          - /url: "#/?id=format-core"
+        - link "format-core" [ref=e46] [cursor=pointer]:
+          - /url: "#/format-core"
+      - paragraph [ref=e47]:
+        - code [ref=e48]: "@innv0/format-core"
+        - text: "is a framework-agnostic TypeScript library providing:"
+      - list [ref=e49]:
+        - listitem [ref=e50]: Unified parser for FILE and FOLDER mode documents
+        - listitem [ref=e51]: "Model types: Concept, Element, Field, Marker, Matrix, Relationship"
+        - listitem [ref=e52]: Validator against template schemas
+        - listitem [ref=e53]: IO drivers for both modes
+      - heading "Ecosystem" [level=3] [ref=e54]:
+        - link:
+          - /url: "#/?id=ecosystem"
+        - link "Ecosystem" [ref=e55] [cursor=pointer]:
+          - /url: "#/ecosystem"
+      - paragraph [ref=e56]: "The four-level specification chain:"
+      - table [ref=e57]:
+        - rowgroup [ref=e58]:
+          - row "Level Name Description" [ref=e59]:
+            - columnheader "Level" [ref=e60]
+            - columnheader "Name" [ref=e61]
+            - columnheader "Description" [ref=e62]
+        - rowgroup [ref=e63]:
+          - 'row "0 defiNNe Meta-specification: structure, SemVer, RFC 2119" [ref=e64]':
+            - cell "0" [ref=e65]
+            - cell "defiNNe" [ref=e66]:
+              - strong [ref=e67]: defiNNe
+            - 'cell "Meta-specification: structure, SemVer, RFC 2119" [ref=e68]'
+          - row "1 FORMAT Central spec with FILE and FOLDER modes" [ref=e69]:
+            - cell "1" [ref=e70]
+            - cell "FORMAT" [ref=e71]:
+              - strong [ref=e72]: FORMAT
+            - cell "Central spec with FILE and FOLDER modes" [ref=e73]
+          - row "2 Templates business, procedures, kb" [ref=e74]:
+            - cell "2" [ref=e75]
+            - cell "Templates" [ref=e76]:
+              - strong [ref=e77]: Templates
+            - cell "business, procedures, kb" [ref=e78]
+          - row "3 Models Concrete instances (Ghostbusters, TeamKB)" [ref=e79]:
+            - cell "3" [ref=e80]
+            - cell "Models" [ref=e81]:
+              - strong [ref=e82]: Models
+            - cell "Concrete instances (Ghostbusters, TeamKB)" [ref=e83]
+      - heading "Usage" [level=3] [ref=e84]:
+        - link:
+          - /url: "#/?id=usage"
+        - link "Usage" [ref=e85] [cursor=pointer]:
+          - /url: "#/usage"
+      - paragraph [ref=e86]: How to create FORMAT models, templates, and work with the ecosystem.

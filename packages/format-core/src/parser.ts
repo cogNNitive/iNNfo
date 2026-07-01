@@ -3,39 +3,52 @@ import {
   TaxonomyEdge, ConceptType, ElementsMap, TreeNode, Relationship, AnalysisEntry
 } from './types';
 
-const YAML_BLOCK_RE = /^---\n([\s\S]*?)\n---/;
+const YAML_BLOCK_RE = /^---\r?\n([\s\S]*?)\r?\n---/;
 const SECTION_RE = /^#\s+(.*)$/gm;
 const WIKILINK_RE = /\[\[([^\]]+)\]\]/g;
 const YAML_FENCE_RE = /```yaml\n([\s\S]*?)```/;
 
 /* ── Marker patterns (support both `_F` and legacy `<!-- block: -->`) ── */
 
-// Section-level markers: `# _F concepts: name` or `# <!-- block: concepts --> name`
-const F_SECTION_RE = /^#\s+(?:_F\s+(\w+):\s*(.*)|<!--\s*block:\s*(\w+)\s*-->\s*(.*))$/m;
+// Section-level markers: `# _F ConceptName`, `# _F matrices: name`, or `# <!-- block: concepts --> name`
+const F_SECTION_RE = /^#\s+(?:_F\s+(?:(matrices):\s*(.*)|(.*))|<!--\s*block:\s*(\w+)\s*-->\s*(.*))$/m;
+
+// Section-level markers: `# _F ConceptName`, `# _F matrices: name`, or `# <!-- block: concepts --> name`
 
 // Element-level markers: `* _F Concept: Name` or `* <!-- _F Concept: --> Name` or `* <!-- block: Concept --> Name`
 const F_ELEMENT_VISIBLE_RE = /^\s*[*\-]\s+_F\s+([\w\s-]+?):\s+(.*)$/;
 const F_ELEMENT_HIDDEN_RE = /^\s*[*\-]\s+<!--\s+(?:_F\s+([\w\s-]+?):|block:\s*([\w\s-]+?))\s*-->\s*(.*)$/;
 
 function isIndexSection(rawTitle: string): boolean {
-  const t = rawTitle.toLowerCase();
-  return t.includes('concepts') && (t.includes('index') || t.includes('_f'));
+  return sectionName(rawTitle) === 'concepts' && sectionTitle(rawTitle).toLowerCase() === 'index';
 }
 
 function sectionName(rawTitle: string): string | null {
-  // Try _F syntax first: `# _F concepts: Name`
-  const fm = rawTitle.match(/^_F\s+(\w+):\s*(.*)/);
-  if (fm) return fm[1]; // 'concepts' or 'matrices'
-  // Try legacy syntax: `<!-- block: concepts --> Name`
+  // New _F syntax: `_F ConceptName` or `_F matrices: Name`
+  const fm = rawTitle.match(/^_F\s+(?:(matrices):\s*(.*)|(.*))/);
+  if (fm) {
+    if (fm[1]) return fm[1]; // 'matrices'
+    if (fm[3] != null) return 'concepts'; // implicit 'concepts' for bare ConceptName
+  }
+  // Hidden _F form: `<!-- _F --> ConceptName`
+  if (/<!--\s*_F\s*-->/.test(rawTitle)) return 'concepts';
+  // Legacy syntax: `<!-- block: concepts --> Name`
   const legacy = rawTitle.match(/<!--\s*block:\s*(\w+)\s*-->/);
   if (legacy) return legacy[1];
   return null;
 }
 
 function sectionTitle(rawTitle: string): string {
-  // Extract the name portion after the marker
-  const fm = rawTitle.match(/^_F\s+\w+:\s*(.*)/);
-  if (fm) return fm[1].trim();
+  // New _F syntax
+  const fm = rawTitle.match(/^_F\s+(?:(matrices):\s*(.*)|(.*))/);
+  if (fm) {
+    if (fm[2]) return fm[2].trim(); // matrix name
+    if (fm[3] != null) return fm[3].trim(); // concept name
+  }
+  // Hidden _F form: `<!-- _F --> ConceptName`
+  const hiddenFm = rawTitle.match(/<!--\s*_F\s*-->\s*(.*)/);
+  if (hiddenFm) return hiddenFm[1].trim();
+  // Legacy syntax
   const legacy = rawTitle.match(/<!--\s*block:\s*\w+\s*-->\s*(.*)/);
   if (legacy) return legacy[1].trim();
   return rawTitle;
@@ -165,7 +178,7 @@ function parseFencedYaml(text: string): Record<string, unknown> {
 }
 
 function parseElementMarker(line: string): string | null {
-  // Visible: `* _F ConceptName: Element`
+  // Visible: `* _F ConceptName: Element` (element marker — colon is required to separate concept name from element name)
   const vis = line.match(F_ELEMENT_VISIBLE_RE);
   if (vis) return vis[2].trim();
   // Hidden: `* <!-- _F ConceptName: --> Element` or `* <!-- block: ConceptName --> Element`
@@ -334,7 +347,7 @@ export function serializeModel(model: ParsedModel): string {
   lines.push('');
 
   if (model.taxonomy.length > 0) {
-    lines.push('# _F concepts: index');
+    lines.push('# _F index');
     const roots = model.taxonomy.filter(e => !model.taxonomy.some(p => p.child === e.parent));
     for (const root of roots) {
       printTaxonomy(root, model.taxonomy, lines, 0);
@@ -343,7 +356,7 @@ export function serializeModel(model: ParsedModel): string {
   }
 
   for (const [conceptName, elementNodes] of model.elements.entries()) {
-    lines.push(`# _F concepts: ${conceptName}`);
+    lines.push(`# _F ${conceptName}`);
     for (const node of elementNodes) {
       const prefix = node.type === 'steps' || node.type === 'sequence' ? '1.' : '*';
       lines.push(`${prefix} _F ${conceptName}: ${node.name}`);

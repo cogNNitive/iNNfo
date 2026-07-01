@@ -1,0 +1,131 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "_FORMAT" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Home" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - link "Documentation" [ref=e7] [cursor=pointer]:
+          - /url: /documentation/
+        - link "About" [ref=e8] [cursor=pointer]:
+          - /url: /about
+        - link "GitHub" [ref=e9] [cursor=pointer]:
+          - /url: https://github.com/innV0/FORMAT
+        - generic [ref=e10]: "|"
+        - link "Open app" [ref=e11] [cursor=pointer]:
+          - /url: /app/
+        - link "Open docs" [ref=e12] [cursor=pointer]:
+          - /url: /documentation/
+        - link "Open App" [ref=e13] [cursor=pointer]:
+          - /url: /app/
+  - main [ref=e14]:
+    - generic [ref=e16]:
+      - heading "One file. Schema included." [level=1] [ref=e17]:
+        - text: One file.
+        - emphasis [ref=e18]: Schema included.
+      - paragraph [ref=e19]: _FORMAT is an open specification for structured Markdown. Every file carries its own schema — concepts, relationships, and evaluations — in plain text. Drop it into any AI model for instant context, or open it in the visual editor.
+      - paragraph [ref=e20]:
+        - text: Ready-to-use templates for
+        - link "Business" [ref=e21] [cursor=pointer]:
+          - /url: /documentation/#/templates/business/V_0-1-0/business_V_0-1-0_FORMAT
+        - text: and
+        - link "Procedures" [ref=e22] [cursor=pointer]:
+          - /url: /documentation/#/templates/procedures/V_0-1-0/procedures_V_0-1-0_FORMAT
+        - text: ", or define your own."
+      - generic [ref=e23]:
+        - link "Try the App" [ref=e24] [cursor=pointer]:
+          - /url: /app/
+        - link "Get Started" [ref=e25] [cursor=pointer]:
+          - /url: /documentation/onboarding
+    - generic [ref=e27]:
+      - heading "What makes _FORMAT different" [level=2] [ref=e28]
+      - paragraph [ref=e29]: A single, portable Markdown file that humans read, AI understands, and Git versions.
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]: 📄
+          - heading "Plain Markdown" [level=3] [ref=e33]
+          - paragraph [ref=e34]: Author in any text editor. Review on GitHub. The format prioritizes both human readability and machine processing — no proprietary tools required.
+        - generic [ref=e35]:
+          - generic [ref=e36]: 🔗
+          - heading "Built-in Relations" [level=3] [ref=e37]
+          - paragraph [ref=e38]: Define matrix tables that map how concepts and elements interconnect — stakeholders to segments, procedures to roles, or any relationship your domain needs.
+        - generic [ref=e39]:
+          - generic [ref=e40]: 🤖
+          - heading "AI-Native" [level=3] [ref=e41]
+          - paragraph [ref=e42]: Drop your model into ChatGPT, Claude, or Gemini. The AI instantly understands the full context of your model without extra prompting or fine-tuning.
+        - generic [ref=e43]:
+          - generic [ref=e44]: 🧩
+          - heading "Template System" [level=3] [ref=e45]
+          - paragraph [ref=e46]: Choose from official templates (Business, Procedures) or define your own schema. Every file is self-describing — the template lives in the frontmatter.
+        - generic [ref=e47]:
+          - generic [ref=e48]: 📊
+          - heading "Visual Editor" [level=3] [ref=e49]
+          - paragraph [ref=e50]: Open any model in the FORMAT app to see editable concept cards, interactive matrices, and a graph view of all relationships — Sankey or force-directed layouts.
+        - generic [ref=e51]:
+          - generic [ref=e52]: 📦
+          - heading "Version-Controlled" [level=3] [ref=e53]
+          - paragraph [ref=e54]: Commit your model to Git. Track changes, review diffs, collaborate with your team — just like code. Plain Markdown means clean, meaningful diffs.
+        - generic [ref=e55]:
+          - generic [ref=e56]: 🛠️
+          - heading "Open Spec" [level=3] [ref=e57]
+          - paragraph [ref=e58]: Fully open specification. Build your own tools, integrations, and generators. No vendor lock-in, no proprietary database, no API dependency.
+    - generic [ref=e60]:
+      - heading "Official Templates" [level=2] [ref=e61]
+      - paragraph [ref=e62]: Jumpstart your model with a ready-made schema. Each template includes concepts, markers, matrices, and full documentation.
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - generic [ref=e65]: Business
+          - paragraph [ref=e66]: Model stakeholders, market segments, value propositions, revenue streams, team, roadmap, and strategy — the full picture of any organization. 70+ concepts, 13 relationship matrices, and 5 evaluation markers.
+          - link "Browse template & documentation →" [ref=e67] [cursor=pointer]:
+            - /url: /documentation/#/templates/business/V_0-1-0/business_V_0-1-0_FORMAT
+        - generic [ref=e68]:
+          - generic [ref=e69]: Procedures
+          - paragraph [ref=e70]: "Document any workflow: ordered steps with branching logic, roles, artifacts, tools, and responsible parties. Perfect for SOPs, onboarding, knowledge management, and audit trails."
+          - link "Browse template & documentation →" [ref=e71] [cursor=pointer]:
+            - /url: /documentation/#/templates/procedures/V_0-1-0/procedures_V_0-1-0_FORMAT
+    - generic [ref=e73]:
+      - heading "How it works" [level=2] [ref=e74]
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - generic [ref=e77]: "1"
+          - generic [ref=e78]:
+            - heading "Pick a template" [level=3] [ref=e79]
+            - paragraph [ref=e80]: Choose from official templates (Business, Procedures) or define your own schema from scratch. Every model carries its template in its frontmatter.
+        - generic [ref=e81]:
+          - generic [ref=e82]: "2"
+          - generic [ref=e83]:
+            - heading "Model" [level=3] [ref=e84]
+            - paragraph [ref=e85]: Define concepts, elements, and their fields in structured Markdown blocks. Each concept is a section; each element is a list item with optional YAML fields.
+        - generic [ref=e86]:
+          - generic [ref=e87]: "3"
+          - generic [ref=e88]:
+            - heading "Map" [level=3] [ref=e89]
+            - paragraph [ref=e90]: Define relationships between concepts using matrix tables. The app visualizes these connections as interactive graphs and scored matrices.
+        - generic [ref=e91]:
+          - generic [ref=e92]: "4"
+          - generic [ref=e93]:
+            - heading "Validate" [level=3] [ref=e94]
+            - paragraph [ref=e95]: The app scores the coherence of your model, highlighting gaps and suggesting improvements using the template's built-in markers.
+        - generic [ref=e96]:
+          - generic [ref=e97]: "5"
+          - generic [ref=e98]:
+            - heading "Use" [level=3] [ref=e99]
+            - paragraph [ref=e100]: Drop your file into any AI model, commit it to Git, or share it with stakeholders. Your entire model fits in one portable, self-describing file.
+    - generic [ref=e102]:
+      - heading "Ready to model anything?" [level=2] [ref=e103]
+      - paragraph [ref=e104]: Open the app, pick a template, and start building in minutes. No sign-up, no servers — everything stays on your machine.
+      - link "Open the App" [ref=e105] [cursor=pointer]:
+        - /url: /app/
+    - generic [ref=e107]:
+      - heading "Get in Touch" [level=2] [ref=e108]
+      - paragraph [ref=e109]: Questions, ideas, or feedback? We'd love to hear from you.
+      - link "Contact Us" [ref=e110] [cursor=pointer]:
+        - /url: https://innv0.com/contact?ref=FORMAT
+  - contentinfo [ref=e111]:
+    - generic [ref=e112]:
+      - paragraph [ref=e113]:
+        - text: Creado con
+        - link "iNNv0 web design skill" [ref=e114] [cursor=pointer]:
+          - /url: https://skills.innv0.com/innv0-web-design-guide
+      - paragraph [ref=e115]: © 2026 iNNv0. All rights reserved.

@@ -80,12 +80,12 @@ cogNNitive/                       ← tag v0.1.0
 ├── specs/                        ← URL base
 │   ├── defiNNe_V_0-1-0_FORMAT.md
 │   ├── FORMAT_V_0-1-0_FORMAT.md
-│   ├── business_V_0-1-0_FORMAT.md
-│   ├── procedures_V_0-1-0_FORMAT.md
-│   └── kb_V_0-1-0_FORMAT.md
+│   ├── business_V_0-1-1_FORMAT.md
+│   ├── procedures_V_0-1-1_FORMAT.md
+│   └── kb_V_0-1-1_FORMAT.md
 ├── models/                       ← ejemplos verificados
-│   ├── Ghostbusters_V_0-1-0_business_FORMAT.md
-│   └── TeamKB_V_0-1-0_kb/
+│   ├── Ghostbusters_V_0-1-1_business_FORMAT.md
+│   └── TeamKB_V_0-1-1_kb/
 ├── packages/format-core/         ← librería compartida
 ├── docs/                         ← documentación interna
 │   ├── spec_consolidation.md

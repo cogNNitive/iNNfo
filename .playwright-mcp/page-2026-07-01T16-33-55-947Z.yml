@@ -1,0 +1,232 @@
+- generic [active] [ref=e1]:
+  - link "View source on Github" [ref=e2] [cursor=pointer]:
+    - /url: https://github.com/innV0/FORMAT
+    - img [ref=e3]
+  - main [ref=e7]:
+    - button "Menu" [ref=e8] [cursor=pointer]
+    - complementary [ref=e13]:
+      - searchbox "Search text" [ref=e16]
+      - heading "_FORMAT Docs" [level=1] [ref=e17]:
+        - link "_FORMAT Docs" [ref=e18] [cursor=pointer]:
+          - /url: /documentation/
+      - list [ref=e20]:
+        - listitem [ref=e21]:
+          - paragraph [ref=e22]:
+            - link "Home" [ref=e23] [cursor=pointer]:
+              - /url: "#/"
+        - listitem [ref=e24]:
+          - paragraph [ref=e25]:
+            - strong [ref=e26]: Getting Started
+          - list [ref=e27]:
+            - listitem [ref=e28]:
+              - link "Onboarding (First Time?)" [ref=e29] [cursor=pointer]:
+                - /url: "#/onboarding"
+              - list [ref=e30]:
+                - listitem [ref=e31]:
+                  - link "What You're Looking At" [ref=e32] [cursor=pointer]:
+                    - /url: "#/onboarding?id=what-you39re-looking-at"
+                - listitem [ref=e33]:
+                  - 'link "Step-by-Step: Opening Your Document in the FORMAT App" [ref=e34] [cursor=pointer]':
+                    - /url: "#/onboarding?id=step-by-step-opening-your-document-in-the-format-app"
+                - list [ref=e35]:
+                  - listitem [ref=e36]:
+                    - link "1. Open the Project Website" [ref=e37] [cursor=pointer]:
+                      - /url: "#/onboarding?id=_1-open-the-project-website"
+                  - listitem [ref=e38]:
+                    - link "2. Go to the App" [ref=e39] [cursor=pointer]:
+                      - /url: "#/onboarding?id=_2-go-to-the-app"
+                  - listitem [ref=e40]:
+                    - link "3. Load Your Document" [ref=e41] [cursor=pointer]:
+                      - /url: "#/onboarding?id=_3-load-your-document"
+                - listitem [ref=e42]:
+                  - link "Raw Markdown vs. Visualized in the App" [ref=e43] [cursor=pointer]:
+                    - /url: "#/onboarding?id=raw-markdown-vs-visualized-in-the-app"
+                - list [ref=e44]:
+                  - listitem [ref=e45]:
+                    - link "Raw Markdown (what you're seeing now)" [ref=e46] [cursor=pointer]:
+                      - /url: "#/onboarding?id=raw-markdown-what-you39re-seeing-now"
+                - listitem [ref=e47]:
+                  - link "stakeholders-segments hierarchy matrix" [ref=e48] [cursor=pointer]:
+                    - /url: "#/onboarding?id=-stakeholders-segments-hierarchy-matrix"
+            - listitem [ref=e49]:
+              - link "How To Use _FORMAT" [ref=e50] [cursor=pointer]:
+                - /url: "#/how-to"
+        - listitem [ref=e51]:
+          - paragraph [ref=e52]:
+            - strong [ref=e53]: Specification (V_0-1-0)
+          - list [ref=e54]:
+            - listitem [ref=e55]:
+              - link "Core Spec" [ref=e56] [cursor=pointer]:
+                - /url: "#/spec/V_0-1-0/_format"
+        - listitem [ref=e57]:
+          - paragraph [ref=e58]:
+            - strong [ref=e59]: Templates
+          - list [ref=e60]:
+            - listitem [ref=e61]:
+              - strong [ref=e62]: Business (V_0-1-0)
+              - list [ref=e63]:
+                - listitem [ref=e64]:
+                  - link "Definition" [ref=e65] [cursor=pointer]:
+                    - /url: "#/templates/business/V_0-1-0/business_V_0-1-0_FORMAT"
+                - listitem [ref=e66]:
+                  - link "Documentation" [ref=e67] [cursor=pointer]:
+                    - /url: "#/templates/business/V_0-1-0/documentation"
+            - listitem [ref=e68]:
+              - strong [ref=e69]: Procedures (V_0-1-0)
+              - list [ref=e70]:
+                - listitem [ref=e71]:
+                  - link "Definition" [ref=e72] [cursor=pointer]:
+                    - /url: "#/templates/procedures/V_0-1-0/procedures_V_0-1-0_FORMAT"
+        - listitem [ref=e73]:
+          - paragraph [ref=e74]:
+            - strong [ref=e75]: App Reference
+          - list [ref=e76]:
+            - listitem [ref=e77]:
+              - link "User Guide" [ref=e78] [cursor=pointer]:
+                - /url: "#/app/user_guide"
+            - listitem [ref=e79]:
+              - link "App Spec" [ref=e80] [cursor=pointer]:
+                - /url: "#/app/app_spec"
+    - article [ref=e82]:
+      - blockquote [ref=e83]:
+        - paragraph [ref=e84]:
+          - strong [ref=e85]: 💡 ¿Cansado de ver el documento como texto plano?
+          - text: En vez de leer el Markdown crudo, podés abrirlo en la
+          - strong [ref=e86]: app de FORMAT
+          - text: para verlo de forma visual e interactiva.
+          - text: Cargá tu archivo
+          - code [ref=e87]: .md
+          - text: en
+          - link "format.innv0.com/app" [ref=e88] [cursor=pointer]:
+            - /url: https://format.innv0.com/app
+          - text: y al instante tenés cards editables, matrices interactivas y un
+          - strong [ref=e89]: graph view
+          - text: que muestra todas las conexiones entre conceptos.
+          - text: Abajo te dejamos un pantallazo del graph view con el modelo de Ghostbusters cargado — así se ve cuando lo visualizás en la app.
+      - paragraph [ref=e90]:
+        - img "Graph View — Sankey layout"
+        - img "Graph View — Force layout"
+      - separator [ref=e91]
+      - heading "Welcome to FORMAT" [level=1] [ref=e92]:
+        - link "Welcome to FORMAT" [ref=e93] [cursor=pointer]:
+          - /url: "#/onboarding?id=welcome-to-format"
+      - paragraph [ref=e94]:
+        - text: You just opened a
+        - strong [ref=e95]: FORMAT document
+        - text: — and it probably looks like a wall of text with symbols, dashes, and tables. That's normal. FORMAT documents are plain Markdown files that carry their own schema, designed to be both human-readable and machine-processable.
+      - paragraph [ref=e96]: This guide is for first-time users who want to understand what's going on and how to work with these files visually.
+      - blockquote [ref=e97]:
+        - paragraph [ref=e98]:
+          - strong [ref=e99]: 👁️ This page itself is a raw Markdown file.
+          - text: What you're reading — headings, text, code blocks — is rendered by Docsify directly from a
+          - code [ref=e100]: .md
+          - text: "file. A FORMAT document is the same: plain Markdown. But when you load it in the FORMAT app, that same raw text becomes an interactive dashboard with editable cards, scored matrices, and navigable concept trees. Keep scrolling to see the side-by-side comparison."
+      - separator [ref=e101]
+      - heading "What You're Looking At" [level=2] [ref=e102]:
+        - link "What You're Looking At" [ref=e103] [cursor=pointer]:
+          - /url: "#/onboarding?id=what-you39re-looking-at"
+      - paragraph [ref=e104]:
+        - text: A FORMAT document is a structured Markdown file that represents a
+        - strong [ref=e105]: business or procedure model
+        - text: . Everything — the schema, the data, the relationships — lives in a single
+        - code [ref=e106]: .md
+        - text: "file:"
+      - code [ref=e108]: ┌─ YAML Frontmatter ─────────────────────────┐ │ - Template definition (concepts, markers) │ │ - Version info, metadata │ ├─ Markdown Body ─────────────────────────────┤ │ - Document Notice │ │ - Concept blocks (business summary, │ │ stakeholders, segments, etc.) │ │ - Matrices (relationships between │ │ concepts and elements) │ └─────────────────────────────────────────────┘
+      - separator [ref=e109]
+      - 'heading "Step-by-Step: Opening Your Document in the FORMAT App" [level=2] [ref=e110]':
+        - 'link "Step-by-Step: Opening Your Document in the FORMAT App" [ref=e111] [cursor=pointer]':
+          - /url: "#/onboarding?id=step-by-step-opening-your-document-in-the-format-app"
+      - heading "1. Open the Project Website" [level=3] [ref=e112]:
+        - link "1. Open the Project Website" [ref=e113] [cursor=pointer]:
+          - /url: "#/onboarding?id=_1-open-the-project-website"
+      - paragraph [ref=e114]:
+        - text: Go to
+        - strong [ref=e115]:
+          - link "format.innv0.com" [ref=e116] [cursor=pointer]:
+            - /url: https://format.innv0.com
+        - text: in any modern browser (Chrome, Edge, Firefox, Safari).
+      - paragraph [ref=e117]: This is the project website. It explains what FORMAT is and links to everything you need.
+      - heading "2. Go to the App" [level=3] [ref=e118]:
+        - link "2. Go to the App" [ref=e119] [cursor=pointer]:
+          - /url: "#/onboarding?id=_2-go-to-the-app"
+      - paragraph [ref=e120]:
+        - text: Open
+        - strong [ref=e121]:
+          - link "format.innv0.com/app" [ref=e122] [cursor=pointer]:
+            - /url: https://format.innv0.com/app
+        - text: or click
+        - strong [ref=e123]: "\"App\""
+        - text: in the navigation bar. The app loads instantly — it's a client-side web application. Nothing is uploaded to a server; your files stay on your machine.
+      - paragraph [ref=e124]: The app shows an empty workspace ready to load a document.
+      - heading "3. Load Your Document" [level=3] [ref=e125]:
+        - link "3. Load Your Document" [ref=e126] [cursor=pointer]:
+          - /url: "#/onboarding?id=_3-load-your-document"
+      - paragraph [ref=e127]:
+        - text: You have two ways to load your
+        - code [ref=e128]: .md
+        - text: "file:"
+      - list [ref=e129]:
+        - listitem [ref=e130]:
+          - strong [ref=e131]: Drag & drop
+          - text: ": Drag the file from your file explorer directly into the app window."
+        - listitem [ref=e132]:
+          - strong [ref=e133]: File picker
+          - text: ": Click the load button and select your file from the dialog."
+      - paragraph [ref=e134]: "Once loaded, the app parses the frontmatter and body, and renders the model as an interactive visual interface with:"
+      - list [ref=e135]:
+        - listitem [ref=e136]: Concept cards with their elements
+        - listitem [ref=e137]: Editable fields and markers
+        - listitem [ref=e138]: Relationship matrices as interactive tables
+        - listitem [ref=e139]: A taxonomy tree showing how concepts relate to each other
+      - separator [ref=e140]
+      - heading "Raw Markdown vs. Visualized in the App" [level=2] [ref=e141]:
+        - link "Raw Markdown vs. Visualized in the App" [ref=e142] [cursor=pointer]:
+          - /url: "#/onboarding?id=raw-markdown-vs-visualized-in-the-app"
+      - paragraph [ref=e143]: Here's the same content in both views so you can see what the app does for you.
+      - heading "Raw Markdown (what you're seeing now)" [level=3] [ref=e144]:
+        - link "Raw Markdown (what you're seeing now)" [ref=e145] [cursor=pointer]:
+          - /url: "#/onboarding?id=raw-markdown-what-you39re-seeing-now"
+      - generic [ref=e146]:
+        - code [ref=e147]: "# <!-- block: concepts --> Business summary A digital agency offering web design, SEO, and content marketing to small and medium businesses in Latin America. # <!-- block: concepts --> Stakeholders * <!-- block: Stakeholders --> Founders ```yaml influence: high interest: high"
+        - text: markdown
+      - list [ref=e148]:
+        - listitem [ref=e149]:
+          - text: Investors
+          - generic [ref=e150]:
+            - code [ref=e151]: "influence: high interest: medium"
+            - text: yaml
+      - heading "stakeholders-segments hierarchy matrix" [level=1] [ref=e152]:
+        - link "stakeholders-segments hierarchy matrix" [ref=e153] [cursor=pointer]:
+          - /url: "#/onboarding?id=-stakeholders-segments-hierarchy-matrix"
+          - generic [ref=e154]: stakeholders-segments hierarchy matrix
+      - table [ref=e155]:
+        - rowgroup [ref=e156]:
+          - row "Stakeholders \\ Segments SMBs Enterprise" [ref=e157]:
+            - columnheader "Stakeholders \\ Segments" [ref=e158]
+            - columnheader "SMBs" [ref=e159]
+            - columnheader "Enterprise" [ref=e160]
+        - rowgroup [ref=e161]:
+          - row "Founders X -" [ref=e162]:
+            - cell "Founders" [ref=e163]
+            - cell "X" [ref=e164]
+            - cell "-" [ref=e165]
+          - row "Investors - X" [ref=e166]:
+            - cell "Investors" [ref=e167]
+            - cell "-" [ref=e168]
+            - cell "X" [ref=e169]
+      - code [ref=e171]: "### Visualized in the App (what you'll see after loading) When you load this file in the FORMAT app, the raw text becomes an interactive dashboard:"
+      - paragraph [ref=e172]: ┌─────────────────────────────────────────────────┐ │ Business summary │ │ ┌─────────────────────────────────────────┐ │ │ │ A digital agency offering web design, │ │ │ │ SEO, and content marketing to small │ │ │ │ and medium businesses in Latin America. │ │ │ └─────────────────────────────────────────┘ │ │ │ │ Stakeholders │ │ ┌──────────────┬───────────┬──────────┐ │ │ │ Name │ Influence │ Interest │ │ │ ├──────────────┼───────────┼──────────┤ │ │ │ Founders │ high │ high │ │ │ │ Investors │ high │ medium │ │ │ └──────────────┴───────────┴──────────┘ │ │ │ │ Stakeholders × Segments │ │ ┌──────────────┬──────┬──────────┐ │ │ │ │ SMBs │ Enterprise│ │ │ ├──────────────┼──────┼──────────┤ │ │ │ Founders │ X │ - │ │ │ │ Investors │ - │ X │ │ │ └──────────────┴──────┴──────────┘ │ └─────────────────────────────────────────────────┘
+      - code [ref=e174]: "The app turns tables into interactive grids, YAML blocks into editable forms, and wikilinks into navigable connections. --- ## What's Next? - **[User Guide](/documentation/app/user_guide)** — detailed reference for the app's features - **[How To _FORMAT](/documentation/how-to)** — guide to authoring your own models - **[Core Specification](/documentation/spec/V_0-1-0/_format)** — the full spec if you want to understand the format in depth"
+  - navigation [ref=e175]:
+    - link "Home" [ref=e176] [cursor=pointer]:
+      - /url: /
+    - link "Open app" [ref=e177] [cursor=pointer]:
+      - /url: /app/
+    - link "Open web" [ref=e178] [cursor=pointer]:
+      - /url: /
+    - link "Documentation" [ref=e179] [cursor=pointer]:
+      - /url: /documentation/
+    - link "Contact" [ref=e180] [cursor=pointer]:
+      - /url: https://innv0.com/contact?ref=FORMAT
+    - link "GitHub" [ref=e181] [cursor=pointer]:
+      - /url: https://github.com/innV0/FORMAT

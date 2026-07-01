@@ -1,43 +1,71 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import DropZone from './components/DropZone.vue'
-import ResultCard from './components/ResultCard.vue'
-import { detectFileMode, detectFolderMode, collectFiles } from './utils/detector'
-import type { DetectionResult } from './types'
+import FolderExplorer from './components/FolderExplorer.vue'
+import ToastMessage from './components/ToastMessage.vue'
+import RecentFolders from './components/RecentFolders.vue'
+import SampleFolders from './components/SampleFolders.vue'
+import { scanFolderContents, collectFiles } from './utils/detector'
+import { addToHistory } from './utils/history'
+import { useToast } from './composables/useToast'
+import type { ScannedFolder, SampleFolder } from './types'
 
-const result = ref<DetectionResult | null>(null)
-const detecting = ref(false)
+const folder = ref<ScannedFolder | null>(null)
+const scanning = ref(false)
+const recentFoldersRef = ref<InstanceType<typeof RecentFolders> | null>(null)
+const folderInput = ref<HTMLInputElement>()
+const { show: showToast } = useToast()
 
-async function onFilePick(file: File) {
-  detecting.value = true
-  result.value = null
+async function onFolderPicked(files: File[]) {
+  scanning.value = true
+  folder.value = null
   try {
-    result.value = await detectFileMode(file)
+    const result = await scanFolderContents(files)
+    folder.value = result
+    addToHistory(result.name, '')
+    recentFoldersRef.value?.refresh()
+
+    const itemsWithErrors = result.items.filter(
+      i => i.validation && i.validation.summary.errors > 0
+    )
+    const itemsWithWarnings = result.items.filter(
+      i => i.validation && i.validation.summary.errors === 0 && i.validation.summary.warnings > 0
+    )
+    const rootIssues = result.rootValidation
+      && (result.rootValidation.summary.errors > 0 || result.rootValidation.summary.warnings > 0)
+
+    if (itemsWithErrors.length > 0) {
+      const names = itemsWithErrors.slice(0, 3).map(i => i.name).join(', ')
+      const rest = itemsWithErrors.length > 3 ? ` and ${itemsWithErrors.length - 3} more` : ''
+      showToast(`Validation errors in ${itemsWithErrors.length} file(s): ${names}${rest}`, 'error')
+    } else if (itemsWithWarnings.length > 0 || rootIssues) {
+      showToast('Validation completed with warnings', 'warning')
+    } else {
+      showToast('All files passed validation', 'success')
+    }
   } finally {
-    detecting.value = false
+    scanning.value = false
   }
 }
 
-async function onFolderPick(files: File[]) {
-  detecting.value = true
-  result.value = null
-  try {
-    result.value = await detectFolderMode(files)
-  } finally {
-    detecting.value = false
-  }
-}
-
-async function onFilesDrop(files: File[]) {
-  if (files.length === 1 && files[0].name.endsWith('.md')) {
-    await onFilePick(files[0])
-  } else {
-    await onFolderPick(files)
+async function onFilesDropped(e: DragEvent) {
+  if (!e.dataTransfer) return
+  const files = collectFiles(e.dataTransfer.items)
+  if (files.length) {
+    await onFolderPicked(files)
   }
 }
 
 function reset() {
-  result.value = null
+  folder.value = null
+}
+
+function handleReopen(name: string) {
+  folderInput.value?.click()
+}
+
+function handleOpenExample(sample: SampleFolder) {
+  folderInput.value?.click()
 }
 </script>
 
@@ -51,32 +79,34 @@ function reset() {
     </header>
 
     <main class="main">
-      <div class="container">
-        <div v-if="!result" class="intro">
-          <p class="intro__text">
-            Open any FORMAT model — detect whether it's FILE or FOLDER mode
-            and launch the right editor.
-          </p>
+      <template v-if="!folder">
+        <div class="container">
+          <div class="intro">
+            <p class="intro__text">
+              Open a folder to explore its FORMAT models and documents.
+            </p>
+          </div>
+
+          <DropZone @folder-picked="onFolderPicked" />
+
+          <RecentFolders ref="recentFoldersRef" @reopen="handleReopen" />
+
+          <SampleFolders @open-example="handleOpenExample" />
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="back">
+          <button class="btn btn--ghost" @click="reset">&larr; Open another folder</button>
         </div>
 
-        <DropZone
-          v-if="!result"
-          @file-pick="onFilePick"
-          @folder-pick="onFolderPick"
-          @files-drop="onFilesDrop"
-        />
-
-        <div v-if="detecting" class="spinner">
+        <div v-if="scanning" class="spinner">
           <div class="spinner__dot" />
-          <p>Detecting mode…</p>
+          <p>Scanning folder…</p>
         </div>
 
-        <ResultCard v-if="result && !detecting" :result="result" />
-
-        <div v-if="result && !detecting" class="back">
-          <button class="btn btn--ghost" @click="reset">Load another</button>
-        </div>
-      </div>
+        <FolderExplorer v-else :folder="folder" />
+      </template>
     </main>
 
     <footer class="footer">
@@ -87,6 +117,23 @@ function reset() {
         </p>
       </div>
     </footer>
+
+    <input
+      ref="folderInput"
+      type="file"
+      style="display:none"
+      webkitdirectory
+      @change="(e: Event) => {
+        const target = e.target as HTMLInputElement
+        const files = target.files
+        if (files?.length) {
+          onFolderPicked(Array.from(files))
+        }
+        target.value = ''
+      }"
+    />
+
+    <ToastMessage />
   </div>
 </template>
 
@@ -171,8 +218,10 @@ function reset() {
 }
 
 .back {
-  text-align: center;
-  margin-top: var(--space-lg);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  margin-bottom: var(--space-lg);
 }
 
 .btn {

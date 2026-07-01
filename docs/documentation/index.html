@@ -45,15 +45,15 @@
     };
   </script>
   <script>
-    window.addEventListener('load', function () {
-      if (typeof Docsify !== 'undefined') {
-        Docsify.doneEach(function () {
+    window.$docsify.plugins = (window.$docsify.plugins || []).concat([
+      function (hook) {
+        hook.doneEach(function () {
           if (window.umami) {
             umami.track({ url: window.location.pathname + window.location.search });
           }
         });
-      }
-    });
+      },
+    ]);
   </script>
   <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>

@@ -17,17 +17,17 @@ npm run build -w @innv0/format-core
 
 ## Sections
 
-### [Launcher](/documentation/launcher)
+### [Launcher](launcher)
 The cogNNitive Launcher is a Vue 3 application that detects FORMAT model modes (FILE or FOLDER) and routes them to the correct editor. Drag-and-drop or pick a file/folder.
 
-### [format-core](/documentation/format-core)
+### [format-core](format-core)
 `@innv0/format-core` is a framework-agnostic TypeScript library providing:
 - Unified parser for FILE and FOLDER mode documents
 - Model types: Concept, Element, Field, Marker, Matrix, Relationship
 - Validator against template schemas
 - IO drivers for both modes
 
-### [Ecosystem](/documentation/ecosystem)
+### [Ecosystem](ecosystem)
 The four-level specification chain:
 
 | Level | Name | Description |
@@ -37,5 +37,8 @@ The four-level specification chain:
 | 2 | **Templates** | business, procedures, kb |
 | 3 | **Models** | Concrete instances (Ghostbusters, TeamKB) |
 
-### [Usage](/documentation/usage)
+### [Specifications](specifications)
+Complete listing of all specs and models at every level, with links to source files.
+
+### [Usage](usage)
 How to create FORMAT models, templates, and work with the ecosystem.

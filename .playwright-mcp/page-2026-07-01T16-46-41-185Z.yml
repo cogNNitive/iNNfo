@@ -1,0 +1,149 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "cogNNitive hub" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - navigation "Main navigation" [ref=e6]:
+        - link "Home" [ref=e7] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=e8] [cursor=pointer]:
+          - /url: /about
+        - link "Docs" [ref=e9] [cursor=pointer]:
+          - /url: /documentation
+        - link "Contact" [ref=e10] [cursor=pointer]:
+          - /url: https://innv0.com/contact?ref=cogNNitive
+      - link "Get Started" [ref=e11] [cursor=pointer]:
+        - /url: /documentation
+  - main [ref=e12]:
+    - generic [ref=e14]:
+      - generic [ref=e15]: v0.1.0 — iNNv0 FORMAT ecosystem
+      - heading "Open, detect, and edit FORMAT models" [level=1] [ref=e16]
+      - paragraph [ref=e17]: cogNNitive is the central hub for the iNNv0 ecosystem. Drop any FORMAT model into the Launcher to detect its mode — FILE or FOLDER — and route it to the right editor.
+      - generic [ref=e18]:
+        - link "Open Launcher" [ref=e19] [cursor=pointer]:
+          - /url: /app/
+        - link "Read the Docs" [ref=e20] [cursor=pointer]:
+          - /url: /documentation
+      - paragraph [ref=e21]:
+        - text: Drop a
+        - strong [ref=e22]: .md
+        - text: file or folder — detect its mode and launch the right editor.
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - heading "What is cogNNitive?" [level=2] [ref=e26]
+        - paragraph [ref=e27]: "A monorepo that ties together the iNNv0 specification ecosystem: the Launcher app, the format-core library, and all specs."
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - img [ref=e31]
+          - heading "cogNNitive Launcher" [level=3] [ref=e34]
+          - paragraph [ref=e35]:
+            - text: Drop a
+            - code [ref=e36]: .md
+            - text: file or folder and the Launcher instantly detects whether it's a FILE mode or FOLDER mode FORMAT model, then routes you to the correct editor.
+        - generic [ref=e37]:
+          - img [ref=e39]
+          - heading "@innv0/format-core" [level=3] [ref=e42]
+          - paragraph [ref=e43]: Shared TypeScript library — parser, resolver, and validator used by both the FORMAT app (FILE mode) and iNNfo app (FOLDER mode).
+        - generic [ref=e44]:
+          - img [ref=e46]
+          - heading "Spec Chain" [level=3] [ref=e49]
+          - paragraph [ref=e50]: "Four levels: defiNNe (meta) → FORMAT (spec) → Templates (business, procedures, kb) → Models. Each level adds structure over the last."
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - heading "How the Launcher works" [level=2] [ref=e54]
+        - paragraph [ref=e55]: Three simple steps from file to editor.
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]: "1"
+          - heading "Drop or select" [level=3] [ref=e59]
+          - paragraph [ref=e60]:
+            - text: Drag a
+            - code [ref=e61]: .md
+            - text: file or an entire folder onto the Launcher, or use the file/folder picker buttons.
+        - generic [ref=e62]:
+          - generic [ref=e63]: "2"
+          - heading "Detect mode" [level=3] [ref=e64]
+          - paragraph [ref=e65]:
+            - text: The Launcher parses the FORMAT frontmatter and identifies
+            - strong [ref=e66]: FILE
+            - text: ","
+            - strong [ref=e67]: FOLDER
+            - text: ", or"
+            - strong [ref=e68]: BOTH
+            - text: mode.
+        - generic [ref=e69]:
+          - generic [ref=e70]: "3"
+          - heading "Launch editor" [level=3] [ref=e71]
+          - paragraph [ref=e72]:
+            - text: Click to open in the matching editor —
+            - strong [ref=e73]: file-format
+            - text: for single documents,
+            - strong [ref=e74]: folder-format
+            - text: for node-based models.
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - heading "Ecosystem Architecture" [level=2] [ref=e78]
+        - paragraph [ref=e79]: The four-level spec chain that powers every FORMAT model.
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - text: Level 0
+          - heading "defiNNe" [level=3] [ref=e82]
+          - paragraph [ref=e83]: The meta-specification. Defines structure, versioning, and RFC 2119 conventions for the entire ecosystem.
+        - generic [ref=e84]:
+          - text: Level 1
+          - heading "FORMAT" [level=3] [ref=e85]
+          - paragraph [ref=e86]: "The central specification. Two modes: FILE (single document) and FOLDER (node-as-folder with assets). Unified relationship system."
+        - generic [ref=e87]:
+          - text: Level 2
+          - heading "Templates" [level=3] [ref=e88]
+          - paragraph [ref=e89]:
+            - text: "Domain-specific templates:"
+            - strong [ref=e90]: business
+            - text: ","
+            - strong [ref=e91]: procedures
+            - text: ","
+            - strong [ref=e92]: kb
+            - text: (knowledge base). Each declares concepts, markers, and matrices.
+        - generic [ref=e93]:
+          - text: Level 3
+          - heading "Models" [level=3] [ref=e94]
+          - paragraph [ref=e95]: Concrete data instances like Ghostbusters (business) or TeamKB (knowledge base). Lightweight — just data and parent pointer.
+    - generic [ref=e97]:
+      - generic [ref=e98]:
+        - heading "Get in Touch" [level=2] [ref=e99]
+        - paragraph [ref=e100]: Questions about the ecosystem or the Launcher? We'd love to hear from you.
+      - generic [ref=e101]:
+        - link "Contact Us" [ref=e102] [cursor=pointer]:
+          - /url: https://innv0.com/contact?ref=cogNNitive
+        - generic [ref=e103]: https://innv0.com/contact?ref=cogNNitive
+  - contentinfo [ref=e104]:
+    - generic [ref=e105]:
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - link "cogNNitive" [ref=e108] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=e109]: Central hub for the iNNv0 FORMAT ecosystem.
+        - generic [ref=e110]:
+          - heading "Ecosystem" [level=4] [ref=e111]
+          - list [ref=e112]:
+            - listitem [ref=e113]:
+              - link "About" [ref=e114] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e115]:
+              - link "Documentation" [ref=e116] [cursor=pointer]:
+                - /url: /documentation
+        - generic [ref=e117]:
+          - heading "iNNv0" [level=4] [ref=e118]
+          - list [ref=e119]:
+            - listitem [ref=e120]:
+              - link "innv0.com" [ref=e121] [cursor=pointer]:
+                - /url: https://innv0.com
+            - listitem [ref=e122]:
+              - link "GitHub" [ref=e123] [cursor=pointer]:
+                - /url: https://github.com/innV0
+      - generic [ref=e124]:
+        - generic [ref=e125]: © 2026 iNNv0. All rights reserved.
+        - generic [ref=e126]:
+          - text: Creado con
+          - link "iNNv0 web design skill" [ref=e127] [cursor=pointer]:
+            - /url: https://skills.innv0.com/innv0-web-design-guide

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { DetectionResult } from '../types'
+import ValidationReport from './ValidationReport.vue'
 
 const props = defineProps<{
   result: DetectionResult
@@ -47,6 +48,11 @@ const meta = computed(() => stateLabels[props.result.mode] ?? stateLabels.NONE)
     <div v-if="result.errors.length" class="result-card__errors">
       <p v-for="err in result.errors" :key="err" class="error-msg">{{ err }}</p>
     </div>
+
+    <ValidationReport
+      v-if="result.validation"
+      :report="result.validation"
+    />
 
     <div v-if="result.mode !== 'NONE'" class="result-card__actions">
       <a

@@ -1,0 +1,84 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: _F
+      - heading "FORMAT Modeler" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - button "Connect Directory" [ref=e11] [cursor=pointer]:
+          - img [ref=e13]
+          - generic [ref=e15]: Connect Directory
+        - button [ref=e16] [cursor=pointer]:
+          - img [ref=e17]
+      - generic [ref=e20]:
+        - button "Save" [disabled] [ref=e21]:
+          - img [ref=e22]
+          - text: Save
+        - 'button "Save options: backup & version" [disabled] [ref=e26]':
+          - img [ref=e27]
+      - button "Edit with AI" [ref=e29] [cursor=pointer]:
+        - img [ref=e30]
+        - generic [ref=e32]: Edit with AI
+      - button "View Model Status & Workspace Files" [ref=e33] [cursor=pointer]:
+        - img [ref=e34]
+      - generic [ref=e36]:
+        - link "Open web" [ref=e37] [cursor=pointer]:
+          - /url: https://format.innv0.com
+        - link "Open docs" [ref=e38] [cursor=pointer]:
+          - /url: https://format.innv0.com/documentation/
+        - link "GitHub" [ref=e40] [cursor=pointer]:
+          - /url: https://github.com/innV0/FORMAT
+          - img [ref=e41]
+  - main [ref=e45]:
+    - generic [ref=e47]:
+      - generic [ref=e48]:
+        - generic [ref=e50]: _F
+        - generic [ref=e51]:
+          - heading "Model Information & Workspace" [level=2] [ref=e52]
+          - paragraph [ref=e53]: Manage your workspace files, inspect metamodel configurations, and view raw model data.
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - heading "Workspace Directory" [level=3] [ref=e57]:
+              - img [ref=e58]
+              - text: Workspace Directory
+            - generic [ref=e60]: Demo Mode
+          - generic [ref=e61]:
+            - img [ref=e62]
+            - paragraph [ref=e65]: Select a local directory to read and write your model files directly on your computer.
+            - button "Connect Workspace Folder" [ref=e66] [cursor=pointer]
+        - generic [ref=e67]:
+          - heading "FORMAT Template Settings" [level=3] [ref=e69]:
+            - img [ref=e70]
+            - text: FORMAT Template Settings
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - generic [ref=e75]: Source FORMAT Template File
+              - strong [ref=e76]: Built-in Default
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - generic [ref=e79]: Concepts Loaded
+                - text: "0"
+              - generic [ref=e80]:
+                - generic [ref=e81]: Matrices Loaded
+                - text: "0"
+            - generic [ref=e82]:
+              - generic [ref=e83]:
+                - generic [ref=e84]: "Format Version:"
+                - generic [ref=e85]: V_0-1-0
+              - generic [ref=e86]:
+                - generic [ref=e87]: "Template Name:"
+                - generic [ref=e88]: business
+              - generic [ref=e89]:
+                - generic [ref=e90]: "Template Version:"
+                - generic [ref=e91]: V_1-0-0
+              - generic [ref=e93]: "Documentation Directory:"
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - heading "Plain Text Model View (Ver en Texto Plano)" [level=3] [ref=e96]:
+            - img [ref=e97]
+            - text: Plain Text Model View (Ver en Texto Plano)
+          - generic [ref=e101] [cursor=pointer]:
+            - checkbox "Show Source Code" [disabled] [ref=e102]
+            - generic [ref=e104]: Show Source Code
+        - generic [ref=e105]: Select or create a markdown file from the workspace list to view its plain text representation.
