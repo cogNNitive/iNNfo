@@ -1,0 +1,99 @@
+# Tasks: Deep Integration (First Slice — "Core unificado + navegación")
+
+## Review Workload Forecast
+
+| Field | Value |
+|-------|-------|
+| Estimated changed lines | ~2,400 |
+| 400-line budget risk | High |
+| Chained PRs recommended | Yes |
+| Suggested split | PR 1 (Skeleton + workspaceStore) → PR 2 (modelStore + identity) → PR 3 (Recursive parser + golden round-trip read) → PR 4 (Recursive serializer + round-trip write) → PR 5 (Metamodel resolution) → PR 6 (Widget substrate + provenance) → PR 7 (Sidebar tree + form + verification) |
+| Delivery strategy | ask-on-risk |
+
+Decision needed before apply: Yes
+Chained PRs recommended: Yes
+Chain strategy: feature-branch-chain
+400-line budget risk: High
+
+### Suggested Work Units
+
+| Unit | Goal | Likely PR | Base |
+|------|------|-----------|------|
+| 1 | `apps/format-editor/` skeleton, `workspaceStore` (FS handle, IndexedDB recovery), single parse-pass trigger | PR 1 | feature/deep-integration |
+| 2 | `modelStore` normalized graph, `ModelNode`/`Provenance`/`FieldValue` types, `identity.ts` (qualified id + sibling-uniqueness) | PR 2 | PR 1 branch |
+| 3 | `recursiveParser.ts` (FILE + FOLDER dispatch, fractal folder+file), golden-file round-trip read tests on `models/*` | PR 3 | PR 2 branch |
+| 4 | `recursiveSerializer.ts` (write-back by `storageMode`), full round-trip parse→serialize golden tests | PR 4 | PR 3 branch |
+| 5 | `metamodel.ts` wrapping `resolveParentChain`/`getSpecForLevel` recursively (inherit + subtree override) | PR 5 | PR 4 branch |
+| 6 | `shared/widgets/` Vue port (fixture-scoped subset) + `FallbackWidget` + provenance-stamping commit hook | PR 6 | PR 5 branch |
+| 7 | `SidebarTree.vue` (unified mixed tree), `NodeForm.vue` (metamodel-driven), router wiring, full verification pass | PR 7 | PR 6 branch |
+
+---
+
+## Phase 1: Skeleton + workspaceStore (PR 1)
+
+- [ ] 1.1 Create `apps/format-editor/package.json`: vue 3.5, pinia 2.1, vue-router 4, `@innv0/format-core: workspace:*`, vite 6, vitest, `@vue/test-utils`
+- [ ] 1.2 Create `apps/format-editor/vite.config.ts` (`@/` alias → `src/`, vue plugin), `index.html`, `src/main.ts` (createApp → createPinia → createRouter → mount), `src/App.vue` (`<router-view/>`)
+- [ ] 1.3 Create `apps/format-editor/src/router/index.ts`: lazy routes gated on `workspaceStore.hasHandle` via `beforeEach` guard
+- [ ] 1.4 Create `apps/format-editor/src/stores/workspaceStore.ts`: FS handle, permission verification, IndexedDB handle recovery on boot, `open()` triggering exactly one parse pass (R1)
+- [ ] 1.5 Unit test: `open()` invoked twice / route navigation does not trigger a second parse pass (R1 scenario "No duplicate parse on navigation")
+- [ ] 1.6 Confirm no `documentStore` or `folderStore` file/export exists anywhere in `apps/format-editor/` (R3) — guard this as a repo-search assertion in a test or lint script
+
+## Phase 2: modelStore + identity (PR 2)
+
+- [ ] 2.1 Create `apps/format-editor/src/model/types.ts`: `ModelNode`, `Provenance`, `FieldValue`, `Author` per design Interfaces/Contracts (R2, R4)
+- [ ] 2.2 Create `apps/format-editor/src/model/identity.ts`: qualified-id builder (`Parent/Child` ancestor-chain join), sibling-name-uniqueness enforcement, collision diagnostics (R11)
+- [ ] 2.3 Unit test `identity.ts`: unique siblings accepted; duplicate sibling names flagged as a collision (not silently merged); cross-branch same-name nodes resolve to distinct qualified paths (R11 scenarios)
+- [ ] 2.4 Create `apps/format-editor/src/stores/modelStore.ts`: single normalized graph `{ nodes: Record<id, ModelNode>, rootIds: string[] }`; selectors (`getNode`, `getChildren`, `getRoots`); node CRUD; dirty-tracking per node (R2)
+- [ ] 2.5 Unit test `modelStore`: confirms exactly one store instance holds node graph data; no parallel per-mode store exists (R2, R3)
+- [ ] 2.6 Wire `workspaceStore.open()` to populate `modelStore` directly (no intermediate per-mode store) — stub the parse call for now (real parser lands in Phase 3)
+
+## Phase 3: Recursive parser (read) + golden round-trip read tests (PR 3)
+
+- [ ] 3.1 Create `apps/format-editor/src/model/recursiveParser.ts`: walks workspace; FILE node → `parseModel(content)`; FOLDER node → `discoverFolder` + `parseModel` on the folder's own `_FORMAT.md`, then recurses into child dirs (fractal folder+file per design) (R5, R6 read side)
+- [ ] 3.2 Assign `storageMode` per node at parse time (`'FILE'` for file primitive, `'FOLDER'` for dir with `_FORMAT.md`) (R4)
+- [ ] 3.3 Assign `qualifiedId` per node using `identity.ts` during parse; surface collision diagnostics without aborting the whole-tree walk (R5 scenario "Read failure isolated" — malformed node reported, siblings still parse)
+- [ ] 3.4 Preserve `rawSections`/`rawContent` passthrough per node for round-trip fidelity (design open question: lean on raw passthrough if `serializeModel` canonical reformatting diverges from source bytes)
+- [ ] 3.5 Golden-file test harness: for each fixture under `models/*`, run `recursiveParser` and snapshot the resulting `ModelNode` graph (structure, fields, `storageMode`, `qualifiedId`) — this is the highest-risk item per design; land BEFORE any UI wiring
+- [ ] 3.6 Construct at least one synthetic FOLDER fixture (nested dirs with `_FORMAT.md`, since `models/*` today is FILE-only) and one mixed FILE+FOLDER fixture tree to exercise R5/R7 mixed-tree scenarios
+- [ ] 3.7 Unit test: all nodes (root + descendants, regardless of mode) appear in the same graph after a recursive parse over a mixed tree (R5 scenario "Recursive read across mixed tree")
+
+## Phase 4: Recursive serializer (write) + full round-trip (PR 4)
+
+- [ ] 4.1 Create `apps/format-editor/src/model/recursiveSerializer.ts`: walks the graph; FILE node → `serializeModel` → write; FOLDER node → per-dir `_FORMAT.md` write matching that node's recorded `storageMode` (R6)
+- [ ] 4.2 Resolve open question: write-back granularity — serialize only dirty nodes (using `modelStore` dirty-tracking) vs. all nodes; implement dirty-only write-back as the default
+- [ ] 4.3 Golden-file round-trip test: parse → serialize (no edits) on every `models/*` FILE fixture — output structurally/byte-equivalent to source (R7)
+- [ ] 4.4 Golden-file round-trip test: parse → serialize (no edits) on the synthetic FOLDER fixture and mixed-tree fixture from 3.6 (R7)
+- [ ] 4.5 Unit test: node identity (`qualifiedId`) unchanged after a no-edit parse→serialize round-trip (R12)
+- [ ] 4.6 Unit test: FOLDER node with field edits is still written as FOLDER after save — editing fields does not alter `storageMode` (R8 scenario "Mode preserved despite edits")
+- [ ] 4.7 Confirm no in-place conversion code path exists (no UI control, no store action swaps `storageMode`) (R8, R19 partial)
+
+## Phase 5: Recursive metamodel resolution (PR 5)
+
+- [ ] 5.1 Create `apps/format-editor/src/model/metamodel.ts`: wraps `resolveParentChain`/`getSpecForLevel`, generalized inward — resolves a node's effective metamodel as root-resolved spec merged with that node's local `concepts`/`markers` override (R9)
+- [ ] 5.2 Unit test: root-defined concept inherited by a child with no local override (R9 scenario "Root concept inherited")
+- [ ] 5.3 Unit test: subtree redefining a concept overrides the root's plain definition for nodes inside that subtree (R9 scenario "Local override applied")
+- [ ] 5.4 Unit test: two-level-deep override — grandchild sees its own override, not child's or root's version (R9 scenario "Nested override two levels deep")
+- [ ] 5.5 Unit test: resolution semantics match `format-core`'s proven spec-chain behavior at node-nesting boundaries (cross-check against `resolveParentChain`/`getSpecForLevel` fixtures already in `packages/format-core`)
+- [ ] 5.6 Confirm `packages/format-core` is not modified in this phase — resolution logic lives entirely in `apps/format-editor/src/model/metamodel.ts` (R18)
+
+## Phase 6: Widget substrate + provenance (PR 6)
+
+- [ ] 6.1 Inventory widget types actually exercised by the fixture metamodels from `models/*` (fields/markers referenced across fixtures) — scope the port list before writing components
+- [ ] 6.2 Create `apps/format-editor/src/shared/widgets/` (Vue port): implement only the fixture-exercised widget types identified in 6.1
+- [ ] 6.3 Create `apps/format-editor/src/shared/widgets/FallbackWidget.vue`: renders raw value + type badge for any widget type not covered by 6.2 (R15)
+- [ ] 6.4 Implement provenance-stamping commit hook: every widget commit writes `{ value, author: {kind:'user', id}, timestamp }` onto the field's `FieldValue` in `modelStore` (R16)
+- [ ] 6.5 Component test: known fixture widget type renders the correct ported widget (R15 scenario "Ported widget renders known type")
+- [ ] 6.6 Component test: unrecognized widget type renders `FallbackWidget`, not a crash or blank field (R15 scenario "Fallback widget for unported type")
+- [ ] 6.7 Component test: editing a field records provenance on save; loading a node with no edits records no new provenance beyond parse-time state (R16 scenarios)
+
+## Phase 7: Unified tree + metamodel-driven form + verification (PR 7)
+
+- [ ] 7.1 Create `apps/format-editor/src/components/SidebarTree.vue`: single tree deriving hierarchy from `modelStore` `parentId`/`childIds`, mixing file-type and folder-type nodes with no mode-based split (R13)
+- [ ] 7.2 Create `apps/format-editor/src/components/NodeForm.vue`: on node selection, resolves metamodel via `metamodel.ts` (Phase 5) and renders fields/markers/widgets from `shared/widgets/` (Phase 6) — not from a hardcoded or per-mode schema (R10, R14)
+- [ ] 7.3 Wire selection: selecting a node in `SidebarTree` updates `NodeForm` to that node's resolved fields; switching selection replaces stale prior-node fields (R14 scenario "Switch selection updates form")
+- [ ] 7.4 Integration test: mount `SidebarTree` + `NodeForm` with Pinia + Router and a fake `FileSystemDirectoryHandle` exercising a mixed FILE/FOLDER tree — both node types selectable from the same tree, each loads its form (R13 scenario "Selection works across types")
+- [ ] 7.5 Integration test: form renders exactly the resolved metamodel's fields (present fields shown, absent fields omitted) (R10 scenarios)
+- [ ] 7.6 Remove/confirm absence of any ESLint rule restricting cross-imports between former FILE/FOLDER areas; `shared/` and `modelStore` importable from anywhere in `apps/format-editor/` (R17)
+- [ ] 7.7 Run `packages/format-core` test suite unchanged — all existing tests pass; diff core public API surface pre/post slice to confirm additive-only (R18)
+- [ ] 7.8 Scan `apps/format-editor/` for absence of: conversion UI/control, cross-boundary wikilink resolution/UI, relationship view editors (grid/table/graph/matrix), rules/workflows features, AI imports/SDKs/generation UI (R19)
+- [ ] 7.9 Full-suite run: unit + golden + component + integration tests all green; update `openspec/changes/deep-integration/` status/notes as needed for handoff to `sdd-verify`
