@@ -1,10 +1,10 @@
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/FORMAT_V_0-2-0_FORMAT.md"
+specification_version: "V_0-1-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/FORMAT_V_0-1-0_FORMAT.md"
 level: 1
 parent:
-  name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/defiNNe/v0.2.0/defiNNe_V_0-2-0_FORMAT.md"
+  name: "defiNNe_V_0-1-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md"
 title: "FORMAT Specification"
 description: "Concrete specification for semantic modeling with concepts, elements, fields, markers, and relationships. Supports FILE mode (single document) and FOLDER mode (node-as-folder hierarchy)."
 author: "innV0 Team"
@@ -62,8 +62,8 @@ FORMAT is a level 1 specification. Its `parent` points to defiNNe:
 
 ```yaml
 parent:
-  name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/defiNNe/v0.2.0/defiNNe_V_0-2-0_FORMAT.md"
+  name: "defiNNe_V_0-1-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md"
 ```
 
 All templates (level 2) MUST declare `parent` pointing to FORMAT.
@@ -110,7 +110,7 @@ A level 3 model MUST NOT include `template:` with `concepts`, `markers`, or `mat
 The model frontmatter is limited to:
 
 ```yaml
-specification_version: "V_0-2-0"
+specification_version: "V_0-1-0"
 specification_url: "..."
 level: 3
 parent:
@@ -269,7 +269,7 @@ markers:
 
 ### 7. Self-Description
 
-This document (`FORMAT_V_0-2-0_FORMAT.md`) is itself a level 1 specification following defiNNe. It declares `parent: { name: "defiNNe_V_0-2-0", url: "..." }` and includes the required body sections.
+This document (`FORMAT_V_0-1-0_FORMAT.md`) is itself a level 1 specification following defiNNe. It declares `parent: { name: "defiNNe_V_0-1-0", url: "..." }` and includes the required body sections.
 
 ## Template
 
@@ -277,12 +277,12 @@ This document (`FORMAT_V_0-2-0_FORMAT.md`) is itself a level 1 specification fol
 
 ```yaml
 ---
-specification_version: "V_0-2-0"
+specification_version: "V_0-1-0"
 specification_url: "<immutable-url>"
 level: 2
 parent:
-  name: "FORMAT_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/FORMAT_V_0-2-0_FORMAT.md"
+  name: "FORMAT_V_0-1-0"
+  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
 title: "<Template Name>"
 mode: "FILE | FOLDER"
 concepts: [...]
@@ -313,8 +313,8 @@ relationship_declarations: {...}
 
 ```yaml
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/FORMAT_V_0-2-0_FORMAT.md"
+specification_version: "V_0-1-0"
+specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
 level: 3
 parent:
   name: "<template>_V_x-y-z"
@@ -336,12 +336,12 @@ mode: "FILE"
 
 ### Parent Chain from a Model
 
-From `Ghostbusters_V_0-3-0_business_FORMAT.md`:
+From `Ghostbusters_V_0-1-0_business_FORMAT.md`:
 
 ```yaml
 parent:
-  name: "business_V_1-0-0"
-  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/docs/templates/business/V_1-0-0/business_V_1-0-0_FORMAT.md"
+  name: "business_V_0-1-0"
+  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/docs/templates/business/V_0-1-0/business_V_0-1-0_FORMAT.md"
 ```
 
-The application resolves: business_V_1-0-0 → FORMAT_V_0-2-0 → defiNNe_V_0-2-0.
+The application resolves: business_V_0-1-0 → FORMAT_V_0-1-0 → defiNNe_V_0-1-0.

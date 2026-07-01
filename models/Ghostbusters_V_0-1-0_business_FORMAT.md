@@ -1,11 +1,11 @@
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/FORMAT_V_0-2-0_FORMAT.md"
+specification_version: "V_0-1-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/business_V_0-1-0_FORMAT.md"
 level: 3
 parent:
-  name: "business_V_1-0-0"
-  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/docs/templates/business/V_1-0-0/business_V_1-0-0_FORMAT.md"
-model_version: "V_0-3-0"
+  name: "business_V_0-1-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/business_V_0-1-0_FORMAT.md"
+model_version: "V_0-1-0"
 title: "Ghostbusters"
 mode: "FILE"
 last_saved: "2026-07-01T00:00:00.000Z"

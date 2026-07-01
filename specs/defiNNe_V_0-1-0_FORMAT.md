@@ -1,6 +1,6 @@
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/defiNNe/v0.2.0/defiNNe_V_0-2-0_FORMAT.md"
+specification_version: "V_0-1-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md"
 level: 0
 title: "defiNNe — The Definition of Definitions"
 description: "Meta-specification for the iNNv0 ecosystem. Defines the structure, versioning, normative language, and dependency resolution for all derived specifications."
@@ -60,7 +60,7 @@ parent:
   url: "<immutable-URL-to-the-parent-document>"
 ```
 
-- `name`: the canonical filename of the parent (without `_FORMAT.md` suffix). Example: `"FORMAT_V_0-2-0"`.
+- `name`: the canonical filename of the parent (without `_FORMAT.md` suffix). Example: `"FORMAT_V_0-1-0"`.
 - `url`: an immutable URL (RECOMMENDED: git tag-based) pointing to the raw parent document.
 
 A level 0 specification MUST NOT include `parent`.
@@ -111,7 +111,7 @@ All specifications MUST begin with a YAML frontmatter block.
 
 ```yaml
 ---
-specification_version: "V_0-2-0"
+specification_version: "V_0-1-0"
 specification_url: "<immutable-URL>"
 level: 0
 title: "..."
@@ -131,8 +131,9 @@ specification_version: "V_x-y-z"
 specification_url: "<immutable-URL>"
 level: 1
 parent:
-  name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/defiNNe/v0.2.0/defiNNe_V_0-2-0_FORMAT.md"
+  name: "defiNNe_V_0-1-0"
+   url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md"
+
 title: "..."
 description: "..."
 ---
@@ -146,8 +147,8 @@ specification_version: "V_x-y-z"
 specification_url: "<immutable-URL>"
 level: 2
 parent:
-  name: "FORMAT_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/FORMAT_V_0-2-0_FORMAT.md"
+  name: "FORMAT_V_0-1-0"
+  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
 title: "..."
 mode: "FILE | FOLDER"
 concepts: [...]
@@ -182,10 +183,10 @@ Specifications MAY include additional fields in the frontmatter beyond those req
 
 | Level | Pattern | Example |
 |---|---|---|
-| 0 | `<Name>_V_x-y-z_FORMAT.md` | `defiNNe_V_0-2-0_FORMAT.md` |
-| 1 | `<Name>_V_x-y-z_FORMAT.md` | `FORMAT_V_0-2-0_FORMAT.md` |
-| 2 | `<Template>_V_x-y-z_FORMAT.md` | `business_V_1-0-0_FORMAT.md` |
-| 3 | `<Model>_V_x-y-z_<Template>_FORMAT.md` | `Ghostbusters_V_0-3-0_business_FORMAT.md` |
+| 0 | `<Name>_V_x-y-z_FORMAT.md` | `defiNNe_V_0-1-0_FORMAT.md` |
+| 1 | `<Name>_V_x-y-z_FORMAT.md` | `FORMAT_V_0-1-0_FORMAT.md` |
+| 2 | `<Template>_V_x-y-z_FORMAT.md` | `business_V_0-1-0_FORMAT.md` |
+| 3 | `<Model>_V_x-y-z_<Template>_FORMAT.md` | `Ghostbusters_V_0-1-0_business_FORMAT.md` |
 
 The filename does NOT encode higher levels. Those are declared in the `parent` field and resolved through the parent chain.
 
@@ -252,7 +253,7 @@ A document is defiNNe-compliant only if ALL of the following hold:
 
 ```markdown
 ---
-specification_version: "V_0-2-0"
+specification_version: "V_0-1-0"
 specification_url: "<url-to-level-1-spec>"
 level: 3
 parent:
@@ -277,35 +278,36 @@ mode: "FILE"
 
 ### Full Parent Chain Resolution
 
-From a model `Ghostbusters_V_0-3-0_business_FORMAT.md`:
+From a model `Ghostbusters_V_0-1-0_business_FORMAT.md`:
 
 ```yaml
 # Ghostbusters (level 3)
 parent:
-  name: "business_V_1-0-0"
-  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/docs/.../business_V_1-0-0_FORMAT.md"
+  name: "business_V_0-1-0"
+  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/docs/.../business_V_0-1-0_FORMAT.md"
 
-# business_V_1-0-0 (level 2)
+# business_V_0-1-0 (level 2)
 parent:
-  name: "FORMAT_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.2.0/FORMAT_V_0-2-0_FORMAT.md"
+  name: "FORMAT_V_0-1-0"
+  url: "https://raw.githubusercontent.com/innV0/FORMAT/v0.1.0/FORMAT_V_0-1-0_FORMAT.md"
 
-# FORMAT_V_0-2-0 (level 1)
+# FORMAT_V_0-1-0 (level 1)
 parent:
-  name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/defiNNe/v0.2.0/defiNNe_V_0-2-0_FORMAT.md"
+  name: "defiNNe_V_0-1-0"
+   url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md"
 
-# defiNNe_V_0-2-0 (level 0)
+
+# defiNNe_V_0-1-0 (level 0)
 # No parent — root of the chain
 ```
 
 ### Cached Directory After First Load
 
 ```
-📁 Ghostbusters_V_0-3-0_business/
-  📄 Ghostbusters_V_0-3-0_business_FORMAT.md
+📁 Ghostbusters_V_0-1-0_business/
+  📄 Ghostbusters_V_0-1-0_business_FORMAT.md
   📁 specs/
-    📄 business_V_1-0-0_FORMAT.md
-    📄 FORMAT_V_0-2-0_FORMAT.md
-    📄 defiNNe_V_0-2-0_FORMAT.md
+    📄 business_V_0-1-0_FORMAT.md
+    📄 FORMAT_V_0-1-0_FORMAT.md
+    📄 defiNNe_V_0-1-0_FORMAT.md
 ```
