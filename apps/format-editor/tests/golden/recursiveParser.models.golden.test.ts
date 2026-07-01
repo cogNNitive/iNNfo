@@ -4,10 +4,13 @@ import { join } from 'node:path'
 import { recursiveParse } from '../../src/model/recursiveParser'
 import { buildFakeTree } from '../helpers/fakeFs'
 
-const modelsDir = join(import.meta.dirname!, '..', '..', '..', '..', 'models')
+// Frozen snapshot of the top-level `models/*` FILE fixtures, sourced from
+// committed HEAD. Kept separate from the mutable `models/` dir so in-flight
+// edits there never break this suite (see openspec/changes/deep-integration).
+const modelsDir = join(import.meta.dirname!, '..', 'fixtures', 'models')
 const fixtureFiles = readdirSync(modelsDir).filter((f) => f.endsWith('.md'))
 
-describe('recursiveParser golden: models/* FILE fixtures', () => {
+describe('recursiveParser golden: frozen models/* FILE fixtures', () => {
   for (const fileName of fixtureFiles) {
     it(`parses ${fileName} into a normalized graph snapshot`, async () => {
       const content = readFileSync(join(modelsDir, fileName), 'utf-8')
