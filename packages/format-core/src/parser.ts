@@ -6,6 +6,7 @@ import {
 const YAML_BLOCK_RE = /^---\r?\n([\s\S]*?)\r?\n---/;
 const SECTION_RE = /^#\s+(.*)$/gm;
 const WIKILINK_RE = /\[\[([^\]]+)\]\]/g;
+const INDEX_F_RE = /_F\s+index:\s*(.*)$/;
 const YAML_FENCE_RE = /```yaml\n([\s\S]*?)```/;
 
 /* ── Marker patterns (support both `_F` and legacy `<!-- block: -->`) ── */
@@ -157,9 +158,19 @@ export function parseIndexBlock(content: string): TaxonomyEdge[] {
     const trimmed = line.trim();
     if (!trimmed.startsWith('*') && !trimmed.startsWith('-')) continue;
     const depth = line.search(/\S/) / 2;
-    const match = trimmed.match(WIKILINK_RE);
-    if (!match) continue;
-    const name = match[0].slice(2, -2);
+
+    // Support both [[wikilinks]] and _F index: Name syntax
+    let name: string | null = null;
+    const wikiMatch = trimmed.match(WIKILINK_RE);
+    if (wikiMatch) {
+      name = wikiMatch[0].slice(2, -2);
+    } else {
+      const fMatch = trimmed.match(INDEX_F_RE);
+      if (fMatch) {
+        name = fMatch[1].trim();
+      }
+    }
+    if (!name) continue;
 
     while (stack.length > 0 && stack[stack.length - 1].depth >= depth) stack.pop();
 
@@ -384,9 +395,11 @@ export function serializeModel(model: ParsedModel): string {
 
   if (model.taxonomy.length > 0) {
     lines.push('# _F index');
-    const roots = model.taxonomy.filter(e => !model.taxonomy.some(p => p.child === e.parent));
-    for (const root of roots) {
-      printTaxonomy(root, model.taxonomy, lines, 0);
+    const allParents = new Set(model.taxonomy.map(e => e.parent));
+    const allChildren = new Set(model.taxonomy.map(e => e.child));
+    const rootNames = [...allParents].filter(p => !allChildren.has(p));
+    for (const rootName of rootNames) {
+      printTaxonomyNode(rootName, model.taxonomy, lines, 0);
     }
     lines.push('');
   }
@@ -458,12 +471,12 @@ export function serializeModel(model: ParsedModel): string {
   return lines.join('\n');
 }
 
-function printTaxonomy(edge: TaxonomyEdge, allEdges: TaxonomyEdge[], lines: string[], depth: number): void {
+function printTaxonomyNode(name: string, allEdges: TaxonomyEdge[], lines: string[], depth: number): void {
   const indent = '  '.repeat(depth);
-  lines.push(`${indent}* [[${edge.child}]]`);
-  const children = allEdges.filter(e => e.parent === edge.child);
+  lines.push(`${indent}* [[${name}]]`);
+  const children = allEdges.filter(e => e.parent === name);
   for (const child of children) {
-    printTaxonomy(child, allEdges, lines, depth + 1);
+    printTaxonomyNode(child.child, allEdges, lines, depth + 1);
   }
 }
 

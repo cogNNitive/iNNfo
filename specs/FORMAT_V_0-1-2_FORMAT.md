@@ -184,7 +184,10 @@ Must be the first content in the body.
 
 #### 5.2. Index Block
 
-The index block defines the taxonomy hierarchy via nested Markdown lists with WikiLink syntax:
+The index block defines the taxonomy hierarchy via nested Markdown lists. Each list item identifies a concept using either:
+
+- **WikiLink syntax**: `[[Concept Name]]` (original format)
+- **`_F index:` marker**: `_F index: Concept Name` (preferred in V_0-1-1+, consistent with other `_F` structural markers)
 
 ```markdown
 # _F index
@@ -194,10 +197,18 @@ The index block defines the taxonomy hierarchy via nested Markdown lists with Wi
 * [[Another Root Concept]]
 ```
 
-- WikiLinks use double-bracket `[[Name]]` syntax to reference concept names.
+The `_F index:` syntax follows the same nesting rules:
+
+```markdown
+# _F index
+* _F index: Parent Concept
+  * _F index: Child Concept
+    * _F index: Grandchild Concept
+```
+
 - Nesting level indicates parent-child relationships (depth = hierarchy level).
 - The index block is identified by the concept name `index`.
-- WikiLinks MUST reference concept names defined in the template; unresolvable references SHOULD be flagged by the application.
+- WikiLinks and `_F index:` markers MUST reference concept names defined in the template; unresolvable references SHOULD be flagged by the application.
 
 #### 5.3. Concept Block
 
