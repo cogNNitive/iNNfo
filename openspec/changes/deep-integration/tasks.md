@@ -31,31 +31,31 @@ Chain strategy: feature-branch-chain
 
 ## Phase 1: Skeleton + workspaceStore (PR 1)
 
-- [ ] 1.1 Create `apps/format-editor/package.json`: vue 3.5, pinia 2.1, vue-router 4, `@innv0/format-core: workspace:*`, vite 6, vitest, `@vue/test-utils`
-- [ ] 1.2 Create `apps/format-editor/vite.config.ts` (`@/` alias → `src/`, vue plugin), `index.html`, `src/main.ts` (createApp → createPinia → createRouter → mount), `src/App.vue` (`<router-view/>`)
-- [ ] 1.3 Create `apps/format-editor/src/router/index.ts`: lazy routes gated on `workspaceStore.hasHandle` via `beforeEach` guard
-- [ ] 1.4 Create `apps/format-editor/src/stores/workspaceStore.ts`: FS handle, permission verification, IndexedDB handle recovery on boot, `open()` triggering exactly one parse pass (R1)
-- [ ] 1.5 Unit test: `open()` invoked twice / route navigation does not trigger a second parse pass (R1 scenario "No duplicate parse on navigation")
-- [ ] 1.6 Confirm no `documentStore` or `folderStore` file/export exists anywhere in `apps/format-editor/` (R3) — guard this as a repo-search assertion in a test or lint script
+- [x] 1.1 Create `apps/format-editor/package.json`: vue 3.5, pinia 2.1, vue-router 4, `@innv0/format-core: workspace:*`, vite 6, vitest, `@vue/test-utils`
+- [x] 1.2 Create `apps/format-editor/vite.config.ts` (`@/` alias → `src/`, vue plugin), `index.html`, `src/main.ts` (createApp → createPinia → createRouter → mount), `src/App.vue` (`<router-view/>`)
+- [x] 1.3 Create `apps/format-editor/src/router/index.ts`: lazy routes gated on `workspaceStore.hasHandle` via `beforeEach` guard
+- [x] 1.4 Create `apps/format-editor/src/stores/workspaceStore.ts`: FS handle, permission verification, IndexedDB handle recovery on boot, `open()` triggering exactly one parse pass (R1)
+- [x] 1.5 Unit test: `open()` invoked twice / route navigation does not trigger a second parse pass (R1 scenario "No duplicate parse on navigation")
+- [x] 1.6 Confirm no `documentStore` or `folderStore` file/export exists anywhere in `apps/format-editor/` (R3) — guard this as a repo-search assertion in a test or lint script
 
 ## Phase 2: modelStore + identity (PR 2)
 
-- [ ] 2.1 Create `apps/format-editor/src/model/types.ts`: `ModelNode`, `Provenance`, `FieldValue`, `Author` per design Interfaces/Contracts (R2, R4)
-- [ ] 2.2 Create `apps/format-editor/src/model/identity.ts`: qualified-id builder (`Parent/Child` ancestor-chain join), sibling-name-uniqueness enforcement, collision diagnostics (R11)
-- [ ] 2.3 Unit test `identity.ts`: unique siblings accepted; duplicate sibling names flagged as a collision (not silently merged); cross-branch same-name nodes resolve to distinct qualified paths (R11 scenarios)
-- [ ] 2.4 Create `apps/format-editor/src/stores/modelStore.ts`: single normalized graph `{ nodes: Record<id, ModelNode>, rootIds: string[] }`; selectors (`getNode`, `getChildren`, `getRoots`); node CRUD; dirty-tracking per node (R2)
-- [ ] 2.5 Unit test `modelStore`: confirms exactly one store instance holds node graph data; no parallel per-mode store exists (R2, R3)
-- [ ] 2.6 Wire `workspaceStore.open()` to populate `modelStore` directly (no intermediate per-mode store) — stub the parse call for now (real parser lands in Phase 3)
+- [x] 2.1 Create `apps/format-editor/src/model/types.ts`: `ModelNode`, `Provenance`, `FieldValue`, `Author` per design Interfaces/Contracts (R2, R4)
+- [x] 2.2 Create `apps/format-editor/src/model/identity.ts`: qualified-id builder (`Parent/Child` ancestor-chain join), sibling-name-uniqueness enforcement, collision diagnostics (R11)
+- [x] 2.3 Unit test `identity.ts`: unique siblings accepted; duplicate sibling names flagged as a collision (not silently merged); cross-branch same-name nodes resolve to distinct qualified paths (R11 scenarios)
+- [x] 2.4 Create `apps/format-editor/src/stores/modelStore.ts`: single normalized graph `{ nodes: Record<id, ModelNode>, rootIds: string[] }`; selectors (`getNode`, `getChildren`, `getRoots`); node CRUD; dirty-tracking per node (R2)
+- [x] 2.5 Unit test `modelStore`: confirms exactly one store instance holds node graph data; no parallel per-mode store exists (R2, R3)
+- [x] 2.6 Wire `workspaceStore.open()` to populate `modelStore` directly (no intermediate per-mode store) — real recursive parser wired directly (Phase 3 landed in the same batch instead of a stub)
 
 ## Phase 3: Recursive parser (read) + golden round-trip read tests (PR 3)
 
-- [ ] 3.1 Create `apps/format-editor/src/model/recursiveParser.ts`: walks workspace; FILE node → `parseModel(content)`; FOLDER node → `discoverFolder` + `parseModel` on the folder's own `_FORMAT.md`, then recurses into child dirs (fractal folder+file per design) (R5, R6 read side)
-- [ ] 3.2 Assign `storageMode` per node at parse time (`'FILE'` for file primitive, `'FOLDER'` for dir with `_FORMAT.md`) (R4)
-- [ ] 3.3 Assign `qualifiedId` per node using `identity.ts` during parse; surface collision diagnostics without aborting the whole-tree walk (R5 scenario "Read failure isolated" — malformed node reported, siblings still parse)
-- [ ] 3.4 Preserve `rawSections`/`rawContent` passthrough per node for round-trip fidelity (design open question: lean on raw passthrough if `serializeModel` canonical reformatting diverges from source bytes)
-- [ ] 3.5 Golden-file test harness: for each fixture under `models/*`, run `recursiveParser` and snapshot the resulting `ModelNode` graph (structure, fields, `storageMode`, `qualifiedId`) — this is the highest-risk item per design; land BEFORE any UI wiring
-- [ ] 3.6 Construct at least one synthetic FOLDER fixture (nested dirs with `_FORMAT.md`, since `models/*` today is FILE-only) and one mixed FILE+FOLDER fixture tree to exercise R5/R7 mixed-tree scenarios
-- [ ] 3.7 Unit test: all nodes (root + descendants, regardless of mode) appear in the same graph after a recursive parse over a mixed tree (R5 scenario "Recursive read across mixed tree")
+- [x] 3.1 Create `apps/format-editor/src/model/recursiveParser.ts`: walks workspace; FILE node → `parseModel(content)`; FOLDER node → own `_FORMAT.md` via `parseModel`, then recurses into child dirs (fractal folder+file per design) (R5, R6 read side). Uses a browser FS-Access-API-shaped walk (`fs-types.ts`) rather than `discoverFolder`/`readFileModel`, since those drivers import `node:fs` and are excluded from format-core's `browser` build condition that this in-browser app must use.
+- [x] 3.2 Assign `storageMode` per node at parse time (`'FILE'` for file primitive, `'FOLDER'` for dir with `_FORMAT.md`) (R4)
+- [x] 3.3 Assign `qualifiedId` per node using `identity.ts` during parse; surface collision diagnostics without aborting the whole-tree walk (R5 scenario "Read failure isolated" — malformed node reported, siblings still parse)
+- [x] 3.4 Preserve `rawSections`/`rawContent` passthrough per node for round-trip fidelity (design open question: lean on raw passthrough if `serializeModel` canonical reformatting diverges from source bytes)
+- [x] 3.5 Golden-file test harness: for each fixture under `models/*`, run `recursiveParser` and snapshot the resulting `ModelNode` graph (structure, fields, `storageMode`, `qualifiedId`) — this is the highest-risk item per design; land BEFORE any UI wiring. NOTE: discovered a pre-existing `format-core` bug (not introduced by this change, confirmed present on committed HEAD and reproduced via `packages/format-core`'s own failing suite) — `parseConceptSection`/`parseIndexBlock` split content on `'\n'` only, leaving a trailing `\r` on every line for CRLF-saved fixtures, which breaks `F_ELEMENT_RE`/index-bullet matching. All `models/*` fixtures except `mini-file_V_0-0-1` are CRLF and under-parse as a result (e.g. Ghostbusters yields 1 element instead of ~30). Golden snapshots faithfully capture current `parseModel` output; flagged as a risk for `sdd-verify`/follow-up rather than fixed here (out of this batch's scope — additive-only in `format-editor`).
+- [x] 3.6 Construct at least one synthetic FOLDER fixture (nested dirs with `_FORMAT.md`, since `models/*` today is FILE-only) and one mixed FILE+FOLDER fixture tree to exercise R5/R7 mixed-tree scenarios
+- [x] 3.7 Unit test: all nodes (root + descendants, regardless of mode) appear in the same graph after a recursive parse over a mixed tree (R5 scenario "Recursive read across mixed tree")
 
 ## Phase 4: Recursive serializer (write) + full round-trip (PR 4)
 
