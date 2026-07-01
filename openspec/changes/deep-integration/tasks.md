@@ -78,13 +78,13 @@ Chain strategy: feature-branch-chain
 
 ## Phase 6: Widget substrate + provenance (PR 6)
 
-- [ ] 6.1 Inventory widget types actually exercised by the fixture metamodels from `models/*` (fields/markers referenced across fixtures) — scope the port list before writing components
-- [ ] 6.2 Create `apps/format-editor/src/shared/widgets/` (Vue port): implement only the fixture-exercised widget types identified in 6.1
-- [ ] 6.3 Create `apps/format-editor/src/shared/widgets/FallbackWidget.vue`: renders raw value + type badge for any widget type not covered by 6.2 (R15)
-- [ ] 6.4 Implement provenance-stamping commit hook: every widget commit writes `{ value, author: {kind:'user', id}, timestamp }` onto the field's `FieldValue` in `modelStore` (R16)
-- [ ] 6.5 Component test: known fixture widget type renders the correct ported widget (R15 scenario "Ported widget renders known type")
-- [ ] 6.6 Component test: unrecognized widget type renders `FallbackWidget`, not a crash or blank field (R15 scenario "Fallback widget for unported type")
-- [ ] 6.7 Component test: editing a field records provenance on save; loading a node with no edits records no new provenance beyond parse-time state (R16 scenarios)
+- [x] 6.1 Inventory widget types actually exercised by the fixture metamodels from `models/*` (fields/markers referenced across fixtures) — scope the port list before writing components. Inventory result (frozen fixtures under `tests/fixtures/models/`): only `FORMAT_V_0-1-0_business_FORMAT.md` (the level-2 business template) declares frontmatter `concepts:`; its concept `type` values are exactly `text`, `category`, `weight` (`ConceptType`'s `list`/`steps`/`sequence` are not exercised by this fixture set). No fixture declares per-field `ConceptField` types (`string`/`select`/`reference`) — form fields bind to parsed element instance data (`ElementNode.fields`), which is dynamically typed.
+- [x] 6.2 Create `apps/format-editor/src/shared/widgets/` (Vue port): implement only the fixture-exercised widget types identified in 6.1 — `TextWidget.vue` (text), `WeightWidget.vue` (weight, numeric input), `CategoryWidget.vue` (category, select from options), plus `index.ts` registry (`resolveWidgetComponent`) and `WidgetField.vue` (dispatches registry vs. fallback, wires provenance commit — the integration surface Phase 7's `NodeForm` binds to).
+- [x] 6.3 Create `apps/format-editor/src/shared/widgets/FallbackWidget.vue`: renders raw value + type badge for any widget type not covered by 6.2 (R15)
+- [x] 6.4 Implement provenance-stamping commit hook: every widget commit writes `{ value, author: {kind:'user', id}, timestamp }` onto the field's `FieldValue` in `modelStore` (R16) — `apps/format-editor/src/shared/provenance.ts` (`commitFieldValue`/`commitMarkerValue`), also marks the owning node dirty for `recursiveSerialize`.
+- [x] 6.5 Component test: known fixture widget type renders the correct ported widget (R15 scenario "Ported widget renders known type") — `tests/component/widgets.test.ts`, `tests/component/WidgetField.test.ts`
+- [x] 6.6 Component test: unrecognized widget type renders `FallbackWidget`, not a crash or blank field (R15 scenario "Fallback widget for unported type") — `tests/component/FallbackWidget.test.ts`, `tests/component/WidgetField.test.ts`
+- [x] 6.7 Component test: editing a field records provenance on save; loading a node with no edits records no new provenance beyond parse-time state (R16 scenarios) — `tests/unit/provenance.test.ts`, `tests/component/WidgetField.test.ts`
 
 ## Phase 7: Unified tree + metamodel-driven form + verification (PR 7)
 
