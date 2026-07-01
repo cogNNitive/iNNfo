@@ -17,49 +17,35 @@ function normalizeLineEndings(text: string): string {
   return text.replace(/\r\n?/g, '\n');
 }
 
-/* ── Marker patterns (support both `_F` and legacy `<!-- block: -->`) ── */
+/* ── Marker patterns (_F syntax only, V_0-1-1+) ── */
 
-// Section-level markers: `# _F ConceptName`, `# _F matrices: name`, or `# <!-- block: concepts --> name`
-const F_SECTION_RE = /^#\s+(?:_F\s+(?:(matrices):\s*(.*)|(.*))|<!--\s*block:\s*(\w+)\s*-->\s*(.*))$/m;
+// Section-level markers: `# _F ConceptName` or `# _F matrices: name`
+const F_SECTION_RE = /^#\s+_F\s+(?:(matrices):\s*(.*)|(.*))/m;
 
-// Section-level markers: `# _F ConceptName`, `# _F matrices: name`, or `# <!-- block: concepts --> name`
-
-// Element-level markers: `* _F Concept: Name` or `* <!-- _F Concept: --> Name` or `* <!-- block: Concept --> Name`
-const F_ELEMENT_VISIBLE_RE = /^\s*[*\-]\s+_F\s+([\w\s-]+?):\s+(.*)$/;
-const F_ELEMENT_HIDDEN_RE = /^\s*[*\-]\s+<!--\s+(?:_F\s+([\w\s-]+?):|block:\s*([\w\s-]+?))\s*-->\s*(.*)$/;
+// Element-level markers: `* _F Concept: Name`
+const F_ELEMENT_RE = /^\s*[*\-]\s+_F\s+([\w\s-]+?):\s+(.*)$/;
 
 function isIndexSection(rawTitle: string): boolean {
   return sectionName(rawTitle) === 'concepts' && sectionTitle(rawTitle).toLowerCase() === 'index';
 }
 
 function sectionName(rawTitle: string): string | null {
-  // New _F syntax: `_F ConceptName` or `_F matrices: Name`
+  // _F syntax: `_F ConceptName` or `_F matrices: Name`
   const fm = rawTitle.match(/^_F\s+(?:(matrices):\s*(.*)|(.*))/);
   if (fm) {
     if (fm[1]) return fm[1]; // 'matrices'
     if (fm[3] != null) return 'concepts'; // implicit 'concepts' for bare ConceptName
   }
-  // Hidden _F form: `<!-- _F --> ConceptName`
-  if (/<!--\s*_F\s*-->/.test(rawTitle)) return 'concepts';
-  // Legacy syntax: `<!-- block: concepts --> Name`
-  const legacy = rawTitle.match(/<!--\s*block:\s*(\w+)\s*-->/);
-  if (legacy) return legacy[1];
   return null;
 }
 
 function sectionTitle(rawTitle: string): string {
-  // New _F syntax
+  // _F syntax: `_F ConceptName` or `_F matrices: Name`
   const fm = rawTitle.match(/^_F\s+(?:(matrices):\s*(.*)|(.*))/);
   if (fm) {
     if (fm[2]) return fm[2].trim(); // matrix name
     if (fm[3] != null) return fm[3].trim(); // concept name
   }
-  // Hidden _F form: `<!-- _F --> ConceptName`
-  const hiddenFm = rawTitle.match(/<!--\s*_F\s*-->\s*(.*)/);
-  if (hiddenFm) return hiddenFm[1].trim();
-  // Legacy syntax
-  const legacy = rawTitle.match(/<!--\s*block:\s*\w+\s*-->\s*(.*)/);
-  if (legacy) return legacy[1].trim();
   return rawTitle;
 }
 
@@ -197,12 +183,8 @@ function parseFencedYaml(text: string): Record<string, unknown> {
 }
 
 function parseElementMarker(line: string): string | null {
-  // Visible: `* _F ConceptName: Element` (element marker — colon is required to separate concept name from element name)
-  const vis = line.match(F_ELEMENT_VISIBLE_RE);
-  if (vis) return vis[2].trim();
-  // Hidden: `* <!-- _F ConceptName: --> Element` or `* <!-- block: ConceptName --> Element`
-  const hid = line.match(F_ELEMENT_HIDDEN_RE);
-  if (hid) return (hid[3] ?? hid[4] ?? '').trim();
+  const match = line.match(F_ELEMENT_RE);
+  if (match) return match[2].trim();
   return null;
 }
 
