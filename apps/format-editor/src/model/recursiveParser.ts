@@ -1,6 +1,6 @@
 import { parseModel } from '@innv0/format-core'
 import type { ElementNode, ParsedModel } from '@innv0/format-core'
-import type { ModelNode, FieldValue } from './types'
+import type { ModelNode, FieldValue, LocalMetamodel } from './types'
 import { IdentityRegistry, buildQualifiedId } from './identity'
 import type { DirectoryHandleLike, FileHandleLike } from './fs-types'
 import { isDirectoryHandle } from './fs-types'
@@ -27,6 +27,14 @@ interface ParseContext {
 
 function nowIso(): string {
   return new Date().toISOString()
+}
+
+/** Extracts a node's own locally-declared metamodel from its frontmatter (R9 local declaration). */
+function toLocalMetamodel(parsed: ParsedModel): LocalMetamodel {
+  return {
+    concepts: (parsed.frontmatter.concepts ?? []) as LocalMetamodel['concepts'],
+    markers: (parsed.frontmatter.markers ?? []) as LocalMetamodel['markers'],
+  }
 }
 
 function toFieldValues(fields: Record<string, unknown>): Record<string, FieldValue> {
@@ -164,6 +172,7 @@ async function parseFileNode(
       relationships: [],
       rawSections: {},
       rawContent: content,
+      localMetamodel: toLocalMetamodel(parsed),
       source: { path: sourcePath },
     }
     ctx.nodes[qualifiedId] = rootNode
@@ -208,6 +217,7 @@ async function parseFolderNode(
       relationships: [],
       rawSections: {},
       rawContent: content,
+      localMetamodel: toLocalMetamodel(parsed),
       source: { path: sourcePath },
     }
     ctx.nodes[qualifiedId] = folderNode
