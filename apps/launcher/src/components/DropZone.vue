@@ -56,7 +56,7 @@ function onFolderChange(e: Event) {
       Drop a folder or <strong>.md</strong> file here
     </p>
     <div class="drop-zone__actions">
-      <button class="btn btn--outline" @click="pickFolder">Abrir carpeta</button>
+      <button class="btn btn--outline" @click="pickFolder">Open folder</button>
     </div>
 
     <input

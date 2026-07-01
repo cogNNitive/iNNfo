@@ -3,25 +3,22 @@ import { computed } from 'vue'
 import type { ScannedFolder, ScannedItem, ValidationReport as ValidationReportType } from '../types'
 import ValidationReport from './ValidationReport.vue'
 
+import { useAppUrls } from '../composables/useAppUrls'
+
 const props = defineProps<{
   folder: ScannedFolder
 }>()
 
-const baseFileUrl = import.meta.env.VITE_FILE_FORMAT_URL ?? 'http://localhost:5175'
-const baseFolderUrl = import.meta.env.VITE_FOLDER_FORMAT_URL ?? 'http://localhost:5174'
+const { fileUrl, folderUrl } = useAppUrls()
 
 const folders = computed(() => props.folder.items.filter(i => i.kind === 'folder'))
 const documents = computed(() => props.folder.items.filter(i => i.kind === 'file'))
 
 function openApp(item: ScannedItem) {
   if (item.kind === 'folder') {
-    const url = new URL(baseFolderUrl)
-    url.searchParams.set('folder', item.relativePath)
-    window.open(url.toString(), '_blank', 'noopener,noreferrer')
+    window.open(folderUrl(item.relativePath), '_blank', 'noopener,noreferrer')
   } else {
-    const url = new URL(baseFileUrl)
-    url.searchParams.set('file', item.relativePath)
-    window.open(url.toString(), '_blank', 'noopener,noreferrer')
+    window.open(fileUrl(item.relativePath), '_blank', 'noopener,noreferrer')
   }
 }
 

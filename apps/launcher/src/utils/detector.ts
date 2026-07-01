@@ -11,14 +11,14 @@ export async function readFileAsText(file: File): Promise<string> {
   })
 }
 
-export function collectFiles(items: DataTransferItemList): File[] {
+export async function collectFiles(items: DataTransferItemList): Promise<File[]> {
   const files: File[] = []
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
     if (item.webkitGetAsEntry) {
       const entry = item.webkitGetAsEntry()
       if (entry?.isDirectory) {
-        files.push(...collectDirectoryEntries(entry as any))
+        files.push(...await collectDirectoryEntries(entry as FileSystemDirectoryEntry))
       } else if (entry?.isFile) {
         const file = item.getAsFile()
         if (file) files.push(file)
@@ -31,30 +31,33 @@ export function collectFiles(items: DataTransferItemList): File[] {
   return files
 }
 
-function collectDirectoryEntries(entry: any): File[] {
+async function collectDirectoryEntries(entry: FileSystemDirectoryEntry): Promise<File[]> {
   const files: File[] = []
   const reader = entry.createReader()
-  function readEntries(): Promise<void> {
+  let iterations = 0
+  const MAX_ITERATIONS = 100
+
+  const readBatch = (): Promise<FileSystemEntry[]> => {
     return new Promise((resolve) => {
-      reader.readEntries((entries: any[]) => {
-        if (entries.length === 0) return resolve()
-        let pending = entries.length
-        for (const e of entries) {
-          if (e.isDirectory) {
-            files.push(...collectDirectoryEntries(e))
-            pending--
-            if (pending === 0) resolve()
-          } else {
-            ;(e as any).file((file: File) => {
-              files.push(file)
-              pending--
-              if (pending === 0) resolve()
-            })
-          }
-        }
-      })
+      reader.readEntries((entries) => resolve(entries as FileSystemEntry[]))
     })
   }
+
+  let entries: FileSystemEntry[]
+  do {
+    entries = await readBatch()
+    for (const e of entries) {
+      if (e.isDirectory) {
+        files.push(...await collectDirectoryEntries(e as FileSystemDirectoryEntry))
+      } else if (e.isFile) {
+        const file = await new Promise<File>((resolve) => (e as FileSystemFileEntry).file(resolve))
+        files.push(file)
+      }
+    }
+    iterations++
+    if (iterations >= MAX_ITERATIONS) break
+  } while (entries.length > 0)
+
   return files
 }
 

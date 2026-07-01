@@ -2,25 +2,16 @@
 import { computed } from 'vue'
 import type { DetectionResult } from '../types'
 import ValidationReport from './ValidationReport.vue'
+import { useAppUrls } from '../composables/useAppUrls'
 
 const props = defineProps<{
   result: DetectionResult
 }>()
 
-const baseFileUrl = import.meta.env.VITE_FILE_FORMAT_URL ?? 'http://localhost:5175'
-const baseFolderUrl = import.meta.env.VITE_FOLDER_FORMAT_URL ?? 'http://localhost:5174'
+const { fileUrl, folderUrl } = useAppUrls()
 
-const fileFormatUrl = computed(() => {
-  const url = new URL(baseFileUrl)
-  if (props.result.fileName) url.searchParams.set('file', props.result.fileName)
-  return url.toString()
-})
-
-const folderFormatUrl = computed(() => {
-  const url = new URL(baseFolderUrl)
-  if (props.result.folderName) url.searchParams.set('folder', props.result.folderName)
-  return url.toString()
-})
+const fileFormatUrl = computed(() => fileUrl(props.result.fileName ?? ''))
+const folderFormatUrl = computed(() => folderUrl(props.result.folderName ?? ''))
 
 const stateLabels: Record<string, { label: string; kind: 'success' | 'error' | 'info' }> = {
   FILE: { label: 'FILE', kind: 'success' },

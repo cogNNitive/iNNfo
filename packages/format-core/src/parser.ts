@@ -54,10 +54,10 @@ function sectionTitle(rawTitle: string): string {
   return rawTitle;
 }
 
-export function parseYaml(yamlStr: string): any {
+export function parseYaml(yamlStr: string): Record<string, unknown> {
   const lines = yamlStr.split(/\r?\n/);
-  const root: any = {};
-  const stack: Array<{ indent: number; key: string | null; data: any; type: 'object' | 'array' }> = [
+  const root: Record<string, unknown> = {};
+  const stack: Array<{ indent: number; key: string | null; data: Record<string, unknown> | unknown[]; type: 'object' | 'array' }> = [
     { indent: -1, key: null, data: root, type: 'object' }
   ];
 
@@ -73,14 +73,14 @@ export function parseYaml(yamlStr: string): any {
       if (parent.type !== 'array') {
         if (parent.key && stack.length >= 2) {
           const gp = stack[stack.length - 2];
-          gp.data[parent.key] = [];
-          parent.data = gp.data[parent.key];
+          (gp.data as Record<string, unknown>)[parent.key] = [];
+          parent.data = (gp.data as Record<string, unknown>)[parent.key] as unknown[];
           parent.type = 'array';
         }
       }
       if (rest === '') {
         const obj: any = {};
-        parent.data.push(obj);
+        (parent.data as unknown[]).push(obj);
         stack.push({ indent, key: null, data: obj, type: 'object' });
       } else {
         const ci = rest.indexOf(':');
@@ -88,10 +88,10 @@ export function parseYaml(yamlStr: string): any {
           const k = rest.substring(0, ci).trim();
           const v = parseYamlValue(rest.substring(ci + 1).trim());
           const obj = { [k]: v };
-          parent.data.push(obj);
+          (parent.data as unknown[]).push(obj);
           stack.push({ indent, key: k, data: obj, type: 'object' });
         } else {
-          parent.data.push(parseYamlValue(rest));
+          (parent.data as unknown[]).push(parseYamlValue(rest));
         }
       }
     } else {
@@ -100,17 +100,17 @@ export function parseYaml(yamlStr: string): any {
       const key = trimmed.substring(0, ci).trim();
       const valStr = trimmed.substring(ci + 1).trim();
       if (valStr === '') {
-        parent.data[key] = {};
-        stack.push({ indent, key, data: parent.data[key], type: 'object' });
+        (parent.data as Record<string, unknown>)[key] = {};
+        stack.push({ indent, key, data: (parent.data as Record<string, unknown>)[key] as Record<string, unknown>, type: 'object' });
       } else {
-        parent.data[key] = parseYamlValue(valStr);
+        (parent.data as Record<string, unknown>)[key] = parseYamlValue(valStr);
       }
     }
   }
   return root;
 }
 
-function parseYamlValue(v: string): any {
+function parseYamlValue(v: string): string | number | boolean | null | unknown[] {
   v = v.trim();
   if (v.startsWith('[') && v.endsWith(']')) {
     return v.slice(1, -1).split(',').map(s => parseYamlValue(s.trim()));
@@ -340,6 +340,42 @@ export function serializeModel(model: ParsedModel): string {
   if (fm.model_version) lines.push(`model_version: "${fm.model_version}"`);
   if (fm.title) lines.push(`title: "${fm.title}"`);
   if (fm.mode) lines.push(`mode: "${fm.mode}"`);
+
+  // Matrix declarations
+  const matrices = fm.matrices as Array<{ name: string; source: string; target: string; params: string }> | undefined;
+  if (matrices && matrices.length > 0) {
+    lines.push('matrices:');
+    for (const m of matrices) {
+      lines.push(`  - name: "${m.name}"`);
+      lines.push(`    source: "${m.source}"`);
+      lines.push(`    target: "${m.target}"`);
+      if (m.params) lines.push(`    params: "${m.params}"`);
+    }
+  }
+
+  // Concept declarations (level-2 templates)
+  if (fm.concepts && fm.concepts.length > 0) {
+    lines.push('concepts:');
+    for (const c of fm.concepts) {
+      lines.push(`  - name: "${c.name}"`);
+      if (c.icon) lines.push(`    icon: "${c.icon}"`);
+      if (c.type) lines.push(`    type: "${c.type}"`);
+      if (c.color) lines.push(`    color: "${c.color}"`);
+      if (c.weight !== undefined) lines.push(`    weight: ${c.weight}`);
+    }
+  }
+
+  // Marker declarations (level-2 templates)
+  if (fm.markers && fm.markers.length > 0) {
+    lines.push('markers:');
+    for (const m of fm.markers) {
+      lines.push(`  - name: "${m.name}"`);
+      if (m.symbol) lines.push(`    symbol: "${m.symbol}"`);
+      if (m.icon) lines.push(`    icon: "${m.icon}"`);
+      if (m.color) lines.push(`    color: "${m.color}"`);
+    }
+  }
+
   lines.push('---');
   lines.push('');
   lines.push('> [!NOTE]');
@@ -392,6 +428,29 @@ export function serializeModel(model: ParsedModel): string {
     for (const row of rows) {
       const vals = cols.map(c => cellMap.get(`${row}||${c}`) || '-');
       lines.push(`| ${row} | ${vals.join(' | ')} |`);
+    }
+    lines.push('');
+  }
+
+  // Node markers (item-markers matrix)
+  const nodeMarkerEntries = Object.entries(model.nodeMarkers);
+  if (nodeMarkerEntries.length > 0) {
+    lines.push('# _F matrices: item-markers matrix');
+    // Collect all unique marker keys
+    const markerKeys = new Set<string>();
+    for (const [, markers] of nodeMarkerEntries) {
+      for (const key of Object.keys(markers)) {
+        markerKeys.add(key);
+      }
+    }
+    const keys = Array.from(markerKeys);
+    const headerLine = `| Item \\ Marker | ${keys.join(' | ')} |`;
+    const sepLine = `| :--- | ${keys.map(() => ':---:').join(' | ')} |`;
+    lines.push(headerLine);
+    lines.push(sepLine);
+    for (const [itemName, markers] of nodeMarkerEntries) {
+      const vals = keys.map(k => markers[k] !== undefined ? String(markers[k]) : '-');
+      lines.push(`| ${itemName} | ${vals.join(' | ')} |`);
     }
     lines.push('');
   }

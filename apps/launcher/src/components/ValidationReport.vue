@@ -22,9 +22,32 @@ function toggle(cat: string) {
   collapsed.value[cat] = !collapsed.value[cat]
 }
 
-function hasVisibleIssues(cat: string): boolean {
-  return props.report.checks.some(c => c.category === cat && !c.passed)
-}
+const checksByCategory = computed(() => {
+  const grouped: Record<string, ValidationCheck[]> = {}
+  for (const check of props.report.checks) {
+    if (!grouped[check.category]) grouped[check.category] = []
+    grouped[check.category].push(check)
+  }
+  return grouped
+})
+
+const passedCountByCategory = computed(() => {
+  const counts: Record<string, number> = {}
+  for (const check of props.report.checks) {
+    if (check.passed) {
+      counts[check.category] = (counts[check.category] || 0) + 1
+    }
+  }
+  return counts
+})
+
+const categoriesWithIssues = computed(() => {
+  const withIssues = new Set<string>()
+  for (const check of props.report.checks) {
+    if (!check.passed) withIssues.add(check.category)
+  }
+  return withIssues
+})
 
 function statusIcon(check: ValidationCheck): string {
   if (check.passed) return '\u2705'
@@ -55,16 +78,16 @@ function statusClass(check: ValidationCheck): string {
     </div>
 
     <div v-for="cat in categories" :key="cat.key" class="category">
-      <button class="category__header" :class="{ 'category__header--issues': hasVisibleIssues(cat.key) }" @click="toggle(cat.key)">
+      <button class="category__header" :class="{ 'category__header--issues': categoriesWithIssues.has(cat.key) }" @click="toggle(cat.key)">
         <span class="category__arrow" :class="{ 'category__arrow--open': !collapsed[cat.key] }">&#9654;</span>
         <span class="category__label">{{ cat.label }}</span>
         <span class="category__count">
-          {{ report.checks.filter(c => c.category === cat.key && c.passed).length }}/{{ report.checks.filter(c => c.category === cat.key).length }}
+          {{ passedCountByCategory[cat.key] ?? 0 }}/{{ checksByCategory[cat.key]?.length ?? 0 }}
         </span>
       </button>
 
       <div v-if="!collapsed[cat.key]" class="category__body">
-        <div v-for="check in report.checks.filter(c => c.category === cat.key)" :key="check.id" class="check" :class="statusClass(check)">
+        <div v-for="check in checksByCategory[cat.key] || []" :key="check.id" class="check" :class="statusClass(check)">
           <span class="check__icon">{{ statusIcon(check) }}</span>
           <div class="check__content">
             <span class="check__label">{{ check.label }}</span>

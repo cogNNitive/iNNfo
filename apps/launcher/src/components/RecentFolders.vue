@@ -4,7 +4,7 @@ import { loadHistory, removeFromHistory, clearHistory, formatTimestamp } from '.
 import type { FolderHistoryEntry } from '../types'
 
 const emit = defineEmits<{
-  reopen: [name: string]
+  reopen: [path: string]
 }>()
 
 const history = ref<FolderHistoryEntry[]>([])
@@ -15,8 +15,8 @@ function refresh() {
   history.value = loadHistory()
 }
 
-function remove(name: string) {
-  removeFromHistory(name)
+function remove(path: string) {
+  removeFromHistory(path)
   refresh()
 }
 
@@ -24,8 +24,6 @@ function clear() {
   clearHistory()
   refresh()
 }
-
-defineExpose({ refresh })
 </script>
 
 <template>
@@ -39,14 +37,14 @@ defineExpose({ refresh })
         v-for="entry in history"
         :key="entry.name"
         class="recent__item"
-        @click="emit('reopen', entry.name)"
+        @click="emit('reopen', entry.path)"
       >
         <svg class="recent__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"/>
         </svg>
         <span class="recent__name">{{ entry.name }}</span>
         <span class="recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
-        <button class="recent__remove" @click.stop="remove(entry.name)">
+        <button class="recent__remove" @click.stop="remove(entry.path)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>

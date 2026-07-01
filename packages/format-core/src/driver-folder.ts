@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir, access } from 'node:fs/promises';
 import { join, relative, dirname, basename } from 'node:path';
 import { ParsedModel, FolderElement, FolderDriverOptions, SpecFrontmatter, GraphEdge } from './types';
 import { parseFrontmatter, parseModel } from './parser';
@@ -10,9 +10,8 @@ export interface FolderModel {
 }
 
 export async function discoverFolder(rootPath: string, _options?: FolderDriverOptions): Promise<FolderModel> {
-  const fs = await import('node:fs/promises');
   const formatMdPath = join(rootPath, '_FORMAT.md');
-  const rootContent = await fs.readFile(formatMdPath, 'utf-8');
+  const rootContent = await readFile(formatMdPath, 'utf-8');
   const rootFrontmatter = parseFrontmatter(rootContent);
   const rootModel = parseModel(rootContent);
 
@@ -21,8 +20,7 @@ export async function discoverFolder(rootPath: string, _options?: FolderDriverOp
 }
 
 async function walkDirectory(rootPath: string, currentPath: string, _depth: number): Promise<FolderElement[]> {
-  const fs = await import('node:fs/promises');
-  const entries = await fs.readdir(currentPath, { withFileTypes: true });
+  const entries = await readdir(currentPath, { withFileTypes: true });
   const result: FolderElement[] = [];
 
   for (const entry of entries) {
@@ -31,19 +29,19 @@ async function walkDirectory(rootPath: string, currentPath: string, _depth: numb
     const formatMdPath = join(dirPath, '_FORMAT.md');
 
     try {
-      await fs.access(formatMdPath);
+      await access(formatMdPath);
     } catch {
       continue;
     }
 
-    const content = await fs.readFile(formatMdPath, 'utf-8');
-    const fm = parseFrontmatter(content) ?? {};
+    const content = await readFile(formatMdPath, 'utf-8');
+    const fm: Partial<SpecFrontmatter> = parseFrontmatter(content) ?? {};
 
     const relPath = relative(rootPath, dirPath).replace(/\\/g, '/');
     const assets: string[] = [];
     const children: FolderElement[] = [];
 
-    const subEntries = await fs.readdir(dirPath, { withFileTypes: true });
+    const subEntries = await readdir(dirPath, { withFileTypes: true });
     for (const sub of subEntries) {
       const subPath = join(dirPath, sub.name);
       if (sub.isDirectory()) {
@@ -56,10 +54,10 @@ async function walkDirectory(rootPath: string, currentPath: string, _depth: numb
 
     result.push({
       path: relPath,
-      type: (fm as any).type || '',
-      fields: (fm as any).fields || {},
-      markers: (fm as any).markers || {},
-      graphEdges: (fm as any).graph_edges || [],
+      type: (fm?.type as string) || '',
+      fields: (fm?.fields as Record<string, unknown>) || {},
+      markers: (fm?.markers as unknown as Record<string, number | string>) || {},
+      graphEdges: (fm?.graph_edges as GraphEdge[]) || [],
       assets,
       children,
     });

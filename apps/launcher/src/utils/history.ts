@@ -14,15 +14,15 @@ export function loadHistory(): FolderHistoryEntry[] {
 
 export function addToHistory(name: string, path: string): void {
   const history = loadHistory()
-  const filtered = history.filter(e => e.name !== name)
+  const filtered = history.filter(e => e.path !== path)
   const entry: FolderHistoryEntry = { name, path, timestamp: Date.now() }
   const updated = [entry, ...filtered].slice(0, MAX_ENTRIES)
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
 }
 
-export function removeFromHistory(name: string): void {
+export function removeFromHistory(path: string): void {
   const history = loadHistory()
-  const updated = history.filter(e => e.name !== name)
+  const updated = history.filter(e => e.path !== path)
   localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
 }
 

@@ -1,6 +1,6 @@
 import {
   ParsedModel, SpecDocument, ValidationResult, ValidationError,
-  Concept, Marker, MatrixDecl, ElementNode, SpecFrontmatter, ElementsMap
+  Concept, MatrixDecl, ElementNode, SpecFrontmatter, ElementsMap
 } from './types';
 
 export function validateModel(
@@ -71,15 +71,6 @@ export function validateModel(
         }
       }
 
-      for (const [markerName] of Object.entries(el.markers)) {
-        if (!templateMarkers.find(m => m.name === markerName)) {
-          warnings.push({
-            path: `elements.${conceptName}.${el.name}.markers.${markerName}`,
-            message: `Marker "${markerName}" is not defined in template`,
-            severity: 'warning'
-          });
-        }
-      }
     }
   }
 

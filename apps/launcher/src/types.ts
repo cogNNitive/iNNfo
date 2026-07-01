@@ -48,6 +48,7 @@ export interface SampleFolder {
   items: number
 }
 
+/** @todo Connect to actual configuration store */
 export interface LauncherConfig {
   fileFormatUrl?: string
   folderFormatUrl?: string

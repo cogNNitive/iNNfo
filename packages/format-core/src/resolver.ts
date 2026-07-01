@@ -60,8 +60,8 @@ export async function resolveParentChain(
     const doc: SpecDocument = {
       name: currentName,
       level: fm.level ?? 0,
-      parentName: (fm.parent as any)?.name,
-      parentUrl: (fm.parent as any)?.url,
+      parentName: fm.parent?.name,
+      parentUrl: fm.parent?.url,
       frontmatter: fm,
       rawContent: content,
     };

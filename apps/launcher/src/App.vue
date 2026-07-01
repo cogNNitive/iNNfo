@@ -12,7 +12,7 @@ import type { ScannedFolder, SampleFolder } from './types'
 
 const folder = ref<ScannedFolder | null>(null)
 const scanning = ref(false)
-const recentFoldersRef = ref<InstanceType<typeof RecentFolders> | null>(null)
+const historyKey = ref(0)
 const folderInput = ref<HTMLInputElement>()
 const { show: showToast } = useToast()
 
@@ -23,7 +23,7 @@ async function onFolderPicked(files: File[]) {
     const result = await scanFolderContents(files)
     folder.value = result
     addToHistory(result.name, '')
-    recentFoldersRef.value?.refresh()
+    historyKey.value++
 
     const itemsWithErrors = result.items.filter(
       i => i.validation && i.validation.summary.errors > 0
@@ -50,7 +50,7 @@ async function onFolderPicked(files: File[]) {
 
 async function onFilesDropped(e: DragEvent) {
   if (!e.dataTransfer) return
-  const files = collectFiles(e.dataTransfer.items)
+  const files = await collectFiles(e.dataTransfer.items)
   if (files.length) {
     await onFolderPicked(files)
   }
@@ -60,11 +60,15 @@ function reset() {
   folder.value = null
 }
 
-function handleReopen(name: string) {
+function handleReopen(path: string) {
+  // The browser security model prevents programmatic folder opening,
+  // but we pass the path for UI context
+  console.log('Reopening folder:', path)
   folderInput.value?.click()
 }
 
 function handleOpenExample(sample: SampleFolder) {
+  console.log('Opening sample:', sample.path)
   folderInput.value?.click()
 }
 </script>
@@ -89,7 +93,7 @@ function handleOpenExample(sample: SampleFolder) {
 
           <DropZone @folder-picked="onFolderPicked" />
 
-          <RecentFolders ref="recentFoldersRef" @reopen="handleReopen" />
+          <RecentFolders :key="historyKey" @reopen="handleReopen" />
 
           <SampleFolders @open-example="handleOpenExample" />
         </div>

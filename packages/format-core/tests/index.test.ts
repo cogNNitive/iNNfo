@@ -113,6 +113,42 @@ describe('Ghostbusters model (level 3)', () => {
     expect(serialized).toContain('# _F matrices: problems-value propositions matrix');
     expect(serialized).toContain('* _F Stakeholders:');
   });
+
+  it('serializes and re-parses preserving full structure', async () => {
+    const { serializeModel, parseModel } = await import('../src/index');
+    const serialized = serializeModel(model);
+    const reparsed = parseModel(serialized);
+
+    // Frontmatter
+    expect(reparsed.frontmatter.title).toBe(model.frontmatter.title);
+    expect(reparsed.frontmatter.level).toBe(model.frontmatter.level);
+    expect(reparsed.frontmatter.mode).toBe(model.frontmatter.mode);
+    expect(reparsed.frontmatter.model_version).toBe(model.frontmatter.model_version);
+
+    // Matrix declarations (round-trip critical)
+    expect(reparsed.matrices.length).toBe(model.matrices.length);
+    if (model.matrices.length > 0) {
+      expect(reparsed.matrices[0].name).toBe(model.matrices[0].name);
+      expect(reparsed.matrices[0].source).toBe(model.matrices[0].source);
+      expect(reparsed.matrices[0].cells.length).toBe(model.matrices[0].cells.length);
+    }
+
+    // Node markers
+    expect(Object.keys(reparsed.nodeMarkers).length)
+      .toBe(Object.keys(model.nodeMarkers).length);
+
+    // Elements preserved
+    expect(reparsed.elements.size).toBe(model.elements.size);
+    for (const [key] of model.elements.entries()) {
+      expect(reparsed.elements.has(key)).toBe(true);
+      const origNodes = model.elements.get(key)!;
+      const reparsedNodes = reparsed.elements.get(key)!;
+      expect(reparsedNodes.length).toBe(origNodes.length);
+    }
+
+    // Taxonomy preserved
+    expect(reparsed.taxonomy.length).toBe(model.taxonomy.length);
+  });
 });
 
 describe('procedures template (level 2)', () => {
@@ -197,6 +233,9 @@ describe('extended parser features', () => {
     const rels = extractRelationships(model.frontmatter, model.elements);
     expect(Array.isArray(rels)).toBe(true);
     expect(rels.length).toBeGreaterThanOrEqual(0);
+    // 0 is valid — the Ghostbusters model currently defines no wikilinks in element
+    // descriptions nor graph_edges in frontmatter, so extractRelationships correctly
+    // returns an empty array. If relationships are added to the model, bump this to > 0.
   });
 
   it('extractAnalysis returns array', () => {
