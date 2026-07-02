@@ -287,10 +287,11 @@ describe('extended parser features', () => {
   it('extractRelationships finds wikilink refs', () => {
     const rels = extractRelationships(model.frontmatter, model.elements);
     expect(Array.isArray(rels)).toBe(true);
-    expect(rels.length).toBeGreaterThanOrEqual(0);
-    // 0 is valid — the Ghostbusters model currently defines no wikilinks in element
-    // descriptions nor graph_edges in frontmatter, so extractRelationships correctly
-    // returns an empty array. If relationships are added to the model, bump this to > 0.
+    // The Ghostbusters model currently defines no wikilinks in element descriptions
+    // nor graph_edges in frontmatter, so extractRelationships must return an empty array.
+    // This is the real contract — if relationships are added to the fixture, this test
+    // will fail and must be bumped to the new expected count (not a >= 0 tautology).
+    expect(rels.length).toBe(0);
   });
 
   it('extractAnalysis returns array', () => {
