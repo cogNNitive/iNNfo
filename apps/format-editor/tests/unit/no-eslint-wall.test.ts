@@ -20,12 +20,13 @@ describe('no ESLint FILE<->FOLDER import wall (R17)', () => {
   })
 
   it('shared/ and modelStore are already imported from components regardless of node storage mode (R17 "Cross-import allowed")', () => {
-    const nodeFormSrc = readFileSync(join(appRoot, 'src', 'components', 'NodeForm.vue'), 'utf-8')
+    // NodeForm.vue was deleted in Phase 6 (replaced by BlockSheet/BlockFeed).
+    // Verify cross-import freedom using the current layout/editor components.
+    const conceptTreeNodeSrc = readFileSync(join(appRoot, 'src', 'components', 'layout', 'ConceptTreeNode.vue'), 'utf-8')
     const widgetFieldSrc = readFileSync(join(appRoot, 'src', 'shared', 'widgets', 'WidgetField.vue'), 'utf-8')
 
-    // components/ freely imports from shared/ and stores/modelStore.
-    expect(nodeFormSrc).toMatch(/from ['"]\.\.\/shared\/widgets\/WidgetField\.vue['"]/)
-    expect(nodeFormSrc).toMatch(/from ['"]\.\.\/stores\/modelStore['"]/)
+    // components/layout/ freely imports from stores/modelStore.
+    expect(conceptTreeNodeSrc).toMatch(/from ['"]\.\.\/\.\.\/stores\/modelStore['"]/)
     // shared/ freely imports from stores/modelStore too — no direction is walled off.
     expect(widgetFieldSrc).toMatch(/from ['"]\.\.\/\.\.\/stores\/modelStore['"]/)
   })

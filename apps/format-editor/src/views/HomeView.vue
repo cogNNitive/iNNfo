@@ -153,12 +153,47 @@ async function clearAllHistory(): Promise<void> {
   history.value = await loadHistory()
 }
 
-/** Handles a sample card click — sets an informational hint. */
-function onSampleClick(sample: SampleFolder) {
+/**
+ * Handles a sample card click — opens the folder picker and tries to start at
+ * a recently used workspace location (if available) so the user can quickly
+ * navigate to the sample folder.
+ */
+async function onSampleClick(sample: SampleFolder): Promise<void> {
   error.value = null
-  // The File System Access API requires user gesture for the picker.
-  // Guide the user to navigate to the sample directory manually.
-  error.value = `Navigate to the "${sample.name}" folder (${sample.path}) using the Open folder button above.`
+  const picker = (window as unknown as {
+    showDirectoryPicker?: (opts?: { startIn?: FileSystemHandle }) => Promise<DirectoryHandleLike>
+  }).showDirectoryPicker
+  if (!picker) {
+    error.value = 'This browser does not support the File System Access API. Use Chrome or Edge.'
+    return
+  }
+  try {
+    busy.value = true
+
+    // Attempt to start the picker at a recently used location
+    let options: { startIn: FileSystemHandle } | undefined
+    if (history.value.length > 0) {
+      const handle = await getStoredHandle(history.value[0].handleKey)
+      if (handle) {
+        // The stored handles are real FileSystemDirectoryHandle instances
+        options = { startIn: handle as unknown as FileSystemHandle }
+      }
+    }
+
+    const dirHandle = options
+      ? await picker.call(window, options)
+      : await picker.call(window)
+
+    await workspace.open(dirHandle)
+    await addToHistory(dirHandle.name, dirHandle)
+    history.value = await loadHistory()
+    router.push('/workspace')
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') return
+    error.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    busy.value = false
+  }
 }
 </script>
 

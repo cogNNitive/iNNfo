@@ -9,6 +9,10 @@ import { resolveWidgetComponent, FallbackWidget } from './index'
  * component for `widgetType` via the registry, falling back to
  * `FallbackWidget` for any unported type (R15). Every commit from the
  * ported widget is stamped with provenance via `commitFieldValue` (R16).
+ *
+ * Enhanced in Phase 4 (rebuild-format-editor-ui) with:
+ * - `fieldDefinition` prop for field-type widgets (options, target_concepts)
+ * - Backward-compatible with concept-type widget dispatch
  */
 const props = withDefaults(
   defineProps<{
@@ -16,6 +20,14 @@ const props = withDefaults(
     fieldKey: string
     widgetType: string
     authorId?: string
+    /** Optional field definition for field-type widgets (provides options, target_concepts, etc.) */
+    fieldDefinition?: {
+      name: string
+      type: string
+      options?: string[]
+      target_concepts?: string[]
+      default?: unknown
+    }
   }>(),
   { authorId: 'anonymous' },
 )
@@ -36,6 +48,7 @@ function onCommit(value: unknown): void {
     :is="widgetComponent ?? FallbackWidget"
     :model-value="currentValue"
     :widget-type="widgetType"
+    :field-definition="fieldDefinition"
     @update:model-value="onCommit"
   />
 </template>

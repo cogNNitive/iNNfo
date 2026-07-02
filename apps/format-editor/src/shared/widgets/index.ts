@@ -2,24 +2,23 @@ import type { Component } from 'vue'
 import TextWidget from './TextWidget.vue'
 import WeightWidget from './WeightWidget.vue'
 import CategoryWidget from './CategoryWidget.vue'
+import FieldString from './FieldString.vue'
+import FieldNumber from './FieldNumber.vue'
+import { UNIFIED_WIDGET_REGISTRY } from './registry'
 
 export { default as FallbackWidget } from './FallbackWidget.vue'
-export { TextWidget, WeightWidget, CategoryWidget }
+export { TextWidget, WeightWidget, CategoryWidget, FieldString, FieldNumber }
+export { UNIFIED_WIDGET_REGISTRY }
+export type { WidgetType } from './registry'
 
 /**
- * Widget types actually ported this slice, scoped to what the `models/*`
- * fixture metamodels exercise (task 6.1 inventory: concept types "text",
- * "category", "weight" — see design.md "Widget port scope" decision).
- * Any type not in this registry has no ported widget and the caller must
- * fall back to `FallbackWidget` (R15).
+ * Resolves a widget type to its ported Vue component, or `undefined` if the
+ * type has no registered widget (caller should render FallbackWidget).
+ *
+ * Reads from the UNIFIED_WIDGET_REGISTRY which merges concept-type widgets
+ * (text, weight, category) with field-type widgets (string, boolean, number,
+ * select, reference).
  */
-const registry: Record<string, Component> = {
-  text: TextWidget,
-  weight: WeightWidget,
-  category: CategoryWidget,
-}
-
-/** Resolves a widget type to its ported Vue component, or `undefined` if not yet ported (R15). */
 export function resolveWidgetComponent(widgetType: string): Component | undefined {
-  return registry[widgetType]
+  return UNIFIED_WIDGET_REGISTRY[widgetType]
 }
