@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <div class="flex items-center gap-3 pb-4 border-b border-slate-200 dark:border-slate-700">
       <div class="h-10 w-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shadow-xs">
-        <span class="font-mono text-lg font-black text-primary select-none leading-none">_F</span>
+        <span class="font-mono text-lg font-black text-primary select-none leading-none">_NN</span>
       </div>
       <div>
         <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Model Information & Workspace</h2>
@@ -64,7 +64,7 @@
         <div class="border-b border-slate-200 dark:border-slate-700 pb-3">
           <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
             <Settings class="w-4 h-4 text-primary" />
-            FORMAT Metadata
+            iNNfo Metadata
           </h3>
         </div>
 
@@ -220,7 +220,7 @@ import { ref, computed } from 'vue';
 import { FolderOpen, FileText, Settings, Tag, Save, ChevronDown, ChevronRight } from 'lucide-vue-next';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
 import { useModelStore } from '../../stores/modelStore';
-import { DEFAULT_FORMAT_VERSION, DEFAULT_TEMPLATE_NAME, DEFAULT_TEMPLATE_VERSION, buildSpecificationUrl, buildDocumentationLocation } from '../../utils/constants';
+import { DEFAULT_INNFO_VERSION, DEFAULT_TEMPLATE_NAME, DEFAULT_TEMPLATE_VERSION, buildSpecificationUrl, buildDocumentationLocation } from '../../utils/constants';
 import { bumpVersion, formatVersionString, parseFormatFilename, buildFormatFilename } from '../../utils/version';
 import type { BumpLevel, SemVer } from '../../utils/version';
 
@@ -263,7 +263,7 @@ function extractFrontmatterField(field: string): string | null {
 }
 
 const formatVersion = computed(() => {
-  return extractFrontmatterField('spec_version') || DEFAULT_FORMAT_VERSION;
+  return extractFrontmatterField('spec_version') || DEFAULT_INNFO_VERSION;
 });
 
 const templateName = computed(() => {

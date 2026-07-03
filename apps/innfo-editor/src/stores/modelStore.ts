@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { ModelNode } from '../model/types'
 import type { DirectoryHandleLike } from './workspaceStore'
 import { recursiveParse } from '../model/recursiveParser'
-import type { ModelDriver } from '@innv0/format-core'
+import type { ModelDriver } from '@innv0/innfo-core'
 
 export interface ModelState {
   nodes: Record<string, ModelNode>

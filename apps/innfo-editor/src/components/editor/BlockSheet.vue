@@ -300,7 +300,7 @@ import BlockRelationships from './BlockRelationships.vue';
 import BlockMatrixSummary from './BlockMatrixSummary.vue';
 import NodeMedia from './NodeMedia.vue';
 import ComplianceTab from './ComplianceTab.vue';
-import { parseFrontmatter } from '@innv0/format-core';
+import { parseFrontmatter } from '@innv0/innfo-core';
 import type { ValidationReport } from '../../shared/validation-types';
 
 const props = withDefaults(defineProps<{
@@ -403,9 +403,9 @@ const cleanConceptName = computed(() => {
 
 // ── Markdown rendering ──────────────────────────────────────────
 
-/** Strip everything from the first _F marker onwards. */
+/** Strip everything from the first _NN marker onwards. */
 function stripBlockDefinitions(text: string): string {
-  const blockPattern = /^[ \t]*(?:[-*+]|\d+\.)?[ \t]*_F\s+[\w\s-]+?:/m;
+  const blockPattern = /^[ \t]*(?:[-*+]|\d+\.)?[ \t]*_NN\s+[\w\s-]+?:/m;
   const idx = text.search(blockPattern);
   if (idx === -1) return text;
   return text.substring(0, idx).trim();

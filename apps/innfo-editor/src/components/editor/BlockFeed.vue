@@ -25,7 +25,7 @@
     <!-- Instance Sheets (list concept only) -->
     <div v-if="isListConcept" class="pl-4 space-y-3">
       <div v-if="items.length === 0" class="text-center py-12 text-slate-400 dark:text-slate-500 italic text-xs bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
-        No elements yet. Add one with the '+' button above or use a _F block entry in the markdown.
+        No elements yet. Add one with the '+' button above or use a _NN block entry in the markdown.
       </div>
 
       <BlockSheet

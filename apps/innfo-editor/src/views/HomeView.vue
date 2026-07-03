@@ -24,7 +24,7 @@ const samples: SampleFolder[] = [
   {
     id: 'sample-ghostbusters',
     name: 'Ghostbusters',
-    description: 'FILE-mode business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations in a single _F.md.',
+    description: 'FILE-mode business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations in a single _NN.md.',
     mode: 'FILE',
     path: 'specs/business_V_0-1-1/samples/Ghostbusters_V_0-1-2_business_F.md',
     items: 1,
@@ -32,7 +32,7 @@ const samples: SampleFolder[] = [
   {
     id: 'sample-music-history',
     name: 'Music History',
-    description: 'FOLDER-mode catalog with 4 genres, 6 artists, and 5 albums — each node is a folder with its own _F.md, demonstrating the full nested tree.',
+    description: 'FOLDER-mode catalog with 4 genres, 6 artists, and 5 albums — each node is a folder with its own _NN.md, demonstrating the full nested tree.',
     mode: 'FOLDER',
     path: 'specs/catalog_V_0-1-2/samples/Music_History_V_1-0-0_catalog/',
     items: 15,
@@ -296,7 +296,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
     <!-- ── Sample models ── -->
     <section class="samples">
       <h3 class="samples__title">Example models</h3>
-      <p class="samples__sub">Open a FORMAT folder to explore, or try one of these samples from the repository.</p>
+      <p class="samples__sub">Open an iNNfo folder to explore, or try one of these samples from the repository.</p>
       <div class="samples__grid">
         <button
           v-for="s in samples"

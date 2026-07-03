@@ -2,8 +2,8 @@
   <header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-6 py-3 shrink-0">
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-2.5">
-        <span class="font-mono text-lg font-black text-primary select-none leading-none">_F</span>
-        <h1 class="text-sm font-semibold tracking-tight">FORMAT Modeler</h1>
+        <span class="font-mono text-lg font-black text-primary select-none leading-none">_NN</span>
+        <h1 class="text-sm font-semibold tracking-tight">iNNfo Modeler</h1>
       </div>
 
       <!-- Model Info Section -->
@@ -133,7 +133,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Copy, Save, ChevronDown, Info } from 'lucide-vue-next';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
 import { useModelStore } from '../../stores/modelStore';
-import { DEFAULT_FORMAT_VERSION, DEFAULT_TEMPLATE_NAME, DEFAULT_TEMPLATE_VERSION } from '../../utils/constants';
+import { DEFAULT_INNFO_VERSION, DEFAULT_TEMPLATE_NAME, DEFAULT_TEMPLATE_VERSION } from '../../utils/constants';
 import { useToast } from '../../shared/useToast';
 
 const workspaceStore = useWorkspaceStore();
@@ -192,7 +192,7 @@ function parseFrontmatter(rawContent: string | undefined): Record<string, string
 
 const frontmatter = computed(() => parseFrontmatter(rootNode.value?.rawContent));
 
-const formatVersion = computed(() => frontmatter.value.formatVersion || DEFAULT_FORMAT_VERSION);
+const formatVersion = computed(() => frontmatter.value.formatVersion || DEFAULT_INNFO_VERSION);
 const templateName = computed(() => frontmatter.value.templateName || DEFAULT_TEMPLATE_NAME);
 const templateVersion = computed(() => frontmatter.value.templateVersion || DEFAULT_TEMPLATE_VERSION);
 const modelVersion = computed(() => frontmatter.value.modelVersion || '—');

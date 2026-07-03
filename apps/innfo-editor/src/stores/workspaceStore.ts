@@ -7,7 +7,7 @@ import { setSessionState, getSessionState, setTreeState, getTreeState } from '..
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
 import type { DirectoryHandleLike } from '../model/fs-types'
 import type { BumpLevel } from '../utils/version'
-import type { ModelDriver } from '@innv0/format-core'
+import type { ModelDriver } from '@innv0/innfo-core'
 import type { ActiveView } from './uiStore'
 
 export type { DirectoryHandleLike }

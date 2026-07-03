@@ -34,9 +34,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useModelStore } from '../../stores/modelStore'
-import { parseFrontmatter } from '@innv0/format-core'
+import { parseFrontmatter } from '@innv0/innfo-core'
 import { getHexColor } from '../../composables/useConceptVisuals'
-import type { MatrixDecl } from '@innv0/format-core'
+import type { MatrixDecl } from '@innv0/innfo-core'
 
 const props = defineProps<{
   rootNodeId: string

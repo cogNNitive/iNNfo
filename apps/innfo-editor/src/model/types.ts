@@ -1,5 +1,5 @@
 /**
- * App re-export — all graph-model types now live in @innv0/format-core.
+ * App re-export — all graph-model types now live in @innv0/innfo-core.
  * This file preserves import paths for existing app code.
  */
 export type {
@@ -11,4 +11,4 @@ export type {
   MetamodelMarker,
   LocalMetamodel,
   ModelNode,
-} from '@innv0/format-core'
+} from '@innv0/innfo-core'

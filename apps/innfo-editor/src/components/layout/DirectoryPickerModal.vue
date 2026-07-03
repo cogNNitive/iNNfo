@@ -4,20 +4,20 @@
  *
  * Provides three entry points:
  *   1. "Open Local Folder" — File System Access API directory picker
- *   2. "Load from URL" — fetch a FORMAT model from a remote URL
- *   3. "New Workspace" — folder init with template selector (V_0-1-5)
+ *   2. "Load from URL" — fetch an iNNfo model from a remote URL
+ *   3. "New Workspace" — folder init with template selector (V_0-2-0)
  *
  * Emits:
  *   - `open-handle` with a FileSystemDirectoryHandle
  *   - `load-url` with the URL string
- *   - `create` with frontmatter data for a new _F.md
+ *   - `create` with frontmatter data for a new _NN.md
  *   - `close` when the user dismisses the modal
  */
 import { ref, onMounted, computed } from 'vue'
 import { isFileSystemAccessSupported } from '../../composables/useFileSystem'
 import { loadHistory, removeFromHistory, formatTimestamp, getStoredHandle } from '../../stores/historyStore'
 import type { DirectoryHandleLike } from '../../model/fs-types'
-import { DEFAULT_FORMAT_VERSION, DEFAULT_TEMPLATE_VERSION, buildSpecificationUrl } from '../../utils/constants'
+import { DEFAULT_INNFO_VERSION, DEFAULT_TEMPLATE_VERSION, buildSpecificationUrl } from '../../utils/constants'
 import type { FolderHistoryEntry } from '../../shared/validation-types'
 
 // ── Events ──
@@ -49,9 +49,9 @@ interface TemplateOption {
 }
 
 const availableTemplates: TemplateOption[] = [
-  { name: 'business', version: 'V_1-0-0', specVersion: DEFAULT_FORMAT_VERSION },
-  { name: 'procedures', version: 'V_1-0-0', specVersion: DEFAULT_FORMAT_VERSION },
-  { name: 'catalog', version: 'V_1-0-0', specVersion: DEFAULT_FORMAT_VERSION },
+  { name: 'business', version: 'V_1-0-0', specVersion: DEFAULT_INNFO_VERSION },
+  { name: 'procedures', version: 'V_1-0-0', specVersion: DEFAULT_INNFO_VERSION },
+  { name: 'catalog', version: 'V_1-0-0', specVersion: DEFAULT_INNFO_VERSION },
   { name: 'kb', version: 'V_0-1-1', specVersion: 'V_0-1-1' },
 ]
 
@@ -241,8 +241,8 @@ function generatePreview(): string {
         </svg>
       </button>
 
-      <h2 class="dp-title">format-editor</h2>
-      <p class="dp-subtitle">Open a FORMAT workspace to begin editing.</p>
+      <h2 class="dp-title">innfo-editor</h2>
+      <p class="dp-subtitle">Open an iNNfo workspace to begin editing.</p>
 
       <!-- Error -->
       <p v-if="error" class="dp-error" role="alert">{{ error }}</p>
@@ -322,7 +322,7 @@ function generatePreview(): string {
       </button>
 
       <h2 class="dp-title">Load from URL</h2>
-      <p class="dp-subtitle">Enter the URL of a FORMAT <code>_F.md</code> file to load it as a virtual workspace.</p>
+      <p class="dp-subtitle">Enter the URL of an iNNfo <code>_NN.md</code> file to load it as a virtual workspace.</p>
 
       <p v-if="error" class="dp-error" role="alert">{{ error }}</p>
 
@@ -330,7 +330,7 @@ function generatePreview(): string {
         <input
           v-model="urlInput"
           type="url"
-          placeholder="https://example.com/model_V_1-0-0_business_F.md"
+          placeholder="https://example.com/model_V_1-0-0_business_NN.md"
           class="dp-input"
           @keydown.enter="loadUrl"
         />
@@ -351,7 +351,7 @@ function generatePreview(): string {
       </button>
 
       <h2 class="dp-title">New Workspace</h2>
-      <p class="dp-subtitle">Create a new FORMAT model directory from a template.</p>
+      <p class="dp-subtitle">Create a new iNNfo model directory from a template.</p>
 
       <p v-if="error" class="dp-error" role="alert">{{ error }}</p>
 

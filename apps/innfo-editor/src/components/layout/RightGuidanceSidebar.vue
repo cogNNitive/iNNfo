@@ -143,10 +143,10 @@ import { useMetamodelStore } from '../../stores/metamodelStore';
 import { useModelStore } from '../../stores/modelStore';
 import { useUiStore } from '../../stores/uiStore';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
-import { parseFrontmatter } from '@innv0/format-core';
+import { parseFrontmatter } from '@innv0/innfo-core';
 import { parseFormatFilename } from '../../utils/version';
 import type { DocumentationEntry } from '../../utils/documentationParser';
-import type { MatrixDecl } from '@innv0/format-core';
+import type { MatrixDecl } from '@innv0/innfo-core';
 
 const props = defineProps<{
   conceptName?: string | null;
