@@ -1,132 +1,120 @@
 <template>
-  <div v-if="participations.length > 0" class="space-y-3">
-    <div v-for="part in participations" :key="part.matrixName" class="space-y-1">
-      <div
-        v-for="cell in part.cells"
-        :key="cell.counterpart"
-        class="flex items-center gap-1.5 text-xs"
-      >
-        <BlockPill
-          kind="instance"
-          :concept-type="part.role === 'source' ? conceptName : counterpartConcept(part)"
-          :name="part.role === 'source' ? blockName : cell.counterpart"
-          :block-id="resolveBlockId(part.role === 'source' ? blockName : cell.counterpart)"
-          class="shrink-0"
-        />
-        <span
-          class="text-xs font-semibold text-slate-400 dark:text-slate-500 px-1.5 py-0.5 rounded cursor-pointer hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
-          @click="$emit('navigate-to-matrix', part.matrixIndex)"
+  <div class="block-matrix-summary">
+    <template v-if="chips.length > 0">
+      <div class="flex flex-wrap gap-2">
+        <div
+          v-for="chip in chips"
+          :key="chip.matrixName"
+          class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
+          :style="{
+            backgroundColor: chip.accentColor + '18',
+            color: chip.accentColor,
+            borderColor: chip.accentColor + '30',
+          }"
+          :class="'border'"
         >
-          {{ part.matrixName }}
-        </span>
-        <BlockPill
-          kind="instance"
-          :concept-type="part.role === 'source' ? counterpartConcept(part) : conceptName"
-          :name="part.role === 'source' ? cell.counterpart : blockName"
-          :block-id="resolveBlockId(part.role === 'source' ? cell.counterpart : blockName)"
-          class="shrink-0"
-        />
+          <svg class="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+          </svg>
+          <span>{{ chip.matrixName }}</span>
+          <span class="opacity-70">·</span>
+          <span class="opacity-80">{{ chip.position }}</span>
+          <span class="opacity-50">({{ chip.count }})</span>
+        </div>
       </div>
-    </div>
+    </template>
+    <p v-else class="text-xs text-slate-400 dark:text-slate-500 italic">
+      No matrix participation.
+    </p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useModelStore } from '../../stores/modelStore';
-import BlockPill from './BlockPill.vue';
+import { computed } from 'vue'
+import { useModelStore } from '../../stores/modelStore'
+import { parseFrontmatter } from '@innv0/format-core'
+import { getHexColor } from '../../composables/useConceptVisuals'
+import type { MatrixDecl } from '@innv0/format-core'
 
 const props = defineProps<{
-  blockName: string;
-  conceptName: string;
-}>();
+  rootNodeId: string
+  nodeConcept: string
+  nodeId: string
+}>()
 
-defineEmits<{
-  (e: 'navigate-to-matrix', matrixIndex: number): void;
-}>();
+const modelStore = useModelStore()
 
-const modelStore = useModelStore();
-const MATRIX_DEFS_KEY = '__matrix_defs';
-
-interface MatrixDef {
-  name: string;
-  source: string;
-  target: string;
-  widgetType: string;
-  params: string;
-  label?: string;
+interface MatrixChip {
+  matrixName: string
+  position: 'row' | 'col'
+  count: number
+  accentColor: string
 }
 
-interface Participation {
-  matrixName: string;
-  matrixIndex: number;
-  role: 'source' | 'target';
-  cells: { counterpart: string; value: string | number | boolean }[];
-}
+const chips = computed<MatrixChip[]>(() => {
+  const root = modelStore.getNode(props.rootNodeId)
+  if (!root?.rawContent) return []
 
-const rootNode = computed(() => {
-  if (modelStore.rootIds.length === 0) return null;
-  return modelStore.getNode(modelStore.rootIds[0]);
-});
+  // Parse frontmatter to get matrix definitions
+  const fm = parseFrontmatter(root.rawContent)
+  const matrices: MatrixDecl[] = (fm as any)?.matrices ?? []
+  if (matrices.length === 0) return []
 
-const matrixDefs = computed<MatrixDef[]>(() => {
-  const root = rootNode.value;
-  if (!root) return [];
-  const field = root.fields[MATRIX_DEFS_KEY];
-  if (!field?.value) return [];
-  return field.value as MatrixDef[];
-});
+  const result: MatrixChip[] = []
 
-const participations = computed<Participation[]>(() => {
-  const root = rootNode.value;
-  if (!root) return [];
+  // Helper: count non-dash/empty cells for a matrix + concept instance
+  function countNonDashCells(matrixName: string, rootNodeId: string, conceptInstanceName: string): number {
+    const rn = modelStore.getNode(rootNodeId)
+    if (!rn?.fields) return 0
 
-  const result: Participation[] = [];
-
-  matrixDefs.value.forEach((def, idx) => {
-    let role: 'source' | 'target' | null = null;
-    if (def.source === props.conceptName) role = 'source';
-    else if (def.target === props.conceptName) role = 'target';
-    if (!role) return;
-
-    const counterpartType = role === 'source' ? def.target : def.source;
-    const nodesOfType = Object.values(modelStore.nodes).filter(n => n.type === counterpartType);
-    const ownTypeNodes = Object.values(modelStore.nodes).filter(n => n.type === props.conceptName);
-
-    const cells: { counterpart: string; value: string | number | boolean }[] = [];
-
-    for (const ownNode of ownTypeNodes) {
-      for (const counterNode of nodesOfType) {
-        const key = `${def.name}||${role === 'source' ? ownNode.name : counterNode.name}||${role === 'source' ? counterNode.name : ownNode.name}`;
-        const field = root.fields[key];
-        const val = field?.value as string | number | boolean | undefined;
-        if (val !== undefined && val !== null && val !== '-') {
-          cells.push({
-            counterpart: counterNode.name,
-            value: val,
-          });
+    let count = 0
+    for (const [key, fv] of Object.entries(rn.fields)) {
+      // Fields keyed as `{matrixName}||{row}||{col}`
+      if (key.startsWith(`${matrixName}||${conceptInstanceName}||`)) {
+        const val = fv?.value
+        if (val !== undefined && val !== null && val !== '' && val !== '-' && val !== false) {
+          count++
         }
       }
     }
+    return count
+  }
 
-    if (cells.length > 0) {
-      result.push({ matrixName: def.name, matrixIndex: idx, role, cells });
+  for (const m of matrices) {
+    const node = modelStore.getNode(props.nodeId)
+    if (!node) continue
+
+    // Resolve concept color for accent
+    const conceptColor = (() => {
+      // Look up concept definition from metamodel or use node's type
+      const rootNode = modelStore.getNode(props.rootNodeId)
+      if (rootNode?.rawContent) {
+        const fmData = parseFrontmatter(rootNode.rawContent)
+        const concepts: Array<{ name: string; color?: string }> = (fmData as any)?.concepts ?? []
+        const found = concepts.find(c => c.name === props.nodeConcept)
+        if (found?.color) return getHexColor(found.color)
+      }
+      // Fall back to the node's type-based color
+      return getHexColor(undefined)
+    })()
+
+    if (m.source === props.nodeConcept) {
+      // Node is a row participant
+      const count = countNonDashCells(m.name, props.rootNodeId, node.name)
+      result.push({ matrixName: m.name, position: 'row', count, accentColor: conceptColor })
     }
-  });
 
-  return result;
-});
+    if (m.target === props.nodeConcept) {
+      // Node is a column participant
+      const count = countNonDashCells(m.name, props.rootNodeId, node.name)
+      if (!result.some(r => r.matrixName === m.name && r.position === 'row')) {
+        result.push({ matrixName: m.name, position: 'col', count, accentColor: conceptColor })
+      }
+    }
+  }
 
-const getMatrixMeta = (matrixName: string) => matrixDefs.value.find(m => m.name === matrixName);
-
-const counterpartConcept = (part: { role: 'source' | 'target'; matrixName: string }) => {
-  const m = getMatrixMeta(part.matrixName);
-  if (!m) return '';
-  return part.role === 'source' ? m.target : m.source;
-};
-
-const resolveBlockId = (name: string): string | undefined => {
-  const node = Object.values(modelStore.nodes).find(n => n.name === name);
-  return node?.id;
-};
+  return result
+})
 </script>

@@ -1,6 +1,7 @@
 <template>
-  <div class="flex flex-col" :class="localNodeId ? 'h-[480px] min-h-0' : 'h-full'">
-    <div class="flex items-center gap-2 px-4 py-2 border-b border-border bg-muted/30 shrink-0">
+  <div class="flex flex-col" :class="inline ? '' : (localNodeId ? 'h-[480px] min-h-0' : 'h-full')" :style="inline ? { height: height + 'px', minHeight: height + 'px' } : {}">
+    <!-- Layout selector header (hidden in inline mode) -->
+    <div v-if="!inline" class="flex items-center gap-2 px-4 py-2 border-b border-border bg-muted/30 shrink-0">
       <button
         v-for="l in layouts"
         :key="l.id"
@@ -24,7 +25,7 @@
       <span class="text-xs text-muted-foreground">{{ displayNodes.length }} nodes &middot; {{ displayEdges.length }} edges</span>
     </div>
 
-    <div ref="containerRef" class="flex-1 min-h-0 relative overflow-auto bg-slate-50/50 dark:bg-slate-950/30" :class="localNodeId ? 'rounded-b-lg' : ''">
+    <div ref="containerRef" class="flex-1 min-h-0 relative overflow-auto bg-slate-50/50 dark:bg-slate-950/30" :class="inline ? 'rounded-lg' : (localNodeId ? 'rounded-b-lg' : '')">
       <svg ref="svgRef" class="w-full h-full" style="display:block;"></svg>
       <div v-if="displayNodes.length === 0" class="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
         No relationships for this element.
@@ -42,7 +43,16 @@ import { useModelStore } from '../../stores/modelStore';
 const props = withDefaults(defineProps<{
   localNodeId?: string;
   autoSelectConcept?: string;
-}>(), { localNodeId: '', autoSelectConcept: '' });
+  /** When true, renders in compact mode: no layout selector, uses `height` prop for sizing */
+  inline?: boolean;
+  /** Container height in pixels (used only when `inline` is true). Default: 320 */
+  height?: number;
+}>(), {
+  localNodeId: '',
+  autoSelectConcept: '',
+  inline: false,
+  height: 320,
+});
 
 const emit = defineEmits<{
   'select-node': [nodeId: string]
