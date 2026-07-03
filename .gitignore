@@ -5,3 +5,5 @@ dist/
 *.tmp.*
 .playwright-mcp/
 archive/
+test-results/
+e2e-reports/
