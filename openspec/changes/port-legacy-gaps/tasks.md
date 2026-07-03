@@ -69,13 +69,13 @@ Files: `package.json`, `utils/markdown.ts`, `BlockRelationships.vue`, `BlockMatr
 
 ## Phase C: Widget Registry (14 new widgets)
 
-- [ ] C.1 Create `DateWidget.vue` — `<input type="date">` in edit, formatted text in read; registered as `'date'`
-- [ ] C.2 Create `UrlWidget.vue` — clickable `<a>` in read, URL input with validation in edit; `'url'`
-- [ ] C.3 Create `ColorWidget.vue` — 20×20px color swatch + hex text in read, `<input type="color">` in edit; `'color'`
-- [ ] C.4 Create `MultiSelectWidget.vue` — static chips in read, removable chips + unselected dropdown in edit; `'multiselect'`
-- [ ] C.5 Create `TagsWidget.vue` — chips in both modes, Enter/comma to add, × to remove, trim + dedup; `'tags'`
-- [ ] C.6 Create `RatingWidget.vue` — filled/empty star icons (1–5) + `n/5` text in both modes; `'rating'`
-- [ ] C.7 Create `ScaleWidget.vue` — clickable step indicators + badge, range from `fieldDefinition.options` (default 1–10); `'scale'`
+- [x] C.1 Create `DateWidget.vue` — `<input type="date">` in edit, formatted text in read; registered as `'date'`
+- [x] C.2 Create `UrlWidget.vue` — clickable `<a>` in read, URL input with validation in edit; `'url'`
+- [x] C.3 Create `ColorWidget.vue` — 20×20px color swatch + hex text in read, `<input type="color">` in edit; `'color'`
+- [x] C.4 Create `MultiSelectWidget.vue` — static chips in read, removable chips + unselected dropdown in edit; `'multiselect'`
+- [x] C.5 Create `TagsWidget.vue` — chips in both modes, Enter/comma to add, × to remove, trim + dedup; `'tags'`
+- [x] C.6 Create `RatingWidget.vue` — filled/empty star icons (1–5) + `n/5` text in both modes; `'rating'`
+- [x] C.7 Create `ScaleWidget.vue` — clickable step indicators + badge, range from `fieldDefinition.options` (default 1–10); `'scale'`
 - [ ] C.8 Create `ToggleGroupWidget.vue` — segmented button group for enum selection, active segment highlighted; `'togglegroup'`
 - [ ] C.9 Create `CycleWidget.vue` — clickable pill cycles through `options`, wraps around; `'cycle'`
 - [ ] C.10 Create `CodeWidget.vue` — `<pre><code>` + language badge in read, monospace textarea with gutter in edit; `'code'`
@@ -124,11 +124,11 @@ Files: `stores/metamodelStore.ts`, `ConceptPerspectivePanel.vue`, test file
 
 ## Phase L: Misc — Session Persistence & Version Management
 
-- [ ] L.1 Create `utils/db.ts` — IndexedDB wrapper with v2 schema (`handles`, `session`, `treeState`, `sidebarWidths`), generic `dbGet/dbSet/dbDelete/dbGetAll/dbClear`, convenience functions (`getSessionState/setSessionState/getTreeState/setTreeState/getSidebarWidth/setSidebarWidth`), graceful degradation
-- [ ] L.2 Update `workspaceStore.ts` — session persistence in `open()` (lastFile, lastOpenedAt) and `recoverHandle()` (restore uiStore state), `persistTreeState`/`restoreTreeState` actions
-- [ ] L.3 Update `useResizablePanel.ts` — IndexedDB read in init, write on `onPointerUp` using `storageKey` as `panelId`
-- [ ] L.4 Update `ModelInfoPanel.vue` — add collapsible "Version Management" section, current version display, three bump buttons (major/minor/patch) with hover preview, disabled states, save invokes `saveActiveFileWithVersionBump`
-- [ ] L.5 Write tests for db.ts (schema upgrade, CRUD, graceful degradation), version panel (bump buttons, disabled states, tooltip), session persistence (reload restores state, tree state round-trip)
+- [x] L.1 Create `utils/db.ts` — IndexedDB wrapper with v2 schema (`handles`, `session`, `treeState`, `sidebarWidths`), generic `dbGet/dbSet/dbDelete/dbGetAll/dbClear`, convenience functions (`getSessionState/setSessionState/getTreeState/setTreeState/getSidebarWidth/setSidebarWidth`), graceful degradation
+- [x] L.2 Update `workspaceStore.ts` — session persistence in `open()` (lastFile, lastOpenedAt) and `recoverHandle()` (restore uiStore state), `persistTreeState`/`restoreTreeState` actions
+- [x] L.3 Update `useResizablePanel.ts` — IndexedDB read in init, write on `onPointerUp` using `storageKey` as `panelId`
+- [x] L.4 Update `ModelInfoPanel.vue` — add collapsible "Version Management" section, current version display, three bump buttons (major/minor/patch) with hover preview, disabled states, save invokes `saveActiveFileWithVersionBump`
+- [x] L.5 Write tests for db.ts (schema upgrade, CRUD, graceful degradation), version panel (bump buttons, disabled states, tooltip), session persistence (reload restores state, tree state round-trip)
 
 Files: `utils/db.ts`, `stores/workspaceStore.ts`, `composables/useResizablePanel.ts`, `ModelInfoPanel.vue`, test file
 
