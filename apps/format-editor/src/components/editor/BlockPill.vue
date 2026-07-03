@@ -3,6 +3,7 @@
     :is="as"
     ref="triggerEl"
     :class="pillClasses"
+    :style="pillStyle"
     @mouseenter="showInfoIcon = true"
     @mouseleave="showInfoIcon = false"
   >
@@ -18,7 +19,10 @@
         :is="visuals.typeIcon.value"
         class="shrink-0 w-3.5 h-3.5 text-current/70"
       />
-      <span class="text-current leading-tight text-left flex-1 min-w-0">
+      <span
+        class="leading-tight text-left flex-1 min-w-0"
+        :class="{ italic: isEmpty, 'text-slate-400': isEmpty }"
+      >
         <slot>
           <template v-if="conceptLabel">
             <span class="font-medium">{{ conceptLabel }}:</span>
@@ -26,6 +30,7 @@
           </template>
           <template v-else>{{ name }}</template>
         </slot>
+        <span v-if="isEmpty" class="ml-1 text-slate-400 dark:text-slate-500 text-2xs italic">Empty</span>
       </span>
 
       <!-- Active markers, read-only, rendered inside the pill -->
@@ -126,6 +131,7 @@ import { Info, X } from 'lucide-vue-next';
 import IconRenderer from './IconRenderer.vue';
 import { getMarkerIcon, getMarkerClasses } from './MarkerIcons';
 import { useBlockVisuals } from '../../composables/useBlockVisuals';
+import { useConceptVisuals, getHexColorLight, textColor as yiqTextColor } from '../../composables/useConceptVisuals';
 import { useModelStore } from '../../stores/modelStore';
 import { commitMarkerValue } from '../../shared/provenance';
 import { MARKER_CYCLE_COUNT } from '../../utils/constants';
@@ -145,6 +151,8 @@ const props = withDefaults(defineProps<{
   as?: string;
   /** Block id — enables popup, active markers, and content-aware (empty) state. */
   blockId?: string;
+  /** Node id for parent-chain color resolution (V_0-1-5). When set, overrides `color` prop. */
+  nodeId?: string;
   /** Shown in the popup and used to detect the empty state. */
   description?: string;
   fields?: Record<string, any>;
@@ -165,6 +173,15 @@ const props = withDefaults(defineProps<{
 });
 
 const modelStore = useModelStore();
+const conceptVisuals = useConceptVisuals();
+
+// ── Node-based color resolution (V_0-1-5 parent chain) ─────────
+function resolveNodeColor(nodeId: string | undefined): string {
+  if (!nodeId) return ''
+  const node = modelStore.getNode(nodeId)
+  if (!node) return ''
+  return conceptVisuals.resolveColor(node)
+}
 
 // In Phase 2, markers come from a hardcoded default list since the metamodel
 // adapter is not yet in place. Phase 6 will wire useMetamodelStore().
@@ -178,10 +195,17 @@ const allMarkers = computed(() => {
   ];
 });
 
+// Resolved color via parent chain (nodeId) or fallback to color prop
+const effectiveColor = computed(() => {
+  const nodeBased = resolveNodeColor(props.nodeId)
+  if (nodeBased) return nodeBased
+  return props.color || ''
+})
+
 const visuals = useBlockVisuals({
   kind: computed(() => props.kind ?? 'instance'),
   conceptType: computed(() => props.conceptType),
-  color: computed(() => props.color),
+  color: effectiveColor,
   icon: computed(() => props.icon),
   typeName: computed(() => props.typeName),
 });
@@ -277,6 +301,25 @@ const infoIconClass = computed(() => {
   return `${base} text-slate-400 hover:text-primary`;
 });
 
+// ── YIQ contrast text color ────────────────────────────────────
+const contrastTextColor = computed(() => {
+  if (!effectiveColor.value) return ''
+  return yiqTextColor(effectiveColor.value)
+})
+
+// ── Pill inline style (YIQ background + text contrast) ─────────
+const pillStyle = computed(() => {
+  if (!effectiveColor.value) return {}
+  const style: Record<string, string> = {}
+  style.backgroundColor = getHexColorLight(effectiveColor.value)
+  if (contrastTextColor.value) {
+    style.color = contrastTextColor.value
+  }
+  // Opacity is handled by the parent row (ConceptTreeNode)
+  // to avoid compounding with the row's own ghost opacity.
+  return style
+})
+
 // ── Pill classes ────────────────────────────────────────────────
 const pillClasses = computed(() => {
   const baseClasses = [
@@ -284,7 +327,7 @@ const pillClasses = computed(() => {
     'px-3 py-1.5 text-xs gap-1.5',
     'rounded-lg font-normal whitespace-normal break-words transition-all duration-200 select-none min-w-0',
     props.interactive ? 'cursor-pointer active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1' : '',
-    isEmpty.value ? '' : '',
+    isEmpty.value ? 'italic' : '',
   ];
 
   if (props.selected) {

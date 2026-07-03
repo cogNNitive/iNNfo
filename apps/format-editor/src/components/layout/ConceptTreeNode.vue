@@ -21,29 +21,32 @@
       </button>
       <span v-else class="w-5 shrink-0"></span>
 
-      <!-- Icon area: element nodes get a diamond bullet, others get the concept icon -->
-      <div class="relative shrink-0 flex items-center justify-center w-4 h-4">
-        <span
-          v-if="node?.kind === 'element'"
-          class="absolute inset-0 flex items-center justify-center text-[9px] leading-none font-bold"
-          :style="{ color: nodeColorHex }"
-        >◆</span>
-        <IconRenderer
-          v-else
-          :icon="nodeIcon"
-          fallback="file-text"
-          custom-class="shrink-0"
-          :style="{ color: nodeColorHex, width: '14px', height: '14px' }"
-        />
-      </div>
+      <!-- BlockPill: colored pill with icon + name + YIQ text + markers + info popup -->
+      <BlockPill
+        :node-id="nodeId"
+        :name="node?.name ?? '(unknown)'"
+        :kind="isConceptLike ? 'concept' : 'instance'"
+        :block-id="nodeId"
+        :description="description"
+        :fields="fields"
+        :concept-fields="conceptFields"
+        :instance-count="instanceCount"
+        :show-markers="true"
+        :interactive="false"
+        :full-width="true"
+        class="flex-1 min-w-0"
+      />
 
-      <!-- Name -->
+      <!-- Instance counter badge -->
       <span
-        class="flex-1 min-w-0 truncate"
-        :class="{ 'font-bold': isConceptLike, 'font-medium': !isConceptLike }"
-        :style="nameStyle"
+        v-if="instanceCount > 0"
+        class="text-2xs px-1.5 py-0.5 rounded-full shrink-0 font-medium tabular-nums"
+        :style="{
+          backgroundColor: nodeColorHex + '18',
+          color: nodeColorHex,
+        }"
       >
-        {{ node?.name ?? '(unknown)' }}
+        {{ instanceCount }}
       </span>
 
       <!-- Kind badge (only non-standard kinds) -->
@@ -128,8 +131,8 @@
 import { ref, computed, watch } from 'vue'
 import { ChevronDown, ChevronUp } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
-import { useConceptVisuals, getHexColorMedium } from '../../composables/useConceptVisuals'
-import IconRenderer from '../editor/IconRenderer.vue'
+import { useConceptVisuals, getHexColorMedium, getHexColorLight } from '../../composables/useConceptVisuals'
+import BlockPill from '../editor/BlockPill.vue'
 import VirtualGroupNode from './VirtualGroupNode.vue'
 import type { ModelNode } from '../../model/types'
 
@@ -142,11 +145,14 @@ const props = withDefaults(
     /** When true, flat element children are grouped by type (concept name)
      *  under virtual concept group headers instead of rendered directly. */
     groupByConcept?: boolean
+    /** Field definitions for the current concept (used for popup field chips). */
+    conceptFields?: any[]
   }>(),
   {
     depth: 0,
     expandedGeneration: undefined,
     groupByConcept: false,
+    conceptFields: () => [],
   },
 )
 
@@ -177,6 +183,8 @@ const children = computed<ModelNode[]>(() => modelStore.getChildren(props.nodeId
 
 const hasChildren = computed(() => children.value.length > 0)
 
+const instanceCount = computed(() => children.value.length)
+
 const isSelected = computed(() => props.nodeId === props.selectedId)
 
 function toggleCollapse(): void {
@@ -186,6 +194,22 @@ function toggleCollapse(): void {
 function onSelect(): void {
   emit('select', props.nodeId)
 }
+
+// ── Ghost state detection ──────────────────────────────────────
+const description = computed(() => node.value?.rawContent ?? '')
+
+const fields = computed(() => node.value?.fields ?? {})
+
+/** True when node has no content, no fields, and no children. */
+const isGhost = computed(() => {
+  const n = node.value
+  if (!n) return false
+  const hasDesc = !!n.rawContent && n.rawContent.trim().length > 0
+  const hasFields = Object.values(n.fields).some(
+    (f: any) => f?.value !== undefined && f?.value !== null && f?.value !== '' && f?.value !== false
+  )
+  return !hasDesc && !hasFields && children.value.length === 0
+})
 
 // ── Virtual grouping (for FILE mode) ──
 
@@ -248,22 +272,10 @@ const isConceptLike = computed(() => {
   return n.kind === 'concept' || n.kind === 'root' || n.kind === undefined
 })
 
-const nodeIcon = computed(() => {
-  const n = node.value
-  if (!n) return 'file-text'
-  return visuals.resolveIcon(n)
-})
-
 const nodeColorHex = computed(() => {
   const n = node.value
   if (!n) return '#94a3b8'
   return visuals.resolveColor(n)
-})
-
-const nodeColorName = computed(() => {
-  const n = node.value
-  if (!n) return 'slate'
-  return visuals.resolveColorName(n)
 })
 
 // ── Row styling ──
@@ -300,12 +312,12 @@ const rowStyle = computed(() => {
     }
   }
 
-  return style
-})
+  // Ghost state: reduced opacity on the entire row
+  if (isGhost.value) {
+    style.opacity = '0.45'
+  }
 
-const nameStyle = computed(() => {
-  if (!isSelected.value) return {}
-  return { color: nodeColorHex.value }
+  return style
 })
 
 </script>
