@@ -1,15 +1,18 @@
 import { defineStore } from 'pinia'
 import { useModelStore } from './modelStore'
+import { useUiStore } from './uiStore'
 import { recursiveSerialize } from '../model/recursiveSerializer'
 import { parseFormatFilename, buildFormatFilename, bumpVersion, formatVersionString } from '../utils/version'
+import { setSessionState, getSessionState, setTreeState, getTreeState } from '../utils/db'
 import type { DirectoryHandleLike } from '../model/fs-types'
 import type { BumpLevel } from '../utils/version'
 import type { ModelDriver } from '@innv0/format-core'
+import type { ActiveView } from './uiStore'
 
 export type { DirectoryHandleLike }
 
 const DB_NAME = 'format-editor'
-const DB_VERSION = 1
+const DB_VERSION = 2
 const STORE_NAME = 'handles'
 const HANDLE_KEY = 'workspaceRoot'
 
@@ -20,6 +23,16 @@ function openHandleDb(): Promise<IDBDatabase> {
       const db = req.result
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME)
+      }
+      // Create v2 stores if upgrading from v1 (backward-compatible)
+      if (!db.objectStoreNames.contains('session')) {
+        db.createObjectStore('session', { keyPath: 'key' })
+      }
+      if (!db.objectStoreNames.contains('treeState')) {
+        db.createObjectStore('treeState', { keyPath: 'nodeId' })
+      }
+      if (!db.objectStoreNames.contains('sidebarWidths')) {
+        db.createObjectStore('sidebarWidths', { keyPath: 'panelId' })
       }
     }
     req.onsuccess = () => resolveDb(req.result)
@@ -103,6 +116,16 @@ export const useWorkspaceStore = defineStore('workspace', {
         await modelStore.parseFromHandle(handle, this.driver ?? undefined)
         this.hasParsed = true
         this.parseCount += 1
+
+        // Persist session state after successful parse
+        const rootId = modelStore.rootIds[0]
+        if (rootId) {
+          const rootNode = modelStore.getNode(rootId)
+          if (rootNode?.source.path) {
+            setSessionState('lastFile', rootNode.source.path).catch(() => {})
+          }
+        }
+        setSessionState('lastOpenedAt', new Date().toISOString()).catch(() => {})
       } catch (err) {
         this.error = err instanceof Error ? err.message : String(err)
         throw err
@@ -117,8 +140,37 @@ export const useWorkspaceStore = defineStore('workspace', {
       if (handle) {
         this.handle = handle
         this.hasHandle = true
+
+        // Restore uiStore state from persisted session
+        try {
+          const session = await getSessionState()
+          const uiStore = useUiStore()
+          if (session.selectedNodeId && typeof session.selectedNodeId === 'string') {
+            uiStore.selectNode(session.selectedNodeId)
+          }
+          if (session.activeView && typeof session.activeView === 'string') {
+            uiStore.setActiveView(session.activeView as ActiveView)
+          }
+        } catch {
+          // Session restoration is best-effort
+        }
       }
       return handle
+    },
+
+    /**
+     * Persists a single tree node's expansion state to IndexedDB.
+     */
+    async persistTreeState(nodeId: string, collapsed: boolean): Promise<void> {
+      await setTreeState(nodeId, collapsed)
+    },
+
+    /**
+     * Restores the full tree state map from IndexedDB.
+     * Returns a Map<nodeId, collapsed> — nodes not present default to expanded.
+     */
+    async restoreTreeState(): Promise<Map<string, boolean>> {
+      return await getTreeState()
     },
 
     reset(): void {

@@ -102,6 +102,79 @@
       </div>
     </div>
 
+    <!-- Version Management Section -->
+    <div class="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+      <div
+        class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3 cursor-pointer select-none"
+        @click="showVersionPanel = !showVersionPanel"
+      >
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <Tag class="w-4 h-4 text-primary" />
+          Version Management
+        </h3>
+        <div class="flex items-center gap-2">
+          <span v-if="currentVersionStr" class="text-xs font-mono text-slate-400">{{ currentVersionStr }}</span>
+          <ChevronDown v-if="showVersionPanel" class="w-4 h-4 text-slate-400" />
+          <ChevronRight v-else class="w-4 h-4 text-slate-400" />
+        </div>
+      </div>
+
+      <div v-if="showVersionPanel" class="space-y-4">
+        <!-- Current version display -->
+        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 p-3 rounded-md border border-slate-200 dark:border-slate-700">
+          <span class="text-xs text-slate-500 dark:text-slate-400">Current Version</span>
+          <span class="font-mono font-bold text-slate-900 dark:text-slate-100">{{ currentVersionStr || '—' }}</span>
+        </div>
+
+        <!-- Bump buttons with hover preview -->
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Bump Level</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              v-for="level in bumpLevels"
+              :key="level"
+              :disabled="isVersionDisabled"
+              :title="versionButtonTitle(level)"
+              :class="[
+                'relative px-3 py-2 rounded-md text-xs font-semibold border transition-all duration-150',
+                isVersionDisabled
+                  ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
+                  : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 hover:border-primary/50 hover:bg-primary/5 active:scale-95',
+                selectedLevel === level ? 'ring-2 ring-primary border-primary' : '',
+              ]"
+              @click="selectedLevel = level"
+            >
+              {{ level.charAt(0).toUpperCase() + level.slice(1) }}
+              <span class="block text-[10px] text-slate-400 dark:text-slate-500 font-normal mt-0.5">{{ versionPreview(level) }}</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed">
+            <strong>Major</strong>: breaking changes &middot;
+            <strong>Minor</strong>: additive changes &middot;
+            <strong>Patch</strong>: fixes and refinements
+          </p>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex items-center justify-between pt-1">
+          <p v-if="versionDisabledReason" class="text-xs text-amber-500 italic">{{ versionDisabledReason }}</p>
+          <div v-else></div>
+          <button
+            :disabled="isVersionDisabled || !selectedLevel"
+            :title="!selectedLevel ? 'Select a bump level first' : ''"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold transition-all duration-150 shadow-xs"
+            :class="isVersionDisabled || !selectedLevel
+              ? 'opacity-50 cursor-not-allowed bg-slate-200 dark:bg-slate-700 text-slate-400'
+              : 'bg-primary text-white hover:brightness-110 active:scale-95'"
+            @click="saveVersion"
+          >
+            <Save class="w-3.5 h-3.5" />
+            Save New Version
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Bottom Section: Plain Text View -->
     <div class="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
       <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
@@ -144,10 +217,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { FolderOpen, FileText, Settings, Copy, Check } from 'lucide-vue-next';
+import { FolderOpen, FileText, Settings, Tag, Save, ChevronDown, ChevronRight } from 'lucide-vue-next';
 import { useWorkspaceStore } from '../../stores/workspaceStore';
 import { useModelStore } from '../../stores/modelStore';
 import { DEFAULT_FORMAT_VERSION, DEFAULT_TEMPLATE_NAME, DEFAULT_TEMPLATE_VERSION, buildSpecificationUrl, buildDocumentationLocation } from '../../utils/constants';
+import { bumpVersion, formatVersionString, parseFormatFilename, buildFormatFilename } from '../../utils/version';
+import type { BumpLevel, SemVer } from '../../utils/version';
 
 const props = defineProps<{
   rootNodeId: string;
@@ -227,4 +302,85 @@ const lastSaved = computed(() => {
 });
 
 const specUrl = computed(() => buildSpecificationUrl(formatVersion.value));
+
+// ── Version Management ─────────────────────────────────────────────────
+
+const showVersionPanel = ref(false);
+const selectedLevel = ref<BumpLevel | null>(null);
+
+const bumpLevels: BumpLevel[] = ['major', 'minor', 'patch'];
+
+/** Parses a "V_Major-Minor-Patch" string into a SemVer tuple. */
+function parseVersionString(str: string): SemVer | null {
+  const match = str.match(/^V_(\d+)-(\d+)-(\d+)$/);
+  if (!match) return null;
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3]),
+  };
+}
+
+/** The raw model_version field value (e.g. "V_1-2-3") from frontmatter. */
+const rawModelVersion = computed(() => {
+  return extractFrontmatterField('model_version') || extractFrontmatterField('version') || 'V_1-0-0';
+});
+
+/** Parsed SemVer of the current model version. */
+const currentModelSemVer = computed((): SemVer | null => parseVersionString(rawModelVersion.value));
+
+/** Formatted version string for display (e.g. "V_1-2-3"). */
+const currentVersionStr = computed(() => {
+  const semver = currentModelSemVer.value;
+  return semver ? formatVersionString(semver) : rawModelVersion.value;
+});
+
+/**
+ * Computes the preview version for a given bump level.
+ * Returns "V_X-Y-Z" string or "—" if the current version can't be parsed.
+ */
+function versionPreview(level: BumpLevel): string {
+  const current = currentModelSemVer.value;
+  if (!current) return '—';
+  const bumped = bumpVersion(current, level);
+  return formatVersionString(bumped);
+}
+
+/**
+ * Computes the tooltip text for a bump button, e.g.
+ * "V_1-0-0 → V_2-0-0"
+ */
+function versionButtonTitle(level: BumpLevel): string {
+  if (isVersionDisabled.value) return versionDisabledReason.value || 'Version management is unavailable';
+  const current = currentVersionStr.value;
+  const preview = versionPreview(level);
+  return `${current} → ${preview}`;
+}
+
+// ── Disabled states ─────────────────────────────────────────────────────
+
+const isVersionDisabled = computed(() => {
+  return !workspaceStore.handle || workspaceStore.saving || modelStore.rootIds.length === 0;
+});
+
+const versionDisabledReason = computed(() => {
+  if (!workspaceStore.handle) return 'Connect a workspace to save versions';
+  if (workspaceStore.saving) return 'Workspace is currently saving';
+  if (modelStore.rootIds.length === 0) return 'No root node available';
+  return null;
+});
+
+// ── Save action ─────────────────────────────────────────────────────────
+
+async function saveVersion(): Promise<void> {
+  if (!selectedLevel.value || isVersionDisabled.value) return;
+  const level = selectedLevel.value;
+
+  try {
+    await workspaceStore.saveActiveFileWithVersionBump(level);
+    selectedLevel.value = null;
+  } catch (err) {
+    console.error('Version save failed:', err);
+  }
+}
 </script>

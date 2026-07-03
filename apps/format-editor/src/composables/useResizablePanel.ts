@@ -1,7 +1,8 @@
 import { ref, onBeforeUnmount } from 'vue';
+import { getSidebarWidth, setSidebarWidth } from '../utils/db';
 
 interface ResizableOptions {
-  /** Persisted width key in localStorage. */
+  /** Persisted width key in localStorage and IndexedDB. */
   storageKey: string;
   /** Default width in pixels when nothing is stored. */
   defaultWidth: number;
@@ -17,14 +18,26 @@ interface ResizableOptions {
 }
 
 /**
- * Reusable pointer-driven panel resizing with localStorage persistence.
+ * Reusable pointer-driven panel resizing with localStorage + IndexedDB persistence.
  * Returns the reactive width and a handler to bind to the drag handle.
+ *
+ * Width is resolved in order:
+ *   1. IndexedDB (async, loaded on init)
+ *   2. localStorage (sync, instant fallback)
+ *   3. defaultWidth
  */
 export function useResizablePanel(options: ResizableOptions) {
   const { storageKey, defaultWidth, minWidth = 200, maxWidth = 720, side } = options;
 
   const stored = Number(localStorage.getItem(storageKey));
   const width = ref(Number.isFinite(stored) && stored > 0 ? stored : defaultWidth);
+
+  // Async load from IndexedDB on init — overwrites localStorage value if found
+  getSidebarWidth(storageKey).then((storedWidth) => {
+    if (storedWidth !== undefined && Number.isFinite(storedWidth) && storedWidth > 0) {
+      width.value = storedWidth;
+    }
+  });
 
   let startX = 0;
   let startWidth = 0;
@@ -44,6 +57,7 @@ export function useResizablePanel(options: ResizableOptions) {
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
     localStorage.setItem(storageKey, String(width.value));
+    setSidebarWidth(storageKey, width.value); // fire-and-forget
   };
 
   const startResize = (e: PointerEvent) => {
