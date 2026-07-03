@@ -30,7 +30,7 @@ describe('defiNNe (level 0)', () => {
   });
 });
 
-describe('FORMAT (level 1)', () => {
+describe('iNNfo (level 1)', () => {
   const content = readArchiveSpec('FORMAT_V_0-1-0_FORMAT.md');
   const fm = parseFrontmatter(content)!;
 
@@ -66,9 +66,77 @@ describe('business template (level 2)', () => {
   });
 });
 
-describe('Ghostbusters model (level 3)', () => {
-  const content = readModel('Ghostbusters_V_0-1-2_business_F.md');
-  const model = parseModel(content);
+describe('iNNfo model with _NN markers (level 3)', () => {
+  // Use inline content with _NN markers — legacy fixtures with _F are out of scope
+  const modelContent = [
+    '---',
+    'spec_version: "V_0-2-0"',
+    'level: 3',
+    'model_version: "V_0-1-2"',
+    'title: "Test Model"',
+    'mode: "FILE"',
+    'parent_spec:',
+    '  name: "business_V_0-1-1"',
+    '  url: "https://example.com/business"',
+    'matrices:',
+    '  - name: "problems-value propositions matrix"',
+    '    source: "Problems"',
+    '    target: "Value propositions"',
+    'concepts:',
+    '  - name: "Stakeholders"',
+    '    type: list',
+    '  - name: "Problems"',
+    '    type: list',
+    '  - name: "Value propositions"',
+    '    type: list',
+    '---',
+    '',
+    '> [!NOTE]',
+    '> This is an **iNNfo document**.',
+    '',
+    '# _NN index',
+    '',
+    '* [[Market]]',
+    '  * [[Segments]]',
+    '* [[Stakeholders]]',
+    '* [[Problems]]',
+    '* [[Value propositions]]',
+    '',
+    '# _NN Stakeholders',
+    '',
+    '* _NN Stakeholders: Founder One',
+    '  A founder.',
+    '* _NN Stakeholders: Founder Two',
+    '  Another founder.',
+    '* _NN Stakeholders: Investor',
+    '  An investor.',
+    '',
+    '# _NN Problems',
+    '',
+    '* _NN Problems: Problem Alpha',
+    '  Description of alpha.',
+    '* _NN Problems: Problem Beta',
+    '  Description of beta.',
+    '',
+    '# _NN Value propositions',
+    '',
+    '* _NN Value propositions: Prop A',
+    '  Value prop A.',
+    '',
+    '# _NN matrices: problems-value propositions matrix',
+    '| Problems \\ Value propositions | Prop A |',
+    '| :--- | :---: |',
+    '| Problem Alpha | X |',
+    '| Problem Beta | - |',
+    '',
+    '# _NN matrices: item-markers matrix',
+    '| Item \\ Marker | weight |',
+    '| :--- | :---: |',
+    '| Problem Alpha | 9 |',
+    '',
+  ].join('\n');
+
+  const model = parseModel(modelContent);
   const fm = model.frontmatter;
 
   it('parses frontmatter', () => {
@@ -79,7 +147,7 @@ describe('Ghostbusters model (level 3)', () => {
   });
 
   it('parses taxonomy from index block', () => {
-    expect(model.taxonomy.length).toBeGreaterThan(20);
+    expect(model.taxonomy.length).toBeGreaterThan(0);
     const marketChild = model.taxonomy.find(e => e.parent === 'Market');
     expect(marketChild).toBeDefined();
     expect(marketChild!.child).toBe('Segments');
@@ -91,8 +159,8 @@ describe('Ghostbusters model (level 3)', () => {
     expect(model.elements.has('Value propositions')).toBe(true);
 
     const stakeholders = model.elements.get('Stakeholders')!;
-    expect(stakeholders.length).toBeGreaterThanOrEqual(7);
-    expect(stakeholders[0].name).toContain('Ghostbusters Founders');
+    expect(stakeholders.length).toBeGreaterThanOrEqual(3);
+    expect(stakeholders[0].name).toContain('Founder One');
     expect(stakeholders[0].type).toBe('Stakeholders');
   });
 
@@ -106,17 +174,17 @@ describe('Ghostbusters model (level 3)', () => {
 
   it('parses item-markers matrix into nodeMarkers', () => {
     expect(Object.keys(model.nodeMarkers).length).toBeGreaterThan(0);
-    expect(model.nodeMarkers['Paranormal Infestation']).toBeDefined();
-    expect(model.nodeMarkers['Paranormal Infestation'].weight).toBe(9);
+    expect(model.nodeMarkers['Problem Alpha']).toBeDefined();
+    expect(model.nodeMarkers['Problem Alpha'].weight).toBe(9);
   });
 
   it('serializes and re-parses correctly', async () => {
     const { serializeModel } = await import('../src/index');
     const serialized = serializeModel(model);
-    expect(serialized).toContain('spec_version: "V_0-1-2"');
-    expect(serialized).toContain('# _F Stakeholders');
-    expect(serialized).toContain('# _F matrices: problems-value propositions matrix');
-    expect(serialized).toContain('* _F Stakeholders:');
+    expect(serialized).toContain('spec_version: "V_0-2-0"');
+    expect(serialized).toContain('# _NN Stakeholders');
+    expect(serialized).toContain('# _NN matrices: problems-value propositions matrix');
+    expect(serialized).toContain('* _NN Stakeholders:');
   });
 
   it('serializes and re-parses preserving full structure', async () => {
@@ -172,18 +240,37 @@ describe('procedures template (level 2)', () => {
 
 
 describe('validator', () => {
-  it('validates Ghostbusters against business template', () => {
-    const modelContent = readModel('Ghostbusters_V_0-1-2_business_F.md');
-    const templateContent = readSpec('business_V_0-1-1_FORMAT.md');
-    const model = parseModel(modelContent);
-    const templateFm = parseFrontmatter(templateContent)!;
+  const validModelContent = [
+    '---',
+    'spec_version: "V_0-2-0"',
+    'level: 3',
+    'model_version: "V_0-1-2"',
+    'title: "Inline Model"',
+    'mode: "FILE"',
+    'parent_spec:',
+    '  name: "business_V_0-1-1"',
+    '  url: "https://example.com/business"',
+    '---',
+    '',
+    '# _NN index',
+    '',
+    '* [[Stakeholders]]',
+    '',
+    '# _NN Stakeholders',
+    '* _NN Stakeholders: Alice',
+    '',
+  ].join('\n');
+
+  it('validates a model with _NN markers', () => {
+    const templateFm = parseFrontmatter(readSpec('business_V_0-1-1_FORMAT.md'))!;
+    const model = parseModel(validModelContent);
 
     const result = validateModel(model, {
       name: 'business_V_0-1-1',
       level: 2,
       parentName: 'FORMAT_V_0-1-1',
       frontmatter: templateFm,
-      rawContent: templateContent,
+      rawContent: readSpec('business_V_0-1-1_FORMAT.md'),
     }, null);
 
     expect(result.valid).toBe(true);
@@ -191,10 +278,8 @@ describe('validator', () => {
   });
 
   it('rejects model with unknown concept', () => {
-    const modelContent = readModel('Ghostbusters_V_0-1-2_business_F.md');
-    const templateContent = readSpec('business_V_0-1-1_FORMAT.md');
-    const model = parseModel(modelContent);
-    const templateFm = parseFrontmatter(templateContent)!;
+    const templateFm = parseFrontmatter(readSpec('business_V_0-1-1_FORMAT.md'))!;
+    const model = parseModel(validModelContent);
 
     model.elements.set('NonExistentConcept', [{ type: 'NonExistentConcept', name: 'Test', description: '', fields: {}, markers: {} }]);
 
@@ -203,7 +288,7 @@ describe('validator', () => {
       level: 2,
       parentName: 'FORMAT_V_0-1-1',
       frontmatter: templateFm,
-      rawContent: templateContent,
+      rawContent: readSpec('business_V_0-1-1_FORMAT.md'),
     }, null);
 
     expect(result.valid).toBe(false);
@@ -222,15 +307,15 @@ describe('CRLF line-ending handling', () => {
       'mode: "FILE"',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '',
-      '* _F index: Parent',
-      '  * _F index: Child',
+      '* _NN index: Parent',
+      '  * _NN index: Child',
       '',
-      '# _F Stakeholders',
-      '* _F Stakeholders: First Stakeholder',
+      '# _NN Stakeholders',
+      '* _NN Stakeholders: First Stakeholder',
       '  Description text for the stakeholder.',
-      '* _F Stakeholders: Second Stakeholder',
+      '* _NN Stakeholders: Second Stakeholder',
       '  Another description.',
       '',
     ].join('\n');
@@ -250,26 +335,88 @@ describe('CRLF line-ending handling', () => {
     expect(crlfModel.elements.size).toBe(lfModel.elements.size);
   });
 
-  it('parses the real Ghostbusters sample model with full fidelity', () => {
-    const content = readModel('Ghostbusters_V_0-1-2_business_F.md');
-    // The sample may be LF or CRLF depending on the platform — either should parse
-    const normalized = content.replace(/\r\n/g, '\n');
+  it('parses a model with _NN markers from CRLF content with full fidelity', () => {
+    const lfContent = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-1-2"',
+      'title: "Inline Test"',
+      'mode: "FILE"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      '---',
+      '',
+      '# _NN index',
+      '',
+      '* [[Market]]',
+      '  * [[Segments]]',
+      '* [[Stakeholders]]',
+      '* [[Problems]]',
+      '',
+      '# _NN Stakeholders',
+      '* _NN Stakeholders: S1',
+      '* _NN Stakeholders: S2',
+      '* _NN Stakeholders: S3',
+      '* _NN Stakeholders: S4',
+      '* _NN Stakeholders: S5',
+      '* _NN Stakeholders: S6',
+      '* _NN Stakeholders: S7',
+      '',
+      '# _NN Problems',
+      '* _NN Problems: P1',
+      '* _NN Problems: P2',
+      '',
+    ].join('\n');
+    const crlfContent = lfContent.replace(/\n/g, '\r\n');
+    const model = parseModel(crlfContent);
 
-    const model = parseModel(normalized);
-
-    // Taxonomy: the index block declares ~30+ nested bullets.
-    expect(model.taxonomy.length).toBeGreaterThan(20);
-
-    // Elements: multiple concept sections, not just the first one.
-    expect(model.elements.size).toBeGreaterThan(5);
+    expect(model.taxonomy.length).toBeGreaterThan(0);
+    const segEdge = model.taxonomy.find(e => e.parent === 'Market');
+    expect(segEdge).toBeDefined();
+    expect(segEdge!.child).toBe('Segments');
+    expect(model.elements.size).toBeGreaterThan(1);
     expect(model.elements.has('Stakeholders')).toBe(true);
     expect(model.elements.get('Stakeholders')!.length).toBeGreaterThanOrEqual(7);
   });
 });
 
 describe('extended parser features', () => {
-  const content = readModel('Ghostbusters_V_0-1-2_business_F.md');
-  const model = parseModel(content);
+  const modelContent = [
+    '---',
+    'spec_version: "V_0-2-0"',
+    'level: 3',
+    'model_version: "V_0-1-2"',
+    'title: "Inline Test"',
+    'mode: "FILE"',
+    'parent_spec:',
+    '  name: "test_V_0-1-1"',
+    '  url: "https://example.com/test"',
+    '---',
+    '',
+    '# _NN index',
+    '',
+    '* [[Market]]',
+    '  * [[Segments]]',
+    '* [[Stakeholders]]',
+    '* [[Problems]]',
+    '',
+    '# _NN Stakeholders',
+    '* _NN Stakeholders: S1',
+    '* _NN Stakeholders: S2',
+    '* _NN Stakeholders: S3',
+    '* _NN Stakeholders: S4',
+    '* _NN Stakeholders: S5',
+    '* _NN Stakeholders: S6',
+    '* _NN Stakeholders: S7',
+    '',
+    '# _NN Problems',
+    '* _NN Problems: P1',
+    '* _NN Problems: P2',
+    '',
+  ].join('\n');
+  const model = parseModel(modelContent);
 
   it('buildHierarchyTree returns tree from taxonomy', () => {
     const tree = buildHierarchyTree(model.taxonomy, model.elements, model.matrices);
@@ -288,7 +435,7 @@ describe('extended parser features', () => {
   });
 
   it('extractAnalysis returns array', () => {
-    const analysis = extractAnalysis(content);
+    const analysis = extractAnalysis(modelContent);
     expect(Array.isArray(analysis)).toBe(true);
   });
 });
@@ -349,9 +496,9 @@ describe('element slug derivation (FR-002)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _F Problems',
+      '# _NN Problems',
       '',
-      '* _F Problems: My Great Element',
+      '* _NN Problems: My Great Element',
       '  A description.',
       '',
     ].join('\n');
@@ -374,9 +521,9 @@ describe('element slug derivation (FR-002)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _F Problems',
+      '# _NN Problems',
       '',
-      '* _F Problems: My Element',
+      '* _NN Problems: My Element',
       '  ```yaml',
       '  slug: my-custom-slug',
       '  severity: high',
@@ -436,11 +583,11 @@ describe('element slug derivation (FR-002)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _F Components',
+      '# _NN Components',
       '',
-      '* _F Components: My Element',
+      '* _NN Components: My Element',
       '  First one.',
-      '* _F Components: my element',
+      '* _NN Components: my element',
       '  Second one with same slug.',
       '',
     ].join('\n');
@@ -486,12 +633,12 @@ describe('element slug derivation (FR-002)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[TestEl]]',
       '',
-      '# _F Components',
+      '# _NN Components',
       '',
-      '* _F Components: Test El',
+      '* _NN Components: Test El',
       '  A test element.',
       '',
     ].join('\n');
@@ -503,15 +650,15 @@ describe('element slug derivation (FR-002)', () => {
       'title: "Index"',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '',
-      '* [[test_F.md]]',
+      '* [[test_NN.md]]',
       '',
     ].join('\n');
 
     const root = fakeDir([
       ['index.md', fakeFile('index.md', indexContent)],
-      ['test_F.md', fakeFile('test_F.md', modelContent)],
+      ['test_NN.md', fakeFile('test_NN.md', modelContent)],
     ]);
 
     const result = await recursiveParse(root as any);
@@ -548,12 +695,12 @@ describe('ConceptField.type with asset types (FR-003)', () => {
       '        type: audio',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[ScreenshotOne]]',
       '',
-      '# _F Screenshots',
+      '# _NN Screenshots',
       '',
-      '* _F Screenshots: ScreenshotOne',
+      '* _NN Screenshots: ScreenshotOne',
       '  ```yaml',
       '  screenshot: photo.png',
       '  source: docs/report.pdf',
@@ -591,12 +738,12 @@ describe('asset_mode (FR-004)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[TestEl]]',
       '',
-      '# _F Components',
+      '# _NN Components',
       '',
-      '* _F Components: TestEl',
+      '* _NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n');
@@ -619,12 +766,12 @@ describe('asset_mode (FR-004)', () => {
       'asset_mode: centralized',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[TestEl]]',
       '',
-      '# _F Components',
+      '# _NN Components',
       '',
-      '* _F Components: TestEl',
+      '* _NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n');
@@ -646,12 +793,12 @@ describe('asset_mode (FR-004)', () => {
       'asset_mode: per-element',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[TestEl]]',
       '',
-      '# _F Components',
+      '# _NN Components',
       '',
-      '* _F Components: TestEl',
+      '* _NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n');
@@ -698,12 +845,12 @@ describe('asset_mode (FR-004)', () => {
       '        type: image',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[ScreenshotOne]]',
       '',
-      '# _F Screenshots',
+      '# _NN Screenshots',
       '',
-      '* _F Screenshots: ScreenshotOne',
+      '* _NN Screenshots: ScreenshotOne',
       '  ```yaml',
       '  screenshot: photo.png',
       '  ```',
@@ -718,15 +865,15 @@ describe('asset_mode (FR-004)', () => {
       'title: "Index"',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '',
-      '* [[test_F.md]]',
+      '* [[test_NN.md]]',
       '',
     ].join('\n');
 
     const root = fakeDir([
       ['index.md', fakeFile('index.md', indexContent)],
-      ['test_F.md', fakeFile('test_F.md', modelContent)],
+      ['test_NN.md', fakeFile('test_NN.md', modelContent)],
     ]);
 
     const result = await recursiveParse(root as any);
@@ -756,12 +903,12 @@ describe('FOLDER mode rejection (FR-007)', () => {
       'mode: FOLDER',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[TestEl]]',
       '',
-      '# _F Components',
+      '# _NN Components',
       '',
-      '* _F Components: TestEl',
+      '* _NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n');
@@ -785,17 +932,17 @@ describe('FOLDER mode rejection (FR-007)', () => {
       'mode: FOLDER',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[TestEl]]',
       '',
-      '# _F Components',
+      '# _NN Components',
       '',
-      '* _F Components: TestEl',
+      '* _NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n');
 
-    const report = validateFormatContent(content, 'test_F.md');
+    const report = validateFormatContent(content, 'test_NN.md');
     const folderCheck = report.checks.find(c => c.id === 'fm-no-folder-mode');
     expect(folderCheck).toBeDefined();
     expect(folderCheck!.passed).toBe(false);
@@ -816,12 +963,12 @@ describe('FOLDER mode rejection (FR-007)', () => {
       'mode: FOLDER',
       '---',
       '',
-      '# _F index',
+      '# _NN index',
       '* [[TestEl]]',
       '',
-      '# _F Components',
+      '# _NN Components',
       '',
-      '* _F Components: TestEl',
+      '* _NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n');

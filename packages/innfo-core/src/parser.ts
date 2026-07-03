@@ -6,7 +6,7 @@ import {
 const YAML_BLOCK_RE = /^---\r?\n([\s\S]*?)\r?\n---/;
 const SECTION_RE = /^#\s+(.*)$/gm;
 const WIKILINK_RE = /\[\[([^\]]+)\]\]/g;
-const INDEX_F_RE = /_F\s+index:\s*(.*)$/;
+const INDEX_NN_RE = /_NN\s+index:\s*(.*)$/;
 const YAML_FENCE_RE = /```yaml\n([\s\S]*?)```/;
 
 /* ── Slug derivation (FR-002) ── */
@@ -40,21 +40,21 @@ function normalizeLineEndings(text: string): string {
   return text.replace(/\r\n?/g, '\n');
 }
 
-/* ── Marker patterns (_F syntax only, V_0-1-1+) ── */
+/* ── Marker patterns (_NN syntax only, V_0-2-0+) ── */
 
-// Section-level markers: `# _F ConceptName` or `# _F matrices: name`
-const F_SECTION_RE = /^#\s+_F\s+(?:(matrices):\s*(.*)|(.*))/m;
+// Section-level markers: `# _NN ConceptName` or `# _NN matrices: name`
+const NN_SECTION_RE = /^#\s+_NN\s+(?:(matrices):\s*(.*)|(.*))/m;
 
-// Element-level markers: `* _F Concept: Name`
-const F_ELEMENT_RE = /^\s*[*\-]\s+_F\s+([\w\s-]+?):\s+(.*)$/;
+// Element-level markers: `* _NN Concept: Name`
+const NN_ELEMENT_RE = /^\s*[*\-]\s+_NN\s+([\w\s-]+?):\s+(.*)$/;
 
 function isIndexSection(rawTitle: string): boolean {
   return sectionName(rawTitle) === 'concepts' && sectionTitle(rawTitle).toLowerCase() === 'index';
 }
 
 function sectionName(rawTitle: string): string | null {
-  // _F syntax: `_F ConceptName` or `_F matrices: Name`
-  const fm = rawTitle.match(/^_F\s+(?:(matrices):\s*(.*)|(.*))/);
+  // _NN syntax: `_NN ConceptName` or `_NN matrices: Name`
+  const fm = rawTitle.match(/^_NN\s+(?:(matrices):\s*(.*)|(.*))/);
   if (fm) {
     if (fm[1]) return fm[1]; // 'matrices'
     if (fm[3] != null) return 'concepts'; // implicit 'concepts' for bare ConceptName
@@ -63,8 +63,8 @@ function sectionName(rawTitle: string): string | null {
 }
 
 function sectionTitle(rawTitle: string): string {
-  // _F syntax: `_F ConceptName` or `_F matrices: Name`
-  const fm = rawTitle.match(/^_F\s+(?:(matrices):\s*(.*)|(.*))/);
+  // _NN syntax: `_NN ConceptName` or `_NN matrices: Name`
+  const fm = rawTitle.match(/^_NN\s+(?:(matrices):\s*(.*)|(.*))/);
   if (fm) {
     if (fm[2]) return fm[2].trim(); // matrix name
     if (fm[3] != null) return fm[3].trim(); // concept name
@@ -182,13 +182,13 @@ export function parseIndexBlock(content: string): TaxonomyEdge[] {
     if (!trimmed.startsWith('*') && !trimmed.startsWith('-')) continue;
     const depth = line.search(/\S/) / 2;
 
-    // Support both [[wikilinks]] and _F index: Name syntax
+    // Support both [[wikilinks]] and _NN index: Name syntax
     let name: string | null = null;
     const wikiMatch = trimmed.match(WIKILINK_RE);
     if (wikiMatch) {
       name = wikiMatch[0].slice(2, -2);
     } else {
-      const fMatch = trimmed.match(INDEX_F_RE);
+      const fMatch = trimmed.match(INDEX_NN_RE);
       if (fMatch) {
         name = fMatch[1].trim();
       }
@@ -212,7 +212,7 @@ function parseFencedYaml(text: string): Record<string, unknown> {
 }
 
 function parseElementMarker(line: string): string | null {
-  const match = line.match(F_ELEMENT_RE);
+  const match = line.match(NN_ELEMENT_RE);
   if (match) return match[2].trim();
   return null;
 }
@@ -468,11 +468,11 @@ export function serializeModel(model: ParsedModel): string {
   lines.push('---');
   lines.push('');
   lines.push('> [!NOTE]');
-  lines.push('> This is a **FORMAT document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter.');
+  lines.push('> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter.');
   lines.push('');
 
   if (model.taxonomy.length > 0) {
-    lines.push('# _F index');
+    lines.push('# _NN index');
     const allParents = new Set(model.taxonomy.map(e => e.parent));
     const allChildren = new Set(model.taxonomy.map(e => e.child));
     const rootNames = [...allParents].filter(p => !allChildren.has(p));
@@ -483,10 +483,10 @@ export function serializeModel(model: ParsedModel): string {
   }
 
   for (const [conceptName, elementNodes] of model.elements.entries()) {
-    lines.push(`# _F ${conceptName}`);
+    lines.push(`# _NN ${conceptName}`);
     for (const node of elementNodes) {
       const prefix = '*'; // all concept types use bullet syntax — numbered lists are not supported
-      lines.push(`${prefix} _F ${conceptName}: ${node.name}`);
+      lines.push(`${prefix} _NN ${conceptName}: ${node.name}`);
       if (Object.keys(node.fields).length > 0) {
         lines.push('  ```yaml');
         for (const [k, v] of Object.entries(node.fields)) {
@@ -505,7 +505,7 @@ export function serializeModel(model: ParsedModel): string {
 
   for (const matrix of model.matrices) {
     if (matrix.cells.length === 0) continue;
-    lines.push(`# _F matrices: ${matrix.name}`);
+    lines.push(`# _NN matrices: ${matrix.name}`);
     const colSet = new Set(matrix.cells.map(c => c.col));
     const rowSet = new Set(matrix.cells.map(c => c.row));
     const cols = Array.from(colSet);
@@ -526,7 +526,7 @@ export function serializeModel(model: ParsedModel): string {
   // Node markers (item-markers matrix)
   const nodeMarkerEntries = Object.entries(model.nodeMarkers);
   if (nodeMarkerEntries.length > 0) {
-    lines.push('# _F matrices: item-markers matrix');
+    lines.push('# _NN matrices: item-markers matrix');
     // Collect all unique marker keys
     const markerKeys = new Set<string>();
     for (const [, markers] of nodeMarkerEntries) {

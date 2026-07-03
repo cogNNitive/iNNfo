@@ -11,13 +11,13 @@ import type { ParsedModel } from './types';
 /* ── Version resolution ──────────────────────────────────────── */
 
 /**
- * SemVer pattern as used in FORMAT filenames: `_V_MAJOR-MINOR-PATCH_`
+ * SemVer pattern as used in iNNfo filenames: `_V_MAJOR-MINOR-PATCH_`
  */
 const VERSION_FILENAME_RE = /_V_(\d+-\d+-\d+)_/;
 
 /**
- * Extract the SemVer (e.g. `0-1-1`) from a FORMAT filename like
- * `Ghostbusters_V_0-1-2_business_F.md` → `0-1-2`.
+ * Extract the SemVer (e.g. `0-1-1`) from an iNNfo filename like
+ * `Ghostbusters_V_0-1-2_business_NN.md` → `0-1-2`.
  * Returns `null` if no version marker is found.
  */
 export function resolveSpecVersionFromFilename(filename: string): string | null {
@@ -38,10 +38,10 @@ export interface ModelInfo {
   version: string | null;
 }
 
-const F_MD_RE = /_F\.md$/i;
+const NN_MD_RE = /_NN\.md$/i;
 
 /**
- * Scan a root directory for FORMAT model files (`*_F.md`).
+ * Scan a root directory for iNNfo model files (`*_NN.md`).
  * Returns an array of `ModelInfo` sorted by id.
  */
 export async function listModels(rootDir: string): Promise<ModelInfo[]> {
@@ -51,10 +51,10 @@ export async function listModels(rootDir: string): Promise<ModelInfo[]> {
 
   for (const entry of entries) {
     if (!entry.isFile()) continue;
-    if (!F_MD_RE.test(entry.name)) continue;
+    if (!NN_MD_RE.test(entry.name)) continue;
 
     const filePath = join(rootDir, entry.name);
-    const id = entry.name.replace(F_MD_RE, '');
+    const id = entry.name.replace(NN_MD_RE, '');
     const version = resolveSpecVersionFromFilename(entry.name);
 
     // Quick-read frontmatter to detect mode

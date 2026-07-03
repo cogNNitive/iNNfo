@@ -3,7 +3,7 @@ import type { LocalMetamodel, MetamodelConcept, MetamodelMarker, ModelNode } fro
 /**
  * Builds the ancestor chain for `nodeId`, root-first (e.g. `[Root, Root/A,
  * Root/A/B]`), by walking `parentId` links in the graph. This mirrors
- * `format-core`'s `resolveParentChain` inherit/override walk, generalized
+ * `innfo-core`'s `resolveParentChain` inherit/override walk, generalized
  * from the level-based spec chain (defiNNe -> FORMAT -> template ->
  * instance) to node-nesting (root node -> ... -> target node) — see
  * design.md "Metamodel resolution" decision. `resolveParentChain` itself

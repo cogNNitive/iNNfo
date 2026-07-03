@@ -257,7 +257,7 @@ export interface ResolverOptions {
   timeout?: number;
 }
 
-/* ── Graph / App Model Types (moved from apps/format-editor/src/model/types.ts) ── */
+/* ── Graph / App Model Types (moved from apps/innfo-editor/src/model/types.ts) ── */
 
 /** Who/what produced a value change. */
 export interface Author {
@@ -329,7 +329,7 @@ export interface ModelNode {
   rawSections: Record<string, string> // round-trip fidelity
   /**
    * Full original source text for root nodes (the node whose own
-   * `_F.md` file was parsed via `parseModel`). Undefined for
+   * `_NN.md` file was parsed via `parseModel`). Undefined for
    * element nodes nested inside a document (they have no own file).
    * Used by the serializer for byte/structurally-equivalent no-edit
    * round-trip (R7) instead of re-deriving through `serializeModel`'s
@@ -347,7 +347,7 @@ export interface ModelNode {
   /**
    * Optional node-kind discriminator.
    * - 'root': the top-level node of a workspace (parentId === null).
-   * - 'concept': a `# _F` section representing a type/group.
+   * - 'concept': a `# _NN` section representing a type/group.
    * - 'element': an index-block instance.
    * Undefined means the node was created before this discriminator existed
    * (backward-compatible with existing graphs).
@@ -369,7 +369,7 @@ export interface ModelNode {
   source: { path: string } // FS location for write-back
   /**
    * Indicates how this node was produced:
-   * - 'parsed': created from parsing a real _F.md document
+   * - 'parsed': created from parsing a real _NN.md document
    * - 'structural': created as a structural placeholder (concept group)
    * Undefined means the node pre-dates this field (backward compatible).
    */

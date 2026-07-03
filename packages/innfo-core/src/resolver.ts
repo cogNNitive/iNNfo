@@ -46,7 +46,7 @@ export async function resolveParentChain(
   await mkdir(specsDir, { recursive: true });
 
   while (currentUrl && currentName && depth < maxDepth) {
-    const cachePath = join(specsDir, `${currentName}_F.md`);
+    const cachePath = join(specsDir, `${currentName}_NN.md`);
     let content: string;
 
     if (await fileExists(cachePath)) {

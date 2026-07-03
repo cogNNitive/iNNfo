@@ -7,7 +7,7 @@ import { parseModel } from './parser';
 
 const VERSION_RE = /^V_\d+-\d+-\d+$/
 const WIKILINK_RE = /\[\[([^\]]+)\]\]/g
-const SECTION_FM_RE = /^#\s+_F\s+(?:(matrices):\s*(.*)|(.*))$/gm
+const SECTION_NN_RE = /^#\s+_NN\s+(?:(matrices):\s*(.*)|(.*))$/gm
 
 export function validateModel(
   model: ParsedModel,
@@ -116,13 +116,13 @@ export function validateModel(
 }
 
 /**
- * Validates FORMAT document content (frontmatter + body syntax + conventions).
- * This is the full format-editor validator, moved to core for reuse by any client.
+ * Validates iNNfo document content (frontmatter + body syntax + conventions).
+ * This is the full innfo-editor validator, moved to core for reuse by any client.
  *
  * @param content - Raw file content to validate
  * @param fileName - File name (used for naming convention checks)
  * @param expectedSpecVersion - Optional expected spec_version (e.g. "V_0-1-5").
-   *   Pass the current FORMAT spec version to validate spec_version matches.
+   *   Pass the current iNNfo spec version to validate spec_version matches.
  */
 export function validateFormatContent(
   content: string,
@@ -154,7 +154,7 @@ export function validateFormatContent(
   checks.push({
     id: 'fm-level',
     label: 'Model level is 3',
-    description: 'FORMAT models must declare level: 3',
+    description: 'iNNfo models must declare level: 3',
     category: 'frontmatter',
     severity: 'error',
     passed: levelOk,
@@ -235,7 +235,7 @@ export function validateFormatContent(
     checks.push({
       id: 'fm-spec-version-match',
       label: 'Specification version matches current spec',
-      description: `spec_version should be "${expectedSpecVersion}" for the current FORMAT specification`,
+      description: `spec_version should be "${expectedSpecVersion}" for the current iNNfo specification`,
       category: 'frontmatter',
       severity: 'warning',
       passed: specMatch,
@@ -255,7 +255,7 @@ export function validateFormatContent(
     checks.push({
       id: 'body-note',
       label: 'Document notice blockquote',
-      description: 'Body should start with a > [!NOTE] blockquote identifying the FORMAT document',
+      description: 'Body should start with a > [!NOTE] blockquote identifying the iNNfo document',
       category: 'body',
       severity: 'warning',
       passed: hasNote,
@@ -268,15 +268,15 @@ export function validateFormatContent(
   checks.push({
     id: 'body-index',
     label: 'Taxonomy index section',
-    description: 'Models must have a # _F index section with [[wikilinks]]',
+    description: 'Models must have a # _NN index section with [[wikilinks]]',
     category: 'body',
     severity: 'error',
     passed: hasIndex,
-    message: hasIndex ? undefined : 'No _F index section found',
+    message: hasIndex ? undefined : 'No _NN index section found',
   })
 
   // 9. Concept section markers
-  const sectionMatches = [...content.matchAll(SECTION_FM_RE)]
+  const sectionMatches = [...content.matchAll(SECTION_NN_RE)]
   const conceptSectionCount = sectionMatches.filter(m => {
     const name = m[1] === 'matrices' ? m[2] : m[3]
     return m[1] !== 'matrices' && name != null && name.trim().toLowerCase() !== 'index'
@@ -286,19 +286,19 @@ export function validateFormatContent(
     checks.push({
       id: 'body-concept-sections',
       label: 'Valid concept section markers',
-      description: 'Each concept section must use # _F <ConceptName> syntax',
+      description: 'Each concept section must use # _NN <ConceptName> syntax',
       category: 'body',
       severity: 'error',
       passed: conceptSectionCount > 0 && allValid,
-      message: !allValid ? 'Some section headers have invalid _F markers'
+      message: !allValid ? 'Some section headers have invalid _NN markers'
         : conceptSectionCount === 0 ? 'No concept sections found (body is empty or malformed)'
         : undefined,
     })
   }
 
   // 10. Element marker syntax
-  const visMarkerRe = /^\s*[*\-]\s+_F\s+([\w\s-]+?):\s+(.+)$/gm
-  const hidMarkerRe = /^\s*[*\-]\s+<!--\s+(?:_F\s+([\w\s-]+?):|block:\s*([\w\s-]+?))\s*-->\s*(.*)$/gm
+  const visMarkerRe = /^\s*[*\-]\s+_NN\s+([\w\s-]+?):\s+(.+)$/gm
+  const hidMarkerRe = /^\s*[*\-]\s+<!--\s+(?:_NN\s+([\w\s-]+?):|block:\s*([\w\s-]+?))\s*-->\s*(.*)$/gm
   const visibleMarkers = [...body.matchAll(visMarkerRe)]
   const hiddenMarkers = [...body.matchAll(hidMarkerRe)]
   const totalMarkers = visibleMarkers.length + hiddenMarkers.length
@@ -307,7 +307,7 @@ export function validateFormatContent(
   const lines = body.split('\n')
   let inIndexSection = false
   for (const line of lines) {
-    if (/^#\s+_F\s+index\s*$/im.test(line.trim())) {
+    if (/^#\s+_NN\s+index\s*$/im.test(line.trim())) {
       inIndexSection = true
       continue
     }
@@ -317,7 +317,7 @@ export function validateFormatContent(
     }
     const trimmed = line.trim()
     if ((trimmed.startsWith('* ') || trimmed.startsWith('- '))
-      && !trimmed.startsWith('* _F ') && !trimmed.startsWith('- _F ')
+      && !trimmed.startsWith('* _NN ') && !trimmed.startsWith('- _NN ')
       && !trimmed.startsWith('* <!--') && !trimmed.startsWith('- <!--')) {
       suspectLines.push(trimmed.substring(0, 60))
     }
@@ -327,30 +327,30 @@ export function validateFormatContent(
     checks.push({
       id: 'body-element-markers',
       label: 'Valid element markers',
-      description: 'Elements must use `* _F ConceptName: Element` or `* <!-- _F ConceptName: --> Element` syntax',
+      description: 'Elements must use `* _NN ConceptName: Element` or `* <!-- _NN ConceptName: --> Element` syntax',
       category: 'body',
       severity: 'error',
       passed: suspectLines.length === 0 && totalMarkers > 0,
       message: suspectLines.length > 0
         ? `${suspectLines.length} bullet(s) look like elements but use wrong marker syntax:\n${suspectLines.slice(0, 3).join('\n')}`
-        : totalMarkers === 0 ? 'No _F element markers found'
+        : totalMarkers === 0 ? 'No _NN element markers found'
         : undefined,
     })
   }
 
   // 10b. Numbered-list markers (silently dropped by parser — warn the user)
   if (hasBody) {
-    const numberedBulletRe = /^\s*\d+\.\s+_F\s+([\w\s-]+?):\s+/gm
+    const numberedBulletRe = /^\s*\d+\.\s+_NN\s+([\w\s-]+?):\s+/gm
     const numberedMatches = [...body.matchAll(numberedBulletRe)]
     checks.push({
       id: 'body-numbered-list-markers',
-      label: 'No numbered-list _F markers',
-      description: 'Numbered lists (1. _F Concept: Name) are silently ignored by the parser. Use bullet syntax (* _F Concept: Name) instead.',
+      label: 'No numbered-list _NN markers',
+      description: 'Numbered lists (1. _NN Concept: Name) are silently ignored by the parser. Use bullet syntax (* _NN Concept: Name) instead.',
       category: 'body',
       severity: 'warning',
       passed: numberedMatches.length === 0,
       message: numberedMatches.length > 0
-        ? `${numberedMatches.length} numbered _F marker(s) detected — these are silently ignored by the parser`
+        ? `${numberedMatches.length} numbered _NN marker(s) detected — these are silently ignored by the parser`
         : undefined,
     })
   }
@@ -362,7 +362,7 @@ export function validateFormatContent(
     let inConceptSection = false
     for (const bl of bodyLines) {
       const trimmed = bl.trim()
-      if (/^#\s+_F\s+(?!index\b)/im.test(trimmed)) {
+      if (/^#\s+_NN\s+(?!index\b)/im.test(trimmed)) {
         inConceptSection = true
         continue
       }
@@ -372,11 +372,11 @@ export function validateFormatContent(
       }
       if (!inConceptSection) continue
 
-      // Detect non-asterisk/hyphen bullet chars used as _F marker lines.
-      // Only flag lines that contain _F markers (clearly trying to be elements)
+      // Detect non-asterisk/hyphen bullet chars used as _NN marker lines.
+      // Only flag lines that contain _NN markers (clearly trying to be elements)
       // with invalid bullet chars like + or > (numbered lists are handled
       // separately by body-numbered-list-markers).
-      if (/^\s*[+>]\s+_F\s/.test(trimmed)) {
+      if (/^\s*[+>]\s+_NN\s/.test(trimmed)) {
         invalidBulletLines.push(trimmed.substring(0, 60))
       }
     }
@@ -396,24 +396,24 @@ export function validateFormatContent(
   // ── Conventions ────────────────────────────────────────────────
 
   // 11. File naming
-  const namingOk = fileName.endsWith('_F.md')
+  const namingOk = fileName.endsWith('_NN.md')
   checks.push({
     id: 'conv-file-naming',
     label: 'File naming convention',
-    description: 'FORMAT files must end with _F.md',
+    description: 'iNNfo files must end with _NN.md',
     category: 'convention',
     severity: 'warning',
     passed: namingOk,
-    message: namingOk ? undefined : `"${fileName}" does not end with _F.md`,
+    message: namingOk ? undefined : `"${fileName}" does not end with _NN.md`,
   })
 
-  // 12. Type field for distributed _F.md files (§5.1.2)
-  if (fileName.endsWith('_F.md')) {
+  // 12. Type field for distributed _NN.md files (§5.1.2)
+  if (fileName.endsWith('_NN.md')) {
     const typeOk = typeof fm.type === 'string' && fm.type.length > 0
     checks.push({
       id: 'conv-type-field',
       label: 'Type field present for OKF conformance',
-      description: 'Distributed _F.md files should include a type field in frontmatter for OKF conformance (§5.1.2)',
+      description: 'Distributed _NN.md files should include a type field in frontmatter for OKF conformance (§5.1.2)',
       category: 'convention',
       severity: 'warning',
       passed: typeOk,
@@ -470,7 +470,7 @@ export function validateFormatContent(
 }
 
 /**
- * Validates FORMAT document syntax.
+ * Validates iNNfo document syntax.
  * Returns a list of syntax checks (simpler than the full content validator).
  */
 export function validateFormatSyntax(
@@ -491,7 +491,7 @@ export function validateFormatSyntax(
   // Check file suffix convention
   checks.push({
     id: 'syntax-filename',
-    label: 'File ends with _F.md',
+    label: 'File ends with _NN.md',
     passed: true, // caller provides this context
   })
 
@@ -500,9 +500,9 @@ export function validateFormatSyntax(
   const hasIndex = parsed.taxonomy.length > 0
   checks.push({
     id: 'syntax-index',
-    label: '_F index section present',
+    label: '_NN index section present',
     passed: hasIndex,
-    message: hasIndex ? undefined : 'No _F index with [[wikilinks]] found',
+    message: hasIndex ? undefined : 'No _NN index with [[wikilinks]] found',
   })
 
   const hasConcepts = parsed.elements.size > 0
