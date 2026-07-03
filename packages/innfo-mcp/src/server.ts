@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * format-mcp — MCP server wrapping @innv0/format-core.
+ * innfo-mcp — MCP server wrapping @innv0/innfo-core.
  *
- * Exposes semantic FORMAT tools over stdio transport for consumption by
+ * Exposes semantic iNNfo tools over stdio transport for consumption by
  * MCP clients such as OpenCode Desktop.
  *
  * Tools:
- *   list_models   — scan models/ directory for FORMAT model files
+ *   list_models   — scan models/ directory for iNNfo model files
  *   read_model    — parse and return a model's full structure
- *   get_spec      — retrieve the FORMAT specification for a version
+ *   get_spec      — retrieve the iNNfo specification for a version
  *   get_template  — retrieve a template (business/procedures/kb)
- *   validate_model— run format-core validator against a template
+ *   validate_model— run innfo-core validator against a template
  *   apply_change  — apply an intent operation and re-validate
  */
 
@@ -32,10 +32,10 @@ import { getSpec, getTemplate } from './tools/spec.js';
 import { validateModel, applyChange } from './tools/mutate.js';
 
 /** Root directory for model scanning (defaults to `models/` under CWD) */
-const ROOT_DIR: string = process.env.FORMAT_MODELS_DIR ?? process.cwd();
+const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd();
 
 const server = new Server(
-  { name: 'format-mcp', version: '0.1.0' },
+  { name: 'innfo-mcp', version: '0.1.0' },
   { capabilities: { tools: {} } },
 );
 
@@ -44,7 +44,7 @@ const server = new Server(
 const toolDefinitions: Tool[] = [
   {
     name: 'list_models',
-    description: 'Scan the models directory and list all FORMAT models',
+    description: 'Scan the models directory and list all iNNfo models',
     inputSchema: {
       type: 'object',
       properties: {
@@ -54,7 +54,7 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'read_model',
-    description: 'Parse and return a FORMAT model\'s full structure by its id',
+    description: 'Parse and return an iNNfo model\'s full structure by its id',
     inputSchema: {
       type: 'object',
       properties: {
@@ -65,7 +65,7 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'get_spec',
-    description: 'Retrieve the FORMAT specification document for a given version',
+    description: 'Retrieve the iNNfo specification document for a given version',
     inputSchema: {
       type: 'object',
       properties: {
@@ -76,7 +76,7 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'get_template',
-    description: 'Retrieve a FORMAT template (business/procedures/kb) by name and version',
+    description: 'Retrieve an iNNfo template (business/procedures/kb) by name and version',
     inputSchema: {
       type: 'object',
       properties: {
@@ -88,7 +88,7 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'validate_model',
-    description: 'Validate a FORMAT model against its template. Provide either id (file on disk) or content (raw text)',
+    description: 'Validate an iNNfo model against its template. Provide either id (file on disk) or content (raw text)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -224,6 +224,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('Fatal error starting format-mcp:', err);
+  console.error('Fatal error starting innfo-mcp:', err);
   process.exit(1);
 });

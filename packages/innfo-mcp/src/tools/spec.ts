@@ -1,7 +1,7 @@
 /**
  * get_spec and get_template tools.
  *
- * Both use the `resolveParentChain` mechanism from format-core to
+ * Both use the `resolveParentChain` mechanism from innfo-core to
  * fetch spec/template documents from the public URL, caching them
  * locally via the spec resolution chain.
  *
@@ -20,11 +20,11 @@ import {
   resolveSpecVersionFromFilename,
   parseFrontmatter,
   listModels,
-} from '@innv0/format-core';
-import type { SpecDocument, SpecCache } from '@innv0/format-core';
+} from '@innv0/innfo-core';
+import type { SpecDocument, SpecCache } from '@innv0/innfo-core';
 
 /**
- * Base GitHub URL for the FORMAT spec repository.
+ * Base GitHub URL for the iNNfo spec repository.
  * Matches the convention used by existing models' `spec_url` field.
  */
 const SPEC_BASE_URL = 'https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs';
@@ -68,8 +68,8 @@ export async function getSpec(
   const version = await resolveVersion(rootDir, explicitVersion, modelId);
 
   // The level-1 FORMAT spec URL
-  const specUrl = `${SPEC_BASE_URL}/FORMAT_V_${version}_FORMAT.md`;
-  const specName = `FORMAT_V_${version}`;
+  const specUrl = `${SPEC_BASE_URL}/iNNfo_V_${version}_NN.md`;
+  const specName = `iNNfo_V_${version}`;
 
   try {
     // ResolveParentChain starts from the parent spec reference, so we
@@ -86,7 +86,7 @@ export async function getSpec(
   } catch (err) {
     // Try Level 0 (defiNNe) — it has no parent
     try {
-      const defiNNeUrl = `${SPEC_BASE_URL}/defiNNe_V_${version}_F.md`;
+      const defiNNeUrl = `${SPEC_BASE_URL}/defiNNe_V_${version}_NN.md`;
       const defiNNeName = `defiNNe_V_${version}`;
       const cache = await resolveParentChain(defiNNeUrl, defiNNeName, join(rootDir, '.spec-cache'));
       const spec = getFormatSpec(cache) ?? null;
@@ -127,7 +127,7 @@ export async function getTemplate(
 
     // Fallback: if resolveParentChain didn't name it as level-2 template,
     // try to read the fetched spec content directly.
-    const content = await readFile(join(rootDir, '.spec-cache', `${templateName}_F.md`), 'utf-8').catch(() => null);
+    const content = await readFile(join(rootDir, '.spec-cache', `${templateName}_NN.md`), 'utf-8').catch(() => null);
     if (content) {
       const fm = parseFrontmatter(content);
       if (fm) {

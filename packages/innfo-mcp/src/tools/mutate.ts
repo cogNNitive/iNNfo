@@ -1,7 +1,7 @@
 /**
  * validate_model and apply_change tools.
  *
- * validate_model runs the format-core validator against the resolved template.
+ * validate_model runs the innfo-core validator against the resolved template.
  * apply_change performs intent-level operations on a model and re-validates.
  * On validation failure, the file is NOT written (reject-without-writing).
  */
@@ -14,8 +14,8 @@ import {
   validateModel as coreValidate,
   getTemplate as coreGetTemplate,
   resolveSpecVersionFromFilename,
-} from '@innv0/format-core';
-import type { ParsedModel, ValidationResult } from '@innv0/format-core';
+} from '@innv0/innfo-core';
+import type { ParsedModel, ValidationResult } from '@innv0/innfo-core';
 
 import { getTemplate } from './spec.js';
 
@@ -32,12 +32,12 @@ export interface ApplyChangeResult {
 
 /**
  * Find a model file by id.
- * Tries exact path, then appending _F.md.
+ * Tries exact path, then appending _NN.md.
  */
 async function findModelFile(rootDir: string, id: string): Promise<string | null> {
   const candidates = [
     join(rootDir, id),
-    join(rootDir, `${id}_F.md`),
+    join(rootDir, `${id}_NN.md`),
   ];
   for (const fp of candidates) {
     try {
