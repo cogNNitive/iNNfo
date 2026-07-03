@@ -52,7 +52,7 @@
     </div>
 
     <!-- Active Matrix View -->
-    <div v-else-if="activeMatrix" class="flex-1 flex flex-col min-h-0 overflow-y-auto">
+    <div v-else-if="activeMatrix" class="flex-1 flex flex-col min-h-0">
       <div class="mb-4 flex items-center justify-between">
         <div class="flex items-center gap-1.5 flex-wrap">
           <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Matrix:</span>
@@ -84,120 +84,194 @@
         </span>
       </div>
 
-      <!-- Relational Data Table -->
-      <div class="border border-slate-200 dark:border-slate-700 rounded-lg overflow-x-auto max-w-full">
-        <table class="min-w-full border-collapse text-xs">
-          <thead class="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-700">
-            <tr>
-              <th class="border-r border-slate-200 dark:border-slate-700 px-4 py-3 text-left font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider sticky left-0 bg-slate-50 dark:bg-slate-900/60 min-w-[150px]">
-                <div class="flex items-center gap-1 flex-wrap">
-                  <BlockPill kind="concept" :concept-type="activeMatrix.source" />
-                  <span class="text-slate-400 dark:text-slate-500 font-normal">\</span>
-                  <BlockPill kind="concept" :concept-type="activeMatrix.target" />
-                </div>
-              </th>
-              <th
-                v-for="col in columns"
-                :key="col"
-                class="px-3 py-3 text-center min-w-[100px] border-r border-slate-100 dark:border-slate-800"
-              >
-                <BlockPill kind="instance" :concept-type="activeMatrix.target" :name="col" :interactive="true" :block-id="resolveBlockId(col, activeMatrix.target)" />
-              </th>
-              <th v-if="!columns.length" class="px-3 py-3 text-center font-bold text-slate-400 dark:text-slate-500">
-                No items defined in {{ activeMatrix.target }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
-            <tr v-for="row in rows" :key="row">
-              <td class="border-r border-slate-200 dark:border-slate-700 px-4 py-2.5 sticky left-0 bg-white dark:bg-slate-900 shadow-2xs min-w-[150px]">
-                <BlockPill kind="instance" :concept-type="activeMatrix.source" :name="row" :interactive="true" :block-id="resolveBlockId(row, activeMatrix.source)" />
-              </td>
+      <!-- Virtual Scrolling Grid -->
+      <div class="border border-slate-200 dark:border-slate-700 rounded-lg flex-1 flex flex-col overflow-hidden min-h-0">
 
-              <td
-                v-for="col in columns"
-                :key="col"
-                class="px-2 py-2 text-center border-r border-slate-100 dark:border-slate-800"
-                :class="getHeatmapClasses(row, col)"
+        <!-- ── Header Row (sticky column labels) ── -->
+        <div class="flex shrink-0 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60">
+          <!-- Corner cell -->
+          <div
+            class="shrink-0 flex items-center gap-1 px-4 py-3 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs"
+            :style="{ width: FIRST_COL_WIDTH + 'px', minWidth: FIRST_COL_WIDTH + 'px' }"
+          >
+            <BlockPill kind="concept" :concept-type="activeMatrix.source" />
+            <span class="text-slate-400 dark:text-slate-500 font-normal">\</span>
+            <BlockPill kind="concept" :concept-type="activeMatrix.target" />
+          </div>
+          <!-- Column header virtual scroll overlay -->
+          <div class="overflow-hidden flex-1 relative" style="scrollbar-width: none;">
+            <div
+              v-if="columns.length"
+              :style="{ height: HEADER_HEIGHT + 'px', position: 'relative', width: colTotalSize + 'px' }"
+            >
+              <div
+                v-for="vCol in colVirtualizer.getVirtualItems()"
+                :key="'hc-' + String(vCol.key)"
+                class="absolute top-0 flex items-center justify-center px-3 py-3 border-r border-slate-100 dark:border-slate-800 text-xs"
+                :style="{
+                  left: 0,
+                  width: colWidth + 'px',
+                  height: HEADER_HEIGHT + 'px',
+                  transform: 'translateX(' + (vCol.start - scrollLeft) + 'px)',
+                }"
               >
-                <!-- 1. Widget Boolean Checkbox -->
-                <div v-if="activeMatrix.widgetType === 'boolean'" class="flex items-center justify-center">
+                <BlockPill
+                  kind="instance"
+                  :concept-type="activeMatrix.target"
+                  :name="columns[vCol.index]"
+                  :interactive="true"
+                  :block-id="resolveBlockId(columns[vCol.index], activeMatrix.target)"
+                />
+              </div>
+            </div>
+            <div v-else class="px-3 py-3 text-center font-bold text-slate-400 dark:text-slate-500 text-xs">
+              No items defined in {{ activeMatrix.target }}
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Body (first column + scrollable grid) ── -->
+        <div class="flex flex-1 min-h-0">
+
+          <!-- First column (row labels, synced with vertical scroll) -->
+          <div
+            class="shrink-0 overflow-hidden border-r border-slate-200 dark:border-slate-700 relative"
+            :style="{ width: FIRST_COL_WIDTH + 'px' }"
+          >
+            <div
+              v-if="rows.length"
+              :style="{ height: rowTotalSize + 'px', position: 'relative' }"
+            >
+              <div
+                v-for="vRow in rowVirtualizer.getVirtualItems()"
+                :key="'row-' + String(vRow.key)"
+                class="absolute left-0 right-0 flex items-center px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs text-xs"
+                :style="{
+                  top: 0,
+                  height: ROW_HEIGHT + 'px',
+                  transform: 'translateY(' + (vRow.start - scrollTop) + 'px)',
+                }"
+              >
+                <BlockPill
+                  kind="instance"
+                  :concept-type="activeMatrix.source"
+                  :name="rows[vRow.index]"
+                  :interactive="true"
+                  :block-id="resolveBlockId(rows[vRow.index], activeMatrix.source)"
+                />
+              </div>
+            </div>
+            <div v-else class="text-center text-slate-400 dark:text-slate-500 text-xs italic py-6">
+              No items defined in {{ activeMatrix.source }}
+            </div>
+          </div>
+
+          <!-- Scrollable grid (both axes) -->
+          <div
+            ref="scrollRef"
+            class="flex-1 overflow-auto"
+            @scroll="onMatrixScroll"
+          >
+            <div
+              v-if="rows.length && columns.length"
+              :style="{ height: rowTotalSize + 'px', width: colTotalSize + 'px', position: 'relative' }"
+            >
+              <div
+                v-for="vRow in rowVirtualizer.getVirtualItems()"
+                :key="'br-' + String(vRow.key)"
+                class="absolute"
+                :style="{ top: 0, height: ROW_HEIGHT + 'px', transform: 'translateY(' + vRow.start + 'px)' }"
+              >
+                <div
+                  v-for="vCol in colVirtualizer.getVirtualItems()"
+                  :key="'bc-' + String(vRow.key) + '-' + String(vCol.key)"
+                  class="absolute flex items-center justify-center px-2 py-2 border-r border-b border-slate-100 dark:border-slate-800"
+                  :class="getHeatmapClasses(rows[vRow.index], columns[vCol.index])"
+                  :style="{ left: 0, width: colWidth + 'px', height: ROW_HEIGHT + 'px', transform: 'translateX(' + vCol.start + 'px)' }"
+                >
+                  <!-- 1. Widget Boolean Checkbox -->
+                  <div v-if="activeMatrix.widgetType === 'boolean'" class="flex items-center justify-center">
+                    <input
+                      type="checkbox"
+                      :checked="getVal(rows[vRow.index], columns[vCol.index]) === 'X' || getVal(rows[vRow.index], columns[vCol.index]) === true"
+                      @change="setVal(rows[vRow.index], columns[vCol.index], ($event.target as HTMLInputElement).checked ? 'X' : '-')"
+                      class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary cursor-pointer"
+                    >
+                  </div>
+
+                  <!-- 2. Widget Cycle Buttons -->
+                  <button
+                    v-else-if="activeMatrix.widgetType === 'cycle'"
+                    @click="rotateCycle(rows[vRow.index], columns[vCol.index])"
+                    :class="[
+                      getCycleBgColor(getVal(rows[vRow.index], columns[vCol.index])),
+                      'px-2 py-1 rounded border text-xs font-bold w-full transition-all cursor-pointer'
+                    ]"
+                  >
+                    {{ getVal(rows[vRow.index], columns[vCol.index]) === '-' ? '' : getVal(rows[vRow.index], columns[vCol.index]) }}
+                  </button>
+
+                  <!-- 3. Widget Rating Scale -->
+                  <select
+                    v-else-if="activeMatrix.widgetType === 'scale'"
+                    :value="getVal(rows[vRow.index], columns[vCol.index]) === '-' ? '' : getVal(rows[vRow.index], columns[vCol.index])"
+                    @change="setVal(rows[vRow.index], columns[vCol.index], ($event.target as HTMLSelectElement).value || '-')"
+                    class="border rounded px-1.5 py-1 text-xs w-full text-center outline-none focus:ring-1 focus:ring-primary border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    <option value="">-</option>
+                    <option v-for="num in scaleRange" :key="num" :value="num">{{ num }}</option>
+                  </select>
+
+                  <!-- 4. Widget Custom Set Options -->
+                  <select
+                    v-else-if="activeMatrix.widgetType === 'set'"
+                    :value="getVal(rows[vRow.index], columns[vCol.index]) === '-' ? '' : getVal(rows[vRow.index], columns[vCol.index])"
+                    @change="setVal(rows[vRow.index], columns[vCol.index], ($event.target as HTMLSelectElement).value || '-')"
+                    class="border rounded px-1.5 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    <option value="">-</option>
+                    <option v-for="opt in getSetOptionsList()" :key="opt" :value="opt">{{ opt }}</option>
+                  </select>
+
+                  <!-- 5. Widget Free Text -->
                   <input
-                    type="checkbox"
-                    :checked="getVal(row, col) === 'X' || getVal(row, col) === true"
-                    @change="setVal(row, col, ($event.target as HTMLInputElement).checked ? 'X' : '-')"
-                    class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary cursor-pointer"
+                    v-else-if="activeMatrix.widgetType === 'text'"
+                    type="text"
+                    :value="getVal(rows[vRow.index], columns[vCol.index]) === '-' ? '' : getVal(rows[vRow.index], columns[vCol.index])"
+                    @input="setVal(rows[vRow.index], columns[vCol.index], ($event.target as HTMLInputElement).value || '-')"
+                    placeholder="-"
+                    class="border rounded px-1.5 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300"
                   >
                 </div>
+              </div>
+            </div>
+            <div v-else-if="!rows.length" class="text-center text-slate-400 dark:text-slate-500 text-xs italic py-6">
+              No items defined in {{ activeMatrix.source }}. Make sure to add items to the hierarchy tree.
+            </div>
+          </div>
 
-                <!-- 2. Widget Cycle Buttons -->
-                <button
-                  v-else-if="activeMatrix.widgetType === 'cycle'"
-                  @click="rotateCycle(row, col)"
-                  :class="[
-                    getCycleBgColor(getVal(row, col)),
-                    'px-2 py-1 rounded border text-xs font-bold w-full transition-all cursor-pointer'
-                  ]"
-                >
-                  {{ getVal(row, col) === '-' ? '' : getVal(row, col) }}
-                </button>
-
-                <!-- 3. Widget Rating Scale -->
-                <select
-                  v-else-if="activeMatrix.widgetType === 'scale'"
-                  :value="getVal(row, col) === '-' ? '' : getVal(row, col)"
-                  @change="setVal(row, col, ($event.target as HTMLSelectElement).value || '-')"
-                  class="border rounded px-1.5 py-1 text-xs w-full text-center outline-none focus:ring-1 focus:ring-primary border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300"
-                >
-                  <option value="">-</option>
-                  <option v-for="num in scaleRange" :key="num" :value="num">{{ num }}</option>
-                </select>
-
-                <!-- 4. Widget Custom Set Options -->
-                <select
-                  v-else-if="activeMatrix.widgetType === 'set'"
-                  :value="getVal(row, col) === '-' ? '' : getVal(row, col)"
-                  @change="setVal(row, col, ($event.target as HTMLSelectElement).value || '-')"
-                  class="border rounded px-1.5 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300"
-                >
-                  <option value="">-</option>
-                  <option v-for="opt in getSetOptionsList()" :key="opt" :value="opt">{{ opt }}</option>
-                </select>
-
-                <!-- 5. Widget Free Text -->
-                <input
-                  v-else-if="activeMatrix.widgetType === 'text'"
-                  type="text"
-                  :value="getVal(row, col) === '-' ? '' : getVal(row, col)"
-                  @input="setVal(row, col, ($event.target as HTMLInputElement).value || '-')"
-                  placeholder="-"
-                  class="border rounded px-1.5 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300"
-                >
-              </td>
-            </tr>
-            <tr v-if="!rows.length">
-              <td :colspan="columns.length + 1" class="text-center text-slate-400 dark:text-slate-500 text-xs italic py-6">
-                No items defined in {{ activeMatrix.source }}. Make sure to add items to the hierarchy tree.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import { useVirtualizer } from '@tanstack/vue-virtual';
 import { Copy, ChevronDown } from 'lucide-vue-next';
 import { useModelStore } from '../../stores/modelStore';
 import { useUiStore } from '../../stores/uiStore';
 import BlockPill from './BlockPill.vue';
 import MatrixPill from './MatrixPill.vue';
 import Badge from '../ui/Badge.vue';
-import { findNodeByName } from '../../utils/tree';
-import { slugify } from '../../utils/sanitize';
 import { commitFieldValue } from '../../shared/provenance';
+
+// ── Constants ──
+const ROW_HEIGHT = 48;
+const HEADER_HEIGHT = 40;
+const FIRST_COL_WIDTH = 150;
+const OVERSCAN = 3;
 
 const props = defineProps<{
   matrixIndex: number;
@@ -285,6 +359,14 @@ const columns = computed(() => {
     .map(n => n.name);
 });
 
+// ── Column width from params (default 120px) ──
+const colWidth = computed(() => {
+  if (!activeMatrix.value) return 120;
+  const params = activeMatrix.value.params;
+  const match = params?.match(/colWidth:(\d+)/);
+  return match ? parseInt(match[1]) : 120;
+});
+
 const scaleRange = computed(() => {
   if (!activeMatrix.value) return [];
   const params = activeMatrix.value.params;
@@ -295,6 +377,72 @@ const scaleRange = computed(() => {
   const range: number[] = [];
   for (let i = min; i <= max; i++) range.push(i);
   return range;
+});
+
+// ── Virtual Scroller Setup ──
+const scrollRef = ref<HTMLElement | null>(null);
+const scrollLeft = ref(0);
+const scrollTop = ref(0);
+
+const rowVirtualizer = useVirtualizer(computed(() => ({
+  count: rows.value.length,
+  getScrollElement: () => scrollRef.value,
+  estimateSize: () => ROW_HEIGHT,
+  overscan: OVERSCAN,
+})));
+
+const colVirtualizer = useVirtualizer(computed(() => ({
+  horizontal: true,
+  count: columns.value.length,
+  getScrollElement: () => scrollRef.value,
+  estimateSize: () => colWidth.value,
+  overscan: OVERSCAN,
+})));
+
+const colTotalSize = computed(() => colVirtualizer.value.getTotalSize());
+const rowTotalSize = computed(() => rowVirtualizer.value.getTotalSize());
+
+// ── Scroll position tracking per matrix ──
+const scrollPositions = new Map<string, { scrollTop: number; scrollLeft: number }>();
+
+function onMatrixScroll() {
+  const el = scrollRef.value;
+  if (!el) return;
+  scrollLeft.value = el.scrollLeft;
+  scrollTop.value = el.scrollTop;
+
+  if (activeMatrixIndex.value < 0) return;
+  const name = matrixDefs.value[activeMatrixIndex.value]?.name;
+  if (name) {
+    scrollPositions.set(name, { scrollTop: el.scrollTop, scrollLeft: el.scrollLeft });
+  }
+}
+
+// Save/restore scroll position on matrix switch
+watch(activeMatrixIndex, (newIdx, oldIdx) => {
+  const el = scrollRef.value;
+  if (!el) return;
+
+  const defs = matrixDefs.value;
+
+  // Save old position
+  if (oldIdx >= 0 && oldIdx < defs.length) {
+    scrollPositions.set(defs[oldIdx].name, {
+      scrollTop: el.scrollTop,
+      scrollLeft: el.scrollLeft,
+    });
+  }
+
+  // Restore or reset new position
+  if (newIdx >= 0 && newIdx < defs.length) {
+    const pos = scrollPositions.get(defs[newIdx].name);
+    nextTick(() => {
+      if (scrollRef.value) {
+        scrollRef.value.scrollTop = pos?.scrollTop ?? 0;
+        scrollRef.value.scrollLeft = pos?.scrollLeft ?? 0;
+      }
+    });
+  }
 });
 
 // ── Matrix values stored as fields on root node ──
@@ -324,6 +472,7 @@ const setVal = (row: string, col: string, value: string | number | boolean) => {
   emit('cell-change', key, value);
 };
 
+// ── Value distribution iterates ALL cells, not just visible ──
 const valueDistribution = computed(() => {
   if (!activeMatrix.value || !rows.value.length || !columns.value.length) return {} as Record<string, number>;
   const counts: Record<string, number> = {};
@@ -366,8 +515,6 @@ const getHeatmapClasses = (row: string, col: string): string => {
   return getCycleBgColor(val);
 };
 
-/** Alias to satisfy template callback type inference. */
-
 // ── Utility functions ──
 const getSetOptionsList = (): string[] => {
   if (!activeMatrix.value) return [];
@@ -382,11 +529,11 @@ const rotateCycle = (row: string, col: string) => {
   if (options.length === 0) {
     // Default cycle: 1-2-3-4-5
     const defaultCycle = ['1', '2', '3', '4', '5'];
-    const idx = current === '-' ? 0 : defaultCycle.indexOf(String(current));
+    const idx = current === '-' ? -1 : defaultCycle.indexOf(String(current));
     const next = idx >= defaultCycle.length - 1 ? '-' : defaultCycle[idx + 1];
     setVal(row, col, next);
   } else {
-    const idx = current === '-' ? 0 : options.indexOf(String(current));
+    const idx = current === '-' ? -1 : options.indexOf(String(current));
     const next = idx >= options.length - 1 ? '-' : options[idx + 1];
     setVal(row, col, next);
   }
