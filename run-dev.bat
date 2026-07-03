@@ -11,7 +11,7 @@ echo.
 
 REM ── Kill any previous dev windows (targeted, not all node.exe!) ──
 echo   Cleaning up previous dev servers...
-taskkill /fi "WINDOWTITLE eq format-editor*" /f >nul 2>&1
+taskkill /fi "WINDOWTITLE eq innfo-editor*" /f >nul 2>&1
 taskkill /fi "WINDOWTITLE eq cogNNitive - docs*" /f >nul 2>&1
 timeout /t 1 /nobreak >nul
 echo   Done.
@@ -29,11 +29,11 @@ if not exist "%ROOT%node_modules" (
     echo.
 )
 
-REM ── Pre-build format-core (required by format-editor) ──
-echo   Building @innv0/format-core...
-cd /d "%ROOT%packages\format-core" && call npx tsc
+REM ── Pre-build innfo-core (required by innfo-editor) ──
+echo   Building @innv0/innfo-core...
+cd /d "%ROOT%packages\innfo-core" && call npx tsc
 if %ERRORLEVEL% NEQ 0 (
-    echo   ERROR: format-core build failed!
+    echo   ERROR: innfo-core build failed!
     pause
     exit /b 1
 )
@@ -42,8 +42,8 @@ echo.
 echo Starting development servers...
 echo.
 
-echo   [format-editor] http://localhost:5174
-start "format-editor" cmd /c "title format-editor && cd /d "%ROOT%" && npm run dev -w @innv0/format-editor -- --port 5174 --host"
+echo   [innfo-editor] http://localhost:5174
+start "innfo-editor" cmd /c "title innfo-editor && cd /d "%ROOT%" && npm run dev -w @innv0/innfo-editor -- --port 5174 --host"
 
 echo   [docs]          http://localhost:8080
 start "cogNNitive - docs" cmd /c "title cogNNitive - docs && cd /d "%ROOT%" && npx http-server docs/ -p 8080 -c-1 --silent"
@@ -51,7 +51,7 @@ start "cogNNitive - docs" cmd /c "title cogNNitive - docs && cd /d "%ROOT%" && n
 echo.
 echo +----------------------------------------------------+
 echo ^|  Server            Window Title               URL  ^|
-echo ^|  format-editor   - format-editor    - http://localhost:5174 ^|
+echo ^|  innfo-editor    - innfo-editor     - http://localhost:5174 ^|
 echo ^|  docs            - cogNNitive - docs - http://localhost:8080 ^|
 echo +----------------------------------------------------+
 echo.
@@ -62,7 +62,7 @@ pause >nul
 
 echo.
 echo Stopping all servers...
-taskkill /fi "WINDOWTITLE eq format-editor" /f >nul 2>&1
+taskkill /fi "WINDOWTITLE eq innfo-editor" /f >nul 2>&1
 taskkill /fi "WINDOWTITLE eq cogNNitive - docs" /f >nul 2>&1
 echo Done.
 echo.
