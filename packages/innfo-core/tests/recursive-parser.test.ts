@@ -117,6 +117,38 @@ describe('recursiveParse (index.md-driven)', () => {
       expect(problemOne).toBeDefined();
       expect(problemOne!.kind).toBe('element');
     });
+
+    it('parses the hidden marker form (`<!-- _NN -->`) identically to the visible form', async () => {
+      // Spec §8: the hidden form keeps the marker invisible in rendered
+      // Markdown while the heading/bullet text renders normally. The parser
+      // must decompose it exactly like the visible `# _NN` / `* _NN` form.
+      const modelContent = makeModel('Hidden Model', `
+# <!-- _NN --> index
+
+* [[Problems]]
+
+# <!-- _NN --> Problems
+
+* <!-- _NN Problems: --> Problem One
+  Description of problem one.
+* <!-- _NN Problems: --> Problem Two
+  Description of problem two.
+`);
+
+      const root = fakeDir('workspace', [
+        ['index.md', fakeFile('index.md', makeIndex(['hidden_NN.md']))],
+        ['hidden_NN.md', fakeFile('hidden_NN.md', modelContent)],
+      ]);
+
+      const result = await recursiveParse(root);
+      expect(result.issues).toHaveLength(0);
+
+      const problemOne = Object.values(result.nodes).find(n => n.name === 'Problem One');
+      const problemTwo = Object.values(result.nodes).find(n => n.name === 'Problem Two');
+      expect(problemOne).toBeDefined();
+      expect(problemOne!.kind).toBe('element');
+      expect(problemTwo).toBeDefined();
+    });
   });
 
   describe('FR-001: Missing index.md', () => {

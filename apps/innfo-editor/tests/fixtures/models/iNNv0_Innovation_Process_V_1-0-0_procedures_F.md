@@ -10,7 +10,7 @@ mode: "FILE"
 template: "procedures"
 ---
 > [!NOTE]> This is a **FORMAT document** G�� a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
-# <!-- block: concepts --> index
+# _NN index
 * [[procedure]]
 * [[roles]]
 * [[work]]
@@ -18,30 +18,30 @@ template: "procedures"
 * [[tools]]
 * [[position]]
 * [[person]]
-# <!-- block: concepts --> procedureThe iNNv0 innovation process is an early-stage innovation management framework structured in two dimensions: **Design** (strategic foundations) and **Execution** (tactical implementation). It focuses on identifying and implementing high-value innovation opportunities with minimal resources, enabling organizations to start building innovation capacity immediately.The process follows a sequential path: assess maturity, describe the organization, plan innovation management, design programs, manage opportunities, and track initiatives. Each step feeds into the next, with AI-powered tools accelerating diagnostics, opportunity identification, ideation, and process optimization.
-# <!-- block: concepts --> roles
-* <!-- block: roles --> Innovation Manager
+# _NN procedureThe iNNv0 innovation process is an early-stage innovation management framework structured in two dimensions: **Design** (strategic foundations) and **Execution** (tactical implementation). It focuses on identifying and implementing high-value innovation opportunities with minimal resources, enabling organizations to start building innovation capacity immediately.The process follows a sequential path: assess maturity, describe the organization, plan innovation management, design programs, manage opportunities, and track initiatives. Each step feeds into the next, with AI-powered tools accelerating diagnostics, opportunity identification, ideation, and process optimization.
+# _NN roles
+* _NN roles: Innovation Manager
 ```yaml
   scope: internal
 ```
 Drives the overall innovation process, coordinates across dimensions, and ensures alignment with strategic goals.
-* <!-- block: roles --> Team Member
+* _NN roles: Team Member
 ```yaml
   scope: internal
 ```
 Participates in assessments, ideation, and execution of innovation initiatives within the organization.
-* <!-- block: roles --> External Consultant
+* _NN roles: External Consultant
 ```yaml
   scope: external
 ```
 Provides specialized expertise, facilitates maturity assessments, and guides program design from an outside perspective.
-* <!-- block: roles --> Stakeholder
+* _NN roles: Stakeholder
 ```yaml
   scope: external
 ```
 Sponsors innovation efforts, provides strategic direction, and validates outcomes against business objectives.
-# <!-- block: concepts --> work
-1. <!-- block: work --> Assess Innovation Maturity
+# _NN work
+1. _NN work: Assess Innovation Maturity
 ```yaml
   step_type: task
   next: Describe Organization
@@ -50,7 +50,7 @@ Sponsors innovation efforts, provides strategic direction, and validates outcome
   output_status: final
 ```
 Conduct a focused diagnosis using the assessmeNNt tool to determine the organization's current state of maturity in innovation management. AI-powered assessment forms enable quick, accurate diagnostics.
-2. <!-- block: work --> Describe Organization
+2. _NN work: Describe Organization
 ```yaml
   step_type: task
   next: Plan Innovation Management
@@ -60,7 +60,7 @@ Conduct a focused diagnosis using the assessmeNNt tool to determine the organiza
   output_status: final
 ```
 Analyze the current business model, organizational culture, and key capabilities using the organizatioNN tool. Establishes the baseline for strategic planning.
-3. <!-- block: work --> Plan Innovation Management
+3. _NN work: Plan Innovation Management
 ```yaml
   step_type: task
   next: Design Innovation Programs
@@ -70,7 +70,7 @@ Analyze the current business model, organizational culture, and key capabilities
   output_status: final
 ```
 Create a simple, actionable strategic roadmap using the plaNN tool to elevate the organization's innovation maturity level. Aligns innovation efforts with company vision and goals.
-4. <!-- block: work --> Design Innovation Programs
+4. _NN work: Design Innovation Programs
 ```yaml
   step_type: task
   next: Manage Opportunities
@@ -80,7 +80,7 @@ Create a simple, actionable strategic roadmap using the plaNN tool to elevate th
   output_status: final
 ```
 Structure the initial tactical programs that will drive innovation using the desigNN tool. Defines scope, resources, and expected outcomes for each program.
-5. <!-- block: work --> Identify and Manage Opportunities
+5. _NN work: Identify and Manage Opportunities
 ```yaml
   step_type: task
   next: Track and Execute Initiatives
@@ -90,7 +90,7 @@ Structure the initial tactical programs that will drive innovation using the des
   output_status: final
 ```
 Systematically identify obvious and easily accessible innovation opportunities using the opportuNNities tool. AI processes large volumes of data to pinpoint high-value, low-risk opportunities.
-6. <!-- block: work --> Track and Execute Initiatives
+6. _NN work: Track and Execute Initiatives
 ```yaml
   step_type: task
   input: Opportunities Registry
@@ -99,54 +99,54 @@ Systematically identify obvious and easily accessible innovation opportunities u
   output_status: draft
 ```
 Use agile tracking to develop selected opportunities into concrete projects using the iNNitiatives tool. AI assists with ideation, process optimization, and reduces the learning curve.
-# <!-- block: concepts --> artifact
-* <!-- block: artifact --> Maturity Assessment Report
+# _NN artifact
+* _NN artifact: Maturity Assessment Report
   Output of the maturity assessment step. Contains the organization's current innovation maturity level, strengths, gaps, and prioritized improvement areas.
-* <!-- block: artifact --> Organization Description Document
+* _NN artifact: Organization Description Document
   Captures the business model analysis, organizational culture assessment, and key capabilities inventory. Serves as the baseline for strategic planning.
-* <!-- block: artifact --> Innovation Management Plan
+* _NN artifact: Innovation Management Plan
   Strategic roadmap outlining initiatives, timelines, resources, and expected maturity progression. Aligns innovation goals with business strategy.
-* <!-- block: artifact --> Program Design Document
+* _NN artifact: Program Design Document
   Defines the structure, scope, and resourcing of each innovation program. Includes success criteria, milestones, and assigned responsibilities.
-* <!-- block: artifact --> Opportunities Registry
+* _NN artifact: Opportunities Registry
   Curated list of identified innovation opportunities with prioritization scores, resource estimates, and potential impact assessments.
-* <!-- block: artifact --> Initiative Tracking Board
+* _NN artifact: Initiative Tracking Board
   Agile board tracking the development of selected opportunities into concrete projects. Includes status, blockers, progress metrics, and deliverables.
-# <!-- block: concepts --> tools
-* <!-- block: tools --> assessmeNNt
+# _NN tools
+* _NN tools: assessmeNNt
   AI-powered assessment tool that conducts quick, accurate diagnosis of an organization's maturity level in innovation management.
-* <!-- block: tools --> organizatioNN
+* _NN tools: organizatioNN
   Tool for concise analysis of the current business model, organizational culture, and key capabilities. Establishes the innovation baseline.
-* <!-- block: tools --> plaNN
+* _NN tools: plaNN
   Strategic planning tool that generates a simple, actionable roadmap to elevate the organization's innovation maturity level.
-* <!-- block: tools --> desigNN
+* _NN tools: desigNN
   Tool for structuring initial innovation programs, defining scope, resources, and expected outcomes.
-* <!-- block: tools --> opportuNNities
+* _NN tools: opportuNNities
   Systematic opportunity identification tool that leverages AI to process data, identify patterns and trends, and pinpoint high-value, low-risk opportunities.
-* <!-- block: tools --> iNNitiatives
+* _NN tools: iNNitiatives
   Agile tracking tool that manages the development of selected opportunities into concrete projects with AI-assisted ideation and process optimization.
-# <!-- block: concepts --> position
-* <!-- block: position --> Innovation Lead
+# _NN position
+* _NN position: Innovation Lead
   Owns the end-to-end innovation process. Coordinates between Design and Execution dimensions and reports to stakeholders.
-* <!-- block: position --> Program Manager
+* _NN position: Program Manager
   Manages individual innovation programs within the Execution dimension. Tracks initiatives, resources, and timelines.
-* <!-- block: position --> Innovation Analyst
+* _NN position: Innovation Analyst
   Conducts maturity assessments, organization descriptions, and opportunity identification. Operates the AI tools.
-* <!-- block: position --> Domain Expert
+* _NN position: Domain Expert
   Provides subject matter expertise during opportunity assessment and program design. May be internal or external.
-# <!-- block: concepts --> person
-* <!-- block: person --> Alex Chen
+# _NN person
+* _NN person: Alex Chen
   Innovation Lead responsible for the overall process. Coordinates across both dimensions and ensures strategic alignment.
-* <!-- block: person --> Sam Rivera
+* _NN person: Sam Rivera
   Program Manager overseeing the execution of innovation programs and tracking initiative progress.
-* <!-- block: person --> Jordan Taylor
+* _NN person: Jordan Taylor
   Innovation Analyst operating the AI tools (assessmeNNt, organizatioNN, opportuNNities) and producing assessment outputs.
-* <!-- block: person --> Pat Morgan
+* _NN person: Pat Morgan
   Domain Expert consulted during opportunity evaluation and program design phases.
-# <!-- block: matrices --> item-markers matrix| Item \ Marker | complexity || :--- | :---: || Innovation Manager | - || Team Member | - || External Consultant | - || Stakeholder | - || Assess Innovation Maturity | 2 || Describe Organization | 2 || Plan Innovation Management | 3 || Design Innovation Programs | 3 || Identify and Manage Opportunities | 2 || Track and Execute Initiatives | 2 || Maturity Assessment Report | 1 || Organization Description Document | 1 || Innovation Management Plan | 3 || Program Design Document | 2 || Opportunities Registry | 2 || Initiative Tracking Board | 2 || assessmeNNt | 1 || organizatioNN | 1 || plaNN | 2 || desigNN | 2 || opportuNNities | 2 || iNNitiatives | 2 || Innovation Lead | - || Program Manager | - || Innovation Analyst | - || Domain Expert | - || Alex Chen | - || Sam Rivera | - || Jordan Taylor | - || Pat Morgan | - |
-# <!-- block: matrices --> metamatrix| Matrix Name | Source | Target | Widget Type | Widget Parameters || :--- | :--- | :--- | :--- | :--- || work-roles matrix | work | roles | cycle | Responsible;Accountable;Consulted;Informed || positions-roles matrix | position | roles | cycle | Assumes || persons-positions matrix | person | position | cycle | Occupies || work-tools matrix | work | tools | cycle | Uses || work-artifacts matrix | work | artifact | cycle | Creates;Modifies;Validates;Reviews || item-markers matrix | elements | markers | cycle | - |
-# <!-- block: matrices --> work-roles matrix| work \ roles | Innovation Manager | Team Member | External Consultant | Stakeholder || :--- | :---: | :---: | :---: | :---: || Assess Innovation Maturity | Accountable | Consulted | Responsible | Informed || Describe Organization | Accountable | Responsible | Consulted | Informed || Plan Innovation Management | Responsible | Consulted | Accountable | Informed || Design Innovation Programs | Consulted | Informed | Responsible | Accountable || Identify and Manage Opportunities | Accountable | Responsible | Consulted | Informed || Track and Execute Initiatives | Accountable | Responsible | Informed | Consulted |
-# <!-- block: matrices --> positions-roles matrix| position \ roles | Innovation Manager | Team Member | External Consultant | Stakeholder || :--- | :---: | :---: | :---: | :---: || Innovation Lead | Assumes | - | - | - || Program Manager | - | Assumes | - | - || Innovation Analyst | - | Assumes | - | - || Domain Expert | - | - | Assumes | - |
-# <!-- block: matrices --> persons-positions matrix| person \ position | Innovation Lead | Program Manager | Innovation Analyst | Domain Expert || :--- | :---: | :---: | :---: | :---: || Alex Chen | Occupies | - | - | - || Sam Rivera | - | Occupies | - | - || Jordan Taylor | - | - | Occupies | - || Pat Morgan | - | - | - | Occupies |
-# <!-- block: matrices --> work-tools matrix| work \ tools | assessmeNNt | organizatioNN | plaNN | desigNN | opportuNNities | iNNitiatives || :--- | :---: | :---: | :---: | :---: | :---: | :---: || Assess Innovation Maturity | Uses | - | - | - | - | - || Describe Organization | - | Uses | - | - | - | - || Plan Innovation Management | - | - | Uses | - | - | - || Design Innovation Programs | - | - | - | Uses | - | - || Identify and Manage Opportunities | - | - | - | - | Uses | - || Track and Execute Initiatives | - | - | - | - | - | Uses |
-# <!-- block: matrices --> work-artifacts matrix| work \ artifacts | Maturity Assessment Report | Organization Description Document | Innovation Management Plan | Program Design Document | Opportunities Registry | Initiative Tracking Board || :--- | :---: | :---: | :---: | :---: | :---: | :---: || Assess Innovation Maturity | Creates | - | - | - | - | - || Describe Organization | Modifies | Creates | - | - | - | - || Plan Innovation Management | - | Modifies | Creates | - | - | - || Design Innovation Programs | - | - | Modifies | Creates | - | - || Identify and Manage Opportunities | - | - | - | Modifies | Creates | - || Track and Execute Initiatives | - | - | - | - | Modifies | Creates |
+# _NN matrices: item-markers matrix| Item \ Marker | complexity || :--- | :---: || Innovation Manager | - || Team Member | - || External Consultant | - || Stakeholder | - || Assess Innovation Maturity | 2 || Describe Organization | 2 || Plan Innovation Management | 3 || Design Innovation Programs | 3 || Identify and Manage Opportunities | 2 || Track and Execute Initiatives | 2 || Maturity Assessment Report | 1 || Organization Description Document | 1 || Innovation Management Plan | 3 || Program Design Document | 2 || Opportunities Registry | 2 || Initiative Tracking Board | 2 || assessmeNNt | 1 || organizatioNN | 1 || plaNN | 2 || desigNN | 2 || opportuNNities | 2 || iNNitiatives | 2 || Innovation Lead | - || Program Manager | - || Innovation Analyst | - || Domain Expert | - || Alex Chen | - || Sam Rivera | - || Jordan Taylor | - || Pat Morgan | - |
+# _NN matrices: metamatrix| Matrix Name | Source | Target | Widget Type | Widget Parameters || :--- | :--- | :--- | :--- | :--- || work-roles matrix | work | roles | cycle | Responsible;Accountable;Consulted;Informed || positions-roles matrix | position | roles | cycle | Assumes || persons-positions matrix | person | position | cycle | Occupies || work-tools matrix | work | tools | cycle | Uses || work-artifacts matrix | work | artifact | cycle | Creates;Modifies;Validates;Reviews || item-markers matrix | elements | markers | cycle | - |
+# _NN matrices: work-roles matrix| work \ roles | Innovation Manager | Team Member | External Consultant | Stakeholder || :--- | :---: | :---: | :---: | :---: || Assess Innovation Maturity | Accountable | Consulted | Responsible | Informed || Describe Organization | Accountable | Responsible | Consulted | Informed || Plan Innovation Management | Responsible | Consulted | Accountable | Informed || Design Innovation Programs | Consulted | Informed | Responsible | Accountable || Identify and Manage Opportunities | Accountable | Responsible | Consulted | Informed || Track and Execute Initiatives | Accountable | Responsible | Informed | Consulted |
+# _NN matrices: positions-roles matrix| position \ roles | Innovation Manager | Team Member | External Consultant | Stakeholder || :--- | :---: | :---: | :---: | :---: || Innovation Lead | Assumes | - | - | - || Program Manager | - | Assumes | - | - || Innovation Analyst | - | Assumes | - | - || Domain Expert | - | - | Assumes | - |
+# _NN matrices: persons-positions matrix| person \ position | Innovation Lead | Program Manager | Innovation Analyst | Domain Expert || :--- | :---: | :---: | :---: | :---: || Alex Chen | Occupies | - | - | - || Sam Rivera | - | Occupies | - | - || Jordan Taylor | - | - | Occupies | - || Pat Morgan | - | - | - | Occupies |
+# _NN matrices: work-tools matrix| work \ tools | assessmeNNt | organizatioNN | plaNN | desigNN | opportuNNities | iNNitiatives || :--- | :---: | :---: | :---: | :---: | :---: | :---: || Assess Innovation Maturity | Uses | - | - | - | - | - || Describe Organization | - | Uses | - | - | - | - || Plan Innovation Management | - | - | Uses | - | - | - || Design Innovation Programs | - | - | - | Uses | - | - || Identify and Manage Opportunities | - | - | - | - | Uses | - || Track and Execute Initiatives | - | - | - | - | - | Uses |
+# _NN matrices: work-artifacts matrix| work \ artifacts | Maturity Assessment Report | Organization Description Document | Innovation Management Plan | Program Design Document | Opportunities Registry | Initiative Tracking Board || :--- | :---: | :---: | :---: | :---: | :---: | :---: || Assess Innovation Maturity | Creates | - | - | - | - | - || Describe Organization | Modifies | Creates | - | - | - | - || Plan Innovation Management | - | Modifies | Creates | - | - | - || Design Innovation Programs | - | - | Modifies | Creates | - | - || Identify and Manage Opportunities | - | - | - | Modifies | Creates | - || Track and Execute Initiatives | - | - | - | - | Modifies | Creates |

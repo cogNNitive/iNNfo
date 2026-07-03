@@ -13,35 +13,35 @@ mode: "FILE"
 > [!NOTE]
 > This is a **FORMAT document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain.
 
-# _F index
+# _NN index
 
 * [[Assumptions]]
 * [[Business summary]]
 * [[Problems]]
 * [[Value propositions]]
 
-# _F Business summary
+# _NN Business summary
 
 A minimal FILE-mode business model used to validate parser, resolver, and validator pipelines.
 
-# _F Problems
+# _NN Problems
 
-* _F Problems: Sample Problem
+* _NN Problems: Sample Problem
   First problem for testing.
-* _F Problems: Second Problem
+* _NN Problems: Second Problem
   Second problem demonstrating multi-instance weight concept.
 
-# _F Value propositions
+# _NN Value propositions
 
-* _F Value propositions: Core Value
+* _NN Value propositions: Core Value
   The main value we deliver.
 
-# _F Assumptions
+# _NN Assumptions
 
-* _F Assumptions: Assumption One
+* _NN Assumptions: Assumption One
   A baseline assumption for the model.
 
-# _F matrices: problems-value propositions matrix
+# _NN matrices: problems-value propositions matrix
 
 | Problems \ Value propositions | Core Value |
 | :--- | :---: |

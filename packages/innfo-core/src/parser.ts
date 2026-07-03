@@ -32,12 +32,22 @@ export function slugify(name: string): string {
     .replace(/^-+|-+$/g, '');          // trim leading/trailing hyphens
 }
 
-/** Normalize CRLF (and legacy CR) line endings to LF.
- *  Called once at every public parse entry point so downstream regexes and
- *  `split('\n')` calls never see a trailing `\r`, which breaks `$`-anchored
- *  patterns (e.g. element/index bullet markers) on CRLF-saved files. */
-function normalizeLineEndings(text: string): string {
-  return text.replace(/\r\n?/g, '\n');
+/** Normalize raw source before pattern matching. Called once at every public
+ *  parse entry point so downstream regexes and `split('\n')` calls see a
+ *  canonical form: LF line endings (a trailing `\r` breaks `$`-anchored
+ *  bullet/section patterns on CRLF-saved files) and visible `_NN` markers
+ *  (the spec's hidden `<!-- _NN --> ` form is unwrapped to `_NN `). */
+function normalizeSource(text: string): string {
+  return (
+    text
+      // CRLF/CR → LF so `$`-anchored patterns work on Windows-saved files.
+      .replace(/\r\n?/g, '\n')
+      // Unwrap the spec's *hidden* marker form (§8: `# <!-- _NN --> Name`,
+      // `* <!-- _NN Concept: --> Name`) into the visible form so the single
+      // set of `_NN` marker regexes matches both. Only comments whose content
+      // starts with `_NN` are touched; ordinary HTML comments are left intact.
+      .replace(/<!--\s*(_NN\b[^>]*?)\s*-->/g, '$1')
+  );
 }
 
 /* ── Marker patterns (_NN syntax only, V_0-2-0+) ── */
@@ -144,7 +154,7 @@ function parseYamlValue(v: string): string | number | boolean | null | unknown[]
 }
 
 export function parseFrontmatter(content: string): SpecFrontmatter | null {
-  const match = normalizeLineEndings(content).match(YAML_BLOCK_RE);
+  const match = normalizeSource(content).match(YAML_BLOCK_RE);
   if (!match) return null;
   const parsed = parseYaml(match[1]);
   // Normalize legacy parent → parent_spec (defiNNe V_0-1-0 era)
@@ -156,7 +166,7 @@ export function parseFrontmatter(content: string): SpecFrontmatter | null {
 }
 
 export function parseMarkdownTable(md: string): Record<string, string>[] {
-  const lines = normalizeLineEndings(md).split('\n').filter(l => l.trim().startsWith('|'));
+  const lines = normalizeSource(md).split('\n').filter(l => l.trim().startsWith('|'));
   if (lines.length < 2) return [];
   const header = parseTableRow(lines[0]);
   if (lines.length < 3) return [];
@@ -174,7 +184,7 @@ function parseTableRow(line: string): string[] {
 
 export function parseIndexBlock(content: string): TaxonomyEdge[] {
   const edges: TaxonomyEdge[] = [];
-  const lines = normalizeLineEndings(content).split('\n');
+  const lines = normalizeSource(content).split('\n');
   const stack: Array<{ name: string; depth: number }> = [];
 
   for (const line of lines) {
@@ -338,7 +348,7 @@ export function getSectionType(rawTitle: string): 'index' | 'concept' | 'matrix'
 }
 
 export function parseModel(content: string): ParsedModel {
-  const normalizedContent = normalizeLineEndings(content);
+  const normalizedContent = normalizeSource(content);
   const frontmatter = parseFrontmatter(normalizedContent);
   const elements = new ElementsMap();
   const matrices: MatrixData[] = [];
@@ -705,7 +715,7 @@ export function extractRelationships(
 /** Parse an Analysis Evaluations section from raw body content.
  *  Detects sections titled "Analysis" or "Evaluation" and extracts structured entries. */
 export function extractAnalysis(rawContent: string): AnalysisEntry[] {
-  const content = normalizeLineEndings(rawContent);
+  const content = normalizeSource(rawContent);
   const entries: AnalysisEntry[] = [];
   // Look for analysis/evaluation sections
   const sectionRe = /^#\s+(.*an?lisis|.*evaluation|.*analysis)(.*)$/im;

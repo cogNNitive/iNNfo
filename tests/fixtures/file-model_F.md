@@ -13,30 +13,30 @@ asset_mode: "centralized"
 > [!NOTE]
 > Modelo FILE de prueba para validación progresiva. Todo el contenido vive en un solo archivo.
 
-# _F index
+# _NN index
 
-* _F index: Business summary
-* _F index: Problems
-* _F index: Value propositions
+* _NN index: Business summary
+* _NN index: Problems
+* _NN index: Value propositions
 
-# _F Business summary
+# _NN Business summary
 
 Un modelo FILE mínimo para pruebas progresivas de la aplicación format-editor.
 
 Este modelo representa un producto SaaS imaginario llamado "TaskFlow" y contiene varios elementos que deberían aparecer en el árbol de la izquierda.
 
-# _F Problems
+# _NN Problems
 
-* _F Problems: Baja adopción
+* _NN Problems: Baja adopción
   Los usuarios no completan el onboarding porque es demasiado largo.
-* _F Problems: Costes elevados
+* _NN Problems: Costes elevados
   La infraestructura actual cuesta más del 30% de los ingresos mensuales.
-* _F Problems: Competencia agresiva
+* _NN Problems: Competencia agresiva
   Tres competidores directos lanzaron funciones similares en los últimos 6 meses.
 
-# _F Value propositions
+# _NN Value propositions
 
-* _F Value propositions: Onboarding exprés
+* _NN Value propositions: Onboarding exprés
   Reducir el onboarding de 15 minutos a 2 minutos con wizard guiado.
-* _F Value propositions: Infraestructura optimizada
+* _NN Value propositions: Infraestructura optimizada
   Migrar a serverless para reducir costes un 40%.
