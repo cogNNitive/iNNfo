@@ -1,14 +1,14 @@
 /**
- * FORMAT versioning & file-naming helpers (spec V_0-1-4 §8).
+ * FORMAT versioning & file-naming helpers (spec V_0-1-5 §8).
  *
  * Every version string in the FORMAT ecosystem uses Semantic Versioning,
  * rendered with a `V_` prefix and hyphen separators instead of dots:
- *   V_MAJOR-MINOR-PATCH   (e.g. V_0-1-4)
+ *   V_MAJOR-MINOR-PATCH   (e.g. V_0-1-5)
  *
- * A FORMAT-compliant file name MUST end with `_FORMAT.md` (§8.1):
- *   - Model document:    <ModelName>_V_x-y-z_<TemplateName>_FORMAT.md
- *   - Template/Spec:     <Name>_V_x-y-z_FORMAT.md
- *   - Old Model format:  <ModelName>_BM_V_x-y-z_FORMAT.md
+ * A FORMAT-compliant file name MUST end with `_F.md` (§8.1):
+ *   - Model document:    <ModelName>_V_x-y-z_<TemplateName>_F.md
+ *   - Template/Spec:     <Name>_V_x-y-z_F.md
+ *   - Old Model format:  <ModelName>_BM_V_x-y-z_F.md
  */
 
 export type BumpLevel = 'major' | 'minor' | 'patch';
@@ -40,8 +40,8 @@ export function formatVersionString(v: SemVer): string {
  * Returns null when the name does not match the §8.1 convention.
  */
 export function parseFormatFilename(fileName: string): ParsedFormatName | null {
-  // 1. Try New: <ModelName>_V_x-y-z_<TemplateName>_FORMAT.md
-  const newMatch = fileName.match(/^(.+?)_V_(\d+)-(\d+)-(\d+)(?:_(.+?))?_FORMAT\.md$/);
+  // 1. Try New: <ModelName>_V_x-y-z_<TemplateName>_F.md
+  const newMatch = fileName.match(/^(.+?)_V_(\d+)-(\d+)-(\d+)(?:_(.+?))?_F\.md$/);
   if (newMatch) {
     const templateName = newMatch[5];
     return {
@@ -56,8 +56,8 @@ export function parseFormatFilename(fileName: string): ParsedFormatName | null {
     };
   }
 
-  // 2. Try Old: <ModelName>_BM_V_x-y-z_FORMAT.md
-  const oldMatch = fileName.match(/^(.+?)_BM_V_(\d+)-(\d+)-(\d+)_FORMAT\.md$/);
+  // 2. Try Old: <ModelName>_BM_V_x-y-z_F.md
+  const oldMatch = fileName.match(/^(.+?)_BM_V_(\d+)-(\d+)-(\d+)_F\.md$/);
   if (oldMatch) {
     return {
       baseName: oldMatch[1],
@@ -81,7 +81,7 @@ export function buildFormatFilename(
   version: SemVer
 ): string {
   const suffix = templateName ? `_${templateName}` : '';
-  return `${baseName}_V_${version.major}-${version.minor}-${version.patch}${suffix}_FORMAT.md`;
+  return `${baseName}_V_${version.major}-${version.minor}-${version.patch}${suffix}_F.md`;
 }
 
 /** Returns a new SemVer with the requested level incremented (§8.2 SemVer rules). */

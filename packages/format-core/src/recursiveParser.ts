@@ -5,14 +5,14 @@ import type { DirectoryHandleLike, FileHandleLike } from './fs-types'
 import { resolveEffectiveMetamodel } from './metamodel'
 import type { ModelDriver } from './driver'
 
-const FORMAT_FILE_SUFFIX = '_FORMAT.md'
+const FORMAT_FILE_SUFFIX = '_F.md'
 
 /**
  * Resolves a relative graph edge target path to an absolute qualified node id.
  * Supports ../ for sibling directories, ../../ for ancestor jumps.
  */
 export function resolveGraphEdgeTarget(target: string, sourcePath: string): string {
-  const sourceDir = sourcePath.replace(/\/_FORMAT\.md$/i, '')
+  const sourceDir = sourcePath.replace(/\/_F\.md$/i, '')
   const sourceParts = sourceDir.split('/').filter(Boolean)
   const targetParts = target.split('/').filter(Boolean)
 
@@ -33,7 +33,7 @@ export function resolveGraphEdgeTarget(target: string, sourcePath: string): stri
  * back to a relative path from sourcePath.
  */
 export function resolveQualifiedIdToPath(qualifiedId: string, sourcePath: string): string {
-  const sourceParts = sourcePath.replace(/\/_FORMAT\.md$/i, '').split('/').filter(Boolean)
+  const sourceParts = sourcePath.replace(/\/_F\.md$/i, '').split('/').filter(Boolean)
   const targetParts = qualifiedId.split('/').filter(Boolean)
 
   let i = 0
@@ -313,7 +313,7 @@ export async function recursiveParse(
   let match: RegExpExecArray | null
   while ((match = wikilinkRegex.exec(body)) !== null) {
     const target = match[1].trim()
-    // Only treat wikilinks ending in _FORMAT.md as model references
+    // Only treat wikilinks ending in _F.md as model references
     if (target.endsWith(FORMAT_FILE_SUFFIX)) {
       const name = target.slice(0, -FORMAT_FILE_SUFFIX.length)
       modelRefs.push({ name, path: target })

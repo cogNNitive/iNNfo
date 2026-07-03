@@ -321,7 +321,7 @@ export interface ModelNode {
   rawSections: Record<string, string> // round-trip fidelity
   /**
    * Full original source text for root nodes (the node whose own
-   * `_FORMAT.md` file was parsed via `parseModel`). Undefined for
+   * `_F.md` file was parsed via `parseModel`). Undefined for
    * element nodes nested inside a document (they have no own file).
    * Used by the serializer for byte/structurally-equivalent no-edit
    * round-trip (R7) instead of re-deriving through `serializeModel`'s
@@ -361,7 +361,7 @@ export interface ModelNode {
   source: { path: string } // FS location for write-back
   /**
    * Indicates how this node was produced:
-   * - 'parsed': created from parsing a real _FORMAT.md document
+   * - 'parsed': created from parsing a real _F.md document
    * - 'structural': created as a structural placeholder (concept group)
    * Undefined means the node pre-dates this field (backward compatible).
    */

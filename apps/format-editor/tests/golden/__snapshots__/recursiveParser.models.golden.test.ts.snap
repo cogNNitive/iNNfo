@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`recursiveParser golden: frozen models/* fixtures > parses Comprehensive_Test_Procedure_V_1-0-0_procedures_FORMAT.md into a normalized graph snapshot 1`] = `
+exports[`recursiveParser golden: frozen models/* fixtures > parses Comprehensive_Test_Procedure_V_1-0-0_procedures_F.md into a normalized graph snapshot 1`] = `
 {
   "issueCount": 0,
   "nodeCount": 1,
@@ -21,7 +21,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses Comprehensive
 }
 `;
 
-exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-0_business_FORMAT.md into a normalized graph snapshot 1`] = `
+exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-0_business_F.md into a normalized graph snapshot 1`] = `
 {
   "issueCount": 0,
   "nodeCount": 1,
@@ -42,7 +42,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
 }
 `;
 
-exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-1_business_FORMAT.md into a normalized graph snapshot 1`] = `
+exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-1_business_F.md into a normalized graph snapshot 1`] = `
 {
   "issueCount": 0,
   "nodeCount": 1,
@@ -63,7 +63,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
 }
 `;
 
-exports[`recursiveParser golden: frozen models/* fixtures > parses Ghostbusters_V_0-1-1_business_FORMAT.md into a normalized graph snapshot 1`] = `
+exports[`recursiveParser golden: frozen models/* fixtures > parses Ghostbusters_V_0-1-1_business_F.md into a normalized graph snapshot 1`] = `
 {
   "issueCount": 0,
   "nodeCount": 39,
@@ -447,7 +447,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses Ghostbusters_
 }
 `;
 
-exports[`recursiveParser golden: frozen models/* fixtures > parses Knowledge_Management_V_1-0-0_procedures_FORMAT.md into a normalized graph snapshot 1`] = `
+exports[`recursiveParser golden: frozen models/* fixtures > parses Knowledge_Management_V_1-0-0_procedures_F.md into a normalized graph snapshot 1`] = `
 {
   "issueCount": 0,
   "nodeCount": 1,
@@ -468,7 +468,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses Knowledge_Man
 }
 `;
 
-exports[`recursiveParser golden: frozen models/* fixtures > parses Knowledge_Management_V_1-0-1_procedures_FORMAT.md into a normalized graph snapshot 1`] = `
+exports[`recursiveParser golden: frozen models/* fixtures > parses Knowledge_Management_V_1-0-1_procedures_F.md into a normalized graph snapshot 1`] = `
 {
   "issueCount": 0,
   "nodeCount": 1,
@@ -489,7 +489,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses Knowledge_Man
 }
 `;
 
-exports[`recursiveParser golden: frozen models/* fixtures > parses iNNv0_Innovation_Process_V_1-0-0_procedures_FORMAT.md into a normalized graph snapshot 1`] = `
+exports[`recursiveParser golden: frozen models/* fixtures > parses iNNv0_Innovation_Process_V_1-0-0_procedures_F.md into a normalized graph snapshot 1`] = `
 {
   "issueCount": 0,
   "nodeCount": 1,
@@ -510,7 +510,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses iNNv0_Innovat
 }
 `;
 
-exports[`recursiveParser golden: frozen models/* fixtures > parses mini-file_V_0-0-1_business_FORMAT.md into a normalized graph snapshot 1`] = `
+exports[`recursiveParser golden: frozen models/* fixtures > parses mini-file_V_0-0-1_business_F.md into a normalized graph snapshot 1`] = `
 {
   "issueCount": 0,
   "nodeCount": 5,

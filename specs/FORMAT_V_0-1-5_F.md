@@ -1,6 +1,6 @@
 ---
-specification_version: "V_0-1-4"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.4/specs/FORMAT_V_0-1-4_FORMAT.md"
+spec_version: "V_0-1-5"
+spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.5/specs/FORMAT_V_0-1-5_F.md"
 level: 1
 parent:
   name: "defiNNe_V_0-1-0"
@@ -26,6 +26,17 @@ relationship_types:
 
 > [!NOTE]
 > This is a **FORMAT document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter.
+
+## Versioning
+
+FORMAT specifications follow an immutable versioning policy:
+
+- **Published specs are frozen**. Once a specification version is released, its file is never modified. Corrections or improvements require a new spec version.
+- **Migrating a model** to a new spec version means creating a new copy of the model adapted to the new version. The old version remains in the workspace as-is, referencing its original spec.
+- **Parent chain resolution** always resolves to the version the model was authored against. A model targeting V_0-1-4 references `FORMAT_V_0-1-4_FORMAT.md` in its parent chain; a model targeting V_0-1-5 references this file (`FORMAT_V_0-1-5_F.md`).
+- **This file** follows this rule: it is published as `FORMAT_V_0-1-5_F.md` and will never be modified in-place. Any future change to the FORMAT specification will produce a new version file (e.g. `FORMAT_V_0-1-6_F.md`), and this file remains as an immutable historical record.
+
+Using the compact file suffix `_F.md` (introduced in V_0-1-5), this document replaces the earlier `_FORMAT.md` convention. Historical specs retain the `_FORMAT.md` suffix and remain frozen.
 
 # FORMAT Specification
 

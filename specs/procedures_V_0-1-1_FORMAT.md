@@ -203,7 +203,7 @@ mode: "FILE"
 Description of the overall procedure.
 
 # _F Work
-1. _F Work: Step Name
+* _F Work: Step Name
   ```yaml
   step_type: "task"
   next: "Next Step Name"

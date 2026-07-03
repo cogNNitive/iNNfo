@@ -42,102 +42,102 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 # _F Work
 
-1. _F Work: Calibración del condensador de flujo
-   ```yaml
-   step_type: "task"
-   next: "Verificación de combustible"
-   tool: "Condensador de flujo"
-   output: "Condensador calibrado"
-   output_status: "listo"
-   ```
-   Encender el sistema principal. Verificar que las luces del condensador
-   parpadeen en secuencia correcta.
+* _F Work: Calibración del condensador de flujo
+  ```yaml
+  step_type: "task"
+  next: "Verificación de combustible"
+  tool: "Condensador de flujo"
+  output: "Condensador calibrado"
+  output_status: "listo"
+  ```
+  Encender el sistema principal. Verificar que las luces del condensador
+  parpadeen en secuencia correcta.
 
-2. _F Work: Verificación de combustible
-   ```yaml
-   step_type: "task"
-   next: "Ingreso de coordenadas temporales"
-   condition: "Si el nivel de combustible es >= 100%"
-   input: "Sr. Fusión operativo"
-   output: "Nivel de combustible verificado"
-   tool: "Sr. Fusión"
-   ```
-   Verificar que la fuente de energía esté operativa.
+* _F Work: Verificación de combustible
+  ```yaml
+  step_type: "task"
+  next: "Ingreso de coordenadas temporales"
+  condition: "Si el nivel de combustible es >= 100%"
+  input: "Sr. Fusión operativo"
+  output: "Nivel de combustible verificado"
+  tool: "Sr. Fusión"
+  ```
+  Verificar que la fuente de energía esté operativa.
 
-3. _F Work: Ingreso de coordenadas temporales
-   ```yaml
-   step_type: "task"
-   next: "Abrir compuertas de flujo"
-   tool: "Pantalla de destino del DeLorean"
-   input: "Coordenadas de destino"
-   output: "Destino configurado"
-   ```
-   Ingresar fecha (DÍA/MES/AÑO) y hora exacta de destino.
+* _F Work: Ingreso de coordenadas temporales
+  ```yaml
+  step_type: "task"
+  next: "Abrir compuertas de flujo"
+  tool: "Pantalla de destino del DeLorean"
+  input: "Coordenadas de destino"
+  output: "Destino configurado"
+  ```
+  Ingresar fecha (DÍA/MES/AÑO) y hora exacta de destino.
 
-4. _F Work: Abrir compuertas de flujo
-   ```yaml
-   step_type: "task"
-   next: "Acelerar a 88 mph"
-   tool: "DeLorean DMC-12"
-   input: "Destino configurado"
-   condition: "Zona de despegue despejada"
-   ```
-   Activar secuencia de apertura de compuertas temporales.
+* _F Work: Abrir compuertas de flujo
+  ```yaml
+  step_type: "task"
+  next: "Acelerar a 88 mph"
+  tool: "DeLorean DMC-12"
+  input: "Destino configurado"
+  condition: "Zona de despegue despejada"
+  ```
+  Activar secuencia de apertura de compuertas temporales.
 
-5. _F Work: Acelerar a 88 mph
-   ```yaml
-   step_type: "task"
-   next: "Activar condensador"
-   tool: "DeLorean DMC-12"
-   condition: "Compuertas abiertas + luz verde"
-   ```
-   Acelerar hasta alcanzar EXACTAMENTE 88 millas por hora.
+* _F Work: Acelerar a 88 mph
+  ```yaml
+  step_type: "task"
+  next: "Activar condensador"
+  tool: "DeLorean DMC-12"
+  condition: "Compuertas abiertas + luz verde"
+  ```
+  Acelerar hasta alcanzar EXACTAMENTE 88 millas por hora.
 
-6. _F Work: Activar condensador
-   ```yaml
-   step_type: "event"
-   next: "Verificar llegada"
-   tool: "Condensador de flujo"
-   output: "Vórtice temporal generado"
-   ```
-   Al alcanzar 88 mph, el condensador genera el vórtice. El vehículo viaja
-   a través del tiempo.
+* _F Work: Activar condensador
+  ```yaml
+  step_type: "event"
+  next: "Verificar llegada"
+  tool: "Condensador de flujo"
+  output: "Vórtice temporal generado"
+  ```
+  Al alcanzar 88 mph, el condensador genera el vórtice. El vehículo viaja
+  a través del tiempo.
 
-7. _F Work: Verificar llegada
-   ```yaml
-   step_type: "task"
-   next: "Ocultar el DeLorean"
-   condition: "Fecha y lugar de destino confirmados"
-   input: "Coordenadas de llegada"
-   tool: "Mapa local"
-   ```
-   Confirmar visualmente la fecha esperada.
+* _F Work: Verificar llegada
+  ```yaml
+  step_type: "task"
+  next: "Ocultar el DeLorean"
+  condition: "Fecha y lugar de destino confirmados"
+  input: "Coordenadas de llegada"
+  tool: "Mapa local"
+  ```
+  Confirmar visualmente la fecha esperada.
 
-8. _F Work: Ocultar el DeLorean
-   ```yaml
-   step_type: "task"
-   tool: "Generador de moscas"
-   output: "DeLorean oculto"
-   ```
-   Buscar un lugar seguro. Activar el generador de moscas.
+* _F Work: Ocultar el DeLorean
+  ```yaml
+  step_type: "task"
+  tool: "Generador de moscas"
+  output: "DeLorean oculto"
+  ```
+  Buscar un lugar seguro. Activar el generador de moscas.
 
-9. _F Work: Ejecutar misión
-   ```yaml
-   step_type: "task"
-   condition: "Misión completada o peligro inminente"
-   tool: "Reloj de pulsera sincronizado"
-   ```
-   Realizar la actividad planificada.
+* _F Work: Ejecutar misión
+  ```yaml
+  step_type: "task"
+  condition: "Misión completada o peligro inminente"
+  tool: "Reloj de pulsera sincronizado"
+  ```
+  Realizar la actividad planificada.
 
-10. _F Work: Regresar a la línea temporal original
-    ```yaml
-    step_type: "task"
-    condition: "Tripulación a bordo + 88 mph alcanzable"
-    tool: "DeLorean DMC-12"
-    input: "Coordenadas de origen"
-    output: "Regreso exitoso"
-    ```
-    Repetir el proceso con coordenadas de origen. Documentar anomalías.
+* _F Work: Regresar a la línea temporal original
+  ```yaml
+  step_type: "task"
+  condition: "Tripulación a bordo + 88 mph alcanzable"
+  tool: "DeLorean DMC-12"
+  input: "Coordenadas de origen"
+  output: "Regreso exitoso"
+  ```
+  Repetir el proceso con coordenadas de origen. Documentar anomalías.
 
 # _F Artifact
 

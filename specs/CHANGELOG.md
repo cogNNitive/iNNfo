@@ -1,13 +1,12 @@
 # FORMAT Specification Changelog
 
 ## V_0-1-4 (Current)
+- **BREAKING CORRECTION**: Unified element syntax. ALL concept types (`text`, `weight`, `list`, `category`, `steps`, `sequence`) use bullet-list syntax (`* _F ConceptName:`). Numbered lists (`1. _F ...`, `2. _F ...`) are NOT supported — the parser only recognizes `*` and `-` bullets, and numbered lists add no semantic value since element order is already determined by document position. (§4.3)
+- Removed "Numbered list with _F markers" from the syntax table for `steps` and `sequence` types
+- Updated serializer to always emit `*` prefix regardless of concept type
+- Updated procedures template example to use `* _F Work:` instead of `1. _F Work:`
 - Workspace `index.md` now uses standard Markdown links `[...](...)` instead of wikilinks `[[...]]` for OKF compatibility
-- Added OKF (Open Knowledge Format) relationship documentation (§5.1.1) with explicit compatibility table and rationale
-- Added `type` requirement in frontmatter for all distributed `_FORMAT.md` files (§5.1.2) to maintain OKF conformance
-- Updated index block syntax (§4.2) to support Markdown links alongside wikilinks and `_F index:` markers
-- Documented that `_F` markers are safely ignored by OKF consumers as plain text
-- Updated template and model examples to reference V_0-1-4 parent chain
-- File renamed from `FORMAT_V_0-1-3_FORMAT.md` to `FORMAT_V_0-1-4_FORMAT.md`
+- **Clarified valid list characters**: Both index blocks (§4.2) and concept blocks (§4.3) now explicitly state that only `*` (asterisk) and `-` (hyphen) are valid bullet characters. The regex patterns are included as normative references. Numbered lists are explicitly disallowed in both sections.
 
 ## V_0-1-3
 - Removed FILE/FOLDER mode dual representation; unified under single body syntax

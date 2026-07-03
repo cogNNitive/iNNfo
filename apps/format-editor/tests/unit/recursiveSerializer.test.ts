@@ -33,12 +33,12 @@ title: "Workspace Index"
 
 # _F index
 
-* [[Doc_FORMAT.md]]
+* [[Doc_F.md]]
 `
 
 describe('recursiveSerializer', () => {
   it('returns write reports for dirty nodes', async () => {
-    const tree: FakeTree = { 'index.md': indexMd, 'Doc_FORMAT.md': fileDocMd }
+    const tree: FakeTree = { 'index.md': indexMd, 'Doc_F.md': fileDocMd }
     const root = buildFakeTree('workspace', tree)
     const parsed = await recursiveParse(root)
 
@@ -48,12 +48,12 @@ describe('recursiveSerializer', () => {
     const report = await recursiveSerialize(parsed.nodes, dirty)
     expect(report).toHaveLength(1)
     expect(report[0].nodeId).toBe(docId)
-    expect(report[0].path).toBe('Doc_FORMAT.md')
+    expect(report[0].path).toBe('Doc_F.md')
     expect(['exact', 'canonical']).toContain(report[0].fidelity)
   })
 
   it('returns empty report when no dirty nodes', async () => {
-    const tree: FakeTree = { 'index.md': indexMd, 'Doc_FORMAT.md': fileDocMd }
+    const tree: FakeTree = { 'index.md': indexMd, 'Doc_F.md': fileDocMd }
     const root = buildFakeTree('workspace', tree)
     const parsed = await recursiveParse(root)
 
@@ -62,7 +62,7 @@ describe('recursiveSerializer', () => {
   })
 
   it('writes through driver when provided', async () => {
-    const tree: FakeTree = { 'index.md': indexMd, 'Doc_FORMAT.md': fileDocMd }
+    const tree: FakeTree = { 'index.md': indexMd, 'Doc_F.md': fileDocMd }
     const root = buildFakeTree('workspace', tree)
     const parsed = await recursiveParse(root)
 
@@ -86,7 +86,7 @@ describe('recursiveSerializer', () => {
   })
 
   it('throws for dirty node without rawContent', async () => {
-    const tree: FakeTree = { 'index.md': indexMd, 'Doc_FORMAT.md': fileDocMd }
+    const tree: FakeTree = { 'index.md': indexMd, 'Doc_F.md': fileDocMd }
     const root = buildFakeTree('workspace', tree)
     const parsed = await recursiveParse(root)
 
@@ -100,7 +100,7 @@ describe('recursiveSerializer', () => {
   })
 
   it('preserves node identity after parse -> serialize report -> re-parse round-trip', async () => {
-    const tree: FakeTree = { 'index.md': indexMd, 'Doc_FORMAT.md': fileDocMd }
+    const tree: FakeTree = { 'index.md': indexMd, 'Doc_F.md': fileDocMd }
     const root = buildFakeTree('workspace', tree)
     const firstParse = await recursiveParse(root)
     const idsBefore = Object.keys(firstParse.nodes).sort()
@@ -121,7 +121,7 @@ describe('recursiveSerializer', () => {
     expect(roundtripContent).not.toBeNull()
 
     // Re-parse from the written content
-    const tree2: FakeTree = { 'index.md': indexMd, 'Doc_FORMAT.md': roundtripContent! }
+    const tree2: FakeTree = { 'index.md': indexMd, 'Doc_F.md': roundtripContent! }
     const root2 = buildFakeTree('workspace', tree2)
     const secondParse = await recursiveParse(root2)
     const idsAfter = Object.keys(secondParse.nodes).sort()

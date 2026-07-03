@@ -479,7 +479,7 @@ export function serializeModel(model: ParsedModel): string {
   for (const [conceptName, elementNodes] of model.elements.entries()) {
     lines.push(`# _F ${conceptName}`);
     for (const node of elementNodes) {
-      const prefix = node.type === 'steps' || node.type === 'sequence' ? '1.' : '*';
+      const prefix = '*'; // all concept types use bullet syntax — numbered lists are not supported
       lines.push(`${prefix} _F ${conceptName}: ${node.name}`);
       if (Object.keys(node.fields).length > 0) {
         lines.push('  ```yaml');

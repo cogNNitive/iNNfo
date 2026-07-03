@@ -66,7 +66,7 @@ describe('business template (level 2)', () => {
 });
 
 describe('Ghostbusters model (level 3)', () => {
-  const content = readModel('Ghostbusters_V_0-1-2_business_FORMAT.md');
+  const content = readModel('Ghostbusters_V_0-1-2_business_F.md');
   const model = parseModel(content);
   const fm = model.frontmatter;
 
@@ -185,7 +185,7 @@ describe('kb template (level 2, FOLDER mode)', () => {
 
 describe('validator', () => {
   it('validates Ghostbusters against business template', () => {
-    const modelContent = readModel('Ghostbusters_V_0-1-2_business_FORMAT.md');
+    const modelContent = readModel('Ghostbusters_V_0-1-2_business_F.md');
     const templateContent = readSpec('business_V_0-1-1_FORMAT.md');
     const model = parseModel(modelContent);
     const templateFm = parseFrontmatter(templateContent)!;
@@ -203,7 +203,7 @@ describe('validator', () => {
   });
 
   it('rejects model with unknown concept', () => {
-    const modelContent = readModel('Ghostbusters_V_0-1-2_business_FORMAT.md');
+    const modelContent = readModel('Ghostbusters_V_0-1-2_business_F.md');
     const templateContent = readSpec('business_V_0-1-1_FORMAT.md');
     const model = parseModel(modelContent);
     const templateFm = parseFrontmatter(templateContent)!;
@@ -263,7 +263,7 @@ describe('CRLF line-ending handling', () => {
   });
 
   it('parses the real Ghostbusters sample model with full fidelity', () => {
-    const content = readModel('Ghostbusters_V_0-1-2_business_FORMAT.md');
+    const content = readModel('Ghostbusters_V_0-1-2_business_F.md');
     // The sample may be LF or CRLF depending on the platform — either should parse
     const normalized = content.replace(/\r\n/g, '\n');
 
@@ -280,7 +280,7 @@ describe('CRLF line-ending handling', () => {
 });
 
 describe('extended parser features', () => {
-  const content = readModel('Ghostbusters_V_0-1-2_business_FORMAT.md');
+  const content = readModel('Ghostbusters_V_0-1-2_business_F.md');
   const model = parseModel(content);
 
   it('buildHierarchyTree returns tree from taxonomy', () => {
@@ -517,13 +517,13 @@ describe('element slug derivation (FR-002)', () => {
       '',
       '# _F index',
       '',
-      '* [[test_FORMAT.md]]',
+      '* [[test_F.md]]',
       '',
     ].join('\n');
 
     const root = fakeDir([
       ['index.md', fakeFile('index.md', indexContent)],
-      ['test_FORMAT.md', fakeFile('test_FORMAT.md', modelContent)],
+      ['test_F.md', fakeFile('test_F.md', modelContent)],
     ]);
 
     const result = await recursiveParse(root as any);
@@ -732,13 +732,13 @@ describe('asset_mode (FR-004)', () => {
       '',
       '# _F index',
       '',
-      '* [[test_FORMAT.md]]',
+      '* [[test_F.md]]',
       '',
     ].join('\n');
 
     const root = fakeDir([
       ['index.md', fakeFile('index.md', indexContent)],
-      ['test_FORMAT.md', fakeFile('test_FORMAT.md', modelContent)],
+      ['test_F.md', fakeFile('test_F.md', modelContent)],
     ]);
 
     const result = await recursiveParse(root as any);
@@ -807,7 +807,7 @@ describe('FOLDER mode rejection (FR-007)', () => {
       '',
     ].join('\n');
 
-    const report = validateFormatContent(content, 'test_FORMAT.md');
+    const report = validateFormatContent(content, 'test_F.md');
     const folderCheck = report.checks.find(c => c.id === 'fm-no-folder-mode');
     expect(folderCheck).toBeDefined();
     expect(folderCheck!.passed).toBe(false);

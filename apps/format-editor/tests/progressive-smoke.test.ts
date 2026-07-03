@@ -60,7 +60,7 @@ title: "Workspace Index"
 
 # _F index
 
-* [[MiModelo_FORMAT.md]]
+* [[MiModelo_F.md]]
 `
 
 // ────────────────────────────────────────────────────────────────
@@ -116,7 +116,7 @@ describe('Paso 2 — Cargar modelo', () => {
   it('2a: parsea un workspace con index.md y produce exactamente 1 root', async () => {
     const tree: FakeTree = {
       'index.md': INDEX_MD,
-      'MiModelo_FORMAT.md': SINGLE_FILE_MODEL,
+      'MiModelo_F.md': SINGLE_FILE_MODEL,
     }
     const handle = buildFakeTree('workspace', tree)
     const result = await recursiveParse(handle)
@@ -128,7 +128,7 @@ describe('Paso 2 — Cargar modelo', () => {
   it('2b: el modelo tiene el nombre correcto', async () => {
     const tree: FakeTree = {
       'index.md': INDEX_MD,
-      'MiModelo_FORMAT.md': SINGLE_FILE_MODEL,
+      'MiModelo_F.md': SINGLE_FILE_MODEL,
     }
     const handle = buildFakeTree('workspace', tree)
     const result = await recursiveParse(handle)
@@ -141,7 +141,7 @@ describe('Paso 2 — Cargar modelo', () => {
   it('2c: el modelo contiene el root y los elementos inline declarados', async () => {
     const tree: FakeTree = {
       'index.md': INDEX_MD,
-      'MiModelo_FORMAT.md': SINGLE_FILE_MODEL,
+      'MiModelo_F.md': SINGLE_FILE_MODEL,
     }
     const handle = buildFakeTree('workspace', tree)
     const result = await recursiveParse(handle)
@@ -160,7 +160,7 @@ describe('Paso 2 — Cargar modelo', () => {
     const { readFileSync } = await import('node:fs')
     const { join } = await import('node:path')
     const ghostbustersContent = readFileSync(
-      join(import.meta.dirname!, 'fixtures', 'models', 'Ghostbusters_V_0-1-1_business_FORMAT.md'),
+      join(import.meta.dirname!, 'fixtures', 'models', 'Ghostbusters_V_0-1-1_business_F.md'),
       'utf-8'
     )
 
@@ -172,12 +172,12 @@ title: "Workspace Index"
 
 # _F index
 
-* [[Ghostbusters_FORMAT.md]]
+* [[Ghostbusters_F.md]]
 `
 
     const tree: FakeTree = {
       'index.md': ghostbustersIndex,
-      'Ghostbusters_FORMAT.md': ghostbustersContent,
+      'Ghostbusters_F.md': ghostbustersContent,
     }
     const handle = buildFakeTree('workspace', tree)
     const result = await recursiveParse(handle)
@@ -204,7 +204,7 @@ describe('Paso 3 — workspaceStore abre un modelo', () => {
     const modelStore = useModelStore()
     const tree: FakeTree = {
       'index.md': INDEX_MD,
-      'MiModelo_FORMAT.md': SINGLE_FILE_MODEL,
+      'MiModelo_F.md': SINGLE_FILE_MODEL,
     }
     const handle = buildFakeTree('workspace', tree)
 
@@ -220,7 +220,7 @@ describe('Paso 3 — workspaceStore abre un modelo', () => {
     const workspaceStore = useWorkspaceStore()
     const tree: FakeTree = {
       'index.md': INDEX_MD,
-      'MiModelo_FORMAT.md': SINGLE_FILE_MODEL,
+      'MiModelo_F.md': SINGLE_FILE_MODEL,
     }
     const handle = buildFakeTree('workspace', tree)
 
@@ -236,11 +236,11 @@ describe('Paso 3 — workspaceStore abre un modelo', () => {
 // ────────────────────────────────────────────────────────────────
 
 describe('Paso 4 — Fixtures reales desde tests/fixtures/ en la raíz', () => {
-  it('4a: carga el modelo FILE real de tests/fixtures/file-model_FORMAT.md', async () => {
+  it('4a: carga el modelo FILE real de tests/fixtures/file-model_F.md', async () => {
     const { readFileSync } = await import('node:fs')
     const { join } = await import('node:path')
     const content = readFileSync(
-      join(import.meta.dirname!, '..', '..', '..', 'tests', 'fixtures', 'file-model_FORMAT.md'),
+      join(import.meta.dirname!, '..', '..', '..', 'tests', 'fixtures', 'file-model_F.md'),
       'utf-8'
     )
 
@@ -252,10 +252,10 @@ title: "Workspace Index"
 
 # _F index
 
-* [[file-model_FORMAT.md]]
+* [[file-model_F.md]]
 `
 
-    const tree: FakeTree = { 'index.md': indexMd, 'file-model_FORMAT.md': content }
+    const tree: FakeTree = { 'index.md': indexMd, 'file-model_F.md': content }
     const handle = buildFakeTree('workspace', tree)
     const result = await recursiveParse(handle)
 

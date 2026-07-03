@@ -12,7 +12,7 @@ title: "Workspace Index"
 
 # _F index
 
-* [[Doc_FORMAT.md]]
+* [[Doc_F.md]]
 `
 
 const validFormatMd = `---
@@ -39,7 +39,7 @@ describe('workspaceStore.open()', () => {
   it('triggers exactly one parse pass into modelStore on the first open()', async () => {
     const workspaceStore = useWorkspaceStore()
     const modelStore = useModelStore()
-    const handle = buildFakeTree('workspace', { 'index.md': indexMd, 'Doc_FORMAT.md': validFormatMd })
+    const handle = buildFakeTree('workspace', { 'index.md': indexMd, 'Doc_F.md': validFormatMd })
 
     await workspaceStore.open(handle)
 
@@ -50,7 +50,7 @@ describe('workspaceStore.open()', () => {
 
   it('does not trigger a second parse pass when open() is invoked twice', async () => {
     const workspaceStore = useWorkspaceStore()
-    const handle = buildFakeTree('workspace', { 'index.md': indexMd, 'Doc_FORMAT.md': validFormatMd })
+    const handle = buildFakeTree('workspace', { 'index.md': indexMd, 'Doc_F.md': validFormatMd })
 
     await workspaceStore.open(handle)
     await workspaceStore.open(handle)
@@ -60,7 +60,7 @@ describe('workspaceStore.open()', () => {
 
   it('does not trigger a second parse pass on repeated route-navigation-like open() calls with the same handle', async () => {
     const workspaceStore = useWorkspaceStore()
-    const handle = buildFakeTree('workspace', { 'index.md': indexMd, 'Doc_FORMAT.md': validFormatMd })
+    const handle = buildFakeTree('workspace', { 'index.md': indexMd, 'Doc_F.md': validFormatMd })
 
     await workspaceStore.open(handle)
     // Simulate navigating between routes/nodes: nothing should re-invoke parsing.

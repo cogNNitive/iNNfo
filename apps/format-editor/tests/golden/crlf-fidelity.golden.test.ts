@@ -15,7 +15,7 @@ import type { ModelNode } from '../../src/model/types'
 // to confirm the app's recursive parser + serializer handle CRLF input
 // with the same fidelity as its LF twin.
 const modelsDir = join(import.meta.dirname!, '..', 'fixtures', 'models')
-const fixtureFile = 'mini-file_V_0-0-1_business_FORMAT.md'
+const fixtureFile = 'mini-file_V_0-0-1_business_F.md'
 
 function makeIndex(wikilinks: string[]): string {
   const items = wikilinks.map(w => `* [[${w}]]`).join('\n')

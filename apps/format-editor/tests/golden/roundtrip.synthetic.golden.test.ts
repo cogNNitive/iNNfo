@@ -34,7 +34,7 @@ title: "Workspace Index"
 
 # _F index
 
-* [[Doc_FORMAT.md]]
+* [[Doc_F.md]]
 `
 
 function structureOf(nodes: Record<string, ModelNode>, rootIds: string[]) {
@@ -85,6 +85,6 @@ async function assertRoundTripStable(index: string, modelFile: string, modelCont
 
 describe('recursiveSerializer golden round-trip: synthetic single-file fixture', () => {
   it('parse -> serialize -> re-parse is structurally stable for single-file model', async () => {
-    await assertRoundTripStable(indexMd, 'Doc_FORMAT.md', fileDocMd)
+    await assertRoundTripStable(indexMd, 'Doc_F.md', fileDocMd)
   })
 })

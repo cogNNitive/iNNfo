@@ -62,8 +62,8 @@ describe('recursiveParse (index.md-driven)', () => {
   describe('FR-001: Workspace with valid index.md', () => {
     it('parses a single model listed in index.md', async () => {
       const root = fakeDir('workspace', [
-        ['index.md', fakeFile('index.md', makeIndex(['gb_FORMAT.md']))],
-        ['gb_FORMAT.md', fakeFile('gb_FORMAT.md', makeModel('Ghostbusters'))],
+        ['index.md', fakeFile('index.md', makeIndex(['gb_F.md']))],
+        ['gb_F.md', fakeFile('gb_F.md', makeModel('Ghostbusters'))],
       ]);
 
       const result = await recursiveParse(root);
@@ -77,9 +77,9 @@ describe('recursiveParse (index.md-driven)', () => {
 
     it('parses multiple models listed in index.md', async () => {
       const root = fakeDir('workspace', [
-        ['index.md', fakeFile('index.md', makeIndex(['modelA_FORMAT.md', 'modelB_FORMAT.md']))],
-        ['modelA_FORMAT.md', fakeFile('modelA_FORMAT.md', makeModel('Model A'))],
-        ['modelB_FORMAT.md', fakeFile('modelB_FORMAT.md', makeModel('Model B'))],
+        ['index.md', fakeFile('index.md', makeIndex(['modelA_F.md', 'modelB_F.md']))],
+        ['modelA_F.md', fakeFile('modelA_F.md', makeModel('Model A'))],
+        ['modelB_F.md', fakeFile('modelB_F.md', makeModel('Model B'))],
       ]);
 
       const result = await recursiveParse(root);
@@ -104,8 +104,8 @@ describe('recursiveParse (index.md-driven)', () => {
 `);
 
       const root = fakeDir('workspace', [
-        ['index.md', fakeFile('index.md', makeIndex(['test_FORMAT.md']))],
-        ['test_FORMAT.md', fakeFile('test_FORMAT.md', modelContent)],
+        ['index.md', fakeFile('index.md', makeIndex(['test_F.md']))],
+        ['test_F.md', fakeFile('test_F.md', modelContent)],
       ]);
 
       const result = await recursiveParse(root);
@@ -122,7 +122,7 @@ describe('recursiveParse (index.md-driven)', () => {
   describe('FR-001: Missing index.md', () => {
     it('returns an error when index.md is missing', async () => {
       const root = fakeDir('workspace', [
-        ['gb_FORMAT.md', fakeFile('gb_FORMAT.md', makeModel('Ghostbusters'))],
+        ['gb_F.md', fakeFile('gb_F.md', makeModel('Ghostbusters'))],
       ]);
 
       const result = await recursiveParse(root);
@@ -135,8 +135,8 @@ describe('recursiveParse (index.md-driven)', () => {
   describe('FR-001: Wikilink to non-existent model', () => {
     it('emits a warning and skips missing file', async () => {
       const root = fakeDir('workspace', [
-        ['index.md', fakeFile('index.md', makeIndex(['exists_FORMAT.md', 'missing_FORMAT.md']))],
-        ['exists_FORMAT.md', fakeFile('exists_FORMAT.md', makeModel('Exists'))],
+        ['index.md', fakeFile('index.md', makeIndex(['exists_F.md', 'missing_F.md']))],
+        ['exists_F.md', fakeFile('exists_F.md', makeModel('Exists'))],
       ]);
 
       const result = await recursiveParse(root);
@@ -147,7 +147,7 @@ describe('recursiveParse (index.md-driven)', () => {
       // Warning for missing file
       const missingIssues = result.issues.filter(i => i.message.includes('not found'));
       expect(missingIssues.length).toBeGreaterThan(0);
-      expect(missingIssues[0].path).toBe('missing_FORMAT.md');
+      expect(missingIssues[0].path).toBe('missing_F.md');
     });
   });
 
@@ -176,9 +176,9 @@ describe('recursiveParse (index.md-driven)', () => {
 `);
 
       const root = fakeDir('workspace', [
-        ['index.md', fakeFile('index.md', makeIndex(['modelA_FORMAT.md', 'modelB_FORMAT.md']))],
-        ['modelA_FORMAT.md', fakeFile('modelA_FORMAT.md', modelA)],
-        ['modelB_FORMAT.md', fakeFile('modelB_FORMAT.md', modelB)],
+        ['index.md', fakeFile('index.md', makeIndex(['modelA_F.md', 'modelB_F.md']))],
+        ['modelA_F.md', fakeFile('modelA_F.md', modelA)],
+        ['modelB_F.md', fakeFile('modelB_F.md', modelB)],
       ]);
 
       const result = await recursiveParse(root);
@@ -218,9 +218,9 @@ describe('recursiveParse (index.md-driven)', () => {
 `);
 
       const root = fakeDir('workspace', [
-        ['index.md', fakeFile('index.md', makeIndex(['modelA_FORMAT.md', 'modelB_FORMAT.md']))],
-        ['modelA_FORMAT.md', fakeFile('modelA_FORMAT.md', modelA)],
-        ['modelB_FORMAT.md', fakeFile('modelB_FORMAT.md', modelB)],
+        ['index.md', fakeFile('index.md', makeIndex(['modelA_F.md', 'modelB_F.md']))],
+        ['modelA_F.md', fakeFile('modelA_F.md', modelA)],
+        ['modelB_F.md', fakeFile('modelB_F.md', modelB)],
       ]);
 
       const result = await recursiveParse(root);

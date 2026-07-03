@@ -36,7 +36,7 @@ title: "Workspace Index"
 
 # _F index
 
-* [[model_FORMAT.md]]
+* [[model_F.md]]
 `
 
 describe('WorkspaceView integration (single-file workspace)', () => {
@@ -47,7 +47,7 @@ describe('WorkspaceView integration (single-file workspace)', () => {
   it('mounts with Pinia + Router, renders layout chrome, and displays model tree with selectable nodes', async () => {
     const tree: FakeTree = {
       'index.md': indexMd,
-      'model_FORMAT.md': singleFileMd,
+      'model_F.md': singleFileMd,
     }
     const handle = buildFakeTree('workspace', tree)
 

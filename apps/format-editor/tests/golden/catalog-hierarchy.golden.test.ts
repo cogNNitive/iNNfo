@@ -59,12 +59,12 @@ title: "Workspace Index"
 
 # _F index
 
-* [[catalog_FORMAT.md]]
+* [[catalog_F.md]]
 `
 
 const catalogTree: FakeTree = {
   'index.md': indexMd,
-  'catalog_FORMAT.md': catalogModelMd,
+  'catalog_F.md': catalogModelMd,
 }
 
 describe('catalog-hierarchy: golden assertions on concept->element tree', () => {

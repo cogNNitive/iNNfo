@@ -24,15 +24,15 @@ const samples: SampleFolder[] = [
   {
     id: 'sample-ghostbusters',
     name: 'Ghostbusters',
-    description: 'FILE-mode business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations in a single _FORMAT.md.',
+    description: 'FILE-mode business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations in a single _F.md.',
     mode: 'FILE',
-    path: 'specs/business_V_0-1-1/samples/Ghostbusters_V_0-1-2_business_FORMAT.md',
+    path: 'specs/business_V_0-1-1/samples/Ghostbusters_V_0-1-2_business_F.md',
     items: 1,
   },
   {
     id: 'sample-music-history',
     name: 'Music History',
-    description: 'FOLDER-mode catalog with 4 genres, 6 artists, and 5 albums — each node is a folder with its own _FORMAT.md, demonstrating the full nested tree.',
+    description: 'FOLDER-mode catalog with 4 genres, 6 artists, and 5 albums — each node is a folder with its own _F.md, demonstrating the full nested tree.',
     mode: 'FOLDER',
     path: 'specs/catalog_V_0-1-2/samples/Music_History_V_1-0-0_catalog/',
     items: 15,
@@ -42,7 +42,7 @@ const samples: SampleFolder[] = [
     name: 'Code Review Process',
     description: 'FILE-mode procedure for PR-based code reviews: roles (Author, Reviewer, Maintainer), step-by-step workflow, tool bindings, and hotfix path.',
     mode: 'FILE',
-    path: 'specs/procedures_V_0-1-1/samples/CodeReviewProcess_V_1-0-0_procedures_FORMAT.md',
+    path: 'specs/procedures_V_0-1-1/samples/CodeReviewProcess_V_1-0-0_procedures_F.md',
     items: 1,
   },
   {

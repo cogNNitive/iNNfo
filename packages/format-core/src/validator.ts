@@ -118,10 +118,16 @@ export function validateModel(
 /**
  * Validates FORMAT document content (frontmatter + body syntax + conventions).
  * This is the full format-editor validator, moved to core for reuse by any client.
+ *
+ * @param content - Raw file content to validate
+ * @param fileName - File name (used for naming convention checks)
+ * @param expectedSpecVersion - Optional expected specification_version (e.g. "V_0-1-4").
+ *   Pass the current FORMAT spec version to validate specification_version matches.
  */
 export function validateFormatContent(
   content: string,
-  fileName: string
+  fileName: string,
+  expectedSpecVersion?: string
 ): ValidationReport {
   const checks: ValidationCheck[] = []
   const parsed = parseModel(content)
@@ -223,6 +229,21 @@ export function validateFormatContent(
     message: specVersionOk ? undefined : 'Missing specification_version',
   })
 
+  // 6b. specification_version matches expected spec version
+  if (specVersionOk && expectedSpecVersion) {
+    const specMatch = fm.specification_version === expectedSpecVersion
+    checks.push({
+      id: 'fm-spec-version-match',
+      label: 'Specification version matches current spec',
+      description: `specification_version should be "${expectedSpecVersion}" for the current FORMAT specification`,
+      category: 'frontmatter',
+      severity: 'warning',
+      passed: specMatch,
+      message: specMatch ? undefined
+        : `Expected "${expectedSpecVersion}", got "${fm.specification_version}"`,
+    })
+  }
+
   // ── Body syntax ────────────────────────────────────────────────
 
   const body = content.replace(/^---[\s\S]*?---\n?/, '').trim()
@@ -317,21 +338,90 @@ export function validateFormatContent(
     })
   }
 
+  // 10b. Numbered-list markers (silently dropped by parser — warn the user)
+  if (hasBody) {
+    const numberedBulletRe = /^\s*\d+\.\s+_F\s+([\w\s-]+?):\s+/gm
+    const numberedMatches = [...body.matchAll(numberedBulletRe)]
+    checks.push({
+      id: 'body-numbered-list-markers',
+      label: 'No numbered-list _F markers',
+      description: 'Numbered lists (1. _F Concept: Name) are silently ignored by the parser. Use bullet syntax (* _F Concept: Name) instead.',
+      category: 'body',
+      severity: 'warning',
+      passed: numberedMatches.length === 0,
+      message: numberedMatches.length > 0
+        ? `${numberedMatches.length} numbered _F marker(s) detected — these are silently ignored by the parser`
+        : undefined,
+    })
+  }
+
+  // 10c. Invalid bullet characters in concept sections
+  if (hasBody) {
+    const invalidBulletLines: string[] = []
+    const bodyLines = body.split('\n')
+    let inConceptSection = false
+    for (const bl of bodyLines) {
+      const trimmed = bl.trim()
+      if (/^#\s+_F\s+(?!index\b)/im.test(trimmed)) {
+        inConceptSection = true
+        continue
+      }
+      if (/^#\s/.test(trimmed)) {
+        inConceptSection = false
+        continue
+      }
+      if (!inConceptSection) continue
+
+      // Detect non-asterisk/hyphen bullet chars used as _F marker lines.
+      // Only flag lines that contain _F markers (clearly trying to be elements)
+      // with invalid bullet chars like + or > (numbered lists are handled
+      // separately by body-numbered-list-markers).
+      if (/^\s*[+>]\s+_F\s/.test(trimmed)) {
+        invalidBulletLines.push(trimmed.substring(0, 60))
+      }
+    }
+    checks.push({
+      id: 'body-invalid-bullet-chars',
+      label: 'Valid bullet characters only (* and -)',
+      description: 'Element markers MUST use * (asterisk) or - (hyphen) as bullet character. + and > are invalid.',
+      category: 'body',
+      severity: 'error',
+      passed: invalidBulletLines.length === 0,
+      message: invalidBulletLines.length > 0
+        ? `${invalidBulletLines.length} line(s) use invalid bullet characters:\n${invalidBulletLines.slice(0, 3).join('\n')}`
+        : undefined,
+    })
+  }
+
   // ── Conventions ────────────────────────────────────────────────
 
   // 11. File naming
-  const namingOk = fileName.endsWith('_FORMAT.md')
+  const namingOk = fileName.endsWith('_F.md')
   checks.push({
     id: 'conv-file-naming',
     label: 'File naming convention',
-    description: 'FORMAT files must end with _FORMAT.md',
+    description: 'FORMAT files must end with _F.md',
     category: 'convention',
     severity: 'warning',
     passed: namingOk,
-    message: namingOk ? undefined : `"${fileName}" does not end with _FORMAT.md`,
+    message: namingOk ? undefined : `"${fileName}" does not end with _F.md`,
   })
 
-  // 12. Wikilinks reference
+  // 12. Type field for distributed _F.md files (§5.1.2)
+  if (fileName.endsWith('_F.md')) {
+    const typeOk = typeof fm.type === 'string' && fm.type.length > 0
+    checks.push({
+      id: 'conv-type-field',
+      label: 'Type field present for OKF conformance',
+      description: 'Distributed _F.md files should include a type field in frontmatter for OKF conformance (§5.1.2)',
+      category: 'convention',
+      severity: 'warning',
+      passed: typeOk,
+      message: typeOk ? undefined : 'Missing type field in frontmatter (required for OKF conformance)',
+    })
+  }
+
+  // 13. Wikilinks reference
   if (hasIndex) {
     const allWikilinks = [...content.matchAll(WIKILINK_RE)].map(m => m[1].toLowerCase())
     const conceptNames = new Set<string>()
@@ -401,7 +491,7 @@ export function validateFormatSyntax(
   // Check file suffix convention
   checks.push({
     id: 'syntax-filename',
-    label: 'File ends with _FORMAT.md',
+    label: 'File ends with _F.md',
     passed: true, // caller provides this context
   })
 

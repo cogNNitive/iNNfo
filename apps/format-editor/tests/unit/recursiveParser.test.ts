@@ -26,14 +26,14 @@ title: "Workspace Index"
 
 # _F index
 
-* [[modelA_FORMAT.md]]
+* [[modelA_F.md]]
 `
 
 describe('recursiveParser: index.md-driven parser', () => {
   it('parses a workspace with index.md and model file into the graph', async () => {
     const tree: FakeTree = {
       'index.md': validIndexMd,
-      'modelA_FORMAT.md': validModelMd,
+      'modelA_F.md': validModelMd,
     }
 
     const root = buildFakeTree('workspace', tree)
@@ -46,7 +46,7 @@ describe('recursiveParser: index.md-driven parser', () => {
 
   it('reports an issue when index.md is missing', async () => {
     const tree: FakeTree = {
-      'modelA_FORMAT.md': validModelMd,
+      'modelA_F.md': validModelMd,
     }
 
     const root = buildFakeTree('workspace', tree)
@@ -66,13 +66,13 @@ title: "Workspace Index"
 
 # _F index
 
-* [[exists_FORMAT.md]]
-* [[missing_FORMAT.md]]
+* [[exists_F.md]]
+* [[missing_F.md]]
 `
 
     const tree: FakeTree = {
       'index.md': indexMd,
-      'exists_FORMAT.md': validModelMd,
+      'exists_F.md': validModelMd,
     }
 
     const root = buildFakeTree('workspace', tree)
@@ -115,14 +115,14 @@ title: "Workspace Index"
 
 # _F index
 
-* [[modelA_FORMAT.md]]
-* [[modelB_FORMAT.md]]
+* [[modelA_F.md]]
+* [[modelB_F.md]]
 `
 
     const tree: FakeTree = {
       'index.md': indexMd,
-      'modelA_FORMAT.md': modelWithElement('Model A', 'Database'),
-      'modelB_FORMAT.md': modelWithElement('Model B', 'Database'),
+      'modelA_F.md': modelWithElement('Model A', 'Database'),
+      'modelB_F.md': modelWithElement('Model B', 'Database'),
     }
 
     const root = buildFakeTree('workspace', tree)
@@ -164,7 +164,7 @@ title: "Full Model"
 
     const tree: FakeTree = {
       'index.md': validIndexMd,
-      'modelA_FORMAT.md': modelWithElements,
+      'modelA_F.md': modelWithElements,
     }
 
     const root = buildFakeTree('workspace', tree)
