@@ -1,5 +1,4 @@
 export type ConceptType = 'text' | 'list' | 'category' | 'weight' | 'steps' | 'sequence';
-export type Mode = 'FILE' | 'FOLDER';
 export type SpecLevel = 0 | 1 | 2 | 3;
 
 export interface ParentRef {
@@ -9,7 +8,7 @@ export interface ParentRef {
 
 export interface ConceptField {
   name: string;
-  type: 'string' | 'select' | 'reference';
+  type: 'string' | 'select' | 'reference' | 'image' | 'file' | 'video' | 'audio';
   options?: string[];
   target_concepts?: string[];
 }
@@ -48,8 +47,7 @@ export interface RelationshipDecl {
 export interface RelationshipTypeDef {
   name: RelationshipType;
   description: string;
-  file_representation: string;
-  folder_representation: string;
+  representation: string;
 }
 
 export interface SpecFrontmatter {
@@ -61,7 +59,6 @@ export interface SpecFrontmatter {
   description?: string;
   author?: string;
   status?: string;
-  mode?: Mode | Mode[];
   concepts?: Concept[];
   markers?: Marker[];
   matrices?: MatrixDecl[];
@@ -69,6 +66,8 @@ export interface SpecFrontmatter {
   relationship_declarations?: Partial<Record<RelationshipType, RelationshipDecl>>;
   model_version?: string;
   last_updated?: string;
+  /** Asset storage mode: 'centralized' (default) or 'per-element'. */
+  asset_mode?: 'centralized' | 'per-element';
   [key: string]: unknown;
 }
 
@@ -78,6 +77,8 @@ export interface ElementNode {
   description: string;
   fields: Record<string, unknown>;
   markers: Record<string, number | string>;
+  /** Optional slug derived from YAML `slug` field or auto-derived from name. */
+  slug?: string;
 }
 
 export interface MatrixCell {
@@ -96,23 +97,6 @@ export interface MatrixData {
 export interface TaxonomyEdge {
   parent: string;
   child: string;
-}
-
-export interface GraphEdge {
-  target: string;
-  label: string;
-  weight?: number;
-  [key: string]: unknown;
-}
-
-export interface FolderElement {
-  path: string;
-  type: string;
-  fields: Record<string, unknown>;
-  markers: Record<string, number | string>;
-  graphEdges: GraphEdge[];
-  assets: string[];
-  children: FolderElement[];
 }
 
 /** Case-insensitive wrapper around Map<string, ElementNode[]> */
@@ -191,6 +175,10 @@ export interface ParsedModel {
   analysis?: AnalysisEntry[];
   /** Optional: raw body text per concept for round-trip fidelity */
   rawSections?: Record<string, string>;
+  /** Slug collisions detected during parsing (FR-002). */
+  slugCollisions?: Array<{ slug: string; elements: string[]; concept: string }>;
+  /** Non-fatal parse warnings (e.g. deprecated features). */
+  parseWarnings?: string[];
 }
 
 export interface SpecCache {
@@ -219,16 +207,165 @@ export interface ValidationResult {
   warnings: ValidationError[];
 }
 
-export interface FileDriverOptions {
-  encoding?: string;
+/* ── Validation check types (from app validator) ── */
+
+/** A single check result within a validation report. */
+export interface ValidationCheck {
+  id: string
+  label: string
+  description: string
+  category: 'frontmatter' | 'body' | 'convention'
+  severity: 'error' | 'warning' | 'info'
+  passed: boolean
+  message?: string
 }
 
-export interface FolderDriverOptions {
-  ignorePatterns?: string[];
+export interface ValidationSummary {
+  total: number
+  passed: number
+  errors: number
+  warnings: number
+}
+
+export interface ValidationReport {
+  checks: ValidationCheck[]
+  summary: ValidationSummary
+}
+
+export interface SyntaxCheck {
+  id: string
+  label: string
+  passed: boolean
+  message?: string
+}
+
+export interface FileDriverOptions {
+  encoding?: string;
 }
 
 export interface ResolverOptions {
   cacheDir?: string;
   maxDepth?: number;
   timeout?: number;
+}
+
+/* ── Graph / App Model Types (moved from apps/format-editor/src/model/types.ts) ── */
+
+/** Who/what produced a value change. */
+export interface Author {
+  kind: 'user' | 'ai' | 'system'
+  id: string
+}
+
+/** Provenance stamp attached to every field write. */
+export interface Provenance {
+  author: Author
+  timestamp: string // ISO-8601
+}
+
+/** A single field's value plus who set it and when. */
+export interface FieldValue {
+  value: unknown
+  provenance: Provenance
+}
+
+/** A normalized relationship edge stored on a node. */
+export interface ModelRelationship {
+  targetId: string
+  label: string
+  value?: string | number
+}
+
+/** A single concept declaration, as declared in a document's frontmatter `concepts:` list. */
+export interface MetamodelConcept {
+  name: string
+  icon?: string
+  type: string
+  color?: string
+  weight?: number
+  fields?: { name: string; type: string; options?: string[]; target_concepts?: string[] }[]
+}
+
+/** A single marker declaration, as declared in a document's frontmatter `markers:` list. */
+export interface MetamodelMarker {
+  name: string
+  icon?: string
+  symbol?: string
+  color?: string
+  weight?: number
+}
+
+/**
+ * The metamodel declared locally by a root node's own frontmatter
+ * (`concepts`/`markers`). Nodes without their own file (nested elements)
+ * declare no local metamodel (empty arrays); their effective metamodel is
+ * resolved by walking up to their nearest ancestor (see `metamodel.ts`).
+ */
+export interface LocalMetamodel {
+  concepts: MetamodelConcept[]
+  markers: MetamodelMarker[]
+}
+
+/**
+ * Normalized graph node.
+ */
+export interface ModelNode {
+  id: string // qualifiedId, e.g. "Process/Phase/Task"
+  name: string // unique among siblings
+  parentId: string | null
+  childIds: string[]
+  type: string // resolved concept type
+  fields: Record<string, FieldValue>
+  markers: Record<string, number | string>
+  relationships: ModelRelationship[]
+  rawSections: Record<string, string> // round-trip fidelity
+  /**
+   * Full original source text for root nodes (the node whose own
+   * `_FORMAT.md` file was parsed via `parseModel`). Undefined for
+   * element nodes nested inside a document (they have no own file).
+   * Used by the serializer for byte/structurally-equivalent no-edit
+   * round-trip (R7) instead of re-deriving through `serializeModel`'s
+   * canonical reformatting, which is not guaranteed to match source bytes.
+   */
+  rawContent?: string
+  /**
+   * This node's own locally-declared metamodel (frontmatter `concepts`/
+   * `markers`), present only on root nodes (undefined for nested element
+   * nodes, which declare nothing locally). The effective metamodel is
+   * resolved by walking up the ancestor chain merging these declarations,
+   * closest subtree override wins (R9) — see `metamodel.ts`.
+   */
+  localMetamodel?: LocalMetamodel
+  /**
+   * Optional node-kind discriminator.
+   * - 'root': the top-level node of a workspace (parentId === null).
+   * - 'concept': a `# _F` section representing a type/group.
+   * - 'element': an index-block instance.
+   * Undefined means the node was created before this discriminator existed
+   * (backward-compatible with existing graphs).
+   */
+  kind?: 'root' | 'concept' | 'element'
+  /**
+   * Optional metamodel binding for concept/group nodes.
+   * - `source: 'metamodel'`: the concept name matched a declared concept in
+   *    the resolved metamodel.
+   * - `source: 'structural'`: no matching concept found; the node is a
+   *    structural concept/group placeholder.
+   * Undefined means the node is not a concept node or pre-dates this field.
+   */
+  conceptBinding?: { name: string; source: 'metamodel' | 'structural' }
+  /** Optional slug derived from element YAML `slug` or auto-derived from name. */
+  slug?: string
+  /** Asset storage mode for this node's subtree. */
+  assetMode?: 'centralized' | 'per-element'
+  source: { path: string } // FS location for write-back
+  /**
+   * Indicates how this node was produced:
+   * - 'parsed': created from parsing a real _FORMAT.md document
+   * - 'structural': created as a structural placeholder (concept group)
+   * Undefined means the node pre-dates this field (backward compatible).
+   */
+  sourceMode?: 'parsed' | 'structural'
+  /** Relative paths of physical assets for this node. */
+  assets?: string[]
 }

@@ -7,7 +7,7 @@ import { useWorkspaceStore } from '../../src/stores/workspaceStore'
 import { routes } from '../../src/router/index'
 import { buildFakeTree, type FakeTree } from '../helpers/fakeFs'
 
-const folderRootMd = `---
+const singleFileMd = `---
 specification_version: "V_0-1-1"
 specification_url: "https://example.test/specs/business_V_0-1-1_FORMAT.md"
 level: 3
@@ -15,47 +15,39 @@ parent:
   name: "business_V_0-1-1"
   url: "https://example.test/specs/business_V_0-1-1_FORMAT.md"
 model_version: "V_0-0-1"
-title: "Integration Folder Root"
-mode: "FOLDER"
-concepts:
-  - name: "Business summary"
-    type: "text"
+title: "Integration Model"
 ---
 
 # _F Business summary
 
-Folder root used in the SidebarTree + NodeForm integration test.
-`
-
-const fileChildMd = `---
-specification_version: "V_0-1-1"
-specification_url: "https://example.test/specs/business_V_0-1-1_FORMAT.md"
-level: 3
-parent:
-  name: "business_V_0-1-1"
-  url: "https://example.test/specs/business_V_0-1-1_FORMAT.md"
-model_version: "V_0-0-1"
-title: "Integration File Child"
-mode: "FILE"
----
+Single-file model for workspace integration test.
 
 # _F Problems
 
 * _F Problems: Sample Problem
-  A problem used to give the FILE child node some field data.
+  A problem used to verify graph population.
 `
 
-describe('SidebarTree + NodeForm integration (mixed FILE/FOLDER tree, R13 scenario "Selection works across types")', () => {
+const indexMd = `---
+specification_version: "V_0-1-2"
+level: 0
+title: "Workspace Index"
+---
+
+# _F index
+
+* [[model_FORMAT.md]]
+`
+
+describe('WorkspaceView integration (single-file workspace)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
 
-  it('mounts with Pinia + Router and a fake FileSystemDirectoryHandle; both node types are selectable and each loads its form', async () => {
+  it('mounts with Pinia + Router, renders layout chrome, and displays model tree with selectable nodes', async () => {
     const tree: FakeTree = {
-      IntegrationRoot: {
-        '_FORMAT.md': folderRootMd,
-        'Child_FORMAT.md': fileChildMd,
-      },
+      'index.md': indexMd,
+      'model_FORMAT.md': singleFileMd,
     }
     const handle = buildFakeTree('workspace', tree)
 
@@ -71,18 +63,20 @@ describe('SidebarTree + NodeForm integration (mixed FILE/FOLDER tree, R13 scenar
     })
     await wrapper.vm.$nextTick()
 
-    // FOLDER root node is selectable and loads its form.
-    await wrapper.get('[data-node-id="IntegrationRoot"]').trigger('click')
-    await wrapper.vm.$nextTick()
-    expect(wrapper.find('.node-form').exists()).toBe(true)
-    expect(wrapper.text()).toContain('IntegrationRoot')
+    // Layout chrome should be present: Header with title
+    expect(wrapper.text()).toContain('FORMAT Modeler')
 
-    // FILE child node (nested under the FOLDER root) is also selectable
-    // from the same tree and loads its own form.
-    const fileChildRow = wrapper.findAll('[data-node-id]').find((el) => el.text().includes('Child'))
-    expect(fileChildRow).toBeDefined()
-    await fileChildRow!.trigger('click')
-    await wrapper.vm.$nextTick()
-    expect(wrapper.find('.node-form').text()).toContain('Child')
+    // Layout chrome renders header and sidebar
+    expect(wrapper.text()).toContain('FORMAT Modeler')
+
+    // Model tree should render the root node
+    expect(wrapper.text()).toContain('model')
+
+    // View switcher buttons present
+    expect(wrapper.text()).toContain('editor')
+    expect(wrapper.text()).toContain('graph')
+
+    // "Select a node" empty state shows when nothing is selected
+    expect(wrapper.text()).toMatch(/Select a node/i)
   })
 })

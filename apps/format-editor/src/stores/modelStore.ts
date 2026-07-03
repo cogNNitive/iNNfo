@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { ModelNode } from '../model/types'
 import type { DirectoryHandleLike } from './workspaceStore'
 import { recursiveParse } from '../model/recursiveParser'
+import type { ModelDriver } from '@innv0/format-core'
 
 export interface ModelState {
   nodes: Record<string, ModelNode>
@@ -25,6 +26,17 @@ export const useModelStore = defineStore('model', {
     getChildren: (state) => (id: string): ModelNode[] =>
       (state.nodes[id]?.childIds ?? []).map((cid) => state.nodes[cid]).filter(Boolean),
     getRoots: (state) => (): ModelNode[] => state.rootIds.map((id) => state.nodes[id]).filter(Boolean),
+
+    /**
+     * Returns the first root node id as the default "active" node.
+     * View-only selection (which node is highlighted/interacted with)
+     * lives in uiStore.selectedNodeId — this getter provides a fallback
+     * for components that need a stable node reference to derive data
+     * (e.g., metamodel resolution).
+     */
+    activeNodeId: (state): string | null => {
+      return state.rootIds[0] ?? null
+    },
   },
   actions: {
     /** Replaces the whole graph (used by a fresh recursive parse). */
@@ -56,9 +68,73 @@ export const useModelStore = defineStore('model', {
      * walking/parsing lands in Phase 3 (recursiveParser.ts); this wires
      * the call so workspaceStore.open() has a single integration point.
      */
-    async parseFromHandle(handle: DirectoryHandleLike): Promise<void> {
-      const result = await recursiveParse(handle)
+    async parseFromHandle(handle: DirectoryHandleLike, driver?: ModelDriver): Promise<void> {
+      const result = await recursiveParse(handle, driver)
       this.setGraph(result.nodes, result.rootIds)
+    },
+
+    /**
+     * Reorders a child within its parent's childIds array.
+     * @param direction 1 = move down, -1 = move up
+     */
+    reorderChild(parentId: string, childId: string, direction: 1 | -1): void {
+      const parent = this.nodes[parentId]
+      if (!parent) return
+      const idx = parent.childIds.indexOf(childId)
+      if (idx === -1) return
+      const newIdx = idx + direction
+      if (newIdx < 0 || newIdx >= parent.childIds.length) return
+      parent.childIds.splice(idx, 1)
+      parent.childIds.splice(newIdx, 0, childId)
+      this.markDirty(parentId)
+    },
+
+    /**
+     * Creates a new child node under the given parent.
+     * @returns the new node's id
+     */
+    createChild(parentId: string, name: string, type: string, kind?: 'concept' | 'element'): string {
+      const parent = this.nodes[parentId]
+      if (!parent) throw new Error(`Parent node "${parentId}" not found`)
+      const id = `${parentId}/${name}`
+      if (this.nodes[id]) throw new Error(`Node "${id}" already exists`)
+      this.nodes[id] = {
+        id,
+        name,
+        parentId,
+        childIds: [],
+        type,
+        kind: kind ?? 'element',
+        fields: {},
+        markers: {},
+        relationships: [],
+        rawSections: {},
+        source: { path: '' },
+      }
+      parent.childIds.push(id)
+      this.markDirty(parentId)
+      return id
+    },
+
+    /**
+     * Removes a node and all its descendants from the graph.
+     */
+    removeNodeTree(nodeId: string): void {
+      const node = this.nodes[nodeId]
+      if (!node) return
+      // Recursively remove children
+      for (const childId of [...node.childIds]) {
+        this.removeNodeTree(childId)
+      }
+      // Remove from parent
+      if (node.parentId) {
+        const parent = this.nodes[node.parentId]
+        if (parent) {
+          parent.childIds = parent.childIds.filter(id => id !== nodeId)
+        }
+      }
+      delete this.nodes[nodeId]
+      this.dirtyIds.add(nodeId)
     },
   },
 })

@@ -141,6 +141,42 @@ async function reopenFolder(entry: FolderHistoryEntry): Promise<void> {
   }
 }
 
+/**
+ * Tries to resolve a relative directory path from any previously stored handle
+ * in the workspace history. This lets us navigate to a sample's parent folder
+ * from a previously-opened workspace root without knowing the absolute path.
+ *
+ * Iterates each history handle and attempts to walk through the path segments
+ * via getDirectoryHandle(). Returns the first handle that fully resolves, or
+ * undefined if none of the stored handles contain the full path.
+ */
+async function resolveAncestorHandle(
+  segments: string[],
+): Promise<FileSystemDirectoryHandle | undefined> {
+  for (const entry of history.value) {
+    try {
+      const handle = await getStoredHandle(entry.handleKey)
+      if (!handle) continue
+
+      // At runtime, stored handles are real FileSystemDirectoryHandle instances.
+      let dir: FileSystemDirectoryHandle = handle as unknown as FileSystemDirectoryHandle
+      for (const seg of segments) {
+        const next = await dir.getDirectoryHandle(seg).catch(() => null)
+        if (!next) {
+          dir = null!
+          break
+        }
+        dir = next
+      }
+      if (dir) return dir
+    } catch {
+      // Stale handle or permission issue — try the next history entry
+      continue
+    }
+  }
+  return undefined
+}
+
 /** Removes a single history entry. */
 async function removeEntry(handleKey: string): Promise<void> {
   await removeFromHistory(handleKey)
@@ -153,12 +189,49 @@ async function clearAllHistory(): Promise<void> {
   history.value = await loadHistory()
 }
 
-/** Handles a sample card click — sets an informational hint. */
-function onSampleClick(sample: SampleFolder) {
+/**
+ * Handles a sample card click — resolves the sample's parent directory from
+ * workspace history and opens the folder picker starting at that location so
+ * the user can quickly select the sample folder without browsing from scratch.
+ */
+async function onSampleClick(sample: SampleFolder): Promise<void> {
   error.value = null
-  // The File System Access API requires user gesture for the picker.
-  // Guide the user to navigate to the sample directory manually.
-  error.value = `Navigate to the "${sample.name}" folder (${sample.path}) using the Open folder button above.`
+  const picker = (window as unknown as {
+    showDirectoryPicker?: (opts?: { startIn?: FileSystemHandle }) => Promise<DirectoryHandleLike>
+  }).showDirectoryPicker
+  if (!picker) {
+    error.value = 'This browser does not support the File System Access API. Use Chrome or Edge.'
+    return
+  }
+  try {
+    busy.value = true
+
+    // Resolve the sample's parent directory from stored workspace history
+    // FILE-mode: parent = directory that contains the file (what user selects)
+    // FOLDER-mode: parent = directory that contains the sample folder
+    const parentSegments = sample.path.replace(/\/+$/, '').split('/').slice(0, -1)
+    const ancestorHandle = parentSegments.length > 0
+      ? await resolveAncestorHandle(parentSegments)
+      : undefined
+
+    const pickerOpts = ancestorHandle
+      ? { startIn: ancestorHandle as FileSystemHandle }
+      : undefined
+
+    const dirHandle = pickerOpts
+      ? await picker.call(window, pickerOpts)
+      : await picker.call(window)
+
+    await workspace.open(dirHandle)
+    await addToHistory(dirHandle.name, dirHandle)
+    history.value = await loadHistory()
+    router.push('/workspace')
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') return
+    error.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    busy.value = false
+  }
 }
 </script>
 

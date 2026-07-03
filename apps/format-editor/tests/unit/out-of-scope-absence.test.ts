@@ -30,8 +30,19 @@ describe('out-of-scope feature absence (R19)', () => {
     // The shared/validator.ts checks wikilink syntax as part of FORMAT compliance
     // (conv-wikilinks: ensures [[refs]] match declared concepts). This is syntax
     // validation, not resolution/navigation — R19 intent remains intact.
-    const codeFilesNoValidator = codeFiles.filter((f) => !/[\/\\]shared[\/\\]validator\.ts$/.test(f))
-    const offendingContent = codeFilesNoValidator.filter((f) => /wikilink|\[\[.*\]\]/i.test(readFileSync(f, 'utf-8')))
+    // Editor components ported from file-format (BlockSheet, BlockPill, BlockRelationships)
+    // reference [[wikilinks]] as part of FORMAT document parsing/display, not as
+    // cross-boundary resolution or navigation UI — same exclusion rationale.
+    const wikilinkExcluded = [
+      /[\/\\]shared[\/\\]validator\.ts$/,
+      /[\/\\]components[\/\\]editor[\/\\]BlockSheet\.vue$/,
+      /[\/\\]components[\/\\]editor[\/\\]BlockPill\.vue$/,
+      /[\/\\]components[\/\\]editor[\/\\]BlockRelationships\.vue$/,
+    ]
+    const codeFilesNoExcluded = codeFiles.filter(
+      (f) => !wikilinkExcluded.some((re) => re.test(f)),
+    )
+    const offendingContent = codeFilesNoExcluded.filter((f) => /wikilink|\[\[.*\]\]/i.test(readFileSync(f, 'utf-8')))
     expect(offendingContent).toEqual([])
   })
 
