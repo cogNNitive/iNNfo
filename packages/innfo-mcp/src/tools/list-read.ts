@@ -7,16 +7,19 @@
  * read_model parses a model by id and returns its parsed structure.
  */
 
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
-import { listModels as coreListModels, parseModel, resolveSpecVersionFromFilename } from '@innv0/innfo-core';
-import type { ModelInfo, ParsedModel } from '@innv0/innfo-core';
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import {
+  listModels as coreListModels,
+  parseModel,
+} from '@innv0/innfo-core'
+import type { ModelInfo, ParsedModel } from '@innv0/innfo-core'
 
 /**
  * Scan a directory for iNNfo models.
  */
 export async function listModels(rootDir: string): Promise<ModelInfo[]> {
-  return coreListModels(rootDir);
+  return coreListModels(rootDir)
 }
 
 /**
@@ -28,22 +31,19 @@ export async function listModels(rootDir: string): Promise<ModelInfo[]> {
  */
 export async function readModel(rootDir: string, id: string): Promise<ParsedModel | null> {
   // Try exact path first, then append _NN.md
-  const candidates = [
-    join(rootDir, id),
-    join(rootDir, `${id}_NN.md`),
-  ];
+  const candidates = [join(rootDir, id), join(rootDir, `${id}_NN.md`), join(rootDir, `${id}_F.md`)]
 
   for (const filePath of candidates) {
     try {
-      const { stat } = await import('node:fs/promises');
-      await stat(filePath);
-      const content = await readFile(filePath, 'utf-8');
-      const model = parseModel(content);
-      return model;
+      const { stat } = await import('node:fs/promises')
+      await stat(filePath)
+      const content = await readFile(filePath, 'utf-8')
+      const model = parseModel(content)
+      return model
     } catch {
-      continue;
+      continue
     }
   }
 
-  return null;
+  return null
 }
