@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital@0;1&family=Geist+Mono:wght@400;500&display=swap');
 
 :root {
-  --canvas-base: #FFFFFF;
-  --canvas-inert: #FAFAFC;
-  --brand-primary: #4D0E4E;
-  --border-soft: #F2F2F7;
+  --canvas-base: #ffffff;
+  --canvas-inert: #fafafc;
+  --brand-primary: #4d0e4e;
+  --border-soft: #f2f2f7;
   --ink-primary: #111112;
   --ink-muted: #636366;
 
@@ -24,7 +24,9 @@
   --radius: 10px;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -73,7 +75,10 @@ a:hover {
   color: white;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--sans);
   font-weight: 700;
   line-height: 1.15;
@@ -117,7 +122,9 @@ p {
   color: var(--brand-primary);
 }
 
-code, pre, .mono {
+code,
+pre,
+.mono {
   font-family: var(--mono);
   font-size: 14px;
   line-height: 1.5;
@@ -212,7 +219,9 @@ code, pre, .mono {
   font-weight: 500;
   color: var(--ink-muted);
   text-decoration: none;
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
 }
 
 .nav a:hover {
@@ -395,21 +404,53 @@ code, pre, .mono {
 }
 
 @media (max-width: 1024px) {
-  h1 { font-size: 36px; }
-  h2 { font-size: 26px; }
-  .grid-3 { grid-template-columns: 1fr 1fr; }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
+  h1 {
+    font-size: 36px;
+  }
+  h2 {
+    font-size: 26px;
+  }
+  .grid-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 640px) {
-  .nav { display: none; }
-  h1 { font-size: 28px; }
-  h2 { font-size: 22px; }
-  h3 { font-size: 18px; }
-  .section { padding: var(--space-xl) 0; }
-  .hero { padding: var(--space-xl) 0; }
-  .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  .footer-grid { grid-template-columns: 1fr; }
-  .hero-actions { flex-direction: column; align-items: center; }
-  .footer-bottom { flex-direction: column; gap: var(--space-sm); text-align: center; }
+  .nav {
+    display: none;
+  }
+  h1 {
+    font-size: 28px;
+  }
+  h2 {
+    font-size: 22px;
+  }
+  h3 {
+    font-size: 18px;
+  }
+  .section {
+    padding: var(--space-xl) 0;
+  }
+  .hero {
+    padding: var(--space-xl) 0;
+  }
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: var(--space-sm);
+    text-align: center;
+  }
 }

@@ -25,8 +25,8 @@ Domain-specific templates. Each declares concepts, markers, matrices, and relati
 
 | Template | Version | Source |
 |----------|---------|--------|
-| **Business** | V 0.1.1 | [`specs/business_V_0-1-1_FORMAT.md`](https://github.com/innV0/cogNNitive/blob/main/specs/business_V_0-1-1_FORMAT.md) |
-| **Procedures** | V 0.1.1 | [`specs/procedures_V_0-1-1_FORMAT.md`](https://github.com/innV0/cogNNitive/blob/main/specs/procedures_V_0-1-1_FORMAT.md) |
+| **Business** | V 0.1.1 | [`specs/business_V_0-1-1_NN.md`](https://github.com/innV0/cogNNitive/blob/main/specs/business_V_0-1-1_NN.md) |
+| **Procedures** | V 0.1.1 | [`specs/procedures_V_0-1-1_NN.md`](https://github.com/innV0/cogNNitive/blob/main/specs/procedures_V_0-1-1_NN.md) |
 | **Knowledge Base (kb)** | V 0.1.1 | [`specs/kb_V_0-1-1_F.md`](https://github.com/innV0/cogNNitive/blob/main/specs/kb_V_0-1-1_F.md) |
 
 ## Level 3 — Models
