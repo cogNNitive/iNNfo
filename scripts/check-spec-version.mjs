@@ -18,189 +18,209 @@
 //   --include-archives — Include archive/ and openspec/changes/archive/ in scan
 //   --inventory     — Print ALL spec versions found in the repo
 
-import { readFileSync } from 'node:fs';
-import { readdirSync, statSync } from 'node:fs';
-import { join, relative, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs'
+import { readdirSync, statSync } from 'node:fs'
+import { join, relative, resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 // ── Config ──────────────────────────────────────────────────────────
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const ARCHIVE_DIRS = new Set(['archive', 'node_modules', '.git', '.playwright-mcp', 'home-page']);
-const ACTIVE_IGNORE = new Set(['node_modules', '.git', '.playwright-mcp', 'home-page']);
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const ARCHIVE_DIRS = new Set(['archive', 'node_modules', '.git', '.playwright-mcp', 'home-page'])
+const ACTIVE_IGNORE = new Set(['node_modules', '.git', '.playwright-mcp', 'home-page'])
 
-const FORMAT_VERSION_RE = /V_\d+-\d+-\d+/g;
+const FORMAT_VERSION_RE = /V_\d+-\d+-\d+/g
 
 // ── File Collection ─────────────────────────────────────────────────
 
 function collectFiles(dir, includeArchives) {
-  const files = [];
-  const topLevel = dir === ROOT;
+  const files = []
+  const topLevel = dir === ROOT
 
   try {
-    const entries = readdirSync(dir);
+    const entries = readdirSync(dir)
     for (const entry of entries) {
-      const full = join(dir, entry);
-      const st = statSync(full);
+      const full = join(dir, entry)
+      const st = statSync(full)
 
       // At top level, skip ignored dirs
       if (topLevel) {
-        if (!includeArchives && ARCHIVE_DIRS.has(entry)) continue;
-        if (ACTIVE_IGNORE.has(entry)) continue;
+        if (!includeArchives && ARCHIVE_DIRS.has(entry)) continue
+        if (ACTIVE_IGNORE.has(entry)) continue
       }
 
       if (st.isDirectory()) {
         // Skip any directory named 'archive' regardless of depth
-        if (!includeArchives && entry === 'archive') continue;
-        files.push(...collectFiles(full, includeArchives));
+        if (!includeArchives && entry === 'archive') continue
+        files.push(...collectFiles(full, includeArchives))
       } else {
-        files.push(full);
+        files.push(full)
       }
     }
   } catch {
     // permission denied or doesn't exist
   }
-  return files;
+  return files
 }
 
 // ── Classification ──────────────────────────────────────────────────
 
 function classifyFile(relPath) {
-  const isFormatFile = relPath.endsWith('_FORMAT.md') || relPath.endsWith('_F.md');
+  const isFormatFile = relPath.endsWith('_FORMAT.md') || relPath.endsWith('_F.md')
 
   if (relPath.startsWith('specs') && isFormatFile && !relPath.includes('/samples/')) {
-    if (relPath.includes('defiNNe') || relPath.includes('/FORMAT')) return 'spec';
-    return 'template';
+    if (relPath.includes('defiNNe') || relPath.includes('/FORMAT')) return 'spec'
+    return 'template'
   }
-  if (relPath.includes('/samples/') && isFormatFile) return 'model';
+  if (relPath.includes('/samples/') && isFormatFile) return 'model'
   if (isFormatFile) {
-    if (relPath.includes('/fixtures/')) return 'fixture';
-    if (relPath.startsWith('specs')) return 'model';
-    if (relPath.startsWith('archive')) return 'model';
-    return 'model';
+    if (relPath.includes('/fixtures/')) return 'fixture'
+    if (relPath.startsWith('specs')) return 'model'
+    if (relPath.startsWith('archive')) return 'model'
+    return 'model'
   }
-  if (relPath.includes('/fixtures/') && relPath.endsWith('.md')) return 'fixture';
-  if (relPath.endsWith('.test.ts') || relPath.endsWith('.test.tsx') || relPath.endsWith('.spec.ts')) return 'test';
-  if ((relPath.startsWith('apps') || relPath.startsWith('packages')) && relPath.endsWith('.ts') && !relPath.endsWith('.test.ts')) return 'source';
-  if (relPath.startsWith('docs') && relPath.endsWith('.md')) return 'doc';
-  if (relPath.startsWith('.agents') && relPath.endsWith('.md')) return 'skill';
-  if (relPath === 'CHANGELOG.md' || relPath === 'specs/CHANGELOG.md') return 'doc';
-  if (relPath.startsWith('specs') && relPath.endsWith('.md') && !relPath.endsWith('_FORMAT.md') && !relPath.endsWith('_F.md')) return 'doc';
-  if (relPath.startsWith('openspec')) return 'other';
-  if (relPath.startsWith('archive')) return 'model';
-  return 'other';
+  if (relPath.includes('/fixtures/') && relPath.endsWith('.md')) return 'fixture'
+  if (relPath.endsWith('.test.ts') || relPath.endsWith('.test.tsx') || relPath.endsWith('.spec.ts'))
+    return 'test'
+  if (
+    (relPath.startsWith('apps') || relPath.startsWith('packages')) &&
+    relPath.endsWith('.ts') &&
+    !relPath.endsWith('.test.ts')
+  )
+    return 'source'
+  if (relPath.startsWith('docs') && relPath.endsWith('.md')) return 'doc'
+  if (relPath.startsWith('.agents') && relPath.endsWith('.md')) return 'skill'
+  if (relPath === 'CHANGELOG.md' || relPath === 'specs/CHANGELOG.md') return 'doc'
+  if (
+    relPath.startsWith('specs') &&
+    relPath.endsWith('.md') &&
+    !relPath.endsWith('_FORMAT.md') &&
+    !relPath.endsWith('_F.md')
+  )
+    return 'doc'
+  if (relPath.startsWith('openspec')) return 'other'
+  if (relPath.startsWith('archive')) return 'model'
+  return 'other'
 }
 
 // ── Frontmatter Scanning ────────────────────────────────────────────
 
 function parseFrontmatterBlocks(content) {
   // Extract YAML frontmatter between --- markers
-  const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!fmMatch) return null;
-  return fmMatch[1];
+  const fmMatch = content.match(/^---\n([\s\S]*?)\n---/)
+  if (!fmMatch) return null
+  return fmMatch[1]
 }
 
 function extractVersionRefs(relPath, content) {
-  const refs = [];
+  const refs = []
 
   // 1. Check file name for version
-  const nameMatch = relPath.match(/V_(\d+-\d+-\d+)/);
+  const nameMatch = relPath.match(/V_(\d+-\d+-\d+)/)
   if (nameMatch) {
-    refs.push({ field: 'filename', value: `V_${nameMatch[1]}`, location: relPath });
+    refs.push({ field: 'filename', value: `V_${nameMatch[1]}`, location: relPath })
   }
 
   // 2. Parse frontmatter for version fields
-  const fm = parseFrontmatterBlocks(content);
+  const fm = parseFrontmatterBlocks(content)
   if (fm) {
     // spec_version
-    const sv = fm.match(/^spec_version\s*:\s*['"]?(V_\d+-\d+-\d+)['"]?\s*$/m);
-    if (sv) refs.push({ field: 'spec_version', value: sv[1], location: relPath });
+    const sv = fm.match(/^spec_version\s*:\s*['"]?(V_\d+-\d+-\d+)['"]?\s*$/m)
+    if (sv) refs.push({ field: 'spec_version', value: sv[1], location: relPath })
 
     // model_version
-    const mv = fm.match(/^model_version\s*:\s*['"]?(V_\d+-\d+-\d+)['"]?\s*$/m);
-    if (mv) refs.push({ field: 'model_version', value: mv[1], location: relPath });
+    const mv = fm.match(/^model_version\s*:\s*['"]?(V_\d+-\d+-\d+)['"]?\s*$/m)
+    if (mv) refs.push({ field: 'model_version', value: mv[1], location: relPath })
 
     // spec_url (extract version from URL)
-    const su = fm.match(/^spec_url\s*:\s*['"](https?:\/\/[^'"]+)['"]\s*$/m);
+    const su = fm.match(/^spec_url\s*:\s*['"](https?:\/\/[^'"]+)['"]\s*$/m)
     if (su) {
-      const urlVer = su[1].match(/V_\d+-\d+-\d+/);
-      if (urlVer) refs.push({ field: 'spec_url', value: urlVer[0], location: relPath });
+      const urlVer = su[1].match(/V_\d+-\d+-\d+/)
+      if (urlVer) refs.push({ field: 'spec_url', value: urlVer[0], location: relPath })
     }
 
     // parent block — name
-    const pn = fm.match(/^parent:\s*\n\s+name:\s*['"]?([^\s'"]+_V_\d+-\d+-\d+[^\s'"]*)['"]?\s*$/m);
+    const pn = fm.match(/^parent:\s*\n\s+name:\s*['"]?([^\s'"]+_V_\d+-\d+-\d+[^\s'"]*)['"]?\s*$/m)
     if (pn) {
-      const parentVer = pn[1].match(/V_\d+-\d+-\d+/);
-      if (parentVer) refs.push({ field: 'parent.name', value: parentVer[0], location: relPath });
+      const parentVer = pn[1].match(/V_\d+-\d+-\d+/)
+      if (parentVer) refs.push({ field: 'parent.name', value: parentVer[0], location: relPath })
     }
 
     // parent block — url
-    const pu = fm.match(/^parent:\s*\n(?:\s+.*\n)*?\s+url:\s*['"](https?:\/\/[^'"]+)['"]\s*$/m);
+    const pu = fm.match(/^parent:\s*\n(?:\s+.*\n)*?\s+url:\s*['"](https?:\/\/[^'"]+)['"]\s*$/m)
     if (pu) {
-      const urlVer = pu[1].match(/V_\d+-\d+-\d+/);
-      if (urlVer) refs.push({ field: 'parent.url', value: urlVer[0], location: relPath });
+      const urlVer = pu[1].match(/V_\d+-\d+-\d+/)
+      if (urlVer) refs.push({ field: 'parent.url', value: urlVer[0], location: relPath })
     }
   }
 
-  return refs;
+  return refs
 }
 
 // ── Version Matching ────────────────────────────────────────────────
 
 function escapeRegex(s) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function contentContainsVersion(content, version) {
-  const re = new RegExp(`(?:^|[^V])${escapeRegex(version)}(?:[^\\d-]|$)`, 'gm');
-  return re.test(content);
+  const re = new RegExp(`(?:^|[^V])${escapeRegex(version)}(?:[^\\d-]|$)`, 'gm')
+  return re.test(content)
 }
 
 // ── Scan Logic ──────────────────────────────────────────────────────
 
 function categorizeByVersion(files) {
-  const versionMap = new Map();
+  const versionMap = new Map()
 
   for (const filePath of files) {
-    const rel = relative(ROOT, filePath);
-    let content;
-    try { content = readFileSync(filePath, 'utf-8'); } catch { continue; }
+    const rel = relative(ROOT, filePath)
+    let content
+    try {
+      content = readFileSync(filePath, 'utf-8')
+    } catch {
+      continue
+    }
 
-    const matches = content.match(FORMAT_VERSION_RE);
-    if (!matches) continue;
+    const matches = content.match(FORMAT_VERSION_RE)
+    if (!matches) continue
 
-    const uniqueVersions = [...new Set(matches)];
+    const uniqueVersions = [...new Set(matches)]
     for (const ver of uniqueVersions) {
-      if (!versionMap.has(ver)) versionMap.set(ver, []);
-      versionMap.get(ver).push(rel);
+      if (!versionMap.has(ver)) versionMap.set(ver, [])
+      versionMap.get(ver).push(rel)
     }
   }
-  return versionMap;
+  return versionMap
 }
 
 function scanForVersion(version, files) {
-  const results = [];
-  const seen = new Set();
+  const results = []
+  const seen = new Set()
 
   for (const filePath of files) {
-    const rel = relative(ROOT, filePath);
-    if (seen.has(rel)) continue;
+    const rel = relative(ROOT, filePath)
+    if (seen.has(rel)) continue
 
-    let content;
-    try { content = readFileSync(filePath, 'utf-8'); } catch { continue; }
+    let content
+    try {
+      content = readFileSync(filePath, 'utf-8')
+    } catch {
+      continue
+    }
 
-    if (!contentContainsVersion(content, version)) continue;
-    seen.add(rel);
+    if (!contentContainsVersion(content, version)) continue
+    seen.add(rel)
 
-    const refs = extractVersionRefs(rel, content);
+    const refs = extractVersionRefs(rel, content)
     results.push({
       file: rel,
       category: classifyFile(rel),
       refs: refs.length > 0 ? refs : [{ field: 'text', value: version, location: rel }],
-    });
+    })
   }
 
-  return results;
+  return results
 }
 
 // ── Output ──────────────────────────────────────────────────────────
@@ -215,120 +235,141 @@ const CATEGORY_LABELS = {
   doc: '\u{1F4DD} Docs',
   skill: '\u{1F916} Skills',
   other: '\u{1F4C1} Other',
-};
-const CATEGORY_ORDER = ['spec', 'template', 'model', 'fixture', 'test', 'source', 'doc', 'skill', 'other'];
+}
+const CATEGORY_ORDER = [
+  'spec',
+  'template',
+  'model',
+  'fixture',
+  'test',
+  'source',
+  'doc',
+  'skill',
+  'other',
+]
 
 function printResults(results, byType, version) {
   if (results.length === 0) {
-    console.log(`  No files reference "${version}" \u2014 repo is clean.\n`);
-    return;
+    console.log(`  No files reference "${version}" \u2014 repo is clean.\n`)
+    return
   }
 
   if (byType) {
-    const grouped = {};
+    const grouped = {}
     for (const r of results) {
-      if (!grouped[r.category]) grouped[r.category] = [];
-      grouped[r.category].push(r);
+      if (!grouped[r.category]) grouped[r.category] = []
+      grouped[r.category].push(r)
     }
 
-    console.log(`  ${results.length} file(s) referencing "${version}":\n`);
+    console.log(`  ${results.length} file(s) referencing "${version}":\n`)
 
     for (const cat of CATEGORY_ORDER) {
-      const items = grouped[cat];
-      if (!items || items.length === 0) continue;
-      const label = CATEGORY_LABELS[cat] || cat;
-      console.log(`  ${label}  (${items.length})`);
+      const items = grouped[cat]
+      if (!items || items.length === 0) continue
+      const label = CATEGORY_LABELS[cat] || cat
+      console.log(`  ${label}  (${items.length})`)
       for (const item of items) {
-        const refSummary = item.refs.map(r => `${r.field}=${r.value}`).join(', ');
-        console.log(`    \u00B7 ${item.file}`);
-        if (refSummary) console.log(`      \u2192 ${refSummary}`);
+        const refSummary = item.refs.map((r) => `${r.field}=${r.value}`).join(', ')
+        console.log(`    \u00B7 ${item.file}`)
+        if (refSummary) console.log(`      \u2192 ${refSummary}`)
       }
-      console.log();
+      console.log()
     }
   } else {
-    console.log(`  ${results.length} file(s) referencing "${version}":\n`);
+    console.log(`  ${results.length} file(s) referencing "${version}":\n`)
     for (const item of results) {
-      const refSummary = item.refs.map(r => `${r.field}=${r.value}`).join(', ');
-      console.log(`  \u00B7 ${item.file}`);
-      if (refSummary) console.log(`    ${refSummary}`);
+      const refSummary = item.refs.map((r) => `${r.field}=${r.value}`).join(', ')
+      console.log(`  \u00B7 ${item.file}`)
+      if (refSummary) console.log(`    ${refSummary}`)
     }
-    console.log();
+    console.log()
   }
 }
 
 function printInventory(versionMap) {
   const sorted = [...versionMap.entries()].sort((a, b) => {
-    const aParts = a[0].replace('V_', '').split('-').map(Number);
-    const bParts = b[0].replace('V_', '').split('-').map(Number);
+    const aParts = a[0].replace('V_', '').split('-').map(Number)
+    const bParts = b[0].replace('V_', '').split('-').map(Number)
     for (let i = 0; i < 3; i++) {
-      if (aParts[i] !== bParts[i]) return bParts[i] - aParts[i];
+      if (aParts[i] !== bParts[i]) return bParts[i] - aParts[i]
     }
-    return 0;
-  });
+    return 0
+  })
 
-  console.log('  Spec Version Inventory\n');
+  console.log('  Spec Version Inventory\n')
   for (const [ver, files] of sorted) {
-    console.log(`  ${ver}  \u2014  ${files.length} file(s)`);
+    console.log(`  ${ver}  \u2014  ${files.length} file(s)`)
     for (const f of files.slice(0, 15)) {
-      console.log(`    \u00B7 ${f}`);
+      console.log(`    \u00B7 ${f}`)
     }
-    if (files.length > 15) console.log(`    \u2026 and ${files.length - 15} more`);
-    console.log();
+    if (files.length > 15) console.log(`    \u2026 and ${files.length - 15} more`)
+    console.log()
   }
-  console.log(`  Total: ${sorted.length} unique spec versions across the repo.\n`);
+  console.log(`  Total: ${sorted.length} unique spec versions across the repo.\n`)
 }
 
 // ── CLI ─────────────────────────────────────────────────────────────
 
 function parseArgs() {
-  const args = process.argv.slice(2);
-  let version = null;
-  let byType = false;
-  let checkMode = false;
-  let inventory = false;
-  let includeArchives = false;
+  const args = process.argv.slice(2)
+  let version = null
+  let byType = false
+  let checkMode = false
+  let inventory = false
+  let includeArchives = false
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
-      case '--version': version = args[++i]; break;
-      case '--by-type': byType = true; break;
-      case '--check': checkMode = true; break;
-      case '--inventory': inventory = true; break;
-      case '--include-archives': includeArchives = true; break;
+      case '--version':
+        version = args[++i]
+        break
+      case '--by-type':
+        byType = true
+        break
+      case '--check':
+        checkMode = true
+        break
+      case '--inventory':
+        inventory = true
+        break
+      case '--include-archives':
+        includeArchives = true
+        break
     }
   }
-  return { version, byType, checkMode, inventory, includeArchives };
+  return { version, byType, checkMode, inventory, includeArchives }
 }
 
 function main() {
-  const { version, byType, checkMode, inventory, includeArchives } = parseArgs();
+  const { version, byType, checkMode, inventory, includeArchives } = parseArgs()
 
-  const allFiles = collectFiles(ROOT, includeArchives)
-    .filter(f => f.endsWith('.md') || f.endsWith('.ts') || f.endsWith('.tsx'));
+  const allFiles = collectFiles(ROOT, includeArchives).filter(
+    (f) => f.endsWith('.md') || f.endsWith('.ts') || f.endsWith('.tsx'),
+  )
 
   if (inventory) {
-    const versionMap = categorizeByVersion(allFiles);
-    printInventory(versionMap);
-    process.exit(0);
+    const versionMap = categorizeByVersion(allFiles)
+    printInventory(versionMap)
+    process.exit(0)
   }
 
   if (!version) {
-    console.error('Required: --version V_x-y-z  or  --inventory');
-    console.error('  e.g.  node scripts/check-spec-version.mjs --version V_0-1-2');
-    process.exit(1);
+    console.error('Required: --version V_x-y-z  or  --inventory')
+    console.error('  e.g.  node scripts/check-spec-version.mjs --version V_0-1-2')
+    process.exit(1)
   }
 
   if (!/^V_\d+-\d+-\d+$/.test(version)) {
-    console.error(`Invalid version format: "${version}". Use V_x-y-z (e.g. V_0-1-2).`);
-    process.exit(1);
+    console.error(`Invalid version format: "${version}". Use V_x-y-z (e.g. V_0-1-2).`)
+    process.exit(1)
   }
 
-  const results = scanForVersion(version, allFiles);
-  printResults(results, byType, version);
+  const results = scanForVersion(version, allFiles)
+  printResults(results, byType, version)
 
   if (checkMode && results.length > 0) {
-    process.exit(1);
+    process.exit(1)
   }
 }
 
-main();
+main()
