@@ -15,29 +15,19 @@
  *   apply_change  — apply an intent operation and re-validate
  */
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import type {
-  ListToolsResult,
-  CallToolResult,
-  Tool,
-} from '@modelcontextprotocol/sdk/types.js';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js'
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+import type { ListToolsResult, CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 
-import { listModels, readModel } from './tools/list-read.js';
-import { getSpec, getTemplate } from './tools/spec.js';
-import { validateModel, applyChange } from './tools/mutate.js';
+import { listModels, readModel } from './tools/list-read.js'
+import { getSpec, getTemplate } from './tools/spec.js'
+import { validateModel, applyChange } from './tools/mutate.js'
 
 /** Root directory for model scanning (defaults to `models/` under CWD) */
-const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd();
+const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd()
 
-const server = new Server(
-  { name: 'innfo-mcp', version: '0.1.0' },
-  { capabilities: { tools: {} } },
-);
+const server = new Server({ name: 'innfo-mcp', version: '0.1.0' }, { capabilities: { tools: {} } })
 
 /* ── Tool definitions ───────────────────────────────────────── */
 
@@ -54,11 +44,14 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'read_model',
-    description: 'Parse and return an iNNfo model\'s full structure by its id',
+    description: "Parse and return an iNNfo model's full structure by its id",
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Model id (filename stem, e.g. Ghostbusters_V_0-1-2_business)' },
+        id: {
+          type: 'string',
+          description: 'Model id (filename stem, e.g. Ghostbusters_V_0-1-2_business)',
+        },
       },
       required: ['id'],
     },
@@ -69,7 +62,10 @@ const toolDefinitions: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        version: { type: 'string', description: 'SemVer override (e.g. "0-1-2"). Defaults from model filename if omitted' },
+        version: {
+          type: 'string',
+          description: 'SemVer override (e.g. "0-1-2"). Defaults from model filename if omitted',
+        },
         model_id: { type: 'string', description: 'Model id to derive version from' },
       },
     },
@@ -88,7 +84,8 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'validate_model',
-    description: 'Validate an iNNfo model against its template. Provide either id (file on disk) or content (raw text)',
+    description:
+      'Validate an iNNfo model against its template. Provide either id (file on disk) or content (raw text)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -99,7 +96,8 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'apply_change',
-    description: 'Apply an intent-level change to a model and re-validate. Returns updated model or validation errors',
+    description:
+      'Apply an intent-level change to a model and re-validate. Returns updated model or validation errors',
     inputSchema: {
       type: 'object',
       properties: {
@@ -117,7 +115,7 @@ const toolDefinitions: Tool[] = [
       required: ['id', 'op', 'args'],
     },
   },
-];
+]
 
 /* ── Tool call dispatcher ────────────────────────────────────── */
 
@@ -125,105 +123,106 @@ async function dispatchTool(name: string, args: Record<string, unknown>): Promis
   try {
     switch (name) {
       case 'list_models':
-        return await handleListModels(args);
+        return await handleListModels(args)
       case 'read_model':
-        return await handleReadModel(args);
+        return await handleReadModel(args)
       case 'get_spec':
-        return await handleGetSpec(args);
+        return await handleGetSpec(args)
       case 'get_template':
-        return await handleGetTemplate(args);
+        return await handleGetTemplate(args)
       case 'validate_model':
-        return await handleValidateModel(args);
+        return await handleValidateModel(args)
       case 'apply_change':
-        return await handleApplyChange(args);
+        return await handleApplyChange(args)
       default:
-        return errorResult(`Unknown tool: ${name}`);
+        return errorResult(`Unknown tool: ${name}`)
     }
   } catch (err) {
-    return errorResult(String(err));
+    return errorResult(String(err))
   }
 }
 
 /* ── Handlers ────────────────────────────────────────────────── */
 
 async function handleListModels(args: Record<string, unknown>): Promise<CallToolResult> {
-  const root = (args.root as string) || ROOT_DIR;
-  const models = await listModels(root);
-  return textResult(JSON.stringify(models, null, 2));
+  const root = (args.root as string) || ROOT_DIR
+  const models = await listModels(root)
+  return textResult(JSON.stringify(models, null, 2))
 }
 
 async function handleReadModel(args: Record<string, unknown>): Promise<CallToolResult> {
-  const id = args.id as string;
-  if (!id) return errorResult('Missing required argument: id');
-  const model = await readModel(ROOT_DIR, id);
-  if (!model) return errorResult(`Model not found: ${id}`);
-  return textResult(JSON.stringify(model, null, 2));
+  const id = args.id as string
+  if (!id) return errorResult('Missing required argument: id')
+  const model = await readModel(ROOT_DIR, id)
+  if (!model) return errorResult(`Model not found: ${id}`)
+  return textResult(JSON.stringify(model, null, 2))
 }
 
 async function handleGetSpec(args: Record<string, unknown>): Promise<CallToolResult> {
-  const version = args.version as string | undefined;
-  const modelId = args.model_id as string | undefined;
-  const spec = await getSpec(ROOT_DIR, version, modelId);
-  return textResult(JSON.stringify(spec, null, 2));
+  const version = args.version as string | undefined
+  const modelId = args.model_id as string | undefined
+  const spec = await getSpec(ROOT_DIR, version, modelId)
+  return textResult(JSON.stringify(spec, null, 2))
 }
 
 async function handleGetTemplate(args: Record<string, unknown>): Promise<CallToolResult> {
-  const name = args.name as string;
-  const version = args.version as string | undefined;
-  if (!name) return errorResult('Missing required argument: name');
-  const template = await getTemplate(ROOT_DIR, name, version);
-  if (!template) return errorResult(`Template not found: ${name}${version ? ` version ${version}` : ''}`);
-  return textResult(JSON.stringify(template, null, 2));
+  const name = args.name as string
+  const version = args.version as string | undefined
+  if (!name) return errorResult('Missing required argument: name')
+  const template = await getTemplate(ROOT_DIR, name, version)
+  if (!template)
+    return errorResult(`Template not found: ${name}${version ? ` version ${version}` : ''}`)
+  return textResult(JSON.stringify(template, null, 2))
 }
 
 async function handleValidateModel(args: Record<string, unknown>): Promise<CallToolResult> {
-  const id = args.id as string | undefined;
-  const content = args.content as string | undefined;
-  if (!id && !content) return errorResult('Provide either id or content');
-  const result = await validateModel(ROOT_DIR, id, content);
-  return textResult(JSON.stringify(result, null, 2));
+  const id = args.id as string | undefined
+  const content = args.content as string | undefined
+  if (!id && !content) return errorResult('Provide either id or content')
+  const result = await validateModel(ROOT_DIR, id, content)
+  return textResult(JSON.stringify(result, null, 2))
 }
 
 async function handleApplyChange(args: Record<string, unknown>): Promise<CallToolResult> {
-  const id = args.id as string;
-  const op = args.op as string;
-  const opArgs = args.args as Record<string, unknown>;
+  const id = args.id as string
+  const op = args.op as string
+  const opArgs = args.args as Record<string, unknown>
   if (!id || !op || !opArgs) {
-    return errorResult('Missing required arguments: id, op, args');
+    return errorResult('Missing required arguments: id, op, args')
   }
-  const result = await applyChange(ROOT_DIR, id, op, opArgs);
-  return textResult(JSON.stringify(result, null, 2));
+  const result = await applyChange(ROOT_DIR, id, op, opArgs)
+  return textResult(JSON.stringify(result, null, 2))
 }
 
 /* ── Response helpers ────────────────────────────────────────── */
 
 function textResult(text: string): CallToolResult {
-  return { content: [{ type: 'text', text }] };
+  return { content: [{ type: 'text', text }] }
 }
 
 function errorResult(text: string): CallToolResult {
-  return { content: [{ type: 'text', text }], isError: true };
+  return { content: [{ type: 'text', text }], isError: true }
 }
 
 /* ── Handlers ────────────────────────────────────────────────── */
 
 server.setRequestHandler(ListToolsRequestSchema, async (): Promise<ListToolsResult> => {
-  return { tools: toolDefinitions };
-});
+  return { tools: toolDefinitions }
+})
 
 server.setRequestHandler(CallToolRequestSchema, async (request): Promise<CallToolResult> => {
-  const { name, arguments: args } = request.params;
-  return dispatchTool(name, (args ?? {}) as Record<string, unknown>);
-});
+  const { name, arguments: args } = request.params
+  return dispatchTool(name, (args ?? {}) as Record<string, unknown>)
+})
 
 /* ── Start ──────────────────────────────────────────────────── */
 
 async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+  const transport = new StdioServerTransport()
+  await server.connect(transport)
 }
 
 main().catch((err) => {
-  console.error('Fatal error starting innfo-mcp:', err);
-  process.exit(1);
-});
+  console.error('Fatal error starting innfo-mcp:', err)
+  process.exit(1)
+})

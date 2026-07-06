@@ -129,7 +129,7 @@ export async function getTemplate(
     // Otherwise construct a basic SpecDocument from the fetched content.
     if (template) return template
 
-    // Fallback: if resolveParentChain didn't name it as level-2 template,
+    // Fallback: if resolveParentChain didn't name it as template,
     // try to read the fetched spec content directly.
     const content = await readFile(
       join(rootDir, '.spec-cache', `${templateName}_NN.md`),
@@ -140,7 +140,7 @@ export async function getTemplate(
       if (fm) {
         return {
           name: templateName,
-          level: 2,
+          level: fm.level ?? 2,
           parentName: fm.parent_spec?.name,
           parentUrl: fm.parent_spec?.url,
           frontmatter: fm,
