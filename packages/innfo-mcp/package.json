@@ -19,6 +19,7 @@
   ],
   "scripts": {
     "build": "tsup",
+    "build:bundle": "tsup",
     "start": "node dist/server.js",
     "test": "vitest run",
     "test:watch": "vitest"

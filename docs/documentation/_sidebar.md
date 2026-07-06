@@ -1,5 +1,5 @@
 - [Home](README)
-- [FORMAT Agent (OpenCode)](opencode-format-agent)
+- [iNNfo Agent (OpenCode)](opencode-innfo-agent)
 - [format-editor](format-editor)
 - [format-core](format-core)
 - [Launcher](launcher) *(legacy)*

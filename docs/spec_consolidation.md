@@ -217,8 +217,8 @@ No se fusionan las UIs. En su lugar se crea una **librería TypeScript pura** qu
 | `defiNNe.md` | `0.1.1` | `V_0-2-0` | `0` |
 | `_format.md` (FORMAT) | `V_0-1-0` | `V_0-2-0` | `1` |
 | `iNNfo.defiNNe.md` | `1.1.0` | *(desaparece como spec)* | — |
-| `business_V_0-1-1_FORMAT.md` | `V_0-1-1` | `V_1-0-0` | `2` |
-| `procedures_V_0-1-1_FORMAT.md` | `V_0-1-1` | `V_1-0-0` | `2` |
+| `business_V_0-1-1_NN.md` | `V_0-1-1` | `V_1-0-0` | `2` |
+| `procedures_V_0-1-1_NN.md` | `V_0-1-1` | `V_1-0-0` | `2` |
 | Modelos (`Ghostbusters_V_...`) | `V_x-y-z` | Sin cambios | `3` |
 
 ---

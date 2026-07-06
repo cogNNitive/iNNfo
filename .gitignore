@@ -13,3 +13,7 @@ dist/
 openspec/changes/archive/
 test-results/
 e2e-reports/
+# Local AI runtime state
+.atl/
+# Backup
+specs.bak/
