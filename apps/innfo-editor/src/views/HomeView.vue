@@ -62,6 +62,44 @@ const samples: SampleFolder[] = [
   },
 ]
 
+interface StarterTemplate {
+  id: string
+  name: string
+  description: string
+  icon: string
+  url: string
+  templateName: string
+}
+
+const starterBase = `${import.meta.env.BASE_URL}starter/`
+
+const starters: StarterTemplate[] = [
+  {
+    id: 'starter-business',
+    name: 'Business',
+    description: 'Model your business idea: market, team, finance, operations, and strategy.',
+    icon: '🏢',
+    url: `${starterBase}Business_V_1-0-0_starter_NN.md`,
+    templateName: 'business',
+  },
+  {
+    id: 'starter-procedures',
+    name: 'Procedures',
+    description: 'Define step-by-step workflows, roles, artifacts, and decision points.',
+    icon: '📋',
+    url: `${starterBase}Procedures_V_1-0-0_starter_NN.md`,
+    templateName: 'procedures',
+  },
+  {
+    id: 'starter-catalog',
+    name: 'Catalog',
+    description: 'Organize collections: artists, albums, products, or any categorized list.',
+    icon: '📚',
+    url: `${starterBase}Catalog_V_1-0-0_starter_NN.md`,
+    templateName: 'catalog',
+  },
+]
+
 onMounted(async () => {
   history.value = await loadHistory()
 })
@@ -212,6 +250,79 @@ async function reopenFolder(entry: FolderHistoryEntry): Promise<void> {
 }
 
 /**
+ * Loads a starter model from its raw GitHub URL into a virtual workspace.
+ * The model can be explored and edited in memory, but cannot be saved
+ * because there's no local folder handle. Use createFromStarter() if you
+ * need full save support.
+ */
+async function previewStarter(starter: StarterTemplate): Promise<void> {
+  error.value = null
+  urlBusy.value = true
+  try {
+    await workspace.loadFromUrl(starter.url)
+    await addToHistory(starter.name, null as unknown as any)
+    history.value = await loadHistory()
+    router.push('/workspace')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    urlBusy.value = false
+  }
+}
+
+/**
+ * Creates a new model from a starter template by:
+ * 1. Asking the user to pick a folder via File System Access API
+ * 2. Fetching the starter model content from the raw URL
+ * 3. Writing it as a new _NN.md file in the selected folder
+ * 4. Opening the folder as a workspace (full save support)
+ */
+async function createFromStarter(starter: StarterTemplate): Promise<void> {
+  error.value = null
+  const picker = (
+    window as unknown as {
+      showDirectoryPicker?: () => Promise<DirectoryHandleLike>
+    }
+  ).showDirectoryPicker
+  if (!picker) {
+    error.value = 'This browser does not support the File System Access API. Use Chrome or Edge.'
+    return
+  }
+  try {
+    busy.value = true
+    const handle = await picker.call(window)
+
+    // Fetch starter content from raw GitHub URL
+    const response = await window.fetch(starter.url)
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    let content = await response.text()
+
+    // Customise the model title so the user gets a fresh copy
+    const modelName = `My${starter.name.replace(/\s/g, '')}`
+    content = content.replace(/^title:.*$/m, `title: "${modelName}"`)
+
+    const filename = `${modelName}_V_1-0-0_${starter.templateName}_NN.md`
+
+    // Write the file into the chosen folder
+    const fileHandle = await handle.getFileHandle(filename, { create: true })
+    if (!fileHandle.createWritable) throw new Error('File handle does not support writing')
+    const writable = await fileHandle.createWritable()
+    await writable.write(content)
+    await writable.close()
+
+    await workspace.open(handle)
+    await addToHistory(handle.name, handle)
+    history.value = await loadHistory()
+    router.push('/workspace')
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') return
+    error.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    busy.value = false
+  }
+}
+
+/**
  * Tries to resolve a relative directory path from any previously stored handle
  * in the workspace history. This lets us navigate to a sample's parent folder
  * from a previously-opened workspace root without knowing the absolute path.
@@ -304,41 +415,136 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
 <template>
   <div class="home">
-    <h1 class="home__title">format-editor</h1>
-    <p class="home__hint">Open a workspace folder to begin.</p>
-
-    <!-- ── Drag-drop / open zone ── -->
-    <div
-      class="drop-zone"
-      :class="{ 'drop-zone--active': isDragging }"
-      @dragover="onDragOver"
-      @dragleave="onDragLeave"
-      @drop="onDrop"
-    >
-      <div class="drop-zone__icon">
-        <svg
-          width="40"
-          height="40"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        >
-          <path d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z" />
-        </svg>
-      </div>
-      <p class="drop-zone__text">Drop a folder here, or click to browse</p>
-      <div class="drop-zone__actions">
-        <button class="home__open" :disabled="busy" @click="openWorkspace">
-          {{ busy ? 'Opening\u2026' : 'Open folder\u2026' }}
-        </button>
-        <button class="home__template" :disabled="busy" @click="createFromTemplate">
-          New from template
-        </button>
-      </div>
+    <!-- ── Hero ── -->
+    <div class="hero">
+      <h1 class="hero__title">iNNfo Model Editor</h1>
+      <p class="hero__desc">
+        Create and edit structured knowledge models in the iNNfo FORMAT.
+        All files are plain-text Markdown stored on your computer — nothing is uploaded to the cloud.
+      </p>
     </div>
 
-    <!-- ── Load from URL ── -->
+    <!-- ── Two-column layout: open existing / start new ── -->
+    <div class="cols">
+      <!-- Left column: open existing -->
+      <div class="col">
+        <h2 class="col__title">Open existing</h2>
+        <p class="col__desc">
+          Select a folder that already contains iNNfo model files.
+        </p>
+
+        <div
+          class="drop-zone"
+          :class="{ 'drop-zone--active': isDragging }"
+          @dragover="onDragOver"
+          @dragleave="onDragLeave"
+          @drop="onDrop"
+        >
+          <div class="drop-zone__icon">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z" />
+            </svg>
+          </div>
+          <p class="drop-zone__text">Drop a folder here, or click to browse</p>
+          <button class="home__open" :disabled="busy" @click="openWorkspace">
+            {{ busy ? 'Opening\u2026' : 'Open folder\u2026' }}
+          </button>
+        </div>
+
+        <!-- ── Recent folders ── -->
+        <section v-if="history.length" class="recent">
+          <div class="recent__header">
+            <h3 class="recent__title">Recent</h3>
+            <button class="recent__clear" @click="clearAllHistory">Clear</button>
+          </div>
+          <div class="recent__list">
+            <button
+              v-for="entry in history"
+              :key="entry.handleKey"
+              class="recent__item"
+              :disabled="reopenBusy === entry.handleKey"
+              @click="reopenFolder(entry)"
+            >
+              <svg
+                class="recent__icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+                />
+              </svg>
+              <span class="recent__name">{{ entry.name }}</span>
+              <span class="recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
+              <span
+                class="recent__remove"
+                role="button"
+                tabindex="0"
+                @click.stop="removeEntry(entry.handleKey)"
+                @keydown.enter.prevent="removeEntry(entry.handleKey)"
+                @keydown.space.prevent="removeEntry(entry.handleKey)"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right column: start from scratch -->
+      <div class="col">
+        <h2 class="col__title">Start from scratch</h2>
+        <p class="col__desc">
+          Choose a template to create a new model, or load one directly from a URL.
+        </p>
+
+        <div class="starters">
+          <div v-for="s in starters" :key="s.id" class="starter-card">
+            <div class="starter-card__head">
+              <span class="starter-card__icon">{{ s.icon }}</span>
+              <strong class="starter-card__name">{{ s.name }}</strong>
+            </div>
+            <p class="starter-card__desc">{{ s.description }}</p>
+            <div class="starter-card__actions">
+              <button
+                class="starter-card__preview"
+                :disabled="urlBusy"
+                @click="previewStarter(s)"
+              >
+                {{ urlBusy ? 'Loading\u2026' : 'Preview' }}
+              </button>
+              <button
+                class="starter-card__create"
+                :disabled="busy"
+                @click="createFromStarter(s)"
+              >
+                {{ busy ? 'Creating\u2026' : 'Create' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Load from URL ── -->
     <div class="home-url">
       <p class="home-url__label">Or load a model from URL:</p>
       <div class="home-url__row">
@@ -355,59 +561,10 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
       </div>
     </div>
 
-    <p v-if="error" class="home__error" role="alert">{{ error }}</p>
+      </div>
+    </div>
 
-    <!-- ── Recent folders ── -->
-    <section v-if="history.length" class="recent">
-      <div class="recent__header">
-        <h3 class="recent__title">Recent</h3>
-        <button class="recent__clear" @click="clearAllHistory">Clear</button>
-      </div>
-      <div class="recent__list">
-        <button
-          v-for="entry in history"
-          :key="entry.handleKey"
-          class="recent__item"
-          :disabled="reopenBusy === entry.handleKey"
-          @click="reopenFolder(entry)"
-        >
-          <svg
-            class="recent__icon"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          >
-            <path
-              d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
-            />
-          </svg>
-          <span class="recent__name">{{ entry.name }}</span>
-          <span class="recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
-          <span
-            class="recent__remove"
-            role="button"
-            tabindex="0"
-            @click.stop="removeEntry(entry.handleKey)"
-            @keydown.enter.prevent="removeEntry(entry.handleKey)"
-            @keydown.space.prevent="removeEntry(entry.handleKey)"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </span>
-        </button>
-      </div>
-    </section>
+    <p v-if="error" class="home__error" role="alert">{{ error }}</p>
 
     <!-- ── Sample models ── -->
     <section class="samples">
@@ -455,24 +612,71 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
   font-family: system-ui, sans-serif;
 }
 
-.home__title {
-  margin: 0;
-  font-size: 1.5rem;
+/* ── Hero ── */
+
+.hero {
+  text-align: center;
+  max-width: 600px;
 }
 
-.home__hint {
+.hero__title {
   margin: 0;
+  font-size: 1.5rem;
+  color: #4d0e4e;
+}
+
+.hero__desc {
+  margin: 0.5rem 0 0;
   color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── Two-column layout ── */
+
+.cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 860px;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.col__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+}
+
+.col__desc {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+  line-height: 1.5;
 }
 
 /* ── Drag-drop zone ── */
 
 .drop-zone {
-  width: 100%;
-  max-width: 480px;
   border: 2px dashed #ccc;
   border-radius: 12px;
-  padding: 2rem 1rem;
+  padding: 1.5rem 1rem;
   text-align: center;
   transition:
     border-color 0.2s,
@@ -486,18 +690,13 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
 .drop-zone__icon {
   color: #999;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .drop-zone__text {
-  margin: 0 0 1rem;
+  margin: 0 0 0.75rem;
   color: #666;
   font-size: 14px;
-}
-
-.drop-zone__actions {
-  display: flex;
-  justify-content: center;
 }
 
 .home__open {
@@ -522,24 +721,95 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
   cursor: default;
 }
 
-.home__template {
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  cursor: pointer;
-  border: 2px solid #4d0e4e;
-  border-radius: 6px;
-  background: #4d0e4e;
-  color: #fff;
+/* ── Starter cards ── */
+
+.starters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.starter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.15s;
+}
+
+.starter-card:hover {
+  border-color: #4d0e4e;
+}
+
+.starter-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.starter-card__icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.starter-card__name {
+  font-size: 14px;
+  color: #333;
+}
+
+.starter-card__desc {
+  margin: 0;
+  font-size: 13px;
+  color: #888;
+  line-height: 1.5;
+}
+
+.starter-card__actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.starter-card__preview,
+.starter-card__create {
+  padding: 0.35rem 0.75rem;
+  font-size: 12px;
   font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
   transition: all 0.15s;
 }
 
-.home__template:hover {
+.starter-card__preview {
+  border: 1px solid #4d0e4e;
+  background: #fff;
+  color: #4d0e4e;
+}
+
+.starter-card__preview:hover:not(:disabled) {
+  background: #f8f0f8;
+}
+
+.starter-card__preview:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.starter-card__create {
+  border: 1px solid #4d0e4e;
+  background: #4d0e4e;
+  color: #fff;
+}
+
+.starter-card__create:hover:not(:disabled) {
   background: #3a0b3b;
 }
 
-.home__template:disabled {
-  opacity: 0.6;
+.starter-card__create:disabled {
+  opacity: 0.5;
   cursor: default;
 }
 
@@ -553,8 +823,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
 .recent {
   width: 100%;
-  max-width: 480px;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
 }
 
 .recent__header {
@@ -776,7 +1045,6 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
 .home-url {
   width: 100%;
-  max-width: 480px;
   text-align: center;
 }
 

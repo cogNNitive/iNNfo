@@ -19,14 +19,18 @@ export const router = createRouter({
 })
 
 /**
- * Gates routes on workspaceStore.hasHandle. Navigating between nodes/routes
- * must never trigger a second parse pass (R1) — this guard only checks
- * `hasHandle`; it never calls `open()` or triggers parsing itself.
+ * Gates routes on workspaceStore. Navigating between nodes/routes must
+ * never trigger a second parse pass (R1) — this guard only checks state;
+ * it never calls `open()` or triggers parsing itself.
+ *
+ * Accepts workspaces with a directory handle OR content already parsed
+ * via URL load (hasParsed). URL-loaded workspaces have no handle but
+ * still contain valid model data in modelStore.
  */
 router.beforeEach((to: RouteLocationNormalized) => {
   if (to.meta?.requiresHandle) {
     const workspaceStore = useWorkspaceStore()
-    if (!workspaceStore.hasHandle) {
+    if (!workspaceStore.hasHandle && !workspaceStore.hasParsed) {
       return { name: 'home' }
     }
   }
