@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 export type ActiveView = 'editor' | 'graph' | 'matrices' | 'info'
 
-export type GhostFilterMode = 'model' | 'template' | 'all'
+export type GhostFilterMode = 'model' | 'all'
 
 /**
  * UI-only state that does not belong in modelStore.
@@ -21,7 +21,7 @@ export const useUiStore = defineStore('ui', () => {
   const activeMatrixIndex = ref<number>(-1)
   const showValidationReport = ref(false)
   const showMetamatrixConfig = ref(false)
-  const ghostFilterMode = ref<GhostFilterMode>('model')
+  const ghostFilterMode = ref<GhostFilterMode>('all')
 
   function setActiveConcept(name: string | null): void {
     activeConcept.value = name

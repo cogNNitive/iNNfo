@@ -22,12 +22,28 @@
         <span>Graph View</span>
       </button>
 
-      <!-- Header with expand/collapse all -->
+      <!-- Header with expand/collapse all + ghost filter -->
       <div class="flex items-center justify-between px-2">
         <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           Model
         </h2>
         <div class="flex items-center gap-2">
+          <!-- Ghost filter: show complete only -->
+          <button
+            @click="toggleGhostFilter"
+            class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-2xs transition-colors flex items-center justify-center gap-1"
+            :class="
+              ghostFilterMode === 'model'
+                ? 'text-primary dark:text-primary-100'
+                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+            "
+            :title="ghostFilterMode === 'model' ? 'Show all concepts' : 'Filter complete only'"
+            data-testid="ghost-filter-toggle"
+          >
+            <span class="text-[10px] font-medium">
+              {{ ghostFilterMode === 'model' ? 'ALL' : 'CMP' }}
+            </span>
+          </button>
           <button
             @click="expandAll"
             class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-2xs text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors flex items-center justify-center"
@@ -47,31 +63,10 @@
         </div>
       </div>
 
-      <!-- Ghost filter toggle (always visible) -->
-      <div
-        class="flex items-center gap-0.5 px-2 py-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-md mx-2"
-        data-testid="ghost-filter-toggle"
-      >
-        <button
-          v-for="opt in filterOptions"
-          :key="opt.value"
-          @click="uiStore.setGhostFilterMode(opt.value)"
-          class="flex-1 text-2xs px-1.5 py-1 rounded transition-colors font-medium"
-          :class="
-            ghostFilterMode === opt.value
-              ? 'bg-white dark:bg-slate-700 text-primary dark:text-primary-100 shadow-sm'
-              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
-          "
-          :data-testid="`filter-${opt.value}`"
-        >
-          {{ opt.label }}
-        </button>
-      </div>
-
-      <!-- Tree section: model-only, template-only, or merged all -->
+      <!-- Tree section: complete-only or merged all -->
       <div class="space-y-0.5">
-        <!-- Model mode: only real tree -->
         <template v-if="ghostFilterMode === 'model'">
+          <!-- Complete only: real tree, no ghosts -->
           <ConceptTreeNode
             v-for="root in roots"
             :key="root.id"
@@ -91,28 +86,8 @@
             No nodes loaded
           </p>
         </template>
-
-        <!-- Template mode: only ghost concepts -->
-        <template v-else-if="ghostFilterMode === 'template'">
-          <VirtualGroupNode
-            v-for="ghost in metamodelStore.ghostConcepts"
-            :key="`ghost:${ghost.name}`"
-            :concept-name="ghost.name"
-            :children="[]"
-            :selected-id="selectedId"
-            :ghost="true"
-            @click-ghost="handleClickGhost"
-          />
-          <p
-            v-if="metamodelStore.ghostConcepts.length === 0"
-            class="px-2 py-4 text-xs text-slate-400 dark:text-slate-500 italic text-center"
-          >
-            All template concepts are present
-          </p>
-        </template>
-
-        <!-- All mode: present + ghost concepts merged into a single sorted list -->
         <template v-else>
+          <!-- Merged: present + ghost concepts sorted by template order -->
           <div
             v-for="item in mergedConcepts"
             :key="item.name"
@@ -199,7 +174,6 @@ import {
 import { useModelStore } from '../../stores/modelStore'
 import { useMetamodelStore } from '../../stores/metamodelStore'
 import { useUiStore } from '../../stores/uiStore'
-import type { GhostFilterMode } from '../../stores/uiStore'
 import { useResizablePanel } from '../../composables/useResizablePanel'
 import ConceptTreeNode from './ConceptTreeNode.vue'
 import VirtualGroupNode from './VirtualGroupNode.vue'
@@ -229,11 +203,9 @@ const roots = computed(() => modelStore.getRoots())
 
 const ghostFilterMode = computed(() => uiStore.ghostFilterMode)
 
-const filterOptions: { value: GhostFilterMode; label: string }[] = [
-  { value: 'model', label: 'Model' },
-  { value: 'template', label: 'Template' },
-  { value: 'all', label: 'All' },
-]
+function toggleGhostFilter(): void {
+  uiStore.setGhostFilterMode(ghostFilterMode.value === 'model' ? 'all' : 'model')
+}
 
 interface MergedConceptItem {
   name: string

@@ -75,33 +75,7 @@ describe('LeftSidebar — ghost filter toggle (R-TGC-01, R-TGC-05)', () => {
     expect(toggle.exists()).toBe(true)
   })
 
-  it('filter buttons exist with correct labels', () => {
-    const modelStore = useModelStore()
-    modelStore.setGraph(
-      {
-        Root: makeNode('Root', {
-          localMetamodel: {
-            concepts: [{ name: 'G', type: 'list' }],
-            markers: [],
-          },
-        }),
-      },
-      ['Root'],
-    )
-
-    const wrapper = mount(LeftSidebar, {
-      attachTo: document.body,
-    })
-
-    expect(wrapper.find('[data-testid="filter-model"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="filter-template"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="filter-all"]').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="filter-model"]').text()).toBe('Model')
-    expect(wrapper.find('[data-testid="filter-template"]').text()).toBe('Template')
-    expect(wrapper.find('[data-testid="filter-all"]').text()).toBe('All')
-  })
-
-  it('clicking filter buttons updates uiStore.ghostFilterMode', async () => {
+  it('ghost filter toggle exists and toggles mode', async () => {
     const modelStore = useModelStore()
     modelStore.setGraph(
       {
@@ -116,23 +90,22 @@ describe('LeftSidebar — ghost filter toggle (R-TGC-01, R-TGC-05)', () => {
     )
 
     const uiStore = useUiStore()
-    expect(uiStore.ghostFilterMode).toBe('model')
+    uiStore.setGhostFilterMode('all') // default is now 'all'
 
     const wrapper = mount(LeftSidebar, {
       attachTo: document.body,
     })
 
-    // Click "Template"
-    await wrapper.find('[data-testid="filter-template"]').trigger('click')
-    expect(uiStore.ghostFilterMode).toBe('template')
+    const toggle = wrapper.find('[data-testid="ghost-filter-toggle"]')
+    expect(toggle.exists()).toBe(true)
 
-    // Click "All"
-    await wrapper.find('[data-testid="filter-all"]').trigger('click')
-    expect(uiStore.ghostFilterMode).toBe('all')
-
-    // Click "Model" (back to default)
-    await wrapper.find('[data-testid="filter-model"]').trigger('click')
+    // Click to toggle to 'model' (complete only)
+    await toggle.trigger('click')
     expect(uiStore.ghostFilterMode).toBe('model')
+
+    // Click again to toggle back to 'all'
+    await toggle.trigger('click')
+    expect(uiStore.ghostFilterMode).toBe('all')
   })
 
   it('shows ghost concept groups inline in "all" mode', () => {
