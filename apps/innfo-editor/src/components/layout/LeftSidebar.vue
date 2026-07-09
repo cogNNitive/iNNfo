@@ -111,29 +111,23 @@
           </p>
         </template>
 
-        <!-- All mode: real tree + ghost concepts in a single flow -->
+        <!-- All mode: present + ghost concepts merged into a single sorted list -->
         <template v-else>
-          <ConceptTreeNode
-            v-for="root in roots"
-            :key="root.id"
-            :node-id="root.id"
-            :selected-id="selectedId"
-            :depth="0"
-            :expanded-generation="expandedGeneration"
-            group-by-concept
-            @select="(id: string) => $emit('select-node', id)"
-            @move-up="(id: string) => $emit('move-up', id)"
-            @move-down="(id: string) => $emit('move-down', id)"
-          />
-          <VirtualGroupNode
-            v-for="ghost in metamodelStore.ghostConcepts"
-            :key="`ghost:${ghost.name}`"
-            :concept-name="ghost.name"
-            :children="[]"
-            :selected-id="selectedId"
-            :ghost="true"
-            @click-ghost="handleClickGhost"
-          />
+          <div
+            v-for="item in mergedConcepts"
+            :key="item.name"
+          >
+            <VirtualGroupNode
+              :concept-name="item.name"
+              :children="item.children"
+              :selected-id="selectedId"
+              :depth="0"
+              :expanded-generation="expandedGeneration"
+              :ghost="item.ghost"
+              @select="(id: string) => $emit('select-node', id)"
+              @click-ghost="handleClickGhost"
+            />
+          </div>
         </template>
       </div>
 
@@ -193,6 +187,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import type { ModelNode } from '../../model/types'
 import {
   ChevronsDown,
   ChevronsUp,
@@ -239,6 +234,46 @@ const filterOptions: { value: GhostFilterMode; label: string }[] = [
   { value: 'template', label: 'Template' },
   { value: 'all', label: 'All' },
 ]
+
+interface MergedConceptItem {
+  name: string
+  ghost: boolean
+  children: ModelNode[]
+}
+
+const mergedConcepts = computed<MergedConceptItem[]>(() => {
+  const items: MergedConceptItem[] = []
+  const seen = new Set<string>()
+
+  // Collect children per concept type from all model nodes
+  const childrenByType = new Map<string, ModelNode[]>()
+  for (const node of Object.values(modelStore.nodes)) {
+    if (node.type && node.kind === 'element') {
+      const list = childrenByType.get(node.type)
+      if (list) list.push(node)
+      else childrenByType.set(node.type, [node])
+    }
+  }
+
+  for (const concept of metamodelStore.concepts) {
+    if (seen.has(concept.name)) continue
+    seen.add(concept.name)
+    const children = childrenByType.get(concept.name) ?? []
+    const isPresent = children.length > 0 || (concept.type === 'text' && (
+      // text concepts: check rawSections on root nodes
+      modelStore.rootIds.some((rid) => {
+        const root = modelStore.getNode(rid)
+        return root?.rawSections && Object.keys(root.rawSections).some(
+          (k) => k.toLowerCase() === concept.name.toLowerCase(),
+        )
+      })
+    ))
+    items.push({ name: concept.name, ghost: !isPresent, children })
+  }
+
+  items.sort((a, b) => a.name.localeCompare(b.name))
+  return items
+})
 
 function handleClickGhost(conceptName: string): void {
   const concept = metamodelStore.getConceptByName(conceptName)

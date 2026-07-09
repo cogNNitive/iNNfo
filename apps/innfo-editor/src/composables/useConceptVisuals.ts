@@ -137,9 +137,10 @@ export function useConceptVisuals() {
 
     const lowerName = conceptName.toLowerCase()
 
-    // Pass 1: walk ancestor chain + all roots (includes template structural roots)
+    // Walk ancestor chain + all roots (includes template structural roots)
     const metamodel = resolveEffectiveMetamodel(node.id, modelStore.nodes, modelStore.rootIds)
-    let match = metamodel.concepts.find((c) => c.name.toLowerCase() === lowerName)
+    const match = metamodel.concepts.find((c) => c.name.toLowerCase() === lowerName)
+    if (match) return match
 
     return undefined
   }
