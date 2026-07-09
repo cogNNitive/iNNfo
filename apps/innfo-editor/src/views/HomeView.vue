@@ -30,7 +30,7 @@ const samples: SampleFolder[] = [
     description:
       'FILE-mode business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations in a single _NN.md.',
     mode: 'FILE',
-    path: 'specs/business_V_0-1-1/samples/Ghostbusters_V_0-1-2_business_F.md',
+    path: 'specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
     items: 1,
   },
   {
@@ -39,7 +39,7 @@ const samples: SampleFolder[] = [
     description:
       'FOLDER-mode catalog with 4 genres, 6 artists, and 5 albums — each node is a folder with its own _NN.md, demonstrating the full nested tree.',
     mode: 'FOLDER',
-    path: 'specs/catalog_V_0-1-2/samples/Music_History_V_1-0-0_catalog/',
+    path: 'specs/v0.1.0/level2/catalog/samples/Music_History_V_1-0-0_catalog/',
     items: 15,
   },
   {
@@ -48,7 +48,7 @@ const samples: SampleFolder[] = [
     description:
       'FILE-mode procedure for PR-based code reviews: roles (Author, Reviewer, Maintainer), step-by-step workflow, tool bindings, and hotfix path.',
     mode: 'FILE',
-    path: 'specs/procedures_V_0-1-1/samples/CodeReviewProcess_V_1-0-0_procedures_F.md',
+    path: 'specs/v0.1.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
     items: 1,
   },
   {
@@ -69,6 +69,8 @@ interface StarterTemplate {
   icon: string
   url: string
   templateName: string
+  sampleUrl?: string
+  sampleName?: string
 }
 
 const starterBase = `${import.meta.env.BASE_URL}starter/`
@@ -81,6 +83,9 @@ const starters: StarterTemplate[] = [
     icon: '🏢',
     url: `${starterBase}Business_V_1-0-0_starter_NN.md`,
     templateName: 'business',
+    sampleUrl:
+      'https://raw.githubusercontent.com/innV0/cogNNitive/main/models/Ghostbusters_V_0-1-2_business_NN.md',
+    sampleName: 'Ghostbusters',
   },
   {
     id: 'starter-procedures',
@@ -89,6 +94,9 @@ const starters: StarterTemplate[] = [
     icon: '📋',
     url: `${starterBase}Procedures_V_1-0-0_starter_NN.md`,
     templateName: 'procedures',
+    sampleUrl:
+      'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
+    sampleName: 'Code Review Process',
   },
   {
     id: 'starter-catalog',
@@ -103,6 +111,10 @@ const starters: StarterTemplate[] = [
 onMounted(async () => {
   history.value = await loadHistory()
 })
+
+const sandboxUrl = `${import.meta.env.BASE_URL}starter/Sandbox_V_1-0-0_starter_NN.md`
+const sandboxBusy = ref(false)
+const docsUrl = 'https://format.innv0.com/documentation/'
 
 // ── Drag-drop state (optional affordance, 2.5) ──
 const isDragging = ref(false)
@@ -211,6 +223,21 @@ async function createFromTemplate(): Promise<void> {
   }
 }
 
+async function loadSandbox(): Promise<void> {
+  error.value = null
+  sandboxBusy.value = true
+  try {
+    await workspace.loadFromUrl(sandboxUrl)
+    await addToHistory('Sandbox', null as unknown as any)
+    history.value = await loadHistory()
+    router.push('/workspace')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    sandboxBusy.value = false
+  }
+}
+
 /**
  * Reopens a recent folder: retrieves the stored handle from IndexedDB,
  * verifies the permission, and navigates to the workspace view.
@@ -261,6 +288,22 @@ async function previewStarter(starter: StarterTemplate): Promise<void> {
   try {
     await workspace.loadFromUrl(starter.url)
     await addToHistory(starter.name, null as unknown as any)
+    history.value = await loadHistory()
+    router.push('/workspace')
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    urlBusy.value = false
+  }
+}
+
+async function previewSample(starter: StarterTemplate): Promise<void> {
+  if (!starter.sampleUrl) return
+  error.value = null
+  urlBusy.value = true
+  try {
+    await workspace.loadFromUrl(starter.sampleUrl)
+    await addToHistory(`${starter.name} Sample`, null as unknown as any)
     history.value = await loadHistory()
     router.push('/workspace')
   } catch (err) {
@@ -424,6 +467,20 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
       </p>
     </div>
 
+    <!-- ── Sandbox ── -->
+    <section class="sandbox">
+      <div class="sandbox__card">
+        <div class="sandbox__icon">🧪</div>
+        <h2 class="sandbox__title">Try the Sandbox</h2>
+        <p class="sandbox__desc">
+          Never used iNNfo before? This tiny example model teaches you how the editor works as you explore. Each element explains what you're looking at — the tree, the views, and the concepts. No files needed, just click and learn.
+        </p>
+        <button class="sandbox__btn" :disabled="sandboxBusy" @click="loadSandbox">
+          {{ sandboxBusy ? 'Loading\u2026' : 'Launch Sandbox' }}
+        </button>
+      </div>
+    </section>
+
     <!-- ── Two-column layout: open existing / start new ── -->
     <div class="cols">
       <!-- Left column: open existing -->
@@ -511,11 +568,11 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
         </section>
       </div>
 
-      <!-- Right column: start from scratch -->
+      <!-- Right column: official templates -->
       <div class="col">
-        <h2 class="col__title">Start from scratch</h2>
+        <h2 class="col__title">Official templates</h2>
         <p class="col__desc">
-          Choose a template to create a new model, or load one directly from a URL.
+          Choose a template to start a new model. Preview an empty starter, a partially-filled sample, or create a full copy in a folder.
         </p>
 
         <div class="starters">
@@ -534,6 +591,14 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
                 {{ urlBusy ? 'Loading\u2026' : 'Preview' }}
               </button>
               <button
+                v-if="s.sampleUrl"
+                class="starter-card__sample"
+                :disabled="urlBusy"
+                @click="previewSample(s)"
+              >
+                {{ urlBusy ? 'Loading\u2026' : 'Preview Sample' }}
+              </button>
+              <button
                 class="starter-card__create"
                 :disabled="busy"
                 @click="createFromStarter(s)"
@@ -543,28 +608,36 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
             </div>
           </div>
         </div>
-
-        <!-- ── Load from URL ── -->
-    <div class="home-url">
-      <p class="home-url__label">Or load a model from URL:</p>
-      <div class="home-url__row">
-        <input
-          v-model="urlInput"
-          type="url"
-          placeholder="https://example.com/model_V_1-0-0_business_NN.md"
-          class="home-url__input"
-          @keydown.enter="loadFromUrl"
-        />
-        <button class="home-url__btn" :disabled="urlBusy || !urlInput.trim()" @click="loadFromUrl">
-          {{ urlBusy ? 'Loading\u2026' : 'Load' }}
-        </button>
-      </div>
-    </div>
-
       </div>
     </div>
 
     <p v-if="error" class="home__error" role="alert">{{ error }}</p>
+
+    <!-- ── Community templates ── -->
+    <section class="community">
+      <h3 class="community__title">Community templates</h3>
+      <p class="community__desc">
+        You can also load any iNNfo model from a URL — including templates created by the community or your own custom models hosted anywhere.
+      </p>
+
+      <div class="community__url">
+        <input
+          v-model="urlInput"
+          type="url"
+          placeholder="https://example.com/model_V_1-0-0_business_NN.md"
+          class="community__input"
+          @keydown.enter="loadFromUrl"
+        />
+        <button class="community__btn" :disabled="urlBusy || !urlInput.trim()" @click="loadFromUrl">
+          {{ urlBusy ? 'Loading\u2026' : 'Load' }}
+        </button>
+      </div>
+
+      <p class="community__docs">
+        📖 Learn how to use existing templates or create your own in the
+        <a :href="docsUrl" target="_blank" rel="noopener noreferrer">documentation</a>.
+      </p>
+    </section>
 
     <!-- ── Sample models ── -->
     <section class="samples">
@@ -1097,5 +1170,182 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 .home-url__btn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* ── Sandbox ── */
+
+.sandbox {
+  width: 100%;
+  max-width: 860px;
+}
+
+.sandbox__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  border: 2px solid #4d0e4e;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f8f0f8 0%, #fff 100%);
+  text-align: center;
+}
+
+.sandbox__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.sandbox__title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #4d0e4e;
+}
+
+.sandbox__desc {
+  margin: 0;
+  max-width: 480px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.sandbox__btn {
+  padding: 0.7rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #4d0e4e;
+  color: #fff;
+  border: none;
+  font-family: system-ui, sans-serif;
+  transition: all 0.15s;
+}
+
+.sandbox__btn:hover:not(:disabled) {
+  background: #3a0b3b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(77, 14, 78, 0.2);
+}
+
+.sandbox__btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Starter sample button ── */
+
+.starter-card__sample {
+  padding: 0.35rem 0.75rem;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
+  transition: all 0.15s;
+  border: 1px solid #7c3aed;
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.starter-card__sample:hover:not(:disabled) {
+  background: #ede9fe;
+}
+
+.starter-card__sample:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Community templates ── */
+
+.community {
+  width: 100%;
+  max-width: 860px;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.community__title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+}
+
+.community__desc {
+  margin: 0 0 1rem;
+  font-size: 14px;
+  color: #888;
+  line-height: 1.5;
+}
+
+.community__url {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.community__input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 14px;
+  font-family: system-ui, sans-serif;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.community__input:focus {
+  border-color: #4d0e4e;
+  box-shadow: 0 0 0 2px rgba(77, 14, 78, 0.1);
+}
+
+.community__btn {
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #4d0e4e;
+  color: #fff;
+  border: 1px solid #4d0e4e;
+  transition: all 0.15s;
+  font-family: system-ui, sans-serif;
+  white-space: nowrap;
+}
+
+.community__btn:hover:not(:disabled) {
+  background: #3a0b3b;
+}
+
+.community__btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.community__docs {
+  margin: 0;
+  font-size: 13px;
+  color: #888;
+  line-height: 1.5;
+}
+
+.community__docs a {
+  color: #4d0e4e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.community__docs a:hover {
+  text-decoration: underline;
 }
 </style>

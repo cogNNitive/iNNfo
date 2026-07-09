@@ -3,6 +3,8 @@ import { ref } from 'vue'
 
 export type ActiveView = 'editor' | 'graph' | 'matrices' | 'info'
 
+export type GhostFilterMode = 'model' | 'template' | 'all'
+
 /**
  * UI-only state that does not belong in modelStore.
  *
@@ -19,6 +21,7 @@ export const useUiStore = defineStore('ui', () => {
   const activeMatrixIndex = ref<number>(-1)
   const showValidationReport = ref(false)
   const showMetamatrixConfig = ref(false)
+  const ghostFilterMode = ref<GhostFilterMode>('model')
 
   function setActiveConcept(name: string | null): void {
     activeConcept.value = name
@@ -48,6 +51,10 @@ export const useUiStore = defineStore('ui', () => {
     showValidationReport.value = val
   }
 
+  function setGhostFilterMode(mode: GhostFilterMode): void {
+    ghostFilterMode.value = mode
+  }
+
   return {
     activeConcept,
     activePerspective,
@@ -57,6 +64,7 @@ export const useUiStore = defineStore('ui', () => {
     activeMatrixIndex,
     showValidationReport,
     showMetamatrixConfig,
+    ghostFilterMode,
     setActiveConcept,
     setActivePerspective,
     setActiveView,
@@ -64,5 +72,6 @@ export const useUiStore = defineStore('ui', () => {
     selectInstance,
     setActiveMatrixIndex,
     setShowValidationReport,
+    setGhostFilterMode,
   }
 })

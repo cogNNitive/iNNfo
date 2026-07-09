@@ -689,7 +689,7 @@ When the sample is loaded for the first time:
 
 ```
 📁 Ghostbusters_V_0-1-2_business/
-  📄 Ghostbusters_V_0-1-2_business_FORMAT.md
+  📄 Ghostbusters_V_0-1-2_business_NN.md
   📁 specs/
     📄 business_V_0-1-1_NN.md         ← this file (downloaded from parent_spec.url)
     📄 iNNfo_V_0-1-0_NN.md             ← downloaded from this file's parent_spec.url

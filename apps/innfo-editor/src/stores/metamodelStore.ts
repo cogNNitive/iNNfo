@@ -6,6 +6,7 @@ import { resolveEffectiveMetamodel } from '../model/metamodel'
 import { parseMetamodelDocumentation } from '../utils/documentationParser'
 import { parseFormatFilename } from '../utils/version'
 import { parseFrontmatter } from '@innv0/innfo-core'
+import { isConceptPresent } from '../utils/ghostDetection'
 import type { MetamodelConcept, MetamodelMarker } from '../model/types'
 import type { DocumentationEntry } from '../utils/documentationParser'
 import type { DirectoryHandleLike } from './workspaceStore'
@@ -55,6 +56,22 @@ export const useMetamodelStore = defineStore('metamodel', () => {
     const concept = getConceptByName(name)
     return concept?.fields ?? []
   }
+
+  /* ── Ghost concept detection (template-concepts absent from model) ── */
+
+  /**
+   * Template-declared concepts that have no corresponding instance in the
+   * loaded model graph. Used by the sidebar to render ghost group placeholders
+   * with an "Add first element" action.
+   *
+   * Depends on the resolved metamodel (`concepts`) and the current model graph.
+   */
+  const ghostConcepts = computed<MetamodelConcept[]>(() => {
+    if (!rootId.value) return []
+    return concepts.value.filter(
+      (c) => !isConceptPresent(c.name, c.type, modelStore.nodes, modelStore.rootIds),
+    )
+  })
 
   /* ── Taxonomy perspectives (Phase H) ── */
 
@@ -207,6 +224,7 @@ export const useMetamodelStore = defineStore('metamodel', () => {
     markers,
     getConceptByName,
     getConceptFields,
+    ghostConcepts,
     taxonomyEdges,
     conceptTree,
     getNeighborhood,

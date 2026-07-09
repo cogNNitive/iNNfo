@@ -391,13 +391,13 @@ Every template defined in this repo has a canonical sample:
 
 | Template | Sample | Path |
 |---|---|---|
-| **Business** | `Ghostbusters_V_0-1-2_business_FORMAT.md` | `specs/v0.1.0/level2/business/samples/` |
+| **Business** | `Ghostbusters_V_0-1-2_business_NN.md` | `specs/v0.1.0/level2/business/samples/` |
 | **Procedures** | `CodeReviewProcess_V_1-0-0_procedures_NN.md` | `specs/v0.1.0/level2/procedures/samples/` |
 | **Catalog** | `Music_History_V_1-0-0_catalog` (FOLDER) | `specs/v0.1.0/level2/catalog/samples/` |
 
 ### Parent Chain from Ghostbusters
 
-From `specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_FORMAT.md`:
+From `specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`:
 
 ```yaml
 parent_spec:

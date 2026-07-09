@@ -184,7 +184,7 @@ Specifications MAY include additional fields in the frontmatter beyond those req
 | 0 | `<Name>_V_x-y-z_NN.md` | `defiNNe_V_0-1-0_NN.md` |
 | 1 | `<Name>_V_x-y-z_NN.md` | `iNNfo_V_0-1-0_NN.md` |
 | 2 | `<Template>_V_x-y-z_FORMAT.md` | `business_V_0-1-1_NN.md` |
-| 3 | `<Model>_V_x-y-z_<Template>_FORMAT.md` | `Ghostbusters_V_0-1-2_business_FORMAT.md` |
+| 3 | `<Model>_V_x-y-z_<Template>_NN.md` | `Ghostbusters_V_0-1-2_business_NN.md` |
 
 Files are organized by level within each version directory:
 
@@ -315,7 +315,7 @@ title: "Model Name"
 
 ### Full Parent Chain Resolution
 
-From the sample model `specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_FORMAT.md`:
+From the sample model `specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`:
 
 ```yaml
 # Ghostbusters (level 3)
@@ -341,7 +341,7 @@ parent_spec:
 
 ```
 📁 Ghostbusters_V_0-1-2_business/
-  📄 Ghostbusters_V_0-1-2_business_FORMAT.md
+  📄 Ghostbusters_V_0-1-2_business_NN.md
   📁 specs/
     📄 business_V_0-1-1_NN.md
     📄 iNNfo_V_0-1-0_NN.md

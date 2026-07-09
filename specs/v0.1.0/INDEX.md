@@ -29,7 +29,7 @@ defiNNe_V_0-1-0 (level 0 — level0/)
 
 ## Samples
 
-- [`level2/business/samples/Ghostbusters_V_0-1-2_business_FORMAT.md`](level2/business/samples/Ghostbusters_V_0-1-2_business_FORMAT.md)
+- [`level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`](level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md)
 - [`level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`](level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md)
 - [`level2/catalog/samples/Music_History_V_1-0-0_catalog/`](level2/catalog/samples/Music_History_V_1-0-0_catalog/)
 

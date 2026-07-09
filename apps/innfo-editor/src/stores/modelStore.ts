@@ -181,8 +181,9 @@ export const useModelStore = defineStore('model', {
             sourceMode: 'structural' as const,
           }
           rootIds.push(templateId)
-        } catch {
-          // Best-effort: network failures degrade to slate fallback
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err)
+          console.warn(`[template] Failed to resolve parent spec "${parentUrl}": ${message}`)
         }
       }
     },
@@ -233,6 +234,31 @@ export const useModelStore = defineStore('model', {
       parent.childIds.push(id)
       this.markDirty(parentId)
       return id
+    },
+
+    /**
+     * Creates a child element for a concept under the first root node.
+     * Convenience wrapper used by the ghost "Add first element" action.
+     * @returns the new node's id
+     */
+    addConceptElement(conceptName: string, elementName: string): string {
+      const rootId = this.rootIds[0]
+      if (!rootId) throw new Error('No root node — cannot add element')
+      return this.createChild(rootId, elementName, conceptName, 'element')
+    },
+
+    /**
+     * Creates a text-type section under the first root node.
+     * For concepts of type `text` (single Markdown block).
+     */
+    addTextSection(conceptName: string): void {
+      const rootId = this.rootIds[0]
+      if (!rootId) throw new Error('No root node — cannot add section')
+      const root = this.nodes[rootId]
+      if (!root) throw new Error(`Root node "${rootId}" not found`)
+      if (!root.rawSections) root.rawSections = {}
+      root.rawSections[conceptName] = ''
+      this.markDirty(rootId)
     },
 
     /**

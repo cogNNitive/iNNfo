@@ -47,27 +47,94 @@
         </div>
       </div>
 
-      <!-- Model tree -->
-      <div class="space-y-0.5">
-        <ConceptTreeNode
-          v-for="root in roots"
-          :key="root.id"
-          :node-id="root.id"
-          :selected-id="selectedId"
-          :depth="0"
-          :expanded-generation="expandedGeneration"
-          group-by-concept
-          @select="(id: string) => $emit('select-node', id)"
-          @move-up="(id: string) => $emit('move-up', id)"
-          @move-down="(id: string) => $emit('move-down', id)"
-        />
-
-        <p
-          v-if="roots.length === 0"
-          class="px-2 py-4 text-xs text-slate-400 dark:text-slate-500 italic text-center"
+      <!-- Ghost filter toggle (always visible) -->
+      <div
+        class="flex items-center gap-0.5 px-2 py-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-md mx-2"
+        data-testid="ghost-filter-toggle"
+      >
+        <button
+          v-for="opt in filterOptions"
+          :key="opt.value"
+          @click="uiStore.setGhostFilterMode(opt.value)"
+          class="flex-1 text-2xs px-1.5 py-1 rounded transition-colors font-medium"
+          :class="
+            ghostFilterMode === opt.value
+              ? 'bg-white dark:bg-slate-700 text-primary dark:text-primary-100 shadow-sm'
+              : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+          "
+          :data-testid="`filter-${opt.value}`"
         >
-          No nodes loaded
-        </p>
+          {{ opt.label }}
+        </button>
+      </div>
+
+      <!-- Tree section: model-only, template-only, or merged all -->
+      <div class="space-y-0.5">
+        <!-- Model mode: only real tree -->
+        <template v-if="ghostFilterMode === 'model'">
+          <ConceptTreeNode
+            v-for="root in roots"
+            :key="root.id"
+            :node-id="root.id"
+            :selected-id="selectedId"
+            :depth="0"
+            :expanded-generation="expandedGeneration"
+            group-by-concept
+            @select="(id: string) => $emit('select-node', id)"
+            @move-up="(id: string) => $emit('move-up', id)"
+            @move-down="(id: string) => $emit('move-down', id)"
+          />
+          <p
+            v-if="roots.length === 0"
+            class="px-2 py-4 text-xs text-slate-400 dark:text-slate-500 italic text-center"
+          >
+            No nodes loaded
+          </p>
+        </template>
+
+        <!-- Template mode: only ghost concepts -->
+        <template v-else-if="ghostFilterMode === 'template'">
+          <VirtualGroupNode
+            v-for="ghost in metamodelStore.ghostConcepts"
+            :key="`ghost:${ghost.name}`"
+            :concept-name="ghost.name"
+            :children="[]"
+            :selected-id="selectedId"
+            :ghost="true"
+            @click-ghost="handleClickGhost"
+          />
+          <p
+            v-if="metamodelStore.ghostConcepts.length === 0"
+            class="px-2 py-4 text-xs text-slate-400 dark:text-slate-500 italic text-center"
+          >
+            All template concepts are present
+          </p>
+        </template>
+
+        <!-- All mode: real tree + ghost concepts in a single flow -->
+        <template v-else>
+          <ConceptTreeNode
+            v-for="root in roots"
+            :key="root.id"
+            :node-id="root.id"
+            :selected-id="selectedId"
+            :depth="0"
+            :expanded-generation="expandedGeneration"
+            group-by-concept
+            @select="(id: string) => $emit('select-node', id)"
+            @move-up="(id: string) => $emit('move-up', id)"
+            @move-down="(id: string) => $emit('move-down', id)"
+          />
+          <VirtualGroupNode
+            v-for="ghost in metamodelStore.ghostConcepts"
+            :key="`ghost:${ghost.name}`"
+            :concept-name="ghost.name"
+            :children="[]"
+            :selected-id="selectedId"
+            :ghost="true"
+            @click-ghost="handleClickGhost"
+          />
+        </template>
       </div>
 
       <!-- Relations Section -->
@@ -135,9 +202,12 @@ import {
   Settings,
 } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
+import { useMetamodelStore } from '../../stores/metamodelStore'
 import { useUiStore } from '../../stores/uiStore'
+import type { GhostFilterMode } from '../../stores/uiStore'
 import { useResizablePanel } from '../../composables/useResizablePanel'
 import ConceptTreeNode from './ConceptTreeNode.vue'
+import VirtualGroupNode from './VirtualGroupNode.vue'
 import MatrixPill from '../editor/MatrixPill.vue'
 
 const emit = defineEmits<{
@@ -149,6 +219,7 @@ const emit = defineEmits<{
 }>()
 
 const modelStore = useModelStore()
+const metamodelStore = useMetamodelStore()
 const uiStore = useUiStore()
 
 const { width, startResize } = useResizablePanel({
@@ -160,6 +231,26 @@ const { width, startResize } = useResizablePanel({
 })
 
 const roots = computed(() => modelStore.getRoots())
+
+const ghostFilterMode = computed(() => uiStore.ghostFilterMode)
+
+const filterOptions: { value: GhostFilterMode; label: string }[] = [
+  { value: 'model', label: 'Model' },
+  { value: 'template', label: 'Template' },
+  { value: 'all', label: 'All' },
+]
+
+function handleClickGhost(conceptName: string): void {
+  const concept = metamodelStore.getConceptByName(conceptName)
+  const type = concept?.type ?? 'text'
+  if (type === 'text') {
+    modelStore.addTextSection(conceptName)
+    uiStore.selectNode(modelStore.rootIds[0])
+  } else {
+    const id = modelStore.addConceptElement(conceptName, `New ${conceptName}`)
+    if (id) uiStore.selectNode(id)
+  }
+}
 
 // Expand/collapse all via generation counter
 const expandedGeneration = ref(-1)
