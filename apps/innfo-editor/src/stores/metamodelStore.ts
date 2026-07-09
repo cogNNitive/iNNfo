@@ -38,13 +38,13 @@ export const useMetamodelStore = defineStore('metamodel', () => {
 
   const concepts = computed<MetamodelConcept[]>(() => {
     if (!rootId.value) return []
-    const metamodel = resolveEffectiveMetamodel(rootId.value, modelStore.nodes)
+    const metamodel = resolveEffectiveMetamodel(rootId.value, modelStore.nodes, modelStore.rootIds)
     return metamodel.concepts
   })
 
   const markers = computed<MetamodelMarker[]>(() => {
     if (!rootId.value) return []
-    const metamodel = resolveEffectiveMetamodel(rootId.value, modelStore.nodes)
+    const metamodel = resolveEffectiveMetamodel(rootId.value, modelStore.nodes, modelStore.rootIds)
     return metamodel.markers
   })
 

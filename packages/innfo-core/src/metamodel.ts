@@ -30,16 +30,23 @@ function buildAncestorChain(nodeId: string, nodes: Record<string, ModelNode>): M
  * closest-wins resolution over the spec chain. Nodes without a local
  * metamodel (nested elements) contribute nothing and are transparent to
  * the walk.
+ *
+ * Template roots: if `allRootIds` is provided, every root-level node
+ * (parentId === null) contributes its local metamodel to the result.
+ * This makes template concepts from structural ghost roots available
+ * to child models that reference them via parent_spec.
  */
 export function resolveEffectiveMetamodel(
   nodeId: string,
   nodes: Record<string, ModelNode>,
+  allRootIds?: string[],
 ): LocalMetamodel {
   const chain = buildAncestorChain(nodeId, nodes)
 
   const conceptsByName = new Map<string, MetamodelConcept>()
   const markersByName = new Map<string, MetamodelMarker>()
 
+  // Collect from ancestor chain (node-level inheritance)
   for (const ancestor of chain) {
     const local = ancestor.localMetamodel
     if (!local) continue
@@ -48,6 +55,27 @@ export function resolveEffectiveMetamodel(
     }
     for (const marker of local.markers) {
       markersByName.set(marker.name, marker)
+    }
+  }
+
+  // Collect from all roots (template structural nodes, sibling roots)
+  if (allRootIds) {
+    for (const rid of allRootIds) {
+      if (rid === nodeId) continue // already in chain
+      const root = nodes[rid]
+      if (!root || root.parentId !== null) continue
+      const local = root.localMetamodel
+      if (!local) continue
+      for (const concept of local.concepts) {
+        if (!conceptsByName.has(concept.name)) {
+          conceptsByName.set(concept.name, concept)
+        }
+      }
+      for (const marker of local.markers) {
+        if (!markersByName.has(marker.name)) {
+          markersByName.set(marker.name, marker)
+        }
+      }
     }
   }
 

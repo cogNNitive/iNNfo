@@ -137,27 +137,9 @@ export function useConceptVisuals() {
 
     const lowerName = conceptName.toLowerCase()
 
-    // Pass 1: walk ancestor chain
-    const metamodel = resolveEffectiveMetamodel(node.id, modelStore.nodes)
+    // Pass 1: walk ancestor chain + all roots (includes template structural roots)
+    const metamodel = resolveEffectiveMetamodel(node.id, modelStore.nodes, modelStore.rootIds)
     let match = metamodel.concepts.find((c) => c.name.toLowerCase() === lowerName)
-    if (match) return match
-
-    // Pass 2: peer template resolution
-    // Walk up to the root for this node
-    let root: ModelNode | null = node
-    const seen = new Set<string>()
-    while (root?.parentId && !seen.has(root.id)) {
-      seen.add(root.id)
-      root = modelStore.nodes[root.parentId] ?? null
-    }
-    if (root) {
-      const peerId = findTemplatePeer(root.id, modelStore.rootIds, modelStore.nodes)
-      if (peerId) {
-        const peerMeta = resolveEffectiveMetamodel(peerId, modelStore.nodes)
-        match = peerMeta.concepts.find((c) => c.name.toLowerCase() === lowerName)
-        if (match) return match
-      }
-    }
 
     return undefined
   }
