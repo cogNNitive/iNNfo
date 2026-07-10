@@ -6,14 +6,23 @@
  * Options come from the `options` prop (passed via fieldDefinition).
  * No label — rendered by parent (WidgetField or BlockSheet).
  */
-defineProps<{
+import { computed } from 'vue'
+
+const props = defineProps<{
   modelValue: string
   options?: string[]
+  fieldDefinition?: {
+    options?: string[]
+  }
 }>()
 
 defineEmits<{
   'update:modelValue': [value: string]
 }>()
+
+const selectOptions = computed(() => {
+  return props.options ?? props.fieldDefinition?.options ?? []
+})
 </script>
 
 <template>
@@ -23,7 +32,7 @@ defineEmits<{
     @change="(e) => $emit('update:modelValue', (e.target as HTMLSelectElement).value)"
   >
     <option value="">- Select -</option>
-    <option v-for="opt in options ?? []" :key="opt" :value="opt">{{ opt }}</option>
+    <option v-for="opt in selectOptions" :key="opt" :value="opt">{{ opt }}</option>
   </select>
 </template>
 

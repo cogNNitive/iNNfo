@@ -3,8 +3,8 @@ spec_version: "V_0-1-2"
 spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/models/starter/Procedures_V_1-0-0_starter_NN.md"
 level: 3
 parent_spec:
-  name: "procedures_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/procedures/procedures_V_0-1-1_NN.md"
+  name: "procedures_V_0-1-2"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/procedures/procedures_V_0-1-2_NN.md"
 model_version: "V_1-0-0"
 title: "Procedures Model Starter"
 mode: "FILE"

@@ -1,141 +1,6 @@
-import {
-  ParsedModel,
-  SpecDocument,
-  ValidationResult,
-  ValidationError,
-  ValidationCheck,
-  ValidationReport,
-  SyntaxCheck,
-} from './types'
-import { parseModel } from './parser'
-
-const VERSION_RE = /^V_\d+-\d+-\d+$/
-const WIKILINK_RE = /\[\[([^\]]+)\]\]/g
-const SECTION_NN_RE = /^#\s+_NN\s+(?:(matrices):\s*(.*)|(.*))$/gm
-
-export function validateModel(
-  model: ParsedModel,
-  template: SpecDocument | null,
-  _formatSpec: SpecDocument | null,
-): ValidationResult {
-  const errors: ValidationError[] = []
-  const warnings: ValidationError[] = []
-  const fm = model.frontmatter
-
-  if (!fm.level) {
-    errors.push({ path: 'frontmatter.level', message: 'Missing level', severity: 'error' })
-  }
-  if (fm.level !== 3) {
-    errors.push({
-      path: 'frontmatter.level',
-      message: `Expected level 3 for model, got ${fm.level}`,
-      severity: 'error',
-    })
-  }
-  if (!fm.parent_spec) {
-    errors.push({
-      path: 'frontmatter.parent_spec',
-      message: 'Missing parent_spec',
-      severity: 'error',
-    })
-  }
-  if (!fm.model_version) {
-    errors.push({
-      path: 'frontmatter.model_version',
-      message: 'Missing model_version',
-      severity: 'error',
-    })
-  }
-
-  // FR-007: Reject FOLDER mode
-  if (fm.mode === 'FOLDER') {
-    errors.push({
-      path: 'frontmatter.mode',
-      message:
-        'FOLDER mode is removed in V_0-1-3. Use index.md-based workspace with single-file models.',
-      severity: 'error',
-    })
-  }
-
-  if (!template) {
-    warnings.push({
-      path: 'parent',
-      message: 'Template not resolved — skipping template validation',
-      severity: 'warning',
-    })
-    return { valid: errors.length === 0, errors, warnings }
-  }
-
-  const templateFm = template.frontmatter
-  const templateConcepts = templateFm.concepts ?? []
-  const templateMarkers = templateFm.markers ?? []
-  const templateMatrices = templateFm.matrices ?? []
-
-  for (const [conceptName, elements] of model.elements) {
-    const conceptDef = templateConcepts.find(
-      (c) => c.name.toLowerCase() === conceptName.toLowerCase(),
-    )
-    if (!conceptDef) {
-      errors.push({
-        path: `elements.${conceptName}`,
-        message: `Concept "${conceptName}" is not defined in template`,
-        severity: 'error',
-      })
-      continue
-    }
-
-    const conceptType = conceptDef.type
-    if (conceptType === 'text' && elements.length > 1) {
-      warnings.push({
-        path: `elements.${conceptName}`,
-        message: `Text-type concept "${conceptName}" should have at most 1 element, got ${elements.length}`,
-        severity: 'warning',
-      })
-    }
-
-    for (const el of elements) {
-      if (conceptDef.fields && conceptDef.fields.length > 0) {
-        for (const fieldDef of conceptDef.fields) {
-          if (fieldDef.type === 'select' && fieldDef.options && el.fields[fieldDef.name]) {
-            const val = String(el.fields[fieldDef.name])
-            if (!fieldDef.options.includes(val)) {
-              errors.push({
-                path: `elements.${conceptName}.${el.name}.fields.${fieldDef.name}`,
-                message: `Invalid value "${val}" for field "${fieldDef.name}". Allowed: ${fieldDef.options.join(', ')}`,
-                severity: 'error',
-              })
-            }
-          }
-        }
-      }
-    }
-  }
-
-  for (const matrix of model.matrices) {
-    const decl = templateMatrices.find((m) => m.name.toLowerCase() === matrix.name.toLowerCase())
-    if (!decl) {
-      warnings.push({
-        path: `matrices.${matrix.name}`,
-        message: `Matrix "${matrix.name}" is not declared in template`,
-        severity: 'warning',
-      })
-    }
-  }
-
-  for (const [itemName, markers] of Object.entries(model.nodeMarkers)) {
-    for (const markerName of Object.keys(markers)) {
-      if (!templateMarkers.find((m) => m.name === markerName)) {
-        warnings.push({
-          path: `nodeMarkers.${itemName}.${markerName}`,
-          message: `Marker "${markerName}" is not defined in template`,
-          severity: 'warning',
-        })
-      }
-    }
-  }
-
-  return { valid: errors.length === 0, errors, warnings }
-}
+import { ValidationCheck, ValidationReport } from '../types'
+import { parseModel } from '../parser'
+import { VERSION_RE, WIKILINK_RE, SECTION_NN_RE } from './constants'
 
 /**
  * Validates iNNfo document content (frontmatter + body syntax + conventions).
@@ -335,9 +200,9 @@ export function validateFormatContent(
   }
 
   // 10. Element marker syntax
-  const visMarkerRe = /^\s*[*\-]\s+_NN\s+([\w\s-]+?):\s+(.+)$/gm
+  const visMarkerRe = /^\s*[*-]\s+_NN\s+([\w\s-]+?):\s+(.+)$/gm
   const hidMarkerRe =
-    /^\s*[*\-]\s+<!--\s+(?:_NN\s+([\w\s-]+?):|block:\s*([\w\s-]+?))\s*-->\s*(.*)$/gm
+    /^\s*[*-]\s+<!--\s+(?:_NN\s+([\w\s-]+?):|block:\s*([\w\s-]+?))\s*-->\s*(.*)$/gm
   const visibleMarkers = [...body.matchAll(visMarkerRe)]
   const hiddenMarkers = [...body.matchAll(hidMarkerRe)]
   const totalMarkers = visibleMarkers.length + hiddenMarkers.length
@@ -520,48 +385,4 @@ export function validateFormatContent(
       warnings,
     },
   }
-}
-
-/**
- * Validates iNNfo document syntax.
- * Returns a list of syntax checks (simpler than the full content validator).
- */
-export function validateFormatSyntax(content: string): SyntaxCheck[] {
-  const checks: SyntaxCheck[] = []
-  const parsed = parseModel(content)
-
-  // Check frontmatter is parseable
-  const hasFrontmatter = Object.keys(parsed.frontmatter).length > 0
-  checks.push({
-    id: 'syntax-frontmatter',
-    label: 'YAML frontmatter is parseable',
-    passed: hasFrontmatter,
-    message: hasFrontmatter ? undefined : 'Frontmatter is missing or unparseable',
-  })
-
-  // Check file suffix convention
-  checks.push({
-    id: 'syntax-filename',
-    label: 'File ends with _NN.md',
-    passed: true, // caller provides this context
-  })
-
-  // Document structure checks
-  const hasIndex = parsed.taxonomy.length > 0
-  checks.push({
-    id: 'syntax-index',
-    label: '_NN index section present',
-    passed: hasIndex,
-    message: hasIndex ? undefined : 'No _NN index with [[wikilinks]] found',
-  })
-
-  const hasConcepts = parsed.elements.size > 0
-  checks.push({
-    id: 'syntax-concepts',
-    label: 'Element declarations present',
-    passed: hasConcepts,
-    message: hasConcepts ? undefined : 'No concept elements found in document body',
-  })
-
-  return checks
 }

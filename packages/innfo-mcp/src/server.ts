@@ -21,7 +21,12 @@ import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprot
 import type { ListToolsResult, CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 
 import { listModels, readModel } from './tools/list-read.js'
-import { getSpec, getTemplateFromUrl, getTemplateFromModel, deriveNameFromUrl } from './tools/spec.js'
+import {
+  getSpec,
+  getTemplateFromUrl,
+  getTemplateFromModel,
+  deriveNameFromUrl,
+} from './tools/spec.js'
 import { validateModel, applyChange } from './tools/mutate.js'
 
 /** Root directory for model scanning (defaults to `models/` under CWD) */
@@ -69,7 +74,7 @@ const toolDefinitions: Tool[] = [
         },
         model_id: {
           type: 'string',
-          description: "Model id whose frontmatter parent_spec.url seeds resolution",
+          description: 'Model id whose frontmatter parent_spec.url seeds resolution',
         },
       },
     },
@@ -84,7 +89,7 @@ const toolDefinitions: Tool[] = [
         url: { type: 'string', description: 'Explicit template URL to resolve from' },
         model_id: {
           type: 'string',
-          description: "Model id whose parent_spec.url points to its template",
+          description: 'Model id whose parent_spec.url points to its template',
         },
         name: {
           type: 'string',
@@ -104,7 +109,8 @@ const toolDefinitions: Tool[] = [
         content: { type: 'string', description: 'Raw model content string (inline)' },
         template_url: {
           type: 'string',
-          description: 'Optional explicit template URL when the model has no resolvable parent_spec.url',
+          description:
+            'Optional explicit template URL when the model has no resolvable parent_spec.url',
         },
       },
     },
@@ -120,7 +126,15 @@ const toolDefinitions: Tool[] = [
         op: {
           type: 'string',
           description: 'Operation to perform',
-          enum: ['add_concept', 'add_field', 'set_marker', 'add_element', 'remove_element'],
+          enum: [
+            'add_concept',
+            'add_field',
+            'set_marker',
+            'add_element',
+            'remove_element',
+            'rename_concept',
+            'rename_element',
+          ],
         },
         args: {
           type: 'object',
@@ -178,8 +192,7 @@ async function handleGetSpec(args: Record<string, unknown>): Promise<CallToolRes
   const modelId = args.model_id as string | undefined
   if (!url && !modelId) return errorResult('Provide either url or model_id')
   const result = await getSpec(ROOT_DIR, { url, modelId })
-  if (!result.spec)
-    return errorResult('Spec could not be resolved from the provided url/model_id')
+  if (!result.spec) return errorResult('Spec could not be resolved from the provided url/model_id')
   return textResult(JSON.stringify(result, null, 2))
 }
 
@@ -197,8 +210,7 @@ async function handleGetTemplate(args: Record<string, unknown>): Promise<CallToo
     return errorResult('Provide either url or model_id')
   }
 
-  if (!template)
-    return errorResult('Template could not be resolved from the provided url/model_id')
+  if (!template) return errorResult('Template could not be resolved from the provided url/model_id')
   return textResult(JSON.stringify(template, null, 2))
 }
 

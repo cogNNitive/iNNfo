@@ -10,7 +10,7 @@ context: |
     - apps/innfo-editor: Frontend Vue 3 editor (Vitest + Playwright).
 testing:
   strict_tdd: true
-  detected_at: '2026-07-06'
+  detected_at: '2026-07-09'
   runner:
     command: 'npm run test'
     framework: 'Vitest'

@@ -12,11 +12,7 @@
 
 import { join, basename } from 'node:path'
 import { readFile, stat } from 'node:fs/promises'
-import {
-  getTemplate as coreGetTemplate,
-  getFormatSpec,
-  parseFrontmatter,
-} from '@innv0/innfo-core'
+import { getTemplate as coreGetTemplate, getFormatSpec, parseFrontmatter } from '@innv0/innfo-core'
 import type { SpecDocument, SpecCache } from '@innv0/innfo-core'
 import { resolveParentChainNode } from './resolver-node.js'
 

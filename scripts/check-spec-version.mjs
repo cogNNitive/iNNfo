@@ -84,7 +84,7 @@ function classifyFile(relPath) {
     return 'test'
   if (
     (relPath.startsWith('apps') || relPath.startsWith('packages')) &&
-    relPath.endsWith('.ts') &&
+    (relPath.endsWith('.ts') || relPath.endsWith('.vue')) &&
     !relPath.endsWith('.test.ts')
   )
     return 'source'
@@ -344,7 +344,7 @@ function main() {
   const { version, byType, checkMode, inventory, includeArchives } = parseArgs()
 
   const allFiles = collectFiles(ROOT, includeArchives).filter(
-    (f) => f.endsWith('.md') || f.endsWith('.ts') || f.endsWith('.tsx'),
+    (f) => f.endsWith('.md') || f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue'),
   )
 
   if (inventory) {

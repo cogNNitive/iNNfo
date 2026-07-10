@@ -113,6 +113,9 @@ export class ElementsMap {
   set(key: string, nodes: ElementNode[]) {
     this._map.set(key.toLowerCase(), { key, nodes })
   }
+  delete(key: string): boolean {
+    return this._map.delete(key.toLowerCase())
+  }
   has(key: string): boolean {
     return this._map.has(key.toLowerCase())
   }

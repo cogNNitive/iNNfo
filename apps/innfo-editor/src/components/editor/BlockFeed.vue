@@ -20,6 +20,7 @@
       @edit-toggle="toggleEdit('concept')"
       @add-child="$emit('add-item')"
       @change="$emit('change-concept')"
+      @update:concept-name="(name) => $emit('change-concept-name', name)"
       @navigate-to-node="(nodeId) => $emit('navigate-to-node', nodeId)"
     />
 
@@ -96,6 +97,7 @@ const props = withDefaults(
 const _emit = defineEmits<{
   'change-concept': []
   'change-item': []
+  'change-concept-name': [name: string]
   'add-item': []
   'delete-item': [index: number]
   'move-item-up': [index: number]

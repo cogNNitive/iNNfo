@@ -27,6 +27,7 @@ export default tseslint.config(
       // Published/built site output (bundled + minified) — not source.
       'docs/app/**',
       '**/*.min.js',
+      'packages/innfo-mcp/bin/**',
     ],
   },
 

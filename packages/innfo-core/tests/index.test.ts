@@ -997,4 +997,62 @@ describe('FOLDER mode rejection (FR-007)', () => {
     expect(folderError).toBeDefined()
     expect(folderError!.severity).toBe('error')
   })
+
+  it('reports warnings for undocumented or incomplete parent concepts', () => {
+    const modelContent = [
+      '---',
+      'spec_version: "V_0-1-3"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Test"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Market]]',
+      '* [[Product]]',
+    ].join('\n')
+
+    const model = parseModel(modelContent)
+    const mockTemplate = {
+      name: 'test_V_0-1-1',
+      level: 2 as const,
+      frontmatter: {
+        spec_version: 'V_0-1-1',
+        spec_url: 'https://example.com/test',
+        level: 2 as const,
+        concepts: [
+          { name: 'Market', type: 'weight' as const },
+          { name: 'Product', type: 'weight' as const },
+        ],
+      },
+      rawContent: [
+        '# Test Template',
+        '',
+        '## Market',
+        '### Summary',
+        'A summary.',
+        '### Description',
+        'A description.',
+        '### Methodologies',
+        'Methodology list.',
+        // Missing prompts for Market
+        '',
+        // Missing ## Product completely
+      ].join('\n'),
+    }
+
+    const result = validateModel(model, mockTemplate, null)
+    expect(result.warnings.length).toBeGreaterThanOrEqual(2)
+
+    const marketWarning = result.warnings.find((w) => w.message.includes('Market'))
+    expect(marketWarning).toBeDefined()
+    expect(marketWarning!.message).toContain('has incomplete documentation in parent template')
+
+    const productWarning = result.warnings.find((w) => w.message.includes('Product'))
+    expect(productWarning).toBeDefined()
+    expect(productWarning!.message).toContain('is undocumented in parent template')
+  })
 })

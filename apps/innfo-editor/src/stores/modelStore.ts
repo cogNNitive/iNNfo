@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { ModelNode } from '../model/types'
-import type { DirectoryHandleLike } from './workspaceStore'
+import type { DirectoryHandleLike, FileHandleLike } from '../model/fs-types'
 import { recursiveParse } from '../model/recursiveParser'
 import { validateFormatContent, parseFrontmatter } from '@innv0/innfo-core'
 import type { ModelDriver, ParseIssue, ValidationReport, LocalMetamodel } from '@innv0/innfo-core'
@@ -11,6 +11,32 @@ export interface ModelState {
   dirtyIds: Set<string>
   parseIssues: ParseIssue[]
   validationReport: ValidationReport | null
+}
+
+/** Helper to recursively search a directory handle for a spec file matching parentName. */
+async function findLocalSpecInHandle(
+  dirHandle: DirectoryHandleLike,
+  reqName: string,
+): Promise<string | null> {
+  const targetName = reqName.toLowerCase()
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (handle.kind === 'file') {
+      const lowerFile = name.toLowerCase()
+      if (
+        lowerFile === `${targetName}_nn.md` ||
+        lowerFile === `${targetName}.md` ||
+        lowerFile === targetName ||
+        (lowerFile.startsWith(targetName) && lowerFile.endsWith('.md'))
+      ) {
+        const file = await (handle as FileHandleLike).getFile()
+        return await file.text()
+      }
+    } else if (handle.kind === 'directory') {
+      const found = await findLocalSpecInHandle(handle as DirectoryHandleLike, reqName)
+      if (found !== null) return found
+    }
+  }
+  return null
 }
 
 /**
@@ -103,7 +129,7 @@ export const useModelStore = defineStore('model', {
     async parseFromHandle(handle: DirectoryHandleLike, driver?: ModelDriver): Promise<void> {
       const result = await recursiveParse(handle, driver)
       this.parseIssues = result.issues
-      await this._resolveParentSpecs(result.nodes, result.rootIds)
+      await this._resolveParentSpecs(result.nodes, result.rootIds, handle)
       this.setGraph(result.nodes, result.rootIds)
     },
 
@@ -115,7 +141,11 @@ export const useModelStore = defineStore('model', {
      * Best-effort: network failures or missing templates degrade gracefully
      * to slate fallback.
      */
-    async _resolveParentSpecs(nodes: Record<string, ModelNode>, rootIds: string[]): Promise<void> {
+    async _resolveParentSpecs(
+      nodes: Record<string, ModelNode>,
+      rootIds: string[],
+      handle?: DirectoryHandleLike,
+    ): Promise<void> {
       for (const rootId of rootIds) {
         const root = nodes[rootId]
         if (!root?.rawContent) continue
@@ -139,10 +169,32 @@ export const useModelStore = defineStore('model', {
         })
         if (existingPeer) continue
 
+        let text = ''
+        if (handle) {
+          try {
+            const specsDir = await handle.getDirectoryHandle('specs')
+            const foundText = await findLocalSpecInHandle(specsDir, parentName)
+            if (foundText) {
+              text = foundText
+            }
+          } catch (e) {
+            // specs directory not found or error accessing it
+          }
+        }
+
+        if (!text) {
+          try {
+            const resp = await fetch(parentUrl)
+            if (!resp.ok) continue
+            text = await resp.text()
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err)
+            console.warn(`[template] Failed to resolve parent spec "${parentUrl}": ${message}`)
+            continue
+          }
+        }
+
         try {
-          const resp = await fetch(parentUrl)
-          if (!resp.ok) continue
-          const text = await resp.text()
           const tplFm = parseFrontmatter(text)
           if (!tplFm?.concepts?.length) continue
 
@@ -179,11 +231,12 @@ export const useModelStore = defineStore('model', {
             rawSections: {},
             source: { path: `spec:${parentName}` },
             sourceMode: 'structural' as const,
+            rawContent: text,
           }
           rootIds.push(templateId)
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err)
-          console.warn(`[template] Failed to resolve parent spec "${parentUrl}": ${message}`)
+          console.warn(`[template] Failed to parse parent spec "${parentName}": ${message}`)
         }
       }
     },

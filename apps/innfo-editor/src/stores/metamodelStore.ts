@@ -166,9 +166,28 @@ export const useMetamodelStore = defineStore('metamodel', () => {
 
   function getConceptGuidance(conceptName: string): DocumentationEntry | null {
     const key = conceptName.toLowerCase()
+
+    if (Object.keys(documentation.value).length === 0) {
+      const rootId = modelStore.rootIds[0]
+      if (rootId) {
+        const rootNode = modelStore.getNode(rootId)
+        if (rootNode?.rawContent) {
+          const fm = parseFrontmatter(rootNode.rawContent)
+          const parentName = (fm as any)?.parent_spec?.name
+          if (parentName) {
+            const templateId = `spec:${parentName}`
+            const specNode = modelStore.getNode(templateId)
+            if (specNode && specNode.rawContent) {
+              documentation.value = parseMetamodelDocumentation(specNode.rawContent)
+            }
+          }
+        }
+      }
+    }
+
     if (documentation.value[key]) return documentation.value[key]
 
-    // Lazy load if documentation is empty and not currently loading
+    // Lazy load fallback if documentation is empty and not currently loading
     if (Object.keys(documentation.value).length === 0 && !docsLoading.value) {
       const ws = useWorkspaceStore()
       if (ws.handle) {

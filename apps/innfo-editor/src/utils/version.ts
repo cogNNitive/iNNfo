@@ -80,8 +80,9 @@ export function buildFormatFilename(
   templateName: string | undefined,
   version: SemVer,
 ): string {
+  const sanitizedBase = baseName.replace(/\s+/g, '-')
   const suffix = templateName ? `_${templateName}` : ''
-  return `${baseName}_V_${version.major}-${version.minor}-${version.patch}${suffix}_NN.md`
+  return `${sanitizedBase}_V_${version.major}-${version.minor}-${version.patch}${suffix}_NN.md`
 }
 
 /** Returns a new SemVer with the requested level incremented (§8.2 SemVer rules). */

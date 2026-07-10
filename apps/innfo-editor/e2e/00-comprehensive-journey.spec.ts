@@ -120,7 +120,9 @@ test.describe('Flujo de Negocio Completo: Edición, Guardado y Validación', () 
     })
 
     await test.step('Entonces se debe mostrar el panel de información del modelo', async () => {
-      await expect(pageInstance.getByText(/Format Version|Template:|Model Info|iNNfo/i).first()).toBeVisible()
+      await expect(
+        pageInstance.getByText(/Format Version|Template:|Model Info|iNNfo/i).first(),
+      ).toBeVisible()
     })
 
     await test.step('Cuando vuelve al editor y selecciona BTTFKB (root con 5 elementos)', async () => {

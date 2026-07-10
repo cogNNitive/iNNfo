@@ -13,10 +13,10 @@
 export const DEFAULT_INNFO_VERSION = 'V_0-2-0'
 
 /** Default template name for new documents. */
-export const DEFAULT_TEMPLATE_NAME = 'business'
+export const DEFAULT_TEMPLATE_NAME = ''
 
 /** Default template version. */
-export const DEFAULT_TEMPLATE_VERSION = 'V_1-0-0'
+export const DEFAULT_TEMPLATE_VERSION = 'V_0-1-0'
 
 /** Maximum marker score value (scores range from 0 to this value). */
 export const MAX_MARKER_SCORE = 3

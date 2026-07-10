@@ -92,6 +92,21 @@ class FakeDirectoryHandle implements DirectoryHandleLike {
     }
     return handle
   }
+
+  async getDirectoryHandle(
+    name: string,
+    options?: { create?: boolean },
+  ): Promise<DirectoryHandleLike> {
+    const value = this.tree[name]
+    if (!value || typeof value === 'string') {
+      if (options?.create) {
+        this.tree[name] = {}
+        return new FakeDirectoryHandle(name, this.tree[name] as FakeTree)
+      }
+      throw new Error(`Directory not found: ${name}`)
+    }
+    return new FakeDirectoryHandle(name, value)
+  }
 }
 
 /** Builds a fake root DirectoryHandleLike from a plain nested object tree. */

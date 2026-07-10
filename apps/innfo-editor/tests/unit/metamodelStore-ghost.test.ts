@@ -45,7 +45,11 @@ describe('metamodelStore: ghostConcepts computed', () => {
 
     const store = useMetamodelStore()
     expect(store.ghostConcepts).toHaveLength(3)
-    expect(store.ghostConcepts.map((c) => c.name)).toEqual(['Description', 'Requirement', 'Category'])
+    expect(store.ghostConcepts.map((c) => c.name)).toEqual([
+      'Description',
+      'Requirement',
+      'Category',
+    ])
   })
 
   it('excludes concepts that have instantiated elements', () => {

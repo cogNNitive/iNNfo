@@ -70,16 +70,14 @@ describe('Ghost groups — Add action integration', () => {
     expect(() => modelStore.addConceptElement('Task', 'My Task')).toThrow('No root node')
   })
 
-  it('clicking a ghost group header in LeftSidebar transitions ghost to present', async () => {
+  it('clicking a ghost group header in LeftSidebar selects virtual concept ID without creating element', async () => {
     const modelStore = useModelStore()
     modelStore.setGraph(
       {
         Root: makeNode('Root', {
           childIds: [],
           localMetamodel: {
-            concepts: [
-              { name: 'Task', type: 'list' },
-            ],
+            concepts: [{ name: 'Task', type: 'list' }],
             markers: [],
           },
         }),
@@ -104,10 +102,11 @@ describe('Ghost groups — Add action integration', () => {
     expect(ghostHeader.exists()).toBe(true)
     await ghostHeader.trigger('click')
 
-    // After adding, the ghost concept should no longer be in ghost list
-    expect(metamodelStore.ghostConcepts).toHaveLength(0)
+    // It should NOT create elements immediately, so ghost count remains 1
+    expect(metamodelStore.ghostConcepts).toHaveLength(1)
 
-    // The newly created node should be selected
-    expect(uiStore.selectedNodeId).toBeTruthy()
+    // The select-node event should be emitted by LeftSidebar with the virtual concept node ID
+    expect(wrapper.emitted('select-node')).toBeTruthy()
+    expect(wrapper.emitted('select-node')![0]).toEqual(['virtual:Root:Task'])
   })
 })

@@ -149,7 +149,25 @@ interface RemoveElementArgs {
   elementName: string
 }
 
-type OpArgs = AddConceptArgs | AddFieldArgs | SetMarkerArgs | AddElementArgs | RemoveElementArgs
+interface RenameConceptArgs {
+  conceptName: string
+  newName: string
+}
+
+interface RenameElementArgs {
+  conceptName: string
+  elementName: string
+  newName: string
+}
+
+type OpArgs =
+  | AddConceptArgs
+  | AddFieldArgs
+  | SetMarkerArgs
+  | AddElementArgs
+  | RemoveElementArgs
+  | RenameConceptArgs
+  | RenameElementArgs
 
 /**
  * Apply an intent-level change to a model.
@@ -305,6 +323,90 @@ function applyMutation(model: ParsedModel, op: string, args: OpArgs): void {
         throw new Error(`Element "${a.elementName}" not found in concept "${a.conceptName}"`)
       }
       model.elements.set(a.conceptName, filtered)
+      break
+    }
+
+    case 'rename_concept': {
+      const a = args as RenameConceptArgs
+      if (!a.conceptName || !a.newName) throw new Error('conceptName and newName are required')
+      const lowerOld = a.conceptName.toLowerCase()
+      const lowerNew = a.newName.toLowerCase()
+      if (lowerOld === lowerNew) throw new Error('newName must differ from conceptName')
+
+      // Update frontmatter concepts[]
+      const concepts = model.frontmatter.concepts ?? []
+      const concept = concepts.find((c) => c.name.toLowerCase() === lowerOld)
+      if (!concept) throw new Error(`Concept "${a.conceptName}" not found in frontmatter`)
+      if (concepts.some((c) => c.name.toLowerCase() === lowerNew && c.name !== concept.name)) {
+        throw new Error(`Concept "${a.newName}" already exists in frontmatter`)
+      }
+      concept.name = a.newName
+      model.frontmatter.concepts = concepts
+
+      // Update elements map: copy nodes to new key, delete old
+      const nodes = model.elements.get(a.conceptName)
+      if (nodes) {
+        // Update each element's type to the new concept name
+        for (const node of nodes) {
+          node.type = a.newName
+        }
+        model.elements.set(a.newName, nodes)
+        model.elements.delete(a.conceptName)
+      }
+
+      // Update taxonomy edges
+      for (const edge of model.taxonomy) {
+        if (edge.parent.toLowerCase() === lowerOld) edge.parent = a.newName
+        if (edge.child.toLowerCase() === lowerOld) edge.child = a.newName
+      }
+
+      // Update rawSections key
+      if (model.rawSections) {
+        const raw = model.rawSections[a.conceptName]
+        if (raw !== undefined) {
+          delete model.rawSections[a.conceptName]
+          model.rawSections[a.newName] = raw
+        }
+      }
+
+      break
+    }
+
+    case 'rename_element': {
+      const a = args as RenameElementArgs
+      if (!a.conceptName || !a.elementName || !a.newName)
+        throw new Error('conceptName, elementName, and newName are required')
+      const lowerOld = a.elementName.toLowerCase()
+      const lowerNew = a.newName.toLowerCase()
+      if (lowerOld === lowerNew) throw new Error('newName must differ from elementName')
+
+      const existingElements = model.elements.get(a.conceptName)
+      if (!existingElements) throw new Error(`Concept "${a.conceptName}" not found`)
+
+      const element = existingElements.find((e) => e.name.toLowerCase() === lowerOld)
+      if (!element)
+        throw new Error(`Element "${a.elementName}" not found in concept "${a.conceptName}"`)
+      if (
+        existingElements.some((e) => e.name.toLowerCase() === lowerNew && e.name !== element.name)
+      ) {
+        throw new Error(`Element "${a.newName}" already exists in concept "${a.conceptName}"`)
+      }
+
+      element.name = a.newName
+
+      // Regenerate slug (only if auto-derived — leave explicit slugs alone)
+      // We always regenerate; the serializer will derive from the new name.
+      element.slug = undefined
+
+      // Update nodeMarkers key if present
+      if (model.nodeMarkers[a.elementName] !== undefined) {
+        model.nodeMarkers[a.newName] = model.nodeMarkers[a.elementName]
+        delete model.nodeMarkers[a.elementName]
+      }
+
+      // Also update nodeMarkers for any entry keyed by the element within a concept context
+      // (item-markers matrix uses element name as row key)
+      model.elements.set(a.conceptName, existingElements) // ensure write-back
       break
     }
 

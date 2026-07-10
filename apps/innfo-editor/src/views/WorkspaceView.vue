@@ -6,6 +6,7 @@ import LeftSidebar from '../components/layout/LeftSidebar.vue'
 import RightGuidanceSidebar from '../components/layout/RightGuidanceSidebar.vue'
 import ValidationReport from '../components/ValidationReport.vue'
 import ToastMessage from '../components/ToastMessage.vue'
+import SaveWorkspaceModal from '../components/layout/SaveWorkspaceModal.vue'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import { useModelStore } from '../stores/modelStore'
 import { useUiStore, type ActiveView } from '../stores/uiStore'
@@ -21,6 +22,9 @@ const TextEditor = defineAsyncComponent(() => import('../components/editor/TextE
 const TreeEditor = defineAsyncComponent(() => import('../components/editor/TreeEditor.vue'))
 const GraphViewer = defineAsyncComponent(() => import('../components/editor/GraphViewer.vue'))
 const MatricesGrid = defineAsyncComponent(() => import('../components/editor/MatricesGrid.vue'))
+const ConceptTableView = defineAsyncComponent(
+  () => import('../components/editor/ConceptTableView.vue'),
+)
 const MetamatrixConfig = defineAsyncComponent(
   () => import('../components/editor/MetamatrixConfig.vue'),
 )
@@ -45,12 +49,39 @@ const validating = ref(false)
 // Validation report is set silently on import (auto-run in setGraph → validateModel).
 // The overlay only opens on explicit Validate button click (runValidation).
 
-// ── Derived ──
 const selectedNodeId = computed(() => uiStore.selectedNodeId)
 
-const selectedNode = computed(() =>
-  selectedNodeId.value ? modelStore.getNode(selectedNodeId.value) : null,
-)
+const selectedNode = computed(() => {
+  const id = selectedNodeId.value
+  if (!id) return null
+  if (id.startsWith('virtual:')) {
+    const parts = id.split(':')
+    const parentId = parts[1]
+    const conceptName = parts[2]
+    const parentNode = modelStore.getNode(parentId)
+    if (!parentNode) return null
+
+    const childIds = parentNode.childIds.filter((cid) => {
+      const child = modelStore.getNode(cid)
+      return child?.type === conceptName && child?.kind === 'element'
+    })
+
+    return {
+      id,
+      name: conceptName,
+      parentId,
+      childIds,
+      type: conceptName,
+      kind: 'concept',
+      fields: {},
+      markers: {},
+      relationships: [],
+      rawSections: {},
+      source: parentNode.source,
+    } as any
+  }
+  return modelStore.getNode(id)
+})
 
 const selectedNodeName = computed(() => selectedNode.value?.name ?? '')
 const selectedNodeType = computed(() => selectedNode.value?.type ?? 'text')
@@ -63,30 +94,35 @@ const rootNode = computed(() => {
 })
 
 /** Determines which editor sub-view to render based on node characteristics. */
-const isConceptLike = (node: { kind?: string }) =>
-  node.kind === 'concept' || node.kind === 'root'
+const isConceptLike = (node: { kind?: string }) => node.kind === 'concept' || node.kind === 'root'
 
-const editorView = computed<'text' | 'tree' | 'sheet'>(() => {
+const editorView = computed<'text' | 'tree' | 'sheet' | 'table'>(() => {
   if (!selectedNode.value) return 'sheet'
-  // Nodes with rawContent show TextEditor, unless they have element children (use BlockFeed for structured view)
+  // If it's a concept-like node
+  if (isConceptLike(selectedNode.value)) {
+    if (selectedNode.value.type === 'text') {
+      return 'text'
+    }
+    return 'table'
+  }
+  // Nodes with rawContent show TextEditor
   if (selectedNode.value.rawContent) {
-    if (isConceptLike(selectedNode.value) && selectedNode.value.childIds.length > 0) return 'sheet'
     return 'text'
   }
-  // Concept/root nodes always show BlockFeed (sheet) — not TreeEditor
-  if (isConceptLike(selectedNode.value)) return 'sheet'
   // Nodes with children get the TreeEditor (structural)
-  if (selectedNode.value.childIds.length > 0) return 'tree'
+  if (selectedNode.value.childIds.length > 0) {
+    return 'tree'
+  }
   // Everything else gets a BlockSheet view
   return 'sheet'
 })
 
 const getConceptFieldsForNode = (node: ModelNode) => {
   const metamodelFields = metamodelStore.getConceptFields(node.type) ?? []
-  const fieldsMap = new Map<string, { name: string; type: string }>()
+  const fieldsMap = new Map<string, { name: string; type: string; [key: string]: any }>()
 
   for (const f of metamodelFields) {
-    fieldsMap.set(f.name, { name: f.name, type: f.type })
+    fieldsMap.set(f.name, { ...f })
   }
 
   if (node.fields) {
@@ -140,24 +176,51 @@ const conceptBlock = computed(() => {
   }
 })
 
+const childItems = computed(() => {
+  const node = selectedNode.value
+  if (!node) return []
+  return node.childIds
+    .map((id: string) => modelStore.getNode(id))
+    .filter((n: ModelNode | undefined): n is ModelNode => !!n)
+    .map((n: ModelNode) => ({
+      id: n.id,
+      name: n.name,
+      description: n.rawSections?.description || '',
+      fields: Object.fromEntries(
+        Object.entries(n.fields ?? {}).map(([k, fv]) => [k, (fv as any).value]),
+      ),
+    }))
+})
+
+const isListConcept = computed(() => childItems.value.length > 0)
+
 const activeEditorComponent = computed(() => {
   if (editorView.value === 'text') return TextEditor
   if (editorView.value === 'tree') return TreeEditor
+  if (editorView.value === 'table') return ConceptTableView
   return BlockFeed
 })
 
 const activeEditorProps = computed(() => {
+  const nid = selectedNodeId.value ?? ''
   if (editorView.value === 'text') {
     return {
-      nodeId: selectedNodeId.value,
+      nodeId: nid,
       conceptName: selectedNodeName.value,
       conceptType: selectedNodeType.value,
     }
   }
   if (editorView.value === 'tree') {
     return {
-      nodeId: selectedNodeId.value,
+      nodeId: nid,
       conceptName: selectedNodeName.value,
+    }
+  }
+  if (editorView.value === 'table') {
+    return {
+      nodeId: nid,
+      conceptType: selectedNodeType.value,
+      conceptFields: activeConceptFields.value,
     }
   }
   return {
@@ -165,8 +228,8 @@ const activeEditorProps = computed(() => {
     conceptType: selectedNodeType.value,
     conceptBlock: conceptBlock.value,
     conceptFields: activeConceptFields.value,
-    items: [],
-    isListConcept: false,
+    items: childItems.value,
+    isListConcept: isListConcept.value,
     validationReport: validationReport.value,
   }
 })
@@ -184,6 +247,8 @@ const activeEditorEvents = computed(() => {
   }
   return {
     'change-concept': onEditorChange,
+    'change-item': onEditorChange,
+    'change-concept-name': onConceptNameChange,
   }
 })
 
@@ -191,22 +256,20 @@ const activeEditorEvents = computed(() => {
 
 function onSelectNode(nodeId: string): void {
   uiStore.selectNode(nodeId)
-}
-
-function onMoveUp(nodeId: string): void {
-  const node = modelStore.getNode(nodeId)
-  if (!node?.parentId) return
-  modelStore.reorderChild(node.parentId, nodeId, -1)
-}
-
-function onMoveDown(nodeId: string): void {
-  const node = modelStore.getNode(nodeId)
-  if (!node?.parentId) return
-  modelStore.reorderChild(node.parentId, nodeId, 1)
+  if (uiStore.activeView === 'matrices' || uiStore.activeView === 'info') {
+    uiStore.setActiveView('editor')
+  }
 }
 
 function onEditorChange(): void {
   // Editor changes are tracked through provenance — nothing extra needed
+}
+
+function onConceptNameChange(newName: string): void {
+  const node = selectedNode.value
+  if (!node || !selectedNodeId.value) return
+  modelStore.upsertNode({ ...node, name: newName })
+  modelStore.markDirty(selectedNodeId.value)
 }
 
 function onNavigateToNode(nodeId: string): void {
@@ -274,6 +337,10 @@ function closeWorkspace(): void {
 async function onKeydown(e: KeyboardEvent): Promise<void> {
   if ((e.ctrlKey || e.metaKey) && e.key === 's') {
     e.preventDefault()
+    if (!workspaceStore.hasHandle) {
+      uiStore.setShowSaveWorkspaceModal(true)
+      return
+    }
     try {
       await workspaceStore.saveActiveFile()
       show('Saved successfully.', 'success')
@@ -299,8 +366,6 @@ onUnmounted(() => {
     <div class="flex flex-1 overflow-hidden">
       <LeftSidebar
         @select-node="onSelectNode"
-        @move-up="onMoveUp"
-        @move-down="onMoveDown"
         @select-matrix="onSelectMatrix"
         @select-view="onSelectView"
       />
@@ -432,6 +497,7 @@ onUnmounted(() => {
       />
 
       <ToastMessage />
+      <SaveWorkspaceModal />
     </div>
   </div>
 </template>

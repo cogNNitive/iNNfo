@@ -122,6 +122,31 @@ describe('ConceptTreeNode.vue — Ghost appearance (R-TN-04)', () => {
     const row = wrapper.find('.flex.items-center')
     expect((row.element as HTMLElement).style.opacity).not.toBe('0.45')
   })
+
+  it('does NOT apply reduced opacity when node has fallback description in rawSections', () => {
+    const modelStore = useModelStore()
+    modelStore.setGraph(
+      {
+        Root: makeNode('Root', {
+          kind: 'element',
+          childIds: [],
+          rawContent: '',
+          rawSections: { description: 'This is a description' },
+        }),
+      },
+      ['Root'],
+    )
+
+    const wrapper = mount(ConceptTreeNode, {
+      props: {
+        nodeId: 'Root',
+        selectedId: null,
+      },
+    })
+
+    const row = wrapper.find('.flex.items-center')
+    expect((row.element as HTMLElement).style.opacity).not.toBe('0.45')
+  })
 })
 
 describe('ConceptTreeNode.vue — BlockPill integration (R-TN-01)', () => {

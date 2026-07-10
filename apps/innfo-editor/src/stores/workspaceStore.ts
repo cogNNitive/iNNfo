@@ -224,8 +224,9 @@ export const useWorkspaceStore = defineStore('workspace', {
           `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_` +
           `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
 
-        const basename = rootNode.source.path.split('/').pop() ?? 'document'
-        const backupName = `${ts}_${basename}`
+        const rawBasename = rootNode.source.path.split(/[/\\]/).pop() ?? 'document'
+        const cleanBasename = rawBasename.split(/[?#]/)[0]
+        const backupName = `${ts}_${cleanBasename.replace(/[^a-zA-Z0-9._-]/g, '_').trim()}`
 
         // Ensure backups/ subdirectory exists
         let backupsDir: DirectoryHandleLike
@@ -300,10 +301,12 @@ export const useWorkspaceStore = defineStore('workspace', {
       const newFilename = buildFormatFilename(parsed.baseName, parsed.templateName, newVersion)
       const versionStr = formatVersionString(newVersion)
 
+      const cleanNewFilename = newFilename.replace(/[^a-zA-Z0-9._-]/g, '_').trim()
+
       // Create the new file and write current content
-      const newFileHandle = await this.handle.getFileHandle(newFilename, { create: true })
+      const newFileHandle = await this.handle.getFileHandle(cleanNewFilename, { create: true })
       if (!newFileHandle.createWritable) {
-        throw new Error(`New file handle "${newFilename}" does not support writing`)
+        throw new Error(`New file handle "${cleanNewFilename}" does not support writing`)
       }
       const writable = await newFileHandle.createWritable()
       await writable.write(rootNode.rawContent ?? '')
@@ -318,7 +321,7 @@ export const useWorkspaceStore = defineStore('workspace', {
       }
 
       // Update the root node's source path
-      rootNode.source.path = newFilename
+      rootNode.source.path = cleanNewFilename
 
       // Mark root node dirty so saveActiveFile persists changes
       modelStore.markDirty(rootId)

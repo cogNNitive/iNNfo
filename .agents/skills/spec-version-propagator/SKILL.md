@@ -165,7 +165,7 @@ The script scans these glob patterns:
 | `apps/**/tests/fixtures/models/*_F.md` | App Fixtures | `spec_version`, `spec_url`, `parent.url` |
 | `apps/**/tests/**/*.test.ts` | Test code | Inline frontmatter strings |
 | `packages/**/tests/**/*.test.ts` | Package tests | Inline frontmatter strings |
-| `apps/**/src/**/*.ts` | Source code | `DEFAULT_INNFO_VERSION` |
+| `apps/**/src/**/*.{ts,vue}` | Source code | `DEFAULT_INNFO_VERSION`, template and sample paths/URLs |
 | `packages/**/src/**/*.ts` | Source code | Version strings, comments |
 | `docs/**/*.md` | Documentation | Version string references |
 | `CHANGELOG.md` | Changelog | Version entries |

@@ -32,9 +32,7 @@ describe('VirtualGroupNode — ghost rendering', () => {
       {
         Root: makeNode('Root', {
           localMetamodel: {
-            concepts: [
-              { name: 'GhostConcept', type: 'list', color: 'blue', icon: 'file-text' },
-            ],
+            concepts: [{ name: 'GhostConcept', type: 'list', color: 'blue', icon: 'file-text' }],
             markers: [],
           },
         }),
@@ -60,7 +58,7 @@ describe('VirtualGroupNode — ghost rendering', () => {
     expect(style).toContain('2px')
   })
 
-  it('emits "click-ghost" when ghost header is clicked', async () => {
+  it('emits "select" with virtual concept ID when ghost header is clicked', async () => {
     const modelStore = useModelStore()
     modelStore.setGraph(
       {
@@ -88,8 +86,8 @@ describe('VirtualGroupNode — ghost rendering', () => {
     expect(header.exists()).toBe(true)
     await header.trigger('click')
 
-    expect(wrapper.emitted('click-ghost')).toBeTruthy()
-    expect(wrapper.emitted('click-ghost')![0]).toEqual(['Ghost'])
+    expect(wrapper.emitted('select')).toBeTruthy()
+    expect(wrapper.emitted('select')![0]).toEqual(['virtual:Root:Ghost'])
   })
 
   it('renders concept name in italic when ghost=true', () => {

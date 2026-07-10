@@ -58,26 +58,6 @@
       >
         {{ node.kind }}
       </span>
-
-      <!-- Move up -->
-      <button
-        v-if="depth !== undefined && depth > 0"
-        @click.stop="$emit('move-up', nodeId)"
-        class="p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-all shrink-0"
-        title="Move up"
-      >
-        <ChevronUp class="w-3 h-3" />
-      </button>
-
-      <!-- Move down -->
-      <button
-        v-if="depth !== undefined"
-        @click.stop="$emit('move-down', nodeId)"
-        class="p-0.5 rounded opacity-0 group-hover:opacity-100 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-all shrink-0"
-        title="Move down"
-      >
-        <ChevronDown class="w-3 h-3" />
-      </button>
     </div>
 
     <!-- ── Children (recursive, with optional virtual grouping) ── -->
@@ -96,8 +76,6 @@
             :depth="(depth ?? 0) + 1"
             :expanded-generation="expandedGeneration"
             @select="(id: string) => $emit('select', id)"
-            @move-up="(id: string) => $emit('move-up', id)"
-            @move-down="(id: string) => $emit('move-down', id)"
           />
           <ConceptTreeNode
             v-else
@@ -106,8 +84,6 @@
             :depth="(depth ?? 0) + 1"
             :expanded-generation="expandedGeneration"
             @select="(id: string) => $emit('select', id)"
-            @move-up="(id: string) => $emit('move-up', id)"
-            @move-down="(id: string) => $emit('move-down', id)"
           />
         </template>
       </template>
@@ -122,8 +98,6 @@
         :depth="(depth ?? 0) + 1"
         :expanded-generation="expandedGeneration"
         @select="(id: string) => $emit('select', id)"
-        @move-up="(id: string) => $emit('move-up', id)"
-        @move-down="(id: string) => $emit('move-down', id)"
       />
     </div>
   </div>
@@ -131,7 +105,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { ChevronDown, ChevronUp } from 'lucide-vue-next'
+import { ChevronDown } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useConceptVisuals, getHexColorMedium } from '../../composables/useConceptVisuals'
 import BlockPill from '../editor/BlockPill.vue'
@@ -160,8 +134,6 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   select: [nodeId: string]
-  'move-up': [nodeId: string]
-  'move-down': [nodeId: string]
 }>()
 
 const modelStore = useModelStore()
@@ -198,7 +170,9 @@ function onSelect(): void {
 }
 
 // ── Ghost state detection ──────────────────────────────────────
-const description = computed(() => node.value?.rawContent ?? '')
+const description = computed(
+  () => node.value?.rawContent || node.value?.rawSections?.description || '',
+)
 
 const fields = computed(() => node.value?.fields ?? {})
 
@@ -206,7 +180,7 @@ const fields = computed(() => node.value?.fields ?? {})
 const isGhost = computed(() => {
   const n = node.value
   if (!n) return false
-  const hasDesc = !!n.rawContent && n.rawContent.trim().length > 0
+  const hasDesc = description.value.trim().length > 0
   const hasFields = Object.values(n.fields).some(
     (f: any) =>
       f?.value !== undefined && f?.value !== null && f?.value !== '' && f?.value !== false,

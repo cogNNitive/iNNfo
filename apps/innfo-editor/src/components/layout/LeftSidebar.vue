@@ -76,8 +76,6 @@
             :expanded-generation="expandedGeneration"
             group-by-concept
             @select="(id: string) => $emit('select-node', id)"
-            @move-up="(id: string) => $emit('move-up', id)"
-            @move-down="(id: string) => $emit('move-down', id)"
           />
           <p
             v-if="roots.length === 0"
@@ -88,10 +86,7 @@
         </template>
         <template v-else>
           <!-- Merged: present + ghost concepts sorted by template order -->
-          <div
-            v-for="item in mergedConcepts"
-            :key="item.name"
-          >
+          <div v-for="item in mergedConcepts" :key="item.name">
             <VirtualGroupNode
               :concept-name="item.name"
               :children="item.children"
@@ -181,8 +176,6 @@ import MatrixPill from '../editor/MatrixPill.vue'
 
 const emit = defineEmits<{
   'select-node': [nodeId: string]
-  'move-up': [nodeId: string]
-  'move-down': [nodeId: string]
   'select-matrix': [idx: number]
   'select-view': [view: string]
 }>()
@@ -231,15 +224,19 @@ const mergedConcepts = computed<MergedConceptItem[]>(() => {
     if (seen.has(concept.name)) continue
     seen.add(concept.name)
     const children = childrenByType.get(concept.name) ?? []
-    const isPresent = children.length > 0 || (concept.type === 'text' && (
-      // text concepts: check rawSections on root nodes
-      modelStore.rootIds.some((rid) => {
-        const root = modelStore.getNode(rid)
-        return root?.rawSections && Object.keys(root.rawSections).some(
-          (k) => k.toLowerCase() === concept.name.toLowerCase(),
-        )
-      })
-    ))
+    const isPresent =
+      children.length > 0 ||
+      (concept.type === 'text' &&
+        // text concepts: check rawSections on root nodes
+        modelStore.rootIds.some((rid) => {
+          const root = modelStore.getNode(rid)
+          return (
+            root?.rawSections &&
+            Object.keys(root.rawSections).some(
+              (k) => k.toLowerCase() === concept.name.toLowerCase(),
+            )
+          )
+        }))
     items.push({ name: concept.name, ghost: !isPresent, children })
   }
 

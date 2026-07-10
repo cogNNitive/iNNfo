@@ -6,9 +6,11 @@
  *   - DirectoryPickerModal guard logic
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { useWorkspaceStore } from '../../src/stores/workspaceStore'
 import { useModelStore } from '../../src/stores/modelStore'
+import { useUiStore } from '../../src/stores/uiStore'
 import {
   isFileSystemAccessSupported,
   scanDirectory,
@@ -361,5 +363,75 @@ describe('workspaceStore.reset()', () => {
 
     expect(store.sourceUrl).toBeNull()
     expect(store.backupEnabled).toBe(true)
+  })
+})
+
+// ── Save Workspace Without Handle (Phase 2 & 4 tests) ──
+
+import SaveWorkspaceModal from '../../src/components/layout/SaveWorkspaceModal.vue'
+
+describe('SaveWorkspaceModal.vue', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    delete (window as any).showDirectoryPicker
+  })
+
+  it('renders instructions in English when showSaveWorkspaceModal is true', () => {
+    const uiStore = useUiStore()
+    uiStore.setShowSaveWorkspaceModal(true)
+
+    const wrapper = mount(SaveWorkspaceModal)
+    expect(wrapper.text()).toContain('Save Workspace')
+    expect(wrapper.text()).not.toContain('Guardar Espacio de Trabajo')
+    expect(wrapper.text()).toContain('Documents')
+    expect(wrapper.text()).not.toContain('Documentos')
+  })
+
+  it('triggers showDirectoryPicker and writes files, transitioning store state', async () => {
+    const uiStore = useUiStore()
+    const workspaceStore = useWorkspaceStore()
+    const modelStore = useModelStore()
+
+    uiStore.setShowSaveWorkspaceModal(true)
+    workspaceStore.sourceUrl = 'https://example.com/MyModel_V_1-0-0_business_NN.md'
+
+    modelStore.rootIds = ['MyModel_V_1-0-0_business_NN']
+    modelStore.nodes = {
+      'MyModel_V_1-0-0_business_NN': {
+        id: 'MyModel_V_1-0-0_business_NN',
+        name: 'MyModel',
+        parentId: null,
+        childIds: [],
+        type: 'document',
+        fields: {},
+        markers: {},
+        relationships: [],
+        rawSections: {},
+        source: { path: 'https://example.com/MyModel_V_1-0-0_business_NN.md' },
+        rawContent: validFormatMd,
+      } as any,
+    }
+
+    const tree: any = {}
+    const mockDirectoryHandle = buildFakeTree('my-local-workspace', tree)
+
+    ;(window as any).showDirectoryPicker = vi.fn().mockResolvedValue(mockDirectoryHandle)
+
+    const wrapper = mount(SaveWorkspaceModal)
+    const saveButton = wrapper.find('button.bg-primary')
+    expect(saveButton.exists()).toBe(true)
+
+    await saveButton.trigger('click')
+    await new Promise((resolve) => setTimeout(resolve, 50))
+
+    expect((window as any).showDirectoryPicker).toHaveBeenCalled()
+    expect(tree['MyModel_V_1-0-0_business_NN.md']).toContain('title: "Test Model"')
+    expect(tree['MyModel_V_1-0-0_business_NN.md']).toContain('spec_version: "V_0-1-1"')
+    expect(tree['Open iNNfo Editor.html']).toContain('refresh')
+    expect(tree['README.md']).toContain('Workspace Instructions')
+
+    expect(workspaceStore.hasHandle).toBe(true)
+    expect(workspaceStore.handle?.name).toBe('my-local-workspace')
+    expect(uiStore.showSaveWorkspaceModal).toBe(false)
   })
 })

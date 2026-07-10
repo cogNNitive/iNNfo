@@ -15,7 +15,14 @@
             custom-class="w-5 h-5 shrink-0"
             :class="[palette.text]"
           />
-          <span class="font-bold text-2xl truncate" :class="[palette.text]">{{
+          <input
+            v-if="isEditing"
+            :value="conceptName"
+            @input="onConceptNameInput"
+            class="font-bold text-2xl border border-slate-200 dark:border-slate-600 rounded-md px-1 py-0.5 focus:ring-1 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 min-w-0 flex-1"
+            placeholder="Concept name"
+          />
+          <span v-else class="font-bold text-2xl truncate" :class="[palette.text]">{{
             cleanConceptName
           }}</span>
           <span class="font-normal text-sm text-slate-500 dark:text-slate-400 shrink-0"
@@ -225,10 +232,19 @@
               class="border-t border-slate-200 dark:border-slate-700 pt-5"
             >
               <div
-                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
+                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center justify-between"
               >
-                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Fields
+                <div class="flex items-center gap-2">
+                  <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
+                  Fields
+                </div>
+                <button
+                  @click.stop="$emit('edit-toggle')"
+                  class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors flex items-center gap-1 font-semibold cursor-pointer"
+                >
+                  <Pencil class="w-3 h-3" />
+                  Edit
+                </button>
               </div>
               <div
                 class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
@@ -438,6 +454,7 @@ const emit = defineEmits<{
   'add-child': []
   change: []
   'update:field': [fieldName: string, value: unknown]
+  'update:concept-name': [name: string]
   'navigate-to-node': [nodeId: string]
 }>()
 
@@ -641,6 +658,11 @@ const navigateToInstance = () => {
   if (!props.block.name || !props.conceptName) return
   emit('navigate-to-node', props.block.name)
   emit('update:collapsed', false)
+}
+
+const onConceptNameInput = (event: Event) => {
+  const newName = (event.target as HTMLInputElement).value
+  emit('update:concept-name', newName)
 }
 
 // ── Input handlers ──────────────────────────────────────────────

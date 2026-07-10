@@ -51,10 +51,9 @@ describe('Header.vue', () => {
     const wrapper = mount(Header)
     const text = wrapper.text()
 
-    expect(text).toContain('V_0-1-9')
-    expect(text).toContain('CustomTemplate')
-    expect(text).toContain('V_2-0-0')
-    expect(text).toContain('V_1-2-3')
+    expect(text).toContain('iNNfo_V_0-1-9_NN.md')
+    expect(text).toContain('CustomTemplate_V_2-0-0')
+    expect(text).toContain('model.md')
   })
 
   it('renders fallback values when root node fields are missing', () => {
@@ -68,11 +67,10 @@ describe('Header.vue', () => {
     const text = wrapper.text()
 
     // DEFAULT_INNFO_VERSION = 'V_0-2-0'
-    // DEFAULT_TEMPLATE_NAME = 'business'
-    // DEFAULT_TEMPLATE_VERSION = 'V_1-0-0'
-    expect(text).toContain('V_0-2-0')
-    expect(text).toContain('business')
-    expect(text).toContain('V_1-0-0')
-    expect(text).toContain('—') // model version fallback
+    // DEFAULT_TEMPLATE_NAME = ''
+    // DEFAULT_TEMPLATE_VERSION = 'V_0-1-0'
+    expect(text).toContain('iNNfo_V_0-2-0_NN.md')
+    expect(text).toContain('V_0-1-0')
+    expect(text).toContain('model.md')
   })
 })

@@ -3,6 +3,9 @@ import type { ModelNode } from '../model/types'
 export interface FieldDefinition {
   name: string
   type: string
+  options?: string[]
+  target_concepts?: string[]
+  default?: unknown
 }
 
 export function getConceptFieldsForNode(
@@ -15,7 +18,7 @@ export function getConceptFieldsForNode(
   const fieldsMap = new Map<string, FieldDefinition>()
 
   for (const f of metamodelFields) {
-    fieldsMap.set(f.name, { name: f.name, type: f.type })
+    fieldsMap.set(f.name, { ...f })
   }
   if (node.fields) {
     for (const key of Object.keys(node.fields)) {

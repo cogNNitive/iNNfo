@@ -68,23 +68,21 @@ If the model_version is quoted (e.g., `model_version: "V_1-0-0"`), the replaceme
 - THEN `model_version: "V_2-0-0"` replaces the old value in rawContent
 - AND `last_updated: "2025-06-15T14:30:00Z"` is added (with the actual current timestamp)
 
-### R-VM-04: _F.md Filename Generation
-
-The existing `buildFormatFilename(baseName, templateName, version)` function in `utils/version.ts` MUST generate filenames following the convention:
+### Requirement: R-VM-04: _NN.md Filename Generation
+The existing `buildFormatFilename(baseName, templateName, version)` function in `utils/version.ts` MUST generate filenames ending with the standard `_NN.md` suffix following the convention:
 
 ```
-{BaseName}_V_{major}-{minor}-{patch}_{TemplateName}.md
+{BaseName}_V_{major}-{minor}-{patch}_{TemplateName}_NN.md
 ```
 
-For example: `"My Model"` with `template: "AI Industry"` and version `[2, 0, 0]` produces `My-Model_V_2-0-0_AI-Industry.md`.
+For example: `"My Model"` with `template: "business"` and version `[2, 0, 0]` produces `My-Model_V_2-0-0_business_NN.md`.
 
-The `saveActiveFileWithVersionBump` action in `workspaceStore` already uses this function. This slice MUST add a preview of the new filename in the version panel UI, shown next to each bump button.
+This slice MUST show a preview of the new filename in the version panel UI next to each bump button.
 
-#### Scenario: Filename preview shows new name
-
-- GIVEN current filename is `My-Model_V_1-0-0_AI-Industry.md`
+#### Scenario: Filename preview shows new name with NN suffix
+- GIVEN current filename is `My-Model_V_1-0-0_business_NN.md`
 - WHEN the user hovers over "Minor" bump
-- THEN the tooltip shows: `My-Model_V_1-1-0_AI-Industry.md`
+- THEN the tooltip shows: `My-Model_V_1-1-0_business_NN.md`
 
 ### R-VM-05: Save Version Creates New File
 

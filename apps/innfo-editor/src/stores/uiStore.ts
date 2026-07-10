@@ -21,6 +21,7 @@ export const useUiStore = defineStore('ui', () => {
   const activeMatrixIndex = ref<number>(-1)
   const showValidationReport = ref(false)
   const showMetamatrixConfig = ref(false)
+  const showSaveWorkspaceModal = ref(false)
   const ghostFilterMode = ref<GhostFilterMode>('all')
 
   function setActiveConcept(name: string | null): void {
@@ -51,6 +52,10 @@ export const useUiStore = defineStore('ui', () => {
     showValidationReport.value = val
   }
 
+  function setShowSaveWorkspaceModal(val: boolean): void {
+    showSaveWorkspaceModal.value = val
+  }
+
   function setGhostFilterMode(mode: GhostFilterMode): void {
     ghostFilterMode.value = mode
   }
@@ -64,6 +69,7 @@ export const useUiStore = defineStore('ui', () => {
     activeMatrixIndex,
     showValidationReport,
     showMetamatrixConfig,
+    showSaveWorkspaceModal,
     ghostFilterMode,
     setActiveConcept,
     setActivePerspective,
@@ -72,6 +78,7 @@ export const useUiStore = defineStore('ui', () => {
     selectInstance,
     setActiveMatrixIndex,
     setShowValidationReport,
+    setShowSaveWorkspaceModal,
     setGhostFilterMode,
   }
 })

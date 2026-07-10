@@ -199,7 +199,7 @@
               :disabled="isVersionDisabled"
               :title="versionButtonTitle(level)"
               :class="[
-                'relative px-3 py-2 rounded-md text-xs font-semibold border transition-all duration-150',
+                'relative px-3 py-2 rounded-md text-xs font-semibold border transition-all duration-150 flex flex-col items-center justify-between min-h-[64px]',
                 isVersionDisabled
                   ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700'
                   : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-600 hover:border-primary/50 hover:bg-primary/5 active:scale-95',
@@ -207,10 +207,14 @@
               ]"
               @click="selectedLevel = level"
             >
-              {{ level.charAt(0).toUpperCase() + level.slice(1) }}
+              <span class="font-bold">{{ level.charAt(0).toUpperCase() + level.slice(1) }}</span>
               <span
-                class="block text-[10px] text-slate-400 dark:text-slate-500 font-normal mt-0.5"
+                class="block text-[10px] text-slate-400 dark:text-slate-500 font-normal mt-0.5 font-mono"
                 >{{ versionPreview(level) }}</span
+              >
+              <span
+                class="block text-[9px] text-slate-400 dark:text-slate-500/70 truncate mt-1 font-mono max-w-full"
+                >{{ filenamePreview(level) }}</span
               >
             </button>
           </div>
@@ -311,7 +315,12 @@ import {
   DEFAULT_TEMPLATE_VERSION,
   buildSpecificationUrl,
 } from '../../utils/constants'
-import { bumpVersion, formatVersionString } from '../../utils/version'
+import {
+  bumpVersion,
+  formatVersionString,
+  buildFormatFilename,
+  parseFormatFilename,
+} from '../../utils/version'
 import type { BumpLevel, SemVer } from '../../utils/version'
 
 const props = defineProps<{
@@ -436,16 +445,36 @@ function versionPreview(level: BumpLevel): string {
   return formatVersionString(bumped)
 }
 
+function filenamePreview(level: BumpLevel): string {
+  const current = currentModelSemVer.value
+  if (!current) return '—'
+  const bumped = bumpVersion(current, level)
+  const path = rootNode.value?.source?.path || ''
+  const fileName = path.split('/').pop() || ''
+  const parsed = parseFormatFilename(fileName)
+  const base = parsed?.baseName || 'Model'
+  const tpl = parsed?.templateName || templateName.value || undefined
+  return buildFormatFilename(base, tpl, bumped)
+}
+
+function currentFilename(): string {
+  const current = currentModelSemVer.value
+  if (!current) return '—'
+  const path = rootNode.value?.source?.path || ''
+  const fileName = path.split('/').pop() || ''
+  const parsed = parseFormatFilename(fileName)
+  const base = parsed?.baseName || 'Model'
+  const tpl = parsed?.templateName || templateName.value || undefined
+  return buildFormatFilename(base, tpl, current)
+}
+
 /**
- * Computes the tooltip text for a bump button, e.g.
- * "V_1-0-0 → V_2-0-0"
+ * Computes the tooltip text for a bump button (R-VM-04 filename preview)
  */
 function versionButtonTitle(level: BumpLevel): string {
   if (isVersionDisabled.value)
     return versionDisabledReason.value || 'Version management is unavailable'
-  const current = currentVersionStr.value
-  const preview = versionPreview(level)
-  return `${current} → ${preview}`
+  return `${currentFilename()} → ${filenamePreview(level)}`
 }
 
 // ── Disabled states ─────────────────────────────────────────────────────

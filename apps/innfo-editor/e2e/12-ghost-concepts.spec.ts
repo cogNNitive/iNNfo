@@ -8,124 +8,89 @@ test.describe('Ghost Concepts — filter toggle, ghost groups, add lifecycle', (
     await openMockFolder(page)
   })
 
-  test('R-TGC-01: Filter toggle appears when model has template concepts', async ({ page }) => {
+  test('R-TGC-01: Filter toggle is visible and functional', async ({ page }) => {
     // Wait for the tree to render
     await page.getByTestId('expand-all').click()
 
-    // The ghost filter toggle should be visible if the model has template concepts
+    // The ghost filter toggle should be visible
     const toggle = page.getByTestId('ghost-filter-toggle')
-    // It may or may not be present depending on mock data; if present it should be functional
-    if (await toggle.isVisible()) {
-      // Verify all three filter buttons exist
-      await expect(page.getByTestId('filter-model')).toBeVisible()
-      await expect(page.getByTestId('filter-template')).toBeVisible()
-      await expect(page.getByTestId('filter-all')).toBeVisible()
+    await expect(toggle).toBeVisible()
 
-      // Default active filter should be "Model"
-      const modelBtn = page.getByTestId('filter-model')
-      await expect(modelBtn).toHaveClass(/bg-white/)
-    }
+    // Default label on the button should be CMP (showing complete only, option to cycle to ALL)
+    await expect(toggle).toHaveText('CMP')
   })
 
-  test('R-TGC-02: Filter toggle buttons are interactive', async ({ page }) => {
+  test('R-TGC-02: Filter toggle switches modes and renders ghost concepts', async ({ page }) => {
     await page.getByTestId('expand-all').click()
 
     const toggle = page.getByTestId('ghost-filter-toggle')
-    if (await toggle.isVisible()) {
-      // Click each filter button and verify active state changes
-      const templateBtn = page.getByTestId('filter-template')
-      await templateBtn.click()
-      await expect(templateBtn).toHaveClass(/bg-white/)
+    await expect(toggle).toBeVisible()
 
-      const allBtn = page.getByTestId('filter-all')
-      await allBtn.click()
-      await expect(allBtn).toHaveClass(/bg-white/)
+    // Click to cycle to ALL mode (which shows ghosts)
+    await toggle.click()
+    await expect(toggle).toHaveText('ALL')
 
-      // Ghost concepts section should appear in 'all' or 'template' mode
-      const ghostSection = page.getByTestId('ghost-concepts-section')
-      // The section only appears if there are ghost concepts
-      if (await ghostSection.isVisible()) {
-        // Ghost groups should have "Add" buttons
-        const addButtons = page.getByTestId('ghost-add-button')
-        const count = await addButtons.count()
-        expect(count).toBeGreaterThan(0)
-      }
+    // In ALL mode, ghost concept headers should render in the tree
+    const ghostHeaders = page.getByTestId('ghost-group-header')
+    // They may exist if metamodel has ghost concepts
+    const count = await ghostHeaders.count()
+    if (count > 0) {
+      await expect(ghostHeaders.first()).toBeVisible()
     }
   })
 
-  test('R-TGC-03: Ghost groups show Add button with ghost styling', async ({ page }) => {
+  test('R-TGC-03: Selecting a ghost concept opens empty table view', async ({ page }) => {
     await page.getByTestId('expand-all').click()
 
     const toggle = page.getByTestId('ghost-filter-toggle')
-    if (await toggle.isVisible()) {
-      // Switch to 'all' mode to show ghosts
-      await page.getByTestId('filter-all').click()
+    await toggle.click() // Switch to ALL mode to see ghosts
 
-      const ghostSection = page.getByTestId('ghost-concepts-section')
-      if (await ghostSection.isVisible()) {
-        // Ghost groups should have dashed border styling
-        const ghostNodes = page.getByTestId('virtual-group-node')
-        const ghostCount = await ghostNodes.count()
-        expect(ghostCount).toBeGreaterThan(0)
+    const ghostHeaders = page.getByTestId('ghost-group-header')
+    if ((await ghostHeaders.count()) > 0) {
+      const firstGhost = ghostHeaders.first()
+      await firstGhost.click()
 
-        // Each ghost group should have an Add button
-        const addButtons = ghostSection.getByTestId('ghost-add-button')
-        expect(await addButtons.count()).toBeGreaterThan(0)
-      }
+      // Should open the table view in the central panel
+      // Verify empty table status message is visible
+      await expect(page.locator('text=No elements for this concept.')).toBeVisible()
+
+      // The "Add Element" button should be visible in the table header
+      const addBtn = page.getByTestId('add-element-btn')
+      await expect(addBtn).toBeVisible()
     }
   })
 
-  test('R-TGC-04: Model view hides ghosts, All view shows both', async ({ page }) => {
+  test('R-TGC-04: Adding element from table creates element and updates sidebar', async ({
+    page,
+  }) => {
     await page.getByTestId('expand-all').click()
 
     const toggle = page.getByTestId('ghost-filter-toggle')
-    if (await toggle.isVisible()) {
-      // Start with 'model' mode (default) — ghost section should NOT be visible
-      const ghostSection = page.getByTestId('ghost-concepts-section')
-      await expect(ghostSection).not.toBeVisible()
+    await toggle.click() // Switch to ALL mode to see ghosts
 
-      // Switch to 'all' — ghost section SHOULD appear (if ghosts exist)
-      await page.getByTestId('filter-all').click()
-      if (await ghostSection.isVisible()) {
-        // Verify ghost groups are rendered
-        const addButtons = ghostSection.getByTestId('ghost-add-button')
-        expect(await addButtons.count()).toBeGreaterThan(0)
-      }
+    const ghostHeaders = page.getByTestId('ghost-group-header')
+    if ((await ghostHeaders.count()) > 0) {
+      // Record the count of ghosts before adding
+      const initialGhostCount = await ghostHeaders.count()
 
-      // Switch to 'template' mode — tree should be hidden, ghosts visible
-      await page.getByTestId('filter-template').click()
-      if (await ghostSection.isVisible()) {
-        // In 'template' mode, the tree may still show depending on implementation
-        // At minimum, ghost section should be visible
-        await expect(ghostSection).toBeVisible()
-      }
-    }
-  })
+      const firstGhost = ghostHeaders.first()
 
-  test('R-TGC-05: Adding element from ghost group creates node and ghost disappears', async ({ page }) => {
-    await page.getByTestId('expand-all').click()
+      await firstGhost.click()
 
-    const toggle = page.getByTestId('ghost-filter-toggle')
-    if (await toggle.isVisible()) {
-      await page.getByTestId('filter-all').click()
+      // Click the Add Element button inside the empty table view
+      const addBtn = page.getByTestId('add-element-btn')
+      await addBtn.click()
 
-      const ghostSection = page.getByTestId('ghost-concepts-section')
-      if (await ghostSection.isVisible()) {
-        // Click the first Add button
-        const addButton = ghostSection.getByTestId('ghost-add-button').first()
-        await addButton.click()
+      // Wait a tick for reactivity
+      await page.waitForTimeout(200)
 
-        // Wait a tick for reactivity
-        await page.waitForTimeout(100)
+      // Once created, the concept is no longer empty, so it should not render as a ghost anymore.
+      // Ghost headers count should decrease by 1.
+      const newGhostCount = await page.getByTestId('ghost-group-header').count()
+      expect(newGhostCount).toBe(initialGhostCount - 1)
 
-        // After adding, the ghost group may disappear from the section
-        // or the ghost count may decrease
-        const remainingAddButtons = await ghostSection.getByTestId('ghost-add-button').count()
-        const previousCount = await addButton.count()
-
-        // The tree should still be visible and functional
-        await expect(page.getByTestId('virtual-group-node').first()).toBeVisible()
-      }
+      // The new element should be selected and its detail block visible
+      await expect(page.getByTestId('block-sheet')).toBeVisible()
     }
   })
 })

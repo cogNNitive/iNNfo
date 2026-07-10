@@ -6,7 +6,7 @@
         class="flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-xs group cursor-pointer"
         :style="headerStyle"
         :class="headerClasses"
-        @click="toggleCollapsed"
+        @click="onHeaderClick"
       >
         <!-- Expand/collapse -->
         <button
@@ -64,8 +64,6 @@
           :depth="depth + 1"
           :expanded-generation="expandedGeneration"
           @select="(id: string) => $emit('select', id)"
-          @move-up="(id: string) => $emit('move-up', id)"
-          @move-down="(id: string) => $emit('move-down', id)"
         />
       </div>
     </template>
@@ -76,10 +74,13 @@
         class="flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-xs group cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60"
         :style="ghostHeaderStyle"
         :class="ghostHeaderClasses"
-        @click="$emit('click-ghost', conceptName)"
+        @click="onHeaderClick"
         data-testid="ghost-group-header"
       >
-        <div class="pointer-events-none flex items-center gap-1 flex-1 min-w-0" style="opacity: 0.55">
+        <div
+          class="pointer-events-none flex items-center gap-1 flex-1 min-w-0"
+          style="opacity: 0.55"
+        >
           <div class="relative shrink-0 flex items-center justify-center w-4 h-4">
             <IconRenderer
               :icon="conceptIcon"
@@ -110,6 +111,7 @@ import {
   getHexColorLight,
 } from '../../composables/useConceptVisuals'
 import { useMetamodelStore } from '../../stores/metamodelStore'
+import { useModelStore } from '../../stores/modelStore'
 import IconRenderer from '../editor/IconRenderer.vue'
 import ConceptTreeNode from './ConceptTreeNode.vue'
 import type { ModelNode } from '../../model/types'
@@ -133,8 +135,6 @@ const props = withDefaults(
 
 const _emit = defineEmits<{
   select: [nodeId: string]
-  'move-up': [nodeId: string]
-  'move-down': [nodeId: string]
   'click-ghost': [conceptName: string]
 }>()
 
@@ -154,6 +154,23 @@ watch(
 
 function toggleCollapsed(): void {
   isCollapsed.value = !isCollapsed.value
+}
+
+const isSelected = computed(() => {
+  if (!props.selectedId) return false
+  if (props.selectedId.startsWith('virtual:')) {
+    const parts = props.selectedId.split(':')
+    return parts[2] === props.conceptName
+  }
+  return false
+})
+
+const modelStore = useModelStore()
+
+function onHeaderClick(): void {
+  const parentId = props.children[0]?.parentId ?? modelStore.rootIds[0] ?? 'Root'
+  const virtualId = `virtual:${parentId}:${props.conceptName}`
+  _emit('select', virtualId)
 }
 
 // Resolve icon and color for this concept group
@@ -186,28 +203,32 @@ const conceptIcon = computed(() => {
 
 const headerStyle = computed(() => {
   const color = conceptColorHex.value
+  const sel = isSelected.value
   return {
     borderLeft: `3px solid ${color}`,
     paddingLeft: 'calc(0.5rem - 2px)',
-    backgroundColor: getHexColorLight(color),
+    backgroundColor: sel ? getHexColorLight(color) : 'transparent',
   }
 })
 
 const headerClasses = computed(() => {
-  return 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+  const base = 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+  return isSelected.value ? `${base} font-semibold bg-slate-100 dark:bg-slate-800/80` : base
 })
 
 // ── Ghost styling ───────────────────────────────────────────────
 const ghostHeaderStyle = computed(() => {
   const color = conceptColorHex.value
+  const sel = isSelected.value
   return {
     borderLeft: `2px dashed ${color}66`,
     paddingLeft: 'calc(0.5rem - 1px)',
-    backgroundColor: getHexColorLight(color),
+    backgroundColor: sel ? getHexColorLight(color) : 'transparent',
   }
 })
 
 const ghostHeaderClasses = computed(() => {
-  return 'text-slate-500 dark:text-slate-400'
+  const base = 'text-slate-500 dark:text-slate-400'
+  return isSelected.value ? `${base} font-semibold bg-slate-100 dark:bg-slate-800/80` : base
 })
 </script>

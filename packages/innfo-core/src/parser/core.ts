@@ -1,30 +1,9 @@
-import {
-  ParsedModel,
-  ElementsMap,
-  MatrixData,
-  SpecFrontmatter,
-  TaxonomyEdge,
-} from '../types'
-import {
-  normalizeSource,
-  YAML_BLOCK_RE,
-  parseMarkdownTable,
-} from './markdown'
-import {
-  parseFrontmatter,
-} from './yaml'
-import {
-  parseIndexBlock,
-} from './taxonomy'
-import {
-  parseConceptSection,
-  parseMatrixSection,
-  getSectionType,
-  sectionTitle,
-} from './sections'
-import {
-  slugify,
-} from './slug'
+import { ParsedModel, ElementsMap, MatrixData, SpecFrontmatter, TaxonomyEdge } from '../types'
+import { normalizeSource, YAML_BLOCK_RE, parseMarkdownTable } from './markdown'
+import { parseFrontmatter } from './yaml'
+import { parseIndexBlock } from './taxonomy'
+import { parseConceptSection, parseMatrixSection, getSectionType, sectionTitle } from './sections'
+import { slugify } from './slug'
 
 /**
  * Derive slugs for all elements that don't have one, and detect collisions.

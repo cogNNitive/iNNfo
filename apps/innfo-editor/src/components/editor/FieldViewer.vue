@@ -1,5 +1,8 @@
 <template>
-  <div data-testid="field-viewer" class="field-viewer space-y-3">
+  <div
+    data-testid="field-viewer"
+    class="field-viewer grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4"
+  >
     <div v-for="entry in fieldEntries" :key="entry.def.name" class="flex flex-col gap-1">
       <label
         class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide"
@@ -19,7 +22,7 @@
       <!-- Read mode: display formatted value -->
       <div
         v-else
-        class="text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700 px-3 py-2 min-h-[32px]"
+        class="text-sm font-medium text-slate-800 dark:text-slate-200 flex items-center min-h-[24px]"
       >
         <template v-if="entry.hasValue && entry.displayValue !== ''">
           <template v-if="entry.def.type === 'select' && entry.def.options">
@@ -58,7 +61,7 @@
     <!-- Empty state -->
     <p
       v-if="fieldDefinitions.length === 0"
-      class="text-xs text-slate-400 dark:text-slate-500 italic"
+      class="col-span-full text-xs text-slate-400 dark:text-slate-500 italic"
     >
       No fields defined for this concept.
     </p>

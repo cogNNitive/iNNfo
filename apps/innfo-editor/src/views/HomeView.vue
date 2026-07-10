@@ -116,22 +116,6 @@ const sandboxUrl = `${import.meta.env.BASE_URL}starter/Sandbox_V_1-0-0_starter_N
 const sandboxBusy = ref(false)
 const docsUrl = 'https://format.innv0.com/documentation/'
 
-// ── Drag-drop state (optional affordance, 2.5) ──
-const isDragging = ref(false)
-function onDragOver(e: DragEvent) {
-  e.preventDefault()
-  isDragging.value = true
-}
-function onDragLeave() {
-  isDragging.value = false
-}
-async function onDrop(_e: DragEvent) {
-  isDragging.value = false
-  // Drag-and-drop does not provide File System Access API handles.
-  // Fall through to the picker flow.
-  await openWorkspace()
-}
-
 /**
  * Entry point: prompts the user for a workspace directory via the File System
  * Access API, runs the single parse pass through workspaceStore.open(), and
@@ -462,8 +446,8 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
     <div class="hero">
       <h1 class="hero__title">iNNfo Model Editor</h1>
       <p class="hero__desc">
-        Create and edit structured knowledge models in the iNNfo FORMAT.
-        All files are plain-text Markdown stored on your computer — nothing is uploaded to the cloud.
+        Create and edit structured knowledge models in the iNNfo FORMAT. All files are plain-text
+        Markdown stored on your computer — nothing is uploaded to the cloud.
       </p>
     </div>
 
@@ -473,7 +457,9 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
         <div class="sandbox__icon">🧪</div>
         <h2 class="sandbox__title">Try the Sandbox</h2>
         <p class="sandbox__desc">
-          Never used iNNfo before? This tiny example model teaches you how the editor works as you explore. Each element explains what you're looking at — the tree, the views, and the concepts. No files needed, just click and learn.
+          Never used iNNfo before? This tiny example model teaches you how the editor works as you
+          explore. Each element explains what you're looking at — the tree, the views, and the
+          concepts. No files needed, just click and learn.
         </p>
         <button class="sandbox__btn" :disabled="sandboxBusy" @click="loadSandbox">
           {{ sandboxBusy ? 'Loading\u2026' : 'Launch Sandbox' }}
@@ -486,18 +472,10 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
       <!-- Left column: open existing -->
       <div class="col">
         <h2 class="col__title">Open existing</h2>
-        <p class="col__desc">
-          Select a folder that already contains iNNfo model files.
-        </p>
+        <p class="col__desc">Select a folder that already contains iNNfo model files.</p>
 
-        <div
-          class="drop-zone"
-          :class="{ 'drop-zone--active': isDragging }"
-          @dragover="onDragOver"
-          @dragleave="onDragLeave"
-          @drop="onDrop"
-        >
-          <div class="drop-zone__icon">
+        <div class="open-card">
+          <div class="open-card__icon">
             <svg
               width="32"
               height="32"
@@ -506,10 +484,11 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
               stroke="currentColor"
               stroke-width="1.5"
             >
-              <path d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z" />
+              <path
+                d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+              />
             </svg>
           </div>
-          <p class="drop-zone__text">Drop a folder here, or click to browse</p>
           <button class="home__open" :disabled="busy" @click="openWorkspace">
             {{ busy ? 'Opening\u2026' : 'Open folder\u2026' }}
           </button>
@@ -572,7 +551,8 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
       <div class="col">
         <h2 class="col__title">Official templates</h2>
         <p class="col__desc">
-          Choose a template to start a new model. Preview an empty starter, a partially-filled sample, or create a full copy in a folder.
+          Choose a template to start a new model. Preview an empty starter, a partially-filled
+          sample, or create a full copy in a folder.
         </p>
 
         <div class="starters">
@@ -583,11 +563,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
             </div>
             <p class="starter-card__desc">{{ s.description }}</p>
             <div class="starter-card__actions">
-              <button
-                class="starter-card__preview"
-                :disabled="urlBusy"
-                @click="previewStarter(s)"
-              >
+              <button class="starter-card__preview" :disabled="urlBusy" @click="previewStarter(s)">
                 {{ urlBusy ? 'Loading\u2026' : 'Preview' }}
               </button>
               <button
@@ -598,11 +574,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
               >
                 {{ urlBusy ? 'Loading\u2026' : 'Preview Sample' }}
               </button>
-              <button
-                class="starter-card__create"
-                :disabled="busy"
-                @click="createFromStarter(s)"
-              >
+              <button class="starter-card__create" :disabled="busy" @click="createFromStarter(s)">
                 {{ busy ? 'Creating\u2026' : 'Create' }}
               </button>
             </div>
@@ -617,7 +589,8 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
     <section class="community">
       <h3 class="community__title">Community templates</h3>
       <p class="community__desc">
-        You can also load any iNNfo model from a URL — including templates created by the community or your own custom models hosted anywhere.
+        You can also load any iNNfo model from a URL — including templates created by the community
+        or your own custom models hosted anywhere.
       </p>
 
       <div class="community__url">
@@ -744,32 +717,28 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
   line-height: 1.5;
 }
 
-/* ── Drag-drop zone ── */
+/* ── Open Folder Action Card ── */
 
-.drop-zone {
-  border: 2px dashed #ccc;
+.open-card {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
   border-radius: 12px;
-  padding: 1.5rem 1rem;
+  padding: 2rem 1rem;
   text-align: center;
+  margin-top: 1rem;
   transition:
     border-color 0.2s,
     background 0.2s;
 }
 
-.drop-zone--active {
-  border-color: #4d0e4e;
-  background: #f8f0f8;
+.open-card:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
 }
 
-.drop-zone__icon {
-  color: #999;
-  margin-bottom: 0.5rem;
-}
-
-.drop-zone__text {
-  margin: 0 0 0.75rem;
-  color: #666;
-  font-size: 14px;
+.open-card__icon {
+  color: #94a3b8;
+  margin-bottom: 1rem;
 }
 
 .home__open {

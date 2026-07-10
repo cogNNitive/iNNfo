@@ -5,6 +5,7 @@ import WeightWidget from '../../src/shared/widgets/WeightWidget.vue'
 import CategoryWidget from '../../src/shared/widgets/CategoryWidget.vue'
 import FieldString from '../../src/shared/widgets/FieldString.vue'
 import FieldNumber from '../../src/shared/widgets/FieldNumber.vue'
+import FieldSelect from '../../src/shared/widgets/FieldSelect.vue'
 import { resolveWidgetComponent } from '../../src/shared/widgets'
 
 describe('TextWidget (fixture-exercised concept type "text")', () => {
@@ -48,6 +49,44 @@ describe('CategoryWidget (fixture-exercised concept type "category")', () => {
 
   it('emits update:modelValue when the user picks a different option', async () => {
     const wrapper = mount(CategoryWidget, {
+      props: { modelValue: 'A', options: ['A', 'B', 'C'] },
+    })
+    const select = wrapper.get('select')
+    await select.setValue('C')
+    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['C'])
+  })
+})
+
+describe('FieldSelect (field-type widget for select fields)', () => {
+  it('renders options from options prop', () => {
+    const wrapper = mount(FieldSelect, {
+      props: { modelValue: 'B', options: ['A', 'B', 'C'] },
+    })
+    const select = wrapper.get('select')
+    expect((select.element as HTMLSelectElement).value).toBe('B')
+    const options = wrapper.findAll('option')
+    expect(options.length).toBe(4) // - Select - + A, B, C
+  })
+
+  it('renders options from fieldDefinition prop', () => {
+    const wrapper = mount(FieldSelect, {
+      props: {
+        modelValue: 'C',
+        fieldDefinition: {
+          name: 'status',
+          type: 'select',
+          options: ['A', 'B', 'C'],
+        },
+      },
+    })
+    const select = wrapper.get('select')
+    expect((select.element as HTMLSelectElement).value).toBe('C')
+    const options = wrapper.findAll('option')
+    expect(options.length).toBe(4) // - Select - + A, B, C
+  })
+
+  it('emits update:modelValue when the user picks a different option', async () => {
+    const wrapper = mount(FieldSelect, {
       props: { modelValue: 'A', options: ['A', 'B', 'C'] },
     })
     const select = wrapper.get('select')
