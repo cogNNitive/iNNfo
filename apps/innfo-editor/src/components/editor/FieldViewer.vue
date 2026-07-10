@@ -24,7 +24,15 @@
         v-else
         class="text-sm font-medium text-slate-800 dark:text-slate-200 flex items-center min-h-[24px]"
       >
-        <template v-if="entry.hasValue && entry.displayValue !== ''">
+        <!-- Markdown field types: render via WidgetField for proper markdown rendering -->
+        <WidgetField
+          v-if="entry.isMarkdownType"
+          :node-id="nodeId"
+          :field-key="entry.def.name"
+          :widget-type="entry.def.type"
+          :field-definition="entry.def"
+        />
+        <template v-else-if="entry.hasValue && entry.displayValue !== ''">
           <template v-if="entry.def.type === 'select' && entry.def.options">
             <span
               class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700"
@@ -73,6 +81,8 @@ import { computed } from 'vue'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
 import { useModelStore } from '../../stores/modelStore'
 
+const MARKDOWN_FIELD_TYPES = new Set(['markdown_inline', 'markdown_file', 'markdown'])
+
 interface FieldEntry {
   def: {
     name: string
@@ -82,6 +92,7 @@ interface FieldEntry {
   }
   hasValue: boolean
   displayValue: unknown
+  isMarkdownType: boolean
 }
 
 /**
@@ -125,6 +136,7 @@ const fieldEntries = computed<FieldEntry[]>(() => {
       def,
       hasValue,
       displayValue: rawValue ?? '',
+      isMarkdownType: MARKDOWN_FIELD_TYPES.has(def.type),
     }
   })
 })

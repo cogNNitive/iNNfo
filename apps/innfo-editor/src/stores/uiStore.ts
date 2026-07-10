@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type ActiveView = 'editor' | 'graph' | 'matrices' | 'info'
+export type ActiveView = 'editor' | 'graph' | 'matrices' | 'info' | 'ai-guide'
 
 export type GhostFilterMode = 'model' | 'all'
 

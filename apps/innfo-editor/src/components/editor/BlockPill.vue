@@ -10,8 +10,15 @@
   >
     <!-- Identity row: icon + name + active markers -->
     <div class="flex items-center gap-1.5 w-full min-w-0">
+      <!-- Scanned image thumbnail (first discovered image, small) -->
+      <img
+        v-if="thumbnailUrl"
+        :src="thumbnailUrl"
+        class="shrink-0 w-5 h-5 rounded object-cover border border-slate-200 dark:border-slate-600"
+        @error="thumbnailError = true"
+      />
       <IconRenderer
-        v-if="visuals.iconToShow.value === 'icon' && visuals.resolvedIcon.value"
+        v-else-if="visuals.iconToShow.value === 'icon' && visuals.resolvedIcon.value"
         :icon="visuals.resolvedIcon.value"
         custom-class="shrink-0 w-3.5 h-3.5 text-current/80"
       />
@@ -132,11 +139,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Info, X } from 'lucide-vue-next'
 import IconRenderer from './IconRenderer.vue'
 import { getMarkerIcon, getMarkerClasses } from './MarkerIcons'
 import { useBlockVisuals } from '../../composables/useBlockVisuals'
+import { useNodeMediaScan } from '../../composables/useNodeMediaScan'
+import { useWorkspaceStore } from '../../stores/workspaceStore'
 import {
   useConceptVisuals,
   getHexColorLight,
@@ -281,11 +290,8 @@ const isEmpty = computed(() => {
   return !hasDescription && !hasFields && !hasInstances
 })
 
-// For element pills (instances), prefix the name with the concept's name.
-const conceptLabel = computed(() => {
-  if (props.kind !== 'instance') return ''
-  return props.conceptType || ''
-})
+// Element pills no longer prefix the concept name — context is always clear.
+const conceptLabel = computed(() => '')
 
 // ── Markers ─────────────────────────────────────────────────────
 
@@ -314,6 +320,47 @@ const markerClassesFor = (markerName: string) =>
 // ── Navigation ──────────────────────────────────────────────────
 const navigateToBlock = () => {
   popupVisible.value = false
+}
+
+// ── Thumbnail scanning (file-system media) ──────────────────────
+const { firstImage, scan, scannedImages } = useNodeMediaScan()
+const thumbnailUrl = ref('')
+const thumbnailError = ref(false)
+
+watch(
+  () => props.blockId,
+  (id) => {
+    thumbnailUrl.value = ''
+    thumbnailError.value = false
+    if (id && useWorkspaceStore().handle) {
+      scan(id).then(() => {
+        if (firstImage.value) {
+          // Convert relative path to blob URL via File System Access
+          resolveThumbnailUrl(id!, firstImage.value.relativePath)
+        }
+      })
+    }
+  },
+  { immediate: true },
+)
+
+async function resolveThumbnailUrl(nodeId: string, relativePath: string): Promise<void> {
+  const ws = useWorkspaceStore()
+  const handle = ws.handle
+  if (!handle) return
+
+  try {
+    const parts = relativePath.split('/').filter(Boolean)
+    let current: any = handle
+    for (let i = 0; i < parts.length - 1; i++) {
+      current = await current.getDirectoryHandle(parts[i])
+    }
+    const fh = await current.getFileHandle(parts[parts.length - 1])
+    const file = await fh.getFile()
+    thumbnailUrl.value = URL.createObjectURL(file)
+  } catch {
+    thumbnailError.value = true
+  }
 }
 
 // ── Popup ───────────────────────────────────────────────────────

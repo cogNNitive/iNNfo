@@ -192,7 +192,9 @@ const { width, startResize } = useResizablePanel({
   side: 'right',
 })
 
-const roots = computed(() => modelStore.getRoots())
+const roots = computed(() =>
+  modelStore.getRoots().filter((r) => r.sourceMode !== 'structural'),
+)
 
 const ghostFilterMode = computed(() => uiStore.ghostFilterMode)
 

@@ -29,6 +29,7 @@ const MetamatrixConfig = defineAsyncComponent(
   () => import('../components/editor/MetamatrixConfig.vue'),
 )
 const ModelInfoPanel = defineAsyncComponent(() => import('../components/editor/ModelInfoPanel.vue'))
+const AIGuidePanel = defineAsyncComponent(() => import('../components/editor/AIGuidePanel.vue'))
 
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
@@ -256,7 +257,7 @@ const activeEditorEvents = computed(() => {
 
 function onSelectNode(nodeId: string): void {
   uiStore.selectNode(nodeId)
-  if (uiStore.activeView === 'matrices' || uiStore.activeView === 'info') {
+  if (uiStore.activeView === 'matrices' || uiStore.activeView === 'info' || uiStore.activeView === 'ai-guide') {
     uiStore.setActiveView('editor')
   }
 }
@@ -488,6 +489,11 @@ onUnmounted(() => {
               No model loaded.
             </p>
           </div>
+        </template>
+
+        <!-- ── AI Guide View ── -->
+        <template v-else-if="uiStore.activeView === 'ai-guide'">
+          <AIGuidePanel />
         </template>
       </main>
 

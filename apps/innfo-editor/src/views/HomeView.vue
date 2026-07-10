@@ -34,15 +34,6 @@ const samples: SampleFolder[] = [
     items: 1,
   },
   {
-    id: 'sample-music-history',
-    name: 'Music History',
-    description:
-      'FOLDER-mode catalog with 4 genres, 6 artists, and 5 albums — each node is a folder with its own _NN.md, demonstrating the full nested tree.',
-    mode: 'FOLDER',
-    path: 'specs/v0.1.0/level2/catalog/samples/Music_History_V_1-0-0_catalog/',
-    items: 15,
-  },
-  {
     id: 'sample-code-review',
     name: 'Code Review Process',
     description:
@@ -84,7 +75,7 @@ const starters: StarterTemplate[] = [
     url: `${starterBase}Business_V_1-0-0_starter_NN.md`,
     templateName: 'business',
     sampleUrl:
-      'https://raw.githubusercontent.com/innV0/cogNNitive/main/models/Ghostbusters_V_0-1-2_business_NN.md',
+      'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
     sampleName: 'Ghostbusters',
   },
   {
@@ -98,14 +89,6 @@ const starters: StarterTemplate[] = [
       'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
     sampleName: 'Code Review Process',
   },
-  {
-    id: 'starter-catalog',
-    name: 'Catalog',
-    description: 'Organize collections: artists, albums, products, or any categorized list.',
-    icon: '📚',
-    url: `${starterBase}Catalog_V_1-0-0_starter_NN.md`,
-    templateName: 'catalog',
-  },
 ]
 
 onMounted(async () => {
@@ -114,6 +97,13 @@ onMounted(async () => {
 
 const sandboxUrl = `${import.meta.env.BASE_URL}starter/Sandbox_V_1-0-0_starter_NN.md`
 const sandboxBusy = ref(false)
+const showSandbox = ref(!localStorage.getItem('nn_hide_sandbox'))
+
+function closeSandbox(): void {
+  localStorage.setItem('nn_hide_sandbox', 'true')
+  showSandbox.value = false
+}
+
 const docsUrl = 'https://format.innv0.com/documentation/'
 
 /**
@@ -452,10 +442,22 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
     </div>
 
     <!-- ── Sandbox ── -->
-    <section class="sandbox">
+    <section v-if="showSandbox" class="sandbox">
       <div class="sandbox__card">
+        <button class="sandbox__close" aria-label="Close" @click="closeSandbox">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
         <div class="sandbox__icon">🧪</div>
-        <h2 class="sandbox__title">Try the Sandbox</h2>
+        <h2 class="sandbox__title">TRY THE SANDBOX</h2>
         <p class="sandbox__desc">
           Never used iNNfo before? This tiny example model teaches you how the editor works as you
           explore. Each element explains what you're looking at — the tree, the views, and the
@@ -474,22 +476,21 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
         <h2 class="col__title">Open existing</h2>
         <p class="col__desc">Select a folder that already contains iNNfo model files.</p>
 
-        <div class="open-card">
-          <div class="open-card__icon">
+        <div class="open-action">
+          <button class="home__open" :disabled="busy" @click="openWorkspace">
             <svg
-              width="32"
-              height="32"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="1.5"
+              stroke-width="2"
+              class="home__open-icon"
             >
               <path
                 d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
               />
             </svg>
-          </div>
-          <button class="home__open" :disabled="busy" @click="openWorkspace">
             {{ busy ? 'Opening\u2026' : 'Open folder\u2026' }}
           </button>
         </div>
@@ -719,48 +720,40 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
 /* ── Open Folder Action Card ── */
 
-.open-card {
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 2rem 1rem;
-  text-align: center;
-  margin-top: 1rem;
-  transition:
-    border-color 0.2s,
-    background 0.2s;
-}
-
-.open-card:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.open-card__icon {
-  color: #94a3b8;
-  margin-bottom: 1rem;
+.open-action {
+  margin-top: 1.25rem;
 }
 
 .home__open {
-  padding: 0.6rem 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
   font-size: 1rem;
   cursor: pointer;
-  border: 2px solid #4d0e4e;
-  border-radius: 6px;
-  background: #fff;
-  color: #4d0e4e;
-  font-weight: 600;
-  transition: all 0.15s;
-}
-
-.home__open:hover {
+  border: 1px solid #4d0e4e;
+  border-radius: 8px;
   background: #4d0e4e;
   color: #fff;
+  font-weight: 600;
+  transition: all 0.15s;
+  box-shadow: 0 2px 4px rgba(77, 14, 78, 0.15);
+}
+
+.home__open:hover:not(:disabled) {
+  background: #3a0b3b;
+  border-color: #3a0b3b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(77, 14, 78, 0.25);
 }
 
 .home__open:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.home__open-icon {
+  flex-shrink: 0;
 }
 
 /* ── Starter cards ── */
@@ -1149,6 +1142,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 }
 
 .sandbox__card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1160,6 +1154,25 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
   text-align: center;
 }
 
+.sandbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.sandbox__close:hover {
+  color: #4d0e4e;
+}
+
 .sandbox__icon {
   font-size: 2.5rem;
   line-height: 1;
@@ -1167,7 +1180,9 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
 .sandbox__title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   color: #4d0e4e;
 }
 
@@ -1195,7 +1210,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 .sandbox__btn:hover:not(:disabled) {
   background: #3a0b3b;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(77, 14, 78, 0.2);
+  box-shadow: 0 4px 12px rgba(77, 14, 78, 0.25);
 }
 
 .sandbox__btn:disabled {

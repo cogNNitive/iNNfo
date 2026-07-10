@@ -22,6 +22,7 @@ import MermaidWidget from './MermaidWidget.vue'
 import DiagramWidget from './DiagramWidget.vue'
 import TimestampWidget from './TimestampWidget.vue'
 import MarkdownWidget from './MarkdownWidget.vue'
+import MarkdownFieldEditor from './MarkdownFieldEditor.vue'
 
 /**
  * All supported widget type identifiers.
@@ -58,6 +59,8 @@ export type WidgetType =
   | 'diagram'
   | 'timestamp'
   | 'markdown'
+  | 'markdown_inline'
+  | 'markdown_file'
 
 /**
  * UNIFIED_WIDGET_REGISTRY merges concept-type widgets (from format-editor's
@@ -101,4 +104,7 @@ export const UNIFIED_WIDGET_REGISTRY: Record<string, Component> = {
   diagram: DiagramWidget,
   timestamp: TimestampWidget,
   markdown: MarkdownWidget,
+  // dual-mode markdown fields: inline vs file
+  markdown_inline: MarkdownFieldEditor,
+  markdown_file: MarkdownFieldEditor,
 }

@@ -308,7 +308,7 @@
                 <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
                 Media &amp; Attachments
               </div>
-              <NodeMedia :assets="assetItems" />
+              <NodeMedia :assets="resolvedAssetItems" />
             </div>
           </div>
 
@@ -387,13 +387,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ChevronDown, ArrowUp, ArrowDown, Pencil, Check, Trash2, PlusCircle } from 'lucide-vue-next'
 import IconRenderer from './IconRenderer.vue'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
 import { getMarkerIcon, getMarkerClasses } from './MarkerIcons'
 import { renderMarkdown } from '../../utils/markdown'
 import { useModelStore } from '../../stores/modelStore'
+import { useNodeMediaScan } from '../../composables/useNodeMediaScan'
+import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { commitMarkerValue } from '../../shared/provenance'
 import { MARKER_CYCLE_COUNT } from '../../utils/constants'
 import { getColorClasses } from '../../utils/colors'
@@ -608,14 +610,105 @@ const hasMatrices = computed(() => {
 
 // ── Assets / Media ──────────────────────────────────────────────
 
+const { scannedAssets, scan: scanMedia } = useNodeMediaScan()
+
+// Trigger scan when the block is expanded and has an id
+watch(
+  () => props.block.id,
+  (id) => {
+    if (id && !props.collapsed && useWorkspaceStore().handle) {
+      scanMedia(id)
+    }
+  },
+  { immediate: false },
+)
+
+// Also scan when uncollapsed
+watch(
+  () => props.collapsed,
+  (collapsed) => {
+    if (!collapsed && props.block.id && useWorkspaceStore().handle) {
+      scanMedia(props.block.id)
+    }
+  },
+  { immediate: false },
+)
+
+// Blob URL cache for FS-resolved asset paths
+const blobUrlCache = new Map<string, string>()
+
+async function resolveAssetUrl(relativePath: string): Promise<string> {
+  if (relativePath.startsWith('http') || relativePath.startsWith('data:') || relativePath.startsWith('blob:')) {
+    return relativePath
+  }
+
+  const cached = blobUrlCache.get(relativePath)
+  if (cached) return cached
+
+  const ws = useWorkspaceStore()
+  const handle = ws.handle
+  if (!handle) return relativePath
+
+  try {
+    const parts = relativePath.split('/').filter(Boolean)
+    let current: any = handle
+    for (let i = 0; i < parts.length - 1; i++) {
+      current = await current.getDirectoryHandle(parts[i])
+    }
+    const fh = await current.getFileHandle(parts[parts.length - 1])
+    const file = await fh.getFile()
+    const url = URL.createObjectURL(file)
+    blobUrlCache.set(relativePath, url)
+    return url
+  } catch {
+    return relativePath
+  }
+}
+
+// Merge declared assets (from parser) with scanned assets (from filesystem)
 const assetItems = computed<Array<{ filename: string; url: string }>>(() => {
   const node = nodeFromStore.value
-  if (!node?.assets || node.assets.length === 0) return []
-  return node.assets.map((path: string) => ({
-    filename: path.split('/').pop() || path,
-    url: path,
+  const declared: Array<{ filename: string; url: string }> = node?.assets
+    ? node.assets.map((path: string) => ({
+        filename: path.split('/').pop() || path,
+        url: path,
+      }))
+    : []
+
+  const scanned: Array<{ filename: string; url: string }> = scannedAssets.value.map((a) => ({
+    filename: a.filename,
+    url: a.relativePath,
   }))
+
+  // Merge: declared assets take precedence, scanned fill gaps
+  const seen = new Set(declared.map((a) => a.filename))
+  const merged = [...declared]
+  for (const item of scanned) {
+    if (!seen.has(item.filename)) {
+      merged.push(item)
+      seen.add(item.filename)
+    }
+  }
+
+  return merged
 })
+
+// Resolve scanned asset paths to blob URLs for display
+const resolvedAssetItems = ref<Array<{ filename: string; url: string }>>([])
+
+watch(
+  [assetItems, scannedAssets],
+  async () => {
+    const resolved = await Promise.all(
+      assetItems.value.map(async (item) => ({
+        filename: item.filename,
+        url: await resolveAssetUrl(item.url),
+      })),
+    )
+    resolvedAssetItems.value = resolved
+  },
+  { immediate: true, deep: true },
+)
 
 // ── History tab ─────────────────────────────────────────────────
 

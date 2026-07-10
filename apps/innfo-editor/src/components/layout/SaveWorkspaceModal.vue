@@ -131,6 +131,21 @@ async function handleSaveWorkspace(): Promise<void> {
       rootNode.value.source.path = targetFilename
     }
 
+    // Write all specs and templates to a local specs/ directory
+    const specsDir = await handle.getDirectoryHandle('specs', { create: true })
+    for (const [id, node] of Object.entries(modelStore.nodes)) {
+      if (id.startsWith('spec:') && node.rawContent) {
+        const specName = node.name || id.substring(5)
+        const filename = specName.endsWith('_NN') ? `${specName}.md` : `${specName}_NN.md`
+        const specFileHandle = await specsDir.getFileHandle(filename, { create: true })
+        if (specFileHandle.createWritable) {
+          const specWritable = await specFileHandle.createWritable()
+          await specWritable.write(node.rawContent)
+          await specWritable.close()
+        }
+      }
+    }
+
     // Write internet shortcut as a safe HTML redirect
     const redirectUrl = window.location.origin
     const shortcutContent = `<!DOCTYPE html>
@@ -177,6 +192,9 @@ To open this workspace:
 
     // Transition editor state
     await workspaceStore.open(handle, { force: true })
+
+    // Ensure the generic iNNfo spec is present locally
+    await workspaceStore._ensureGeneralSpec(handle)
 
     // Clear dirty flags
     for (const id of Array.from(modelStore.dirtyIds)) {

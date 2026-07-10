@@ -13,11 +13,16 @@ export interface ModelState {
   validationReport: ValidationReport | null
 }
 
+interface LocalSpecResult {
+  content: string
+  filename: string
+}
+
 /** Helper to recursively search a directory handle for a spec file matching parentName. */
 async function findLocalSpecInHandle(
   dirHandle: DirectoryHandleLike,
   reqName: string,
-): Promise<string | null> {
+): Promise<LocalSpecResult | null> {
   const targetName = reqName.toLowerCase()
   for await (const [name, handle] of dirHandle.entries()) {
     if (handle.kind === 'file') {
@@ -29,7 +34,7 @@ async function findLocalSpecInHandle(
         (lowerFile.startsWith(targetName) && lowerFile.endsWith('.md'))
       ) {
         const file = await (handle as FileHandleLike).getFile()
-        return await file.text()
+        return { content: await file.text(), filename: name }
       }
     } else if (handle.kind === 'directory') {
       const found = await findLocalSpecInHandle(handle as DirectoryHandleLike, reqName)
@@ -170,12 +175,14 @@ export const useModelStore = defineStore('model', {
         if (existingPeer) continue
 
         let text = ''
+        let specFilename = ''
         if (handle) {
           try {
             const specsDir = await handle.getDirectoryHandle('specs')
-            const foundText = await findLocalSpecInHandle(specsDir, parentName)
-            if (foundText) {
-              text = foundText
+            const localResult = await findLocalSpecInHandle(specsDir, parentName)
+            if (localResult) {
+              text = localResult.content
+              specFilename = `specs/${localResult.filename}`
             }
           } catch (e) {
             // specs directory not found or error accessing it
@@ -187,6 +194,21 @@ export const useModelStore = defineStore('model', {
             const resp = await fetch(parentUrl)
             if (!resp.ok) continue
             text = await resp.text()
+            // Persist to specs/ when handle is available
+            if (handle) {
+              specFilename = `specs/${parentName.replace(/\.md$/i, '')}${parentName.endsWith('_NN') ? '' : '_NN'}.md`
+              try {
+                const specsDir = await handle.getDirectoryHandle('specs', { create: true })
+                const fileHandle = await specsDir.getFileHandle(specFilename.replace('specs/', ''), { create: true })
+                if (fileHandle.createWritable) {
+                  const w = await fileHandle.createWritable()
+                  await w.write(text)
+                  await w.close()
+                }
+              } catch (e) {
+                console.warn(`[template] Could not persist spec to specs/:`, e)
+              }
+            }
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err)
             console.warn(`[template] Failed to resolve parent spec "${parentUrl}": ${message}`)
@@ -229,7 +251,7 @@ export const useModelStore = defineStore('model', {
             markers: {},
             relationships: [],
             rawSections: {},
-            source: { path: `spec:${parentName}` },
+            source: { path: specFilename || `spec:${parentName}` },
             sourceMode: 'structural' as const,
             rawContent: text,
           }

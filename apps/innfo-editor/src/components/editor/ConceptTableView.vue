@@ -50,16 +50,20 @@
             :class="idx === children.length - 1 ? 'border-b-0' : ''"
           >
             <td
-              class="sticky left-0 z-10 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30 px-3 py-2 text-sm font-medium text-slate-800 dark:text-slate-200 border-r border-slate-100 dark:border-slate-700/50"
+              class="sticky left-0 z-10 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30 px-2 py-1 border-r border-slate-100 dark:border-slate-700/50"
             >
-              <div class="flex items-center gap-2">
-                <span
-                  class="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-xs text-slate-500 shrink-0"
-                >
-                  {{ child.name.charAt(0).toUpperCase() }}
-                </span>
-                <span class="truncate">{{ child.name }}</span>
-              </div>
+              <BlockPill
+                kind="instance"
+                :concept-type="conceptType"
+                :name="child.name"
+                :node-id="child.id"
+                :block-id="child.id"
+                :description="getDescription(child)"
+                :fields="getRawFields(child)"
+                :concept-fields="conceptFields || []"
+                interactive
+                full-width
+              />
             </td>
             <td
               v-for="field in conceptFields"
@@ -121,6 +125,8 @@ import { ChevronUp, ChevronDown, Plus } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
+import BlockPill from './BlockPill.vue'
+import type { FieldValue } from '@innv0/innfo-core'
 
 const props = defineProps<{
   nodeId: string
@@ -130,6 +136,23 @@ const props = defineProps<{
 
 const modelStore = useModelStore()
 const uiStore = useUiStore()
+
+function getRawFields(child: { fields?: Record<string, FieldValue | unknown> }): Record<string, unknown> {
+  if (!child.fields) return {}
+  const raw: Record<string, unknown> = {}
+  for (const [key, val] of Object.entries(child.fields)) {
+    if (val && typeof val === 'object' && 'value' in (val as FieldValue)) {
+      raw[key] = (val as FieldValue).value
+    } else {
+      raw[key] = val
+    }
+  }
+  return raw
+}
+
+function getDescription(child: { rawSections?: Record<string, string> }): string {
+  return child.rawSections?.description ?? ''
+}
 
 const children = computed(() => {
   const id = props.nodeId

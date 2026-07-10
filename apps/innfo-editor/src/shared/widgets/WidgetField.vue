@@ -52,6 +52,8 @@ function onCommit(value: unknown): void {
     :model-value="currentValue"
     :widget-type="widgetType"
     :field-definition="fieldDefinition"
+    :node-id="nodeId"
+    :field-key="fieldKey"
     @update:model-value="onCommit"
   />
 </template>

@@ -19,6 +19,7 @@ import MermaidWidget from './MermaidWidget.vue'
 import DiagramWidget from './DiagramWidget.vue'
 import TimestampWidget from './TimestampWidget.vue'
 import MarkdownWidget from './MarkdownWidget.vue'
+import MarkdownFieldEditor from './MarkdownFieldEditor.vue'
 import { UNIFIED_WIDGET_REGISTRY } from './registry'
 
 export { default as FallbackWidget } from './FallbackWidget.vue'
@@ -43,6 +44,7 @@ export {
   DiagramWidget,
   TimestampWidget,
   MarkdownWidget,
+  MarkdownFieldEditor,
 }
 export { UNIFIED_WIDGET_REGISTRY }
 export type { WidgetType } from './registry'

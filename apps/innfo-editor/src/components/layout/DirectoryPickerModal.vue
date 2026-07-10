@@ -60,7 +60,6 @@ interface TemplateOption {
 const availableTemplates: TemplateOption[] = [
   { name: 'business', version: 'V_1-0-0', specVersion: DEFAULT_INNFO_VERSION },
   { name: 'procedures', version: 'V_1-0-0', specVersion: DEFAULT_INNFO_VERSION },
-  { name: 'catalog', version: 'V_1-0-0', specVersion: DEFAULT_INNFO_VERSION },
   { name: 'kb', version: 'V_0-1-1', specVersion: 'V_0-1-1' },
 ]
 

@@ -45,6 +45,21 @@
 
     <!-- Right Section Actions -->
     <div class="flex items-center gap-2.5 shrink-0">
+      <!-- Use AI Button -->
+      <button
+        @click="uiStore.setActiveView('ai-guide')"
+        class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition-all cursor-pointer"
+        :class="
+          uiStore.activeView === 'ai-guide'
+            ? 'bg-purple-600 text-white ring-purple-500/30 hover:bg-purple-700'
+            : 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 ring-purple-300 dark:ring-purple-700/50 hover:bg-purple-50 dark:hover:bg-purple-950/30'
+        "
+        title="Use AI to edit models"
+      >
+        <Sparkles class="w-3.5 h-3.5" />
+        <span>Use AI</span>
+      </button>
+
       <!-- Save Button with integrated Saved status -->
       <div class="relative" ref="saveDropdownRef">
         <div class="relative inline-flex rounded-md shadow-xs">
@@ -226,6 +241,13 @@
                   >
                     https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/iNNfo_{{ formatVersion }}_NN.md
                   </a>
+                  <span class="font-sans font-medium text-slate-400">Local Path:</span>
+                  <span v-if="workspaceStore.hasHandle" class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold">
+                    specs/{{ specFileName }}
+                  </span>
+                  <span v-else class="text-red-500 dark:text-red-450 font-bold">
+                    Pendiente de descarga
+                  </span>
                 </div>
               </div>
 
@@ -260,6 +282,15 @@
                     </a>
                   </template>
                   <span v-else class="text-slate-750 dark:text-slate-300 break-all select-all">—</span>
+                  <template v-if="templateRemoteUrl">
+                    <span class="font-sans font-medium text-slate-400">Local Path:</span>
+                    <span v-if="workspaceStore.hasHandle" class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold">
+                      specs/{{ templateFileName }}
+                    </span>
+                    <span v-else class="text-red-500 dark:text-red-450 font-bold">
+                      Pendiente de descarga
+                    </span>
+                  </template>
                 </div>
               </div>
 
@@ -268,7 +299,16 @@
                 <span class="font-bold text-slate-800 dark:text-slate-200 block mb-1">3. Model</span>
                 <div class="grid grid-cols-[80px_1fr] gap-x-2 gap-y-1 mt-1.5 font-mono text-3xs text-slate-500">
                   <span class="font-sans font-medium text-slate-400">Filename:</span>
-                  <span class="text-slate-750 dark:text-slate-205 break-all select-all font-semibold">{{ modelFileName }}</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-slate-750 dark:text-slate-205 break-all select-all font-semibold">{{ modelFileName }}</span>
+                    <button
+                      @click="renameModelFile"
+                      class="p-0.5 rounded text-slate-405 hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer"
+                      title="Rename model file"
+                    >
+                      <Edit2 class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                   <span class="font-sans font-medium text-slate-400">{{ workspaceStore.hasHandle ? 'Local Path:' : 'Source URL:' }}</span>
                   <template v-if="workspaceStore.hasHandle">
                     <span class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold">{{ displayLocalPath }}</span>
@@ -305,7 +345,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Copy, Save, ChevronDown, Info, CheckCircle, AlertTriangle, XCircle, Check, X } from 'lucide-vue-next'
+import { Copy, Save, ChevronDown, Info, CheckCircle, AlertTriangle, XCircle, Check, X, Edit2, Sparkles } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
@@ -435,6 +475,26 @@ const modelFileName = computed(() => {
 const specFileName = computed(() => {
   return `iNNfo_${formatVersion.value}_NN.md`
 })
+
+const templateFileName = computed(() => {
+  const name = fullTemplateName.value
+  if (!name) return ''
+  return name.endsWith('_NN') ? `${name}.md` : `${name}_NN.md`
+})
+
+function renameModelFile(): void {
+  const currentName = modelFileName.value
+  const newName = window.prompt('Enter new filename (e.g. MyModel_NN.md):', currentName)
+  if (newName && newName.trim() && newName !== currentName) {
+    workspaceStore.renameActiveFile(newName.trim())
+      .then(() => {
+        show('Filename updated successfully.', 'success')
+      })
+      .catch((err) => {
+        show(err instanceof Error ? err.message : 'Rename failed', 'error')
+      })
+  }
+}
 
 const templateRemoteUrl = computed(() => {
   const node = rootNode.value

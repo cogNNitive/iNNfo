@@ -8,8 +8,10 @@ import {
   bumpVersion,
   formatVersionString,
 } from '../utils/version'
+import { buildSpecificationUrl, buildSpecificationUrlFromMain } from '../utils/constants'
 import { IndexedDbWorkspaceRepository } from '../repositories/IndexedDbWorkspaceRepository'
 import type { IWorkspaceRepository } from '../repositories/IWorkspaceRepository'
+import { parseFrontmatter } from '@innv0/innfo-core'
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
 import type { DirectoryHandleLike } from '../model/fs-types'
 import type { BumpLevel } from '../utils/version'
@@ -253,6 +255,70 @@ export const useWorkspaceStore = defineStore('workspace', {
     },
 
     /**
+     * Downloads the generic iNNfo specification (level-1) into specs/ when
+     * the root node declares a spec_version and the file is not already present.
+     *
+     * Best-effort: network failures or missing versions degrade gracefully.
+     */
+    async _ensureGeneralSpec(handle: DirectoryHandleLike): Promise<void> {
+      const modelStore = useModelStore()
+      const rootId = modelStore.rootIds[0]
+      if (!rootId) return
+      const rootNode = modelStore.getNode(rootId)
+      if (!rootNode?.rawContent) return
+
+      const fm = parseFrontmatter(rootNode.rawContent)
+      const specVersion = (fm as any)?.spec_version as string | undefined
+      if (!specVersion) return
+
+      const specFilename = `iNNfo_${specVersion}_NN.md`
+
+      try {
+        const specsDir = await handle.getDirectoryHandle('specs', { create: true })
+
+        // Skip if already exists
+        try {
+          await specsDir.getFileHandle(specFilename)
+          return
+        } catch {
+          // Not found — proceed to download
+        }
+
+        const urls = [
+          buildSpecificationUrl(specVersion),
+          buildSpecificationUrlFromMain(specVersion),
+        ]
+
+        let text = ''
+        for (const url of urls) {
+          try {
+            const resp = await fetch(url)
+            if (resp.ok) {
+              text = await resp.text()
+              break
+            }
+          } catch {
+            continue
+          }
+        }
+
+        if (!text) {
+          console.warn(`[spec] Failed to fetch spec for version ${specVersion} from any URL`)
+          return
+        }
+
+        const fileHandle = await specsDir.getFileHandle(specFilename, { create: true })
+        if (fileHandle.createWritable) {
+          const w = await fileHandle.createWritable()
+          await w.write(text)
+          await w.close()
+        }
+      } catch (e) {
+        console.warn('[spec] Could not ensure general spec:', e)
+      }
+    },
+
+    /**
      * Serializes all dirty nodes and writes them back to disk via
      * recursiveSerialize. Clears dirty flags on success.
      *
@@ -270,6 +336,25 @@ export const useWorkspaceStore = defineStore('workspace', {
 
         const modelStore = useModelStore()
         await recursiveSerialize(modelStore.nodes, modelStore.dirtyIds, this.driver ?? undefined)
+
+        // Persist spec:* nodes (templates/specs) to specs/ directory
+        const specsDir = await this.handle.getDirectoryHandle('specs', { create: true })
+        for (const [id, node] of Object.entries(modelStore.nodes)) {
+          if (id.startsWith('spec:') && node.rawContent) {
+            const specName = node.name || id.substring(5)
+            const filename = specName.endsWith('_NN') ? `${specName}.md` : `${specName}_NN.md`
+            const fileHandle = await specsDir.getFileHandle(filename, { create: true })
+            if (fileHandle.createWritable) {
+              const w = await fileHandle.createWritable()
+              await w.write(node.rawContent)
+              await w.close()
+            }
+          }
+        }
+
+        // Also ensure the generic iNNfo spec is present
+        await this._ensureGeneralSpec(this.handle)
+
         // Clear dirty flags after successful write
         for (const id of Array.from(modelStore.dirtyIds)) {
           modelStore.clearDirty(id)
@@ -280,6 +365,46 @@ export const useWorkspaceStore = defineStore('workspace', {
       } finally {
         this.saving = false
       }
+    },
+
+    /**
+     * Renames the active file on disk (if handle present) and updates the source path in memory.
+     */
+    async renameActiveFile(newFilename: string): Promise<void> {
+      const modelStore = useModelStore()
+      const rootId = modelStore.rootIds[0]
+      const rootNode = rootId ? modelStore.getNode(rootId) : null
+      if (!rootNode) throw new Error('No root node found to rename')
+
+      let cleanNewFilename = newFilename.trim()
+      if (!cleanNewFilename.endsWith('.md')) {
+        cleanNewFilename += '.md'
+      }
+      cleanNewFilename = cleanNewFilename.replace(/[^a-zA-Z0-9._-]/g, '_')
+
+      if (this.handle) {
+        const oldFilename = rootNode.source.path
+        if (oldFilename === cleanNewFilename) return
+
+        // Create new file and copy content
+        const newFileHandle = await this.handle.getFileHandle(cleanNewFilename, { create: true })
+        if (!newFileHandle.createWritable) {
+          throw new Error(`File handle for "${cleanNewFilename}" does not support writing`)
+        }
+        const writable = await newFileHandle.createWritable()
+        await writable.write(rootNode.rawContent ?? '')
+        await writable.close()
+
+        // Delete old file
+        try {
+          await this.handle.removeEntry?.(oldFilename)
+        } catch (e) {
+          console.warn(`Failed to delete old file "${oldFilename}":`, e)
+        }
+      }
+
+      // Update in memory path
+      rootNode.source.path = cleanNewFilename
     },
 
     /**
@@ -300,6 +425,7 @@ export const useWorkspaceStore = defineStore('workspace', {
       const newVersion = bumpVersion(parsed.version, level)
       const newFilename = buildFormatFilename(parsed.baseName, parsed.templateName, newVersion)
       const versionStr = formatVersionString(newVersion)
+      const oldFilename = rootNode.source.path
 
       const cleanNewFilename = newFilename.replace(/[^a-zA-Z0-9._-]/g, '_').trim()
 
@@ -311,6 +437,25 @@ export const useWorkspaceStore = defineStore('workspace', {
       const writable = await newFileHandle.createWritable()
       await writable.write(rootNode.rawContent ?? '')
       await writable.close()
+
+      // Archive the previous version (non-blocking)
+      if (oldFilename !== cleanNewFilename) {
+        try {
+          const archiveDir = await this.handle.getDirectoryHandle('Archive', { create: true })
+          const oldFileHandle = await this.handle.getFileHandle(oldFilename)
+          const oldFile = await oldFileHandle.getFile()
+          const oldContent = await oldFile.text()
+          const archiveFileHandle = await archiveDir.getFileHandle(oldFilename, { create: true })
+          if (archiveFileHandle.createWritable) {
+            const archiveWritable = await archiveFileHandle.createWritable()
+            await archiveWritable.write(oldContent)
+            await archiveWritable.close()
+          }
+          await this.handle.removeEntry?.(oldFilename)
+        } catch (err) {
+          console.warn('[version-bump] Failed to archive previous version:', err)
+        }
+      }
 
       // Update the root node's in-memory frontmatter version
       if (rootNode.rawContent) {
