@@ -16,7 +16,6 @@
 | [`level1/iNNfo_NN.md`](level1/iNNfo_NN.md) | `v0.1.0/level1/iNNfo_V_0-1-1_NN.md` |
 | [`level2/business/business_NN.md`](level2/business/business_NN.md) | `v0.1.0/level2/business/business_V_0-1-2_NN.md` |
 | [`level2/procedures/procedures_NN.md`](level2/procedures/procedures_NN.md) | `v0.1.0/level2/procedures/procedures_V_0-1-2_NN.md` |
-| [`level2/catalog/catalog_NN.md`](level2/catalog/catalog_NN.md) | `v0.1.0/level2/catalog/catalog_V_0-1-3_NN.md` |
 
 ## Stable URLs
 
@@ -35,8 +34,6 @@ https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/busi
 # Always the latest procedures template:
 https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/procedures/procedures_NN.md
 
-# Always the latest catalog template:
-https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/catalog/catalog_NN.md
 ```
 
 ## Immutable URLs

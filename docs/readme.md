@@ -17,7 +17,7 @@ This is the public website for the **cogNNitive** monorepo, published via GitHub
 | `apps/format-editor` | Unified Vue 3 workspace editor (FILE + FOLDER in one tree) |
 | `apps/launcher` | Legacy drag-and-drop detector — being consolidated into format-editor |
 | `packages/format-core` | Shared TypeScript parser, resolver, and validator |
-| `specs/` | defiNNe, FORMAT, business, procedures, kb, catalog specs |
+| `specs/` | defiNNe, FORMAT, business, procedures, kb specs |
 | `models/` | Example FORMAT models |
 | `docs/` | This website + Docsify documentation at `/documentation` |
 

@@ -105,18 +105,6 @@ A concept/group node MUST bind to a matching metamodel concept when the resolved
 - THEN the directory still becomes a structural concept/group node
 - AND its subtree is still walked and included in the graph
 
-### Requirement: Catalog Fixture Loads to a Non-Empty Tree
-
-Loading a catalog-shaped directory handle (root `_FORMAT.md` in FOLDER mode, bare concept directories, element leaf directories with `_FORMAT.md` and `type:`) MUST yield a non-empty tree containing each bare concept directory as a concept node with its element leaf directories as children.
-
-#### Scenario: `AI_Industry_V_1-0-0_catalog`-shaped fixture parses end-to-end
-
-- GIVEN a catalog-shaped fixture modeled on `models/AI_Industry_V_1-0-0_catalog/` (bare `AILab` directory containing `Anthropic/_F.md` with `type: "AILab"`)
-- WHEN `recursiveParse` runs over the fixture's root directory handle
-- THEN the resulting tree is non-empty
-- AND it contains concept node `AILab` with element child `Anthropic`
-- AND `Anthropic` carries `type: "AILab"`
-
 ### Requirement: Scope Guard — No Write-Path, Conversion, or Downstream Feature Changes
 
 This slice MUST NOT introduce index-block generation on save, FILE↔FOLDER conversion, cross-boundary wikilinks or their UI, relationship view editors, or AI functionality. `packages/format-core`'s public API and behavior MUST remain unchanged.

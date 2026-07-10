@@ -14,7 +14,6 @@ This is the first versioned release of the iNNfo specification ecosystem. All sp
 | [`level1/iNNfo_V_0-1-1_NN.md`](level1/iNNfo_V_0-1-1_NN.md) | 1 | Concrete specification — concepts, markers, matrices |
 | [`level2/business/business_V_0-1-2_NN.md`](level2/business/business_V_0-1-2_NN.md) | 2 | Business strategy template |
 | [`level2/procedures/procedures_V_0-1-2_NN.md`](level2/procedures/procedures_V_0-1-2_NN.md) | 2 | Workflow procedures template |
-| [`level2/catalog/catalog_V_0-1-3_NN.md`](level2/catalog/catalog_V_0-1-3_NN.md) | 2 | Knowledge catalog template (FOLDER mode) |
 
 ## Parent Chain
 
@@ -23,15 +22,12 @@ defiNNe_V_0-1-0 (level 0 — level0/)
   └── iNNfo_V_0-1-1 (level 1 — level1/)
         ├── business_V_0-1-2 (level 2 — level2/business/)
         ├── procedures_V_0-1-2 (level 2 — level2/procedures/)
-        └── catalog_V_0-1-3 (level 2 — level2/catalog/)
-              └── (level 3 models in samples/)
 ```
 
 ## Samples
 
 - [`level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`](level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md)
 - [`level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`](level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md)
-- [`level2/catalog/samples/Music_History_V_1-0-0_catalog/`](level2/catalog/samples/Music_History_V_1-0-0_catalog/)
 
 ## Consumer Notes
 

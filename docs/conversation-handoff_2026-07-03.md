@@ -64,7 +64,7 @@ openspec/changes/innfo-rename/          → Artefactos SDD completos
 - Modelos legacy `_F.md` (fixtures, samples, Sandbox, docs/cogNNitive/)
 - Specs congeladas en `archive/`
 - `specs/FORMAT_V_0-1-5_F.md` (spec legacy V_0-1-5)
-- Templates `business_V_0-1-1_NN.md`, `procedures_V_0-1-1_NN.md`, `catalog_V_0-1-2_NN.md` (quedaron out-of-scope en el proposal final, aunque el user inicialmente dijo de migrarlos)
+- Templates `business_V_0-1-1_NN.md`, `procedures_V_0-1-1_NN.md` (quedaron out-of-scope en el proposal final, aunque el user inicialmente dijo de migrarlos)
 
 ## Decisiones clave tomadas
 
@@ -78,7 +78,7 @@ openspec/changes/innfo-rename/          → Artefactos SDD completos
 
 - [ ] **Mergear PR #1 primero** (spec file, bajo riesgo)
 - [ ] **Mergear PR #2 después** (code rename, necesita rebase si PR #1 se mergeó)
-- [ ] Opcional: Migrar los 3 templates (`business`, `procedures`, `catalog`) a `_NN.md`
+- [ ] Opcional: Migrar los 2 templates (`business`, `procedures`) a `_NN.md`
 - [ ] Opcional: Migrar modelos legacy (Ghostbusters, CodeReviewProcess, etc.)
 
 ---

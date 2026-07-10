@@ -72,27 +72,6 @@ Contiene:
 
 ## Fixtures creados
 
-### `tests/fixtures/catalog-single-file_FORMAT.md`
-
-Modelo FILE clásico, todo en un archivo. Conceptos: Problems, Value propositions.
-5 elementos con fields (severity, impact, owner).
-
-### `tests/fixtures/catalog-distributed/`
-
-MISMO modelo semántico, pero distribuido:
-```
-catalog-distributed/
-├── _FORMAT.md                                   ← root con índice + elementos + pointers
-├── problems/baja-adopcion/_FORMAT.md             ← type: Problems (profundidad 2)
-├── expenses/costes-elevados._FORMAT.md           ← type: Problems (archivo suelto, fractal)
-├── expenses/deeper/competencia._FORMAT.md        ← type: Problems (profundidad 3)
-├── value-props/onboarding._FORMAT.md             ← type: Value propositions
-└── value-props/infra/infra-optimizada._FORMAT.md ← type: Value propositions (profundidad 3)
-```
-
-**Ambos se parsean idénticamente** (verificado con script inline).
-La profundidad de carpetas es irrelevante semánticamente.
-
 ---
 
 ## Preguntas abiertas para la siguiente sesión
@@ -125,8 +104,6 @@ La profundidad de carpetas es irrelevante semánticamente.
 | `apps/format-editor/src/components/editor/BlockFeed.vue` | Feed de bloques por concepto |
 | `apps/format-editor/src/shared/widgets/WidgetField.vue` | Widget genérico de field |
 | `apps/format-editor/src/stores/modelStore.ts` | Store central de nodos |
-| `tests/fixtures/catalog-single-file_FORMAT.md` | Fixture: single file |
-| `tests/fixtures/catalog-distributed/_FORMAT.md` | Fixture: distributed root |
 
 ---
 
@@ -148,9 +125,6 @@ Los puntos clave acordados hasta ahora:
 7. OKF compliance es viable con ajustes mínimos.
 
 Los fixtures están en:
-- tests/fixtures/catalog-single-file_FORMAT.md (versión inline)
-- tests/fixtures/catalog-distributed/ (versión distribuida)
-Ambos representan el MISMO modelo semántico.
 
 Temas pendientes para trabajar:
 A. Implementar la vista tabla por concepto (elementos como filas, fields como

@@ -29,7 +29,7 @@ Level 0: defiNNe (meta-spec, rarely bumped)
 Level 1: iNNfo (the concrete spec)
   │  parent of
   ▼
-Level 2: Templates (business, procedures, kb, catalog)
+Level 2: Templates (business, procedures, kb)
   │  parent of
   ▼
 Level 3: Models, fixtures, samples
@@ -111,7 +111,7 @@ This lists every file still referencing the OLD version.
 
 ### Step 4 — Propagate to templates (Level 2)
 
-For each template spec (`business_V_0-1-1_NN.md`, `procedures_V_0-1-1_NN.md`, `kb_V_0-1-1_NN.md`, `catalog_V_0-1-2_NN.md`):
+For each template spec (`business_V_0-1-1_NN.md`, `procedures_V_0-1-1_NN.md`, `kb_V_0-1-1_NN.md`):
 
 - Update `parent.name` to point to the new FORMAT version
 - Update `parent.url` to point to the new FORMAT file URL

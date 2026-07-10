@@ -228,8 +228,7 @@ specs/
 │       ├── business/
 │       │   ├── business_V_0-1-1_NN.md
 │       │   └── samples/
-│       ├── procedures/
-│       └── catalog/
+│       └── procedures/
 ├── latest/         ← manually synced, stable filenames
 └── CHANGELOG.md
 ```

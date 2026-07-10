@@ -10,7 +10,6 @@ tests/
 ├── README.md                        # ⬅ estás acá
 └── fixtures/
     ├── workspace-index.md           # Índice del workspace de prueba
-    ├── catalog_F.md            # Business FILE — AI Industry Catalog
     ├── file-model_F.md         # Business FILE — progressive smoke test
     ├── sample-model_F.md       # Business FILE — minimal shape validation
     ├── folder-model/                # KB FOLDER — progressive smoke test
@@ -24,20 +23,6 @@ tests/
     │   └── Meeting/_F.md
     ├── music-business/
     │   └── music-business_F.md  # Business FILE — Vinyl Records Inc.
-    ├── music-catalog/               # Catalog FOLDER
-    │   ├── _F.md
-    │   ├── Artist/
-    │   │   ├── Radiohead/_F.md
-    │   │   └── Nina Simone/_F.md
-    │   ├── Album/
-    │   │   ├── OK Computer/_F.md
-    │   │   └── I Put a Spell on You/_F.md
-    │   ├── Genre/
-    │   │   ├── Alternative Rock/_F.md
-    │   │   └── Jazz Blues/_F.md
-    │   └── Instrument/
-    │       ├── Electric Guitar/_F.md
-    │       └── Piano/_F.md
     ├── music-production/
     │   └── music-production_F.md # Procedures FILE — Song Recording
     └── music-kb/                     # KB FOLDER
@@ -51,12 +36,10 @@ tests/
 
 | Modelo | Template | Modo | Propósito |
 |--------|----------|------|-----------|
-| `catalog_F.md` | business_V_0-1-1 | FILE | Catálogo AI Industry — conceptos Problems y Value propositions |
 | `file-model_F.md` | business_V_0-1-1 | FILE | Smoke test FILE — 5 elementos inline con Business summary, Problems, Value propositions |
 | `sample-model_F.md` | business_V_0-1-1 | FILE | Validación mínima de forma — 1 elemento Problem |
 | `folder-model/` | kb_V_0-1-1 | FOLDER | Smoke test FOLDER — Topics anidados (Risk, Feature) y sub-modelo Meeting |
 | `music-business/` | business_V_0-1-1 | FILE | Negocio discográfico completo — Problems, Value propositions, Channels, Stakeholders, matriz |
-| `music-catalog/` | catalog_V_0-1-2 | FOLDER | Catálogo musical — Artists, Albums, Genres, Instruments con graph_edges |
 | `music-production/` | procedures_V_0-1-1 | FILE | Workflow de grabación — Work steps, Artifacts, Tools, Roles, 3 matrices |
 | `music-kb/` | kb_V_0-1-1 | FOLDER | Base de conocimiento — Personas, Topics, References con graph_edges |
 
@@ -164,24 +147,6 @@ npx vitest run tests/progressive-smoke.test.ts --reporter=verbose
 | Collectors | element | FILE | Stakeholders |
 | problems-value propositions matrix | matrix | FILE | music-business |
 
-### Modelo — Music Catalog (`music-catalog/`)
-
-| Nodo | Tipo/Kind | StorageMode | Padre |
-|------|-----------|-------------|-------|
-| music-catalog | root | FOLDER | null |
-| Artist | concept (type folder) | FOLDER | music-catalog |
-| Radiohead | element (Artist) | FOLDER | Artist |
-| Nina Simone | element (Artist) | FOLDER | Artist |
-| Album | concept (type folder) | FOLDER | music-catalog |
-| OK Computer | element (Album) | FOLDER | Album |
-| I Put a Spell on You | element (Album) | FOLDER | Album |
-| Genre | concept (type folder) | FOLDER | music-catalog |
-| Alternative Rock | element (Genre) | FOLDER | Genre |
-| Jazz Blues | element (Genre) | FOLDER | Genre |
-| Instrument | concept (type folder) | FOLDER | music-catalog |
-| Electric Guitar | element (Instrument) | FOLDER | Instrument |
-| Piano | element (Instrument) | FOLDER | Instrument |
-
 ### Modelo — Music Production (`music-production/music-production_F.md`)
 
 | Nodo | Tipo/Kind | StorageMode | Padre |
@@ -237,9 +202,6 @@ Al final de las pruebas deberías poder marcar todo esto:
 - [ ] **Paso 4**: Navego entre vistas (editor/graph/matrices/info)
 - [ ] **Paso 5**: Los tests automatizados pasan
 - [ ] **Music Business**: Aparece music-business (FILE) con 12 elementos y 1 matriz
-- [ ] **Music Catalog**: Aparece music-catalog (FOLDER) con Artist/Album/Genre/Instrument como type folders
-- [ ] **Music Catalog**: Radiohead tiene graph_edges hacia OK Computer y Alternative Rock
-- [ ] **Music Catalog**: Nina Simone tiene graph_edges hacia I Put a Spell on You, Jazz Blues y Piano
 - [ ] **Music Production**: Aparece music-production (FILE) con 6 Work steps, 4 Artifacts, 4 Tools, 4 Roles, 3 matrices
 - [ ] **Music KB**: Aparece music-kb (FOLDER) con Producer (Persona), Music Theory (Topic), Mixing Guide (Reference)
 - [ ] **Music KB**: Music Theory tiene graph_edge hacia Producer

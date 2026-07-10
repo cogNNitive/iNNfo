@@ -1,6 +1,6 @@
 ---
-specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+specification_version: "V_0-1-1"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-1_NN.md"
 level: 1
 parent_spec:
   name: "defiNNe_V_0-1-0"
@@ -33,8 +33,8 @@ iNNfo specifications follow an immutable versioning policy:
 
 - **Published specs are frozen**. Once a specification version is released, its file is never modified. Corrections or improvements require a new spec version.
 - **Migrating a model** to a new spec version means creating a new copy of the model adapted to the new version. The old version remains in the workspace as-is, referencing its original spec.
-- **Parent chain resolution** always resolves to the version the model was authored against. A model targeting V_0-1-0 references this file (`iNNfo_V_0-1-0_NN.md`) in its parent chain.
-- **This file** follows this rule: it is published as `iNNfo_V_0-1-0_NN.md` and will never be modified in-place. Any future change to the iNNfo specification will produce a new version file (e.g. `iNNfo_V_0-2-0_NN.md`), and this file remains as an immutable historical record.
+- **Parent chain resolution** always resolves to the version the model was authored against. A model targeting V_0-1-1 references this file (`iNNfo_V_0-1-1_NN.md`) in its parent chain.
+- **This file** follows this rule: it is published as `iNNfo_V_0-1-1_NN.md` and will never be modified in-place. Any future change to the iNNfo specification will produce a new version file (e.g. `iNNfo_V_0-2-0_NN.md`), and this file remains as an immutable historical record.
 
 # iNNfo Specification
 
@@ -83,14 +83,14 @@ The model frontmatter is limited to:
 
 ```yaml
 ---
-specification_version: "V_0-1-0"
+specification_version: "V_0-1-1"
 specification_url: "<immutable-url>"
 level: 3
 parent_spec:
   name: "<template>_V_x-y-z"
   url: "<immutable-url>"
-model_version: "V_x-y-z"
-title: "..."
+  model_version: "V_x-y-z"
+  title: "..."
 ---
 ```
 
@@ -322,7 +322,7 @@ See individual template specifications for valid `type` values per concept.
 
 ### 6. Self-Description
 
-This document (`iNNfo_V_0-1-0_NN.md`) is itself a level 1 specification following defiNNe. It declares `parent_spec: { name: "defiNNe_V_0-1-0", url: "..." }` and includes the required body sections.
+This document (`iNNfo_V_0-1-1_NN.md`) is itself a level 1 specification following defiNNe. It declares `parent_spec: { name: "defiNNe_V_0-1-0", url: "..." }` and includes the required body sections.
 
 ## Template
 
@@ -330,12 +330,12 @@ This document (`iNNfo_V_0-1-0_NN.md`) is itself a level 1 specification followin
 
 ```yaml
 ---
-specification_version: "V_0-1-0"
+specification_version: "V_0-1-1"
 specification_url: "<immutable-url>"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+  name: "iNNfo_V_0-1-1"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-1_NN.md"
 title: "<Template Name>"
 concepts: [...]
 markers: [...]
@@ -365,14 +365,14 @@ relationship_declarations: {...}
 
 ```yaml
 ---
-specification_version: "V_0-1-0"
+specification_version: "V_0-1-1"
 specification_url: "<immutable-url>"
 level: 3
 parent_spec:
   name: "<template>_V_x-y-z"
   url: "<immutable-url>"
-model_version: "V_x-y-z"
-title: "..."
+  model_version: "V_x-y-z"
+  title: "..."
 ---
 
 > [!NOTE]
@@ -385,23 +385,10 @@ title: "..."
 
 ## Examples
 
-### Canonical Samples
-
-Every template defined in this repo has a canonical sample:
-
-| Template | Sample | Path |
-|---|---|---|
-| **Business** | `Ghostbusters_V_0-1-2_business_NN.md` | `specs/v0.1.0/level2/business/samples/` |
-| **Procedures** | `CodeReviewProcess_V_1-0-0_procedures_NN.md` | `specs/v0.1.0/level2/procedures/samples/` |
-
-### Parent Chain from Ghostbusters
-
-From `specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`:
+### Parent Chain
 
 ```yaml
 parent_spec:
-  name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
+  name: "business_V_0-1-2"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-2_NN.md"
 ```
-
-The application resolves: Ghostbusters → business_V_0-1-1 → iNNfo_V_0-1-0 → defiNNe_V_0-1-0.

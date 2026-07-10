@@ -10,6 +10,7 @@
 //   node scripts/check-spec-version.mjs --version V_0-1-2 --include-archives
 //   node scripts/check-spec-version.mjs --inventory
 //   node scripts/check-spec-version.mjs --inventory --include-archives
+//   node scripts/check-spec-version.mjs --check-urls
 //
 // Modes:
 //   default         — Print all files referencing the given version
@@ -17,8 +18,9 @@
 //   --check         — Exit code 1 if any references found (for CI/git hooks)
 //   --include-archives — Include archive/ and openspec/changes/archive/ in scan
 //   --inventory     — Print ALL spec versions found in the repo
+//   --check-urls    — Verify all hardcoded raw.githubusercontent.com URLs in source files point to existing files
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { readdirSync, statSync } from 'node:fs'
 import { join, relative, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -30,6 +32,7 @@ const ARCHIVE_DIRS = new Set(['archive', 'node_modules', '.git', '.playwright-mc
 const ACTIVE_IGNORE = new Set(['node_modules', '.git', '.playwright-mcp', 'home-page'])
 
 const FORMAT_VERSION_RE = /V_\d+-\d+-\d+/g
+const GITHUB_RAW_URL_RE = /https:\/\/raw\.githubusercontent\.com\/innV0\/cogNNitive\/(?:main|v[\d.]+)\/([^\s"')\]]+)/g
 
 // ── File Collection ─────────────────────────────────────────────────
 
@@ -166,6 +169,56 @@ function escapeRegex(s) {
 function contentContainsVersion(content, version) {
   const re = new RegExp(`(?:^|[^V])${escapeRegex(version)}(?:[^\\d-]|$)`, 'gm')
   return re.test(content)
+}
+
+// ── URL Integrity Check ─────────────────────────────────────────────
+
+function scanUrls(files) {
+  const broken = []
+
+  for (const filePath of files) {
+    const rel = relative(ROOT, filePath)
+    let content
+    try {
+      content = readFileSync(filePath, 'utf-8')
+    } catch {
+      continue
+    }
+
+    const matches = [...content.matchAll(GITHUB_RAW_URL_RE)]
+    if (matches.length === 0) continue
+
+    for (const match of matches) {
+      const repoPath = match[1].replace(/\/+$/, '')
+      const localPath = join(ROOT, repoPath.replace(/\//g, '\\'))
+
+      if (!existsSync(localPath)) {
+        // For FOLDER-mode samples, the URL points to the directory _NN.md
+        // Check if at least the parent directory exists
+        const parentDir = dirname(localPath)
+        if (!existsSync(parentDir)) {
+          broken.push({ file: rel, url: match[0], missingPath: repoPath })
+        }
+      }
+    }
+  }
+
+  return broken
+}
+
+function printUrlResults(broken) {
+  if (broken.length === 0) {
+    console.log('  All hardcoded GitHub raw URLs point to existing files.\n')
+    return
+  }
+
+  console.log(`  ${broken.length} broken URL(s):\n`)
+  for (const b of broken) {
+    console.log(`  \u00B7 ${b.file}`)
+    console.log(`    URL: ${b.url}`)
+    console.log(`    Missing: ${b.missingPath}`)
+    console.log()
+  }
 }
 
 // ── Scan Logic ──────────────────────────────────────────────────────
@@ -317,6 +370,7 @@ function parseArgs() {
   let checkMode = false
   let inventory = false
   let includeArchives = false
+  let checkUrls = false
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -335,9 +389,12 @@ function parseArgs() {
       case '--include-archives':
         includeArchives = true
         break
+      case '--check-urls':
+        checkUrls = true
+        break
     }
   }
-  return { version, byType, checkMode, inventory, includeArchives }
+  return { version, byType, checkMode, inventory, includeArchives, checkUrls }
 }
 
 function main() {
