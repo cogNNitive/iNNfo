@@ -1,9 +1,9 @@
 ---
-specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level0/defiNNe_V_0-1-0_NN.md"
+specification_version: "V_0-2-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 level: 0
 title: "defiNNe — The Definition of Definitions"
-description: "Meta-specification for the iNNv0 ecosystem. Defines the structure, versioning, normative language, and dependency resolution for all derived specifications."
+description: "Meta-specification for the iNNv0 ecosystem. Defines the structure, versioning, normative language, terminology discipline, and dependency resolution for all derived specifications."
 author: "innV0 Team"
 status: "Draft"
 ---
@@ -29,12 +29,13 @@ defiNNe is built on four foundational values:
 - **Standardize** how specifications in the iNNv0 ecosystem are structured, versioned, and referenced.
 - **Enable dependency resolution** across specification levels via the parent chain.
 - **Provide a normative language** (RFC 2119) that all derived specifications must use.
+- **Enforce terminology discipline** so every entity has one canonical name across the ecosystem.
 - **Ensure URL persistence** so every specification version is retrievable indefinitely.
 - **Define the spec resolver protocol** so applications can auto-download and cache the parent chain.
 
 ## Specification
 
-### 1. Hierarchy of Levels
+### Hierarchy of Levels
 
 | Level | Role | Example |
 |---|---|---|
@@ -50,7 +51,20 @@ Rules:
 - A level 0 specification MUST NOT declare a `parent_spec`.
 - Each level ADDS constraints. It MUST NOT relax constraints from the level above.
 
-### 2. Parent Field
+### Terminology Discipline
+
+Every specification defines its entities once and uses exactly one canonical name for
+each throughout its normative text. This applies to all derived specifications:
+
+- A specification MUST include a glossary that names each entity it defines.
+- Normative text MUST use only those canonical names. Synonyms MUST NOT be used
+  interchangeably for a defined entity.
+- Implementation-only vocabulary — in particular the word **"node"** (a runtime graph
+  representation) — MUST NOT appear in normative specification text.
+
+The canonical entity vocabulary for semantic models is defined by iNNfo (level 1).
+
+### Parent Field
 
 The `parent_spec` field is an object, not a string:
 
@@ -60,12 +74,12 @@ parent_spec:
   url: "<immutable-URL-to-the-parent-document>"
 ```
 
-- `name`: the canonical filename of the parent (without `_FORMAT.md` or `_NN.md` suffix). Example: `"iNNfo_V_0-1-0"`.
+- `name`: the canonical filename of the parent (without the `_NN.md` suffix). Example: `"iNNfo_V_0-2-0"`.
 - `url`: an immutable URL (RECOMMENDED: git tag-based) pointing to the raw parent document.
 
 A level 0 specification MUST NOT include `parent_spec`.
 
-### 3. Spec Resolver Protocol
+### Spec Resolver Protocol
 
 > **Note for application implementors**: This section describes the RECOMMENDED behavior for applications that consume iNNfo models. It is not a requirement for spec authors.
 
@@ -89,7 +103,7 @@ The cached directory structure:
     📄 <great-grandparent.name>_NN.md  ← level 0 (defiNNe)
 ```
 
-### 4. Normative Language (RFC 2119)
+### Normative Language (RFC 2119)
 
 When a specification makes a normative statement (a rule, requirement, or constraint), it MUST use these keywords with RFC 2119 semantics:
 
@@ -103,15 +117,15 @@ When a specification makes a normative statement (a rule, requirement, or constr
 
 Purely descriptive or explanatory text (tables of concepts, examples, taxonomy listings) is NOT required to use RFC 2119 keywords.
 
-### 5. Required Frontmatter Structure
+### Required Frontmatter Structure
 
 All specifications MUST begin with a YAML frontmatter block.
 
-#### 5.1. Level 0 (defiNNe)
+**Level 0 (defiNNe)**
 
 ```yaml
 ---
-specification_version: "V_0-1-0"
+specification_version: "V_x-y-z"
 specification_url: "<immutable-URL>"
 level: 0
 title: "..."
@@ -123,7 +137,7 @@ status: "Draft | Stable | Deprecated"
 
 No `parent_spec`.
 
-#### 5.2. Level 1 (concrete specifications)
+**Level 1 (concrete specifications)**
 
 ```yaml
 ---
@@ -131,15 +145,14 @@ specification_version: "V_x-y-z"
 specification_url: "<immutable-URL>"
 level: 1
 parent_spec:
-  name: "defiNNe_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level0/defiNNe_V_0-1-0_NN.md"
-
+  name: "defiNNe_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 title: "..."
 description: "..."
 ---
 ```
 
-#### 5.3. Level 2 (templates)
+**Level 2 (templates)**
 
 ```yaml
 ---
@@ -147,16 +160,17 @@ specification_version: "V_x-y-z"
 specification_url: "<immutable-URL>"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+  name: "iNNfo_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "..."
 concepts: [...]
 markers: [...]
 matrices: [...]
+relationship_types: {...}
 ---
 ```
 
-#### 5.4. Level 3 (models) — Lightweight
+**Level 3 (models) — Lightweight**
 
 ```yaml
 ---
@@ -171,20 +185,22 @@ title: "..."
 ---
 ```
 
-A level 3 model MUST NOT inline the template definition. It MUST rely on the `parent_spec` URL + spec resolver to obtain its schema.
+`model_version` and `title` are top-level keys. A level 3 model MUST NOT inline the template definition; it MUST rely on the `parent_spec` URL + spec resolver to obtain its schema.
 
-#### 5.5. Frontmatter Extensibility
+**Frontmatter Extensibility**
 
-Specifications MAY include additional fields in the frontmatter beyond those required above. Applications MUST ignore unrecognized fields. Additional fields MUST NOT contradict or override the required fields defined in this specification.
+Specifications MAY include additional fields beyond those required above. Applications MUST ignore unrecognized fields. Additional fields MUST NOT contradict or override the required fields defined here.
 
-### 6. File Naming Convention
+### File Naming Convention
+
+All specification and model files use the `_NN.md` suffix.
 
 | Level | Pattern | Example |
 |---|---|---|
-| 0 | `<Name>_V_x-y-z_NN.md` | `defiNNe_V_0-1-0_NN.md` |
-| 1 | `<Name>_V_x-y-z_NN.md` | `iNNfo_V_0-1-0_NN.md` |
-| 2 | `<Template>_V_x-y-z_FORMAT.md` | `business_V_0-1-1_NN.md` |
-| 3 | `<Model>_V_x-y-z_<Template>_NN.md` | `Ghostbusters_V_0-1-2_business_NN.md` |
+| 0 | `<Name>_V_x-y-z_NN.md` | `defiNNe_V_0-2-0_NN.md` |
+| 1 | `<Name>_V_x-y-z_NN.md` | `iNNfo_V_0-2-0_NN.md` |
+| 2 | `<Template>_V_x-y-z_NN.md` | `business_V_0-2-0_NN.md` |
+| 3 | `<Model>_V_x-y-z_<Template>_NN.md` | `Ghostbusters_V_0-2-0_business_NN.md` |
 
 Files are organized by level within each version directory:
 
@@ -194,14 +210,14 @@ v<version>/
 ├── level1/         ← level 1 specs
 └── level2/         ← level 2 templates
     ├── <template>/
-    │   ├── <template>_V_x-y-z_FORMAT.md
+    │   ├── <template>_V_x-y-z_NN.md
     │   └── samples/
     └── ...
 ```
 
-The `latest/` directory mirrors this structure but uses stable filenames without version numbers (e.g. `defiNNe_NN.md` instead of `defiNNe_V_0-1-0_NN.md`).
+The `latest/` directory mirrors this structure but uses stable filenames without version numbers (e.g. `defiNNe_NN.md` instead of `defiNNe_V_0-2-0_NN.md`).
 
-### 7. Versioning
+### Versioning
 
 All versions use Semantic Versioning with hyphen separators: `V_MAJOR-MINOR-PATCH`.
 
@@ -211,42 +227,39 @@ All versions use Semantic Versioning with hyphen separators: `V_MAJOR-MINOR-PATC
 | **MINOR** | Backward-compatible addition |
 | **PATCH** | Bug fix, clarification, examples |
 
-#### 7.1. Version Directory Structure
-
 Specification versions are stored in versioned directories under `specs/`:
 
 ```
 specs/
 ├── CHANGELOG.md
-├── v0.1.0/
+├── v0.2.0/
 │   ├── INDEX.md
 │   ├── level0/
-│   │   └── defiNNe_V_0-1-0_NN.md
+│   │   └── defiNNe_V_0-2-0_NN.md
 │   ├── level1/
-│   │   └── iNNfo_V_0-1-0_NN.md
+│   │   └── iNNfo_V_0-2-0_NN.md
 │   └── level2/
 │       ├── business/
-│       │   ├── business_V_0-1-1_NN.md
+│       │   ├── business_V_0-2-0_NN.md
 │       │   └── samples/
 │       └── procedures/
-├── latest/         ← manually synced, stable filenames
-└── CHANGELOG.md
+└── latest/         ← stable filenames, mirrors the current version
 ```
 
 - Each `vMAJOR.MINOR.PATCH/` directory is **frozen and immutable** once published.
-- `latest/` is a convenience alias with stable filenames (no version in name).
-- To publish a new version, create a new directory (e.g., `v0.2.0/`), populate it with the updated specs, sync to `latest/`, and create a corresponding git tag.
+- `latest/` is a convenience alias with stable filenames (no version in name) that mirrors the current version.
+- To publish a new version, create a new directory (e.g., `v0.3.0/`), populate it with the updated specs, sync to `latest/`, and create a corresponding git tag.
 
-### 8. Specification URL Persistence
+### Specification URL Persistence
 
 - The `specification_url` MUST point to an immutable version of the specification.
 - RECOMMENDED: use a git tag: `https://raw.githubusercontent.com/innV0/<repo>/v<version>/<path>`
 - Once a version is published under a given URL, its content MUST NOT change.
 - Corrections and errata MUST be published as a new PATCH version.
 
-### 9. Required Body Sections (Levels 0, 1, 2)
+### Required Body Sections (Levels 0, 1, 2)
 
-The document body of any level 0, 1, or 2 specification MUST include these sections as H2 headings, in order:
+The document body of any level 0, 1, or 2 specification MUST include these sections as H2 headings, in this exact order, with no other section before the one-sentence summary:
 
 ```
 ## <one-sentence-summary>
@@ -262,27 +275,32 @@ The document body of any level 0, 1, or 2 specification MUST include these secti
 ## Examples
 ```
 
-The `<one-sentence-summary>` placeholder means a brief H2 heading that summarizes the specification in one sentence (e.g. `## A meta-specification for defining structured, versioned documents`).
+The `<one-sentence-summary>` placeholder means a brief H2 heading that summarizes the specification in one sentence.
 
-Level 3 models (level 3) MUST NOT include these sections. They contain only model data.
+Level 3 models MUST NOT include these sections. They contain only model data.
 
-### 10. Document Notice
+### Document Notice
 
 The first content in the Markdown body — immediately after the frontmatter — MUST be a GFM `> [!NOTE]` admonition. This applies to ALL levels (0–3).
 
-### 11. Compliance Checklist
+### Cross-References
+
+Internal cross-references MUST use stable heading names, not section numbers. Sections are unnumbered so that references remain valid as the document evolves.
+
+### Compliance Checklist
 
 A document is defiNNe-compliant only if ALL of the following hold:
 
-1. Filename matches the level convention (§6).
-2. Frontmatter contains `specification_version` in `V_MAJOR-MINOR-PATCH` form (§7).
-3. Frontmatter contains a resolvable `specification_url` (§8).
+1. Filename matches the level convention (see **File Naming Convention**).
+2. Frontmatter contains `specification_version` in `V_MAJOR-MINOR-PATCH` form (see **Versioning**).
+3. Frontmatter contains a resolvable `specification_url` (see **Specification URL Persistence**).
 4. Frontmatter contains `level`.
 5. If level > 0: frontmatter contains `parent_spec` as an object with `name` and `url`.
-6. If level ≤ 2: body contains the required sections (§9).
-7. If level = 3: body does NOT contain the required sections (§9).
-8. Body begins with the required Document Notice (§10).
-9. Normative language uses RFC 2119 keywords (§4).
+6. If level ≤ 2: body contains the required sections in order (see **Required Body Sections**).
+7. If level = 3: body does NOT contain the required sections.
+8. Body begins with the required Document Notice (see **Document Notice**).
+9. Normative language uses RFC 2119 keywords (see **Normative Language**).
+10. Normative text obeys the **Terminology Discipline** (canonical names only; no "node").
 
 ## Template
 
@@ -290,7 +308,7 @@ A document is defiNNe-compliant only if ALL of the following hold:
 
 ```markdown
 ---
-specification_version: "V_0-1-0"
+specification_version: "V_0-2-0"
 specification_url: "<url-to-level-1-spec>"
 level: 3
 parent_spec:
@@ -314,35 +332,35 @@ title: "Model Name"
 
 ### Full Parent Chain Resolution
 
-From the sample model `specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`:
+From the sample model `specs/v0.2.0/level2/business/samples/Ghostbusters_V_0-2-0_business_NN.md`:
 
 ```yaml
 # Ghostbusters (level 3)
 parent_spec:
-  name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
+  name: "business_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 
-# business_V_0-1-1 (level 2)
+# business_V_0-2-0 (level 2)
 parent_spec:
-  name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+  name: "iNNfo_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 
-# iNNfo_V_0-1-0 (level 1)
+# iNNfo_V_0-2-0 (level 1)
 parent_spec:
-  name: "defiNNe_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level0/defiNNe_V_0-1-0_NN.md"
+  name: "defiNNe_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 
-# defiNNe_V_0-1-0 (level 0) — this document
+# defiNNe_V_0-2-0 (level 0) — this document
 # No parent_spec — root of the chain
 ```
 
 ### Cached Directory After First Load
 
 ```
-📁 Ghostbusters_V_0-1-2_business/
-  📄 Ghostbusters_V_0-1-2_business_NN.md
+📁 Ghostbusters_V_0-2-0_business/
+  📄 Ghostbusters_V_0-2-0_business_NN.md
   📁 specs/
-    📄 business_V_0-1-1_NN.md
-    📄 iNNfo_V_0-1-0_NN.md
-    📄 defiNNe_V_0-1-0_NN.md
+    📄 business_V_0-2-0_NN.md
+    📄 iNNfo_V_0-2-0_NN.md
+    📄 defiNNe_V_0-2-0_NN.md
 ```

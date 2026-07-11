@@ -1,10 +1,10 @@
 ---
-specification_version: "V_0-1-2"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/procedures/procedures_V_0-1-2_NN.md"
+specification_version: "V_0-2-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-1_NN.md"
+  name: "iNNfo_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "Procedures Template"
 concepts:
   - name: "Procedure"
@@ -70,7 +70,7 @@ markers:
     icon: "gauge"
     color: "green"
     weight: 50
-relationship_declarations:
+relationship_types:
   hierarchy:
     enabled: false
   evaluable_matrix:
@@ -83,26 +83,26 @@ matrices:
   - name: "work-roles matrix"
     source: "Work"
     target: "Roles"
-    params: "Responsible;Accountable;Consulted;Informed"
+    values: [Responsible, Accountable, Consulted, Informed]
   - name: "positions-roles matrix"
     source: "Position"
     target: "Roles"
-    params: "Assumes"
+    values: [Assumes]
   - name: "persons-positions matrix"
     source: "Person"
     target: "Position"
-    params: "Occupies"
+    values: [Occupies]
   - name: "work-tools matrix"
     source: "Work"
     target: "Tools"
-    params: "Uses"
+    values: [Uses]
   - name: "work-artifacts matrix"
     source: "Work"
     target: "Artifact"
-    params: "Creates;Modifies;Validates;Reviews"
+    values: [Creates, Modifies, Validates, Reviews]
   - name: "item-markers matrix"
-    source: "elements"
-    target: "markers"
+    source: "Elements"
+    target: "Markers"
 ---
 
 > [!NOTE]
@@ -125,11 +125,7 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 
 ## Specification
 
-### 1. Supported Mode
-
-This template supports **FILE mode only**.
-
-### 2. Concepts
+### Concepts
 
 | Concept | Type | Purpose |
 |---|---|---|
@@ -141,13 +137,13 @@ This template supports **FILE mode only**.
 | **Position** | `list` | Organizational positions that assume one or more roles |
 | **Person** | `list` | Named individuals who occupy positions |
 
-### 3. Markers
+### Markers
 
 | Marker | Purpose |
 |---|---|
 | `complexity` | How complex the procedure step or element is to execute |
 
-### 4. Matrices
+### Matrices
 
 | Matrix | Source → Target | Purpose |
 |---|---|---|
@@ -157,7 +153,7 @@ This template supports **FILE mode only**.
 | Work-Tools | Work → Tools | Which tools are used by each work step |
 | Work-Artifacts | Work → Artifact | I/O relationships (Creates, Modifies, Validates, Reviews) |
 
-### 5. Relationship Types
+### Relationship Types
 
 | Type | Enabled | Representation |
 |---|---|---|
@@ -174,12 +170,12 @@ To create a procedures model, create a level 3 FILE mode document with:
 
 ```yaml
 ---
-specification_version: "V_0-1-1"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-1_NN.md"
+specification_version: "V_0-2-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
-  name: "procedures_V_0-1-2"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/procedures/procedures_V_0-1-2_NN.md"
+  name: "procedures_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Procedure Name>"
 ---
@@ -232,9 +228,9 @@ When the sample is loaded for the first time:
 📁 CodeReviewProcess_V_1-0-0_procedures/
   📄 CodeReviewProcess_V_1-0-0_procedures_NN.md
   📁 specs/
-    📄 procedures_V_0-1-1_NN.md
-    📄 iNNfo_V_0-1-0_NN.md
-    📄 defiNNe_V_0-1-0_NN.md
+    📄 procedures_V_0-2-0_NN.md
+    📄 iNNfo_V_0-2-0_NN.md
+    📄 defiNNe_V_0-2-0_NN.md
 ```
 
 ### Parent Chain
@@ -242,13 +238,13 @@ When the sample is loaded for the first time:
 ```yaml
 # From the CodeReviewProcess sample:
 parent_spec:
-  name: "procedures_V_0-1-2"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/procedures/procedures_V_0-1-2_NN.md"
+  name: "procedures_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
 
 # This template's parent:
 parent_spec:
-  name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+  name: "iNNfo_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 ```
 
 
@@ -257,7 +253,7 @@ parent_spec:
 ## Procedure
 
 ### Summary
-Brief explanation of the procedure goals.
+The overall workflow this model describes.
 
 ### Description
 Brief explanation of the procedure goals.
@@ -271,108 +267,10 @@ Brief explanation of the procedure goals.
 ## Work
 
 ### Summary
-Sequence of actions, decisions, and events in the workflow. Work items can reference artifacts as inputs and outputs, and tools as resources.
+The ordered steps, decisions, and events of the workflow.
 
 ### Description
 Sequence of actions, decisions, and events in the workflow. Work items can reference artifacts as inputs and outputs, and tools as resources.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## step_type
-
-### Summary
-Description of step_type.
-
-### Description
-Description of step_type.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## next
-
-### Summary
-Description of next.
-
-### Description
-Description of next.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## condition
-
-### Summary
-Description of condition.
-
-### Description
-Description of condition.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## input
-
-### Summary
-Description of input.
-
-### Description
-Description of input.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## output
-
-### Summary
-Description of output.
-
-### Description
-Description of output.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## output_status
-
-### Summary
-Description of output_status.
-
-### Description
-Description of output_status.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## tool
-
-### Summary
-Description of tool.
-
-### Description
-Description of tool.
 
 ### Methodologies
 *No methodologies provided.*
@@ -383,7 +281,7 @@ Description of tool.
 ## Artifact
 
 ### Summary
-Tangible or digital outputs that flow through the procedure (e.g. documents, forms, reports, certificates). Work items interact with artifacts via the work-artifacts matrix (Creates, Modifies, Validates, Reviews).
+Documents and deliverables produced or consumed by work steps.
 
 ### Description
 Tangible or digital outputs that flow through the procedure (e.g. documents, forms, reports, certificates). Work items interact with artifacts via the work-artifacts matrix (Creates, Modifies, Validates, Reviews).
@@ -397,7 +295,7 @@ Tangible or digital outputs that flow through the procedure (e.g. documents, for
 ## Tools
 
 ### Summary
-Software applications, instruments, or resources used to modify, generate, or process artifacts during a work item (e.g. IDE, spreadsheet, design tool, CI pipeline). Connected to work via the work-tools matrix.
+Software and resources used to carry out work steps.
 
 ### Description
 Software applications, instruments, or resources used to modify, generate, or process artifacts during a work item (e.g. IDE, spreadsheet, design tool, CI pipeline). Connected to work via the work-tools matrix.
@@ -411,24 +309,10 @@ Software applications, instruments, or resources used to modify, generate, or pr
 ## Roles
 
 ### Summary
-The functional responsibilities/actors in the workflow (e.g. Developer, QA).
+The functional roles that act in the workflow.
 
 ### Description
 The functional responsibilities/actors in the workflow (e.g. Developer, QA).
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## scope
-
-### Summary
-Description of scope.
-
-### Description
-Description of scope.
 
 ### Methodologies
 *No methodologies provided.*
@@ -439,7 +323,7 @@ Description of scope.
 ## Position
 
 ### Summary
-Job roles or titles within the organization (e.g. Senior Developer).
+Organizational positions that assume roles.
 
 ### Description
 Job roles or titles within the organization (e.g. Senior Developer).
@@ -453,7 +337,7 @@ Job roles or titles within the organization (e.g. Senior Developer).
 ## Person
 
 ### Summary
-The actual team members occupying those positions.
+Named individuals who occupy positions.
 
 ### Description
 The actual team members occupying those positions.
