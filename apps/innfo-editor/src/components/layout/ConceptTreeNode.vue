@@ -221,8 +221,8 @@ const groupedChildren = computed<RenderItem[]>(() => {
     }
   }
 
-  // Sort groups by name (alphabetically)
-  const sortedGroups = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+  // Preserve insertion order — follows _NN index order from the parser
+  const sortedGroups = [...groups.entries()]
 
   const result: RenderItem[] = []
 

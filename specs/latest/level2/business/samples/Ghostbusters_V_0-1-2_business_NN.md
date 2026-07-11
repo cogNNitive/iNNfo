@@ -1,10 +1,10 @@
 ---
-specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+specification_version: "V_0-2-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
-  name: "business_V_0-1-2"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-2_NN.md"
+  name: "business_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 model_version: "V_0-1-2"
 title: "Ghostbusters"
 ---
@@ -14,92 +14,92 @@ title: "Ghostbusters"
 
 # _NN index
 
-* _NN index: Analysis
-  * _NN index: Assumptions
-  * _NN index: Risks
-  * _NN index: Suggestions
-  * _NN index: SWOT
-  * _NN index: Unfair advantage
-  * _NN index: Keys
-* _NN index: Business idea
-  * _NN index: Business status
-  * _NN index: Challenges
-  * _NN index: Inspiration
-  * _NN index: Opportunity
-* _NN index: Business objectives
-  * _NN index: Mission
-  * _NN index: Organizational goals
-  * _NN index: Organizational values
-  * _NN index: Vision
-* _NN index: Communication
-  * _NN index: Pitch
-  * _NN index: Presentations
-  * _NN index: Storytelling
-  * _NN index: Web
-* _NN index: Finance
-  * _NN index: Costs
-  * _NN index: Customer Acquisition Cost
-  * _NN index: Funding sources
-  * _NN index: Life Time Value
-  * _NN index: Projections
-  * _NN index: Revenue
-  * _NN index: Shareholders
-  * _NN index: Unit economics
-* _NN index: Legal
-  * _NN index: Contracts
-  * _NN index: Legal issues
-* _NN index: Market
-  * _NN index: Segments
-    * _NN index: Behaviors
-    * _NN index: Channels
-    * _NN index: Competition
-    * _NN index: Emotions
-    * _NN index: Journey
-    * _NN index: Market size
-    * _NN index: Market trends
-    * _NN index: Messages
-    * _NN index: Perceptions
-    * _NN index: Problems
-    * _NN index: Profiles
-      * _NN index: Persona
-    * _NN index: Relationships
-    * _NN index: Roles
-    * _NN index: Segmentation
-    * _NN index: Value propositions
-  * _NN index: Stakeholders
-* _NN index: Marketing
-  * _NN index: Branding
-  * _NN index: Logo
-  * _NN index: Media plan
-  * _NN index: Naming
-  * _NN index: Visual identity
-* _NN index: Operations
-  * _NN index: Activities
-  * _NN index: Functions
-  * _NN index: Resources
-* _NN index: Organization
-* _NN index: Products and services
-  * _NN index: Brochure
-  * _NN index: Components
-  * _NN index: Features
-  * _NN index: Offerings
-  * _NN index: Portfolio
-  * _NN index: Pricing
-  * _NN index: Roadmap
-* _NN index: Project plan
-  * _NN index: Milestones
-  * _NN index: Phases
-* _NN index: Solutions
-* _NN index: Team
-  * _NN index: Compensations
-  * _NN index: Contributions
-  * _NN index: Goals
-  * _NN index: Positions
-  * _NN index: Skills
-* _NN index: Validation
-  * _NN index: Coherence
-  * _NN index: Experiments
-  * _NN index: Metrics
+* [[Analysis]]
+  * [[Assumptions]]
+  * [[Risks]]
+  * [[Suggestions]]
+  * [[SWOT]]
+  * [[Unfair advantage]]
+  * [[Keys]]
+* [[Business idea]]
+  * [[Business status]]
+  * [[Challenges]]
+  * [[Inspiration]]
+  * [[Opportunity]]
+* [[Business objectives]]
+  * [[Mission]]
+  * [[Organizational goals]]
+  * [[Organizational values]]
+  * [[Vision]]
+* [[Communication]]
+  * [[Pitch]]
+  * [[Presentations]]
+  * [[Storytelling]]
+  * [[Web]]
+* [[Finance]]
+  * [[Costs]]
+  * [[Customer Acquisition Cost]]
+  * [[Funding sources]]
+  * [[Life Time Value]]
+  * [[Projections]]
+  * [[Revenue]]
+  * [[Shareholders]]
+  * [[Unit economics]]
+* [[Legal]]
+  * [[Contracts]]
+  * [[Legal issues]]
+* [[Market]]
+  * [[Segments]]
+    * [[Behaviors]]
+    * [[Channels]]
+    * [[Competition]]
+    * [[Emotions]]
+    * [[Journey]]
+    * [[Market size]]
+    * [[Market trends]]
+    * [[Messages]]
+    * [[Perceptions]]
+    * [[Problems]]
+    * [[Profiles]]
+      * [[Persona]]
+    * [[Relationships]]
+    * [[Roles]]
+    * [[Segmentation]]
+    * [[Value propositions]]
+  * [[Stakeholders]]
+* [[Marketing]]
+  * [[Branding]]
+  * [[Logo]]
+  * [[Media plan]]
+  * [[Naming]]
+  * [[Visual identity]]
+* [[Operations]]
+  * [[Activities]]
+  * [[Functions]]
+  * [[Resources]]
+* [[Organization]]
+* [[Products and services]]
+  * [[Brochure]]
+  * [[Components]]
+  * [[Features]]
+  * [[Offerings]]
+  * [[Portfolio]]
+  * [[Pricing]]
+  * [[Roadmap]]
+* [[Project plan]]
+  * [[Milestones]]
+  * [[Phases]]
+* [[Solutions]]
+* [[Team]]
+  * [[Compensations]]
+  * [[Contributions]]
+  * [[Goals]]
+  * [[Positions]]
+  * [[Skills]]
+* [[Validation]]
+  * [[Coherence]]
+  * [[Experiments]]
+  * [[Metrics]]
 
 # _NN Business summary
 

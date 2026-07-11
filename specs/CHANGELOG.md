@@ -4,9 +4,29 @@ All notable changes to the iNNfo specification ecosystem are documented here.
 
 | Version | Date | Status | Summary |
 |---|---|---|---|
-| [v0.1.0](v0.1.0/) | 2026-07-06 | **Active** | First versioned release. Resets from legacy FORMAT lineage. Introduces versioned directory structure with level-based organization, `latest/` alias with stable filenames, INDEX.md per version, and CHANGELOG.md. All specs use `specification_version`/`specification_url` frontmatter per defiNNe. Templates reference `iNNfo_V_0-1-0` as parent (replaces `FORMAT`). |
+| [v0.2.0](v0.2.0/) | 2026-07-11 | **Active** | Metamodel consolidation: canonical entity glossary, name-based identity, reserved pseudo-concepts, `values` matrices, wikilink index, single asset convention. FOLDER mode, `_FORMAT.md`, hierarchy matrices, and `_NN index:` removed. |
+| v0.1.0 | 2026-07-06 | Removed | First versioned release (directory removed; superseded by v0.2.0). |
 
-## v0.1.0 (2026-07-06) — Active
+## v0.2.0 (2026-07-11) — Active
+
+Metamodel consolidation and hardening. See `openspec/changes/spec-foundation-hardening`.
+
+### Specification Changes
+- **Canonical entity glossary** in iNNfo: Workspace → Model → Concept → Element → Field, plus cross-cutting Marker, Relationship, Matrix. "node" barred from normative text; synonyms removed.
+- **Reserved pseudo-concepts** `Concepts`, `Elements`, `Markers`.
+- **Name-based identity** (single source of truth): Element names unique within the whole Model; Model name (`title`) unique within the Workspace; no persisted slug/id.
+- **Fields & Assets**: single storage convention `{modelDir}/assets/{element-slug}/{filename}`; `asset_mode` removed.
+- **Relationship Types**: unified term (was `relationship_declarations`).
+- **Matrices** declare `values: [...]` (replacing the `params` `;`-string DSL).
+- **Hierarchy** only via the index block; hierarchy matrices removed.
+- **Index syntax**: `[[wikilink]]` canonical; `_NN index:` retired.
+- Section numbers dropped in favor of stable heading-name references.
+
+### Removed (no backwards compatibility)
+- **FOLDER mode / `_F` markers**, **`_FORMAT.md` filenames**, **hierarchy matrices**, **`_NN index:`** syntax.
+- **The `v0.1.0/` directory** — only v0.2.0 is maintained.
+
+## v0.1.0 (2026-07-06) — Superseded
 
 ### Structural Changes
 - **Versioned directories**: Each spec version lives in `vMAJOR.MINOR.PATCH/` with level-based subdirectories (`level0/`, `level1/`, `level2/`).

@@ -9,13 +9,12 @@ import {
 } from '../types'
 import { normalizeSource, WIKILINK_RE, parseMarkdownTable } from './markdown'
 
-/** Build a hierarchical tree from taxonomy + elements + hierarchy matrices.
- *  Hierarchy matrices are matrices named like `{src}-{tgt} hierarchy matrix`.
- *  Elements with concept types that appear in the taxonomy chain are placed at the correct depth. */
+/** Build a hierarchical tree from taxonomy edges and elements.
+ *  The taxonomy index is the sole hierarchy mechanism (R-MM-07). */
 export function buildHierarchyTree(
   taxonomy: TaxonomyEdge[],
   elements: ElementsMap,
-  matrices: MatrixData[],
+  _matrices?: MatrixData[],
 ): TreeNode[] {
   const roots: TreeNode[] = []
   const nodeMap = new Map<string, TreeNode>()
@@ -36,7 +35,7 @@ export function buildHierarchyTree(
     }
   }
 
-  // Apply taxonomy edges
+  // Apply taxonomy edges (sole hierarchy mechanism)
   for (const edge of taxonomy) {
     const parentId = edge.parent.toLowerCase().replace(/\s+/g, '-')
     const childId = edge.child.toLowerCase().replace(/\s+/g, '-')
@@ -44,24 +43,6 @@ export function buildHierarchyTree(
     const child = nodeMap.get(childId)
     if (parent && child) {
       parent.children.push(child)
-    }
-  }
-
-  // Apply hierarchy matrices: rows marked with 'X' become parent→child
-  for (const matrix of matrices) {
-    const mn = matrix.name.toLowerCase()
-    if (mn.includes('hierarchy matrix') || mn.includes('jerarqu')) {
-      for (const cell of matrix.cells) {
-        if (cell.value.toLowerCase() === 'x') {
-          const parentId = cell.col.toLowerCase().replace(/\s+/g, '-')
-          const childId = cell.row.toLowerCase().replace(/\s+/g, '-')
-          const parent = nodeMap.get(parentId)
-          const child = nodeMap.get(childId)
-          if (parent && child && !parent.children.includes(child)) {
-            parent.children.push(child)
-          }
-        }
-      }
     }
   }
 

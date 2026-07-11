@@ -28,7 +28,7 @@ export async function listModels(rootDir: string): Promise<ModelInfo[]> {
  */
 export async function readModel(rootDir: string, id: string): Promise<ParsedModel | null> {
   // Try exact path first, then append _NN.md
-  const candidates = [join(rootDir, id), join(rootDir, `${id}_NN.md`), join(rootDir, `${id}_F.md`)]
+  const candidates = [join(rootDir, id), join(rootDir, `${id}_NN.md`)]
 
   for (const filePath of candidates) {
     try {

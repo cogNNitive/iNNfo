@@ -1,3 +1,5 @@
 export { validateModel } from './model'
 export { validateFormatContent } from './content'
 export { validateFormatSyntax } from './syntax'
+export { validateReferences } from './references'
+export type { ReferenceDiagnostic } from './references'

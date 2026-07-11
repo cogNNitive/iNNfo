@@ -3,9 +3,8 @@
  * These do NOT change any existing behavior — they provide convenience
  * wrappers that the MCP server consumes.
  */
-import { readdir, readFile } from 'node:fs/promises'
+import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { parseModel } from './parser'
 
 /* ── Version resolution ──────────────────────────────────────── */
 
@@ -31,8 +30,6 @@ export interface ModelInfo {
   id: string
   /** Absolute filesystem path */
   path: string
-  /** FILE or FOLDER — determined from the model's `mode` frontmatter field */
-  mode: 'FILE' | 'FOLDER'
   /** SemVer extracted from filename, e.g. `0-1-2` */
   version: string | null
 }
@@ -57,19 +54,7 @@ export async function listModels(rootDir: string): Promise<ModelInfo[]> {
     const id = entry.name.replace(MD_FILE_RE, '')
     const version = resolveSpecVersionFromFilename(entry.name)
 
-    // Quick-read frontmatter to detect mode
-    let mode: 'FILE' | 'FOLDER' = 'FILE'
-    try {
-      const content = await readFile(filePath, 'utf-8')
-      const parsed = parseModel(content)
-      if (parsed.frontmatter.mode === 'FOLDER') {
-        mode = 'FOLDER'
-      }
-    } catch {
-      // If parse fails, default to FILE
-    }
-
-    models.push({ id, path: filePath, mode, version })
+    models.push({ id, path: filePath, version })
   }
 
   models.sort((a, b) => a.id.localeCompare(b.id))

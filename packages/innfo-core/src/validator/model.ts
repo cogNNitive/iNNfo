@@ -37,6 +37,18 @@ export function validateModel(
     })
   }
 
+  // R-MM-02: Reject reserved concept names in template
+  const RESERVED_CONCEPT_NAMES = new Set(['Concepts', 'Elements', 'Markers'])
+  for (const concept of fm.concepts ?? []) {
+    if (RESERVED_CONCEPT_NAMES.has(concept.name)) {
+      errors.push({
+        path: `frontmatter.concepts.${concept.name}`,
+        message: `Reserved concept name "${concept.name}" — Concepts, Elements, and Markers are reserved pseudo-concepts and MUST NOT be declared`,
+        severity: 'error',
+      })
+    }
+  }
+
   // FR-007: Reject FOLDER mode
   if (fm.mode === 'FOLDER') {
     errors.push({

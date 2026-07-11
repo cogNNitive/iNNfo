@@ -136,6 +136,23 @@ function normalizeElementsIntoGraph(
     }
   }
 
+  // Re-sort elements by their position in the _NN index (if present).
+  // The index defines both hierarchy AND display order; elements not listed
+  // in the index get a high sort value so they appear after indexed ones.
+  if (parsed.taxonomy.length > 0) {
+    const indexOrder = new Map<string, number>()
+    let orderIdx = 0
+    for (const edge of parsed.taxonomy) {
+      if (!indexOrder.has(edge.parent)) indexOrder.set(edge.parent, orderIdx++)
+      if (!indexOrder.has(edge.child)) indexOrder.set(edge.child, orderIdx++)
+    }
+    allElements.sort((a, b) => {
+      const oa = indexOrder.get(a.name) ?? 99999
+      const ob = indexOrder.get(b.name) ?? 99999
+      return oa - ob
+    })
+  }
+
   // First pass: elements whose taxonomy parent has no listed parent themselves
   // (i.e. top-level relative to this document) get created first, so their
   // qualifiedId is available for children referencing them via taxonomy.
@@ -157,8 +174,18 @@ function normalizeElementsIntoGraph(
     return rootId
   }
 
+  // Track element names model-wide for uniqueness across all concepts (R-IE-02)
+  const modelWideElementNames = new Set<string>()
+
   for (const el of allElements) {
     try {
+      if (modelWideElementNames.has(el.name)) {
+        throw new Error(
+          `Duplicate element name "${el.name}" — element names must be unique within the whole model`,
+        )
+      }
+      modelWideElementNames.add(el.name)
+
       const parentQualifiedId = resolveParentQualifiedId(el.name, new Set())
       const qualifiedId = ctx.identity.register(parentQualifiedId, el.name)
       qualifiedIdByElementName.set(el.name, qualifiedId)
@@ -377,6 +404,16 @@ export function normalizeSingleModel(
 
   ctx.nodes[qualifiedId] = rootNode
 
+  // Surface slug collisions as warnings (R-IE-05)
+  if (parsed.slugCollisions && parsed.slugCollisions.length > 0) {
+    for (const sc of parsed.slugCollisions) {
+      ctx.issues.push({
+        path: refPath,
+        message: `Slug collision: "${sc.slug}" is shared by elements: ${sc.elements.join(', ')}`,
+      })
+    }
+  }
+
   // Normalize in-file elements
   normalizeElementsIntoGraph(parsed, qualifiedId, refPath, ctx)
 
@@ -390,7 +427,16 @@ async function parseAndRegisterModel(
   ctx: ParseContext,
   elementNameToModel: Map<string, string>,
 ): Promise<void> {
-  const result = normalizeSingleModel(content, refPath, refName, ctx.identity)
+  let result: { nodes: Record<string, ModelNode>; issues: ParseIssue[] }
+  try {
+    result = normalizeSingleModel(content, refPath, refName, ctx.identity)
+  } catch (err) {
+    ctx.issues.push({
+      path: refPath,
+      message: err instanceof Error ? err.message : String(err),
+    })
+    return
+  }
 
   // Merge resulting nodes and issues into context
   for (const [id, node] of Object.entries(result.nodes)) {
@@ -522,14 +568,7 @@ export async function recursiveParse(
           await parseAndRegisterModel(content, ref.path, ref.name, ctx, elementNameToModel)
         }
 
-        // Surface identity collisions even in fallback mode
-        for (const collision of ctx.identity.getCollisions()) {
-          ctx.issues.push({
-            path: collision.parentQualifiedId ?? '<root>',
-            message: collision.message,
-          })
         }
-      }
 
       // Add the missing index.md issue as the first warning (downgraded when fallback found models)
       const rootCount = Object.values(ctx.nodes).filter((n) => n.parentId === null).length
@@ -607,14 +646,6 @@ export async function recursiveParse(
 
     // Parse and register the model (shared helper — also used by index.md fallback)
     await parseAndRegisterModel(content, ref.path, ref.name, ctx, elementNameToModel)
-  }
-
-  // Step 4: Surface identity collisions as parse issues
-  for (const collision of ctx.identity.getCollisions()) {
-    ctx.issues.push({
-      path: collision.parentQualifiedId ?? '<root>',
-      message: collision.message,
-    })
   }
 
   const rootIds = Object.values(ctx.nodes)

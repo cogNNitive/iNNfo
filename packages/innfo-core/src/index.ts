@@ -12,6 +12,7 @@ export {
   extractRelationships,
   extractAnalysis,
   slugify,
+  uniqueSlugify,
   deriveElementSlugs,
 } from './parser'
 
@@ -24,7 +25,8 @@ export {
 } from './resolver'
 export type { SpecResolver } from './resolver'
 
-export { validateModel, validateFormatContent, validateFormatSyntax } from './validator'
+export { validateModel, validateFormatContent, validateFormatSyntax, validateReferences } from './validator'
+export type { ReferenceDiagnostic } from './validator'
 
 export * from './identity'
 export * from './metamodel'
@@ -35,3 +37,5 @@ export { createDriver } from './driver-unified'
 export * from './fs-types'
 export { listModels, resolveSpecVersionFromFilename } from './helpers'
 export type { ModelInfo } from './helpers'
+export { applyMutation } from './mutate'
+export type { MutationResult } from './mutate'

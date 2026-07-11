@@ -20,6 +20,28 @@ export function validateFormatContent(
   const parsed = parseModel(content)
   const fm = parsed.frontmatter
 
+  // ── R-MM-02: Reject reserved concept names ───────────────────
+
+  const RESERVED_CONCEPT_NAMES = new Set(['Concepts', 'Elements', 'Markers'])
+  const reservedViolations: string[] = []
+  for (const concept of fm.concepts ?? []) {
+    if (RESERVED_CONCEPT_NAMES.has(concept.name)) {
+      reservedViolations.push(concept.name)
+    }
+  }
+  if (reservedViolations.length > 0) {
+    checks.push({
+      id: 'fm-reserved-names',
+      label: 'No reserved concept names',
+      description:
+        'Concepts, Elements, and Markers are reserved built-in pseudo-concepts and MUST NOT be declared as concept names',
+      category: 'frontmatter',
+      severity: 'error',
+      passed: false,
+      message: `Reserved concept name(s) used: ${reservedViolations.join(', ')}`,
+    })
+  }
+
   // ── FR-007: Reject FOLDER mode ────────────────────────────────
 
   if (fm.mode === 'FOLDER') {

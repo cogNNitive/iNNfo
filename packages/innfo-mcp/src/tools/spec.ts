@@ -23,15 +23,15 @@ import { resolveParentChainNode } from './resolver-node.js'
 export function deriveNameFromUrl(url: string): string {
   return basename(url)
     .replace(/\.(md|markdown)$/i, '')
-    .replace(/_(NN|FORMAT|F)$/i, '')
+    .replace(/_NN$/i, '')
 }
 
 /**
  * Locate a model file on disk by id.
- * Tries the id verbatim, then `_NN.md` and `_F.md` suffixes.
+ * Tries the id verbatim, then the `_NN.md` suffix.
  */
 export async function findModelFile(rootDir: string, id: string): Promise<string | null> {
-  const candidates = [join(rootDir, id), join(rootDir, `${id}_NN.md`), join(rootDir, `${id}_F.md`)]
+  const candidates = [join(rootDir, id), join(rootDir, `${id}_NN.md`)]
   for (const fp of candidates) {
     try {
       await stat(fp)

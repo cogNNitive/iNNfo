@@ -73,13 +73,7 @@
           }}</Badge>
         </div>
 
-        <button
-          @click="copyMatrixMarkdown"
-          class="inline-flex items-center gap-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer shadow-2xs"
-        >
-          <Copy class="w-3 h-3 text-slate-500 dark:text-slate-400" />
-          Copy Table MD
-        </button>
+
       </div>
 
       <!-- Value Distribution Card -->
@@ -342,7 +336,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useVirtualizer } from '@tanstack/vue-virtual'
-import { Copy, ChevronDown } from 'lucide-vue-next'
+import { ChevronDown } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import BlockPill from './BlockPill.vue'
@@ -662,23 +656,5 @@ const rotateCycle = (row: string, col: string) => {
 const resolveBlockId = (name: string, _conceptType: string): string | undefined => {
   const node = Object.values(modelStore.nodes).find((n) => n.name === name)
   return node?.id
-}
-
-const copyMatrixMarkdown = () => {
-  if (!activeMatrix.value) return
-  let md =
-    `| ${activeMatrix.value.source} \\ ${activeMatrix.value.target} | ` +
-    columns.value.join(' | ') +
-    ' |\n'
-  md += `| :--- | ` + columns.value.map(() => ':---:').join(' | ') + ' |\n'
-  rows.value.forEach((row) => {
-    const colsVal = columns.value.map((col) => {
-      const val = getVal(row, col)
-      return val !== undefined && val !== null ? String(val) : '-'
-    })
-    md += `| ${row} | ` + colsVal.join(' | ') + ' |\n'
-  })
-
-  navigator.clipboard.writeText(md)
 }
 </script>

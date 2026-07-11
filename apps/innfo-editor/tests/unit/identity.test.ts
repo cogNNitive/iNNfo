@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { IdentityRegistry, buildQualifiedId } from '../../src/model/identity'
+import { IdentityRegistry, buildQualifiedId, DuplicateNameError } from '../../src/model/identity'
 
 describe('identity', () => {
   it('accepts unique sibling names', () => {
@@ -9,32 +9,24 @@ describe('identity', () => {
 
     expect(alpha).toBe('Alpha')
     expect(beta).toBe('Beta')
-    expect(registry.hasCollisions()).toBe(false)
   })
 
-  it('flags duplicate sibling names as a collision, not a silent merge', () => {
+  it('throws on duplicate sibling names (R-IE-02)', () => {
     const registry = new IdentityRegistry()
     registry.register(null, 'Alpha')
-    registry.register(null, 'Alpha')
-
-    expect(registry.hasCollisions()).toBe(true)
-    const collisions = registry.getCollisions()
-    expect(collisions).toHaveLength(1)
-    expect(collisions[0].name).toBe('Alpha')
-    expect(collisions[0].parentQualifiedId).toBeNull()
+    expect(() => registry.register(null, 'Alpha')).toThrow(DuplicateNameError)
   })
 
-  it('disambiguates the colliding qualified id instead of reusing the first one (R11 — no silent overwrite)', () => {
+  it('reports the colliding name in the error', () => {
     const registry = new IdentityRegistry()
-    const first = registry.register(null, 'Alpha')
-    const second = registry.register(null, 'Alpha')
-
-    expect(first).toBe('Alpha')
-    expect(second).not.toBe(first)
-    expect(second).toBe('Alpha#2')
-
-    const third = registry.register(null, 'Alpha')
-    expect(third).toBe('Alpha#3')
+    registry.register(null, 'Alpha')
+    try {
+      registry.register(null, 'Alpha')
+    } catch (e) {
+      expect(e).toBeInstanceOf(DuplicateNameError)
+      expect((e as DuplicateNameError).duplicateName).toBe('Alpha')
+      expect((e as DuplicateNameError).parentQualifiedId).toBeNull()
+    }
   })
 
   it('resolves cross-branch same-name nodes to distinct qualified paths', () => {
@@ -47,7 +39,6 @@ describe('identity', () => {
     expect(alphaUnderParent1).toBe('Parent1/Alpha')
     expect(alphaUnderParent2).toBe('Parent2/Alpha')
     expect(alphaUnderParent1).not.toBe(alphaUnderParent2)
-    expect(registry.hasCollisions()).toBe(false)
   })
 
   it('buildQualifiedId joins ancestor chain with Parent/Child', () => {

@@ -35,7 +35,7 @@
           <span
             :class="
               workspaceStore.handle
-                ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-900/30 dark:text-emerald-400'
+                ? 'bg-emerald-50 text-emerald-750 ring-emerald-600/10 dark:bg-emerald-900/30 dark:text-emerald-400'
                 : 'bg-amber-50 text-amber-700 ring-amber-600/10 dark:bg-amber-900/30 dark:text-amber-400'
             "
             class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
@@ -85,9 +85,40 @@
             </p>
           </div>
         </div>
+
+        <!-- Sync / Local Status Card (from Modal) -->
+        <div class="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700 rounded-lg p-3.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-805 dark:text-slate-200">Local Status:</span>
+            <span
+              class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-3xs font-semibold ring-1 ring-inset"
+              :class="workspaceStore.handle
+                ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 ring-emerald-600/20'
+                : 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 ring-amber-600/20'"
+            >
+              {{ workspaceStore.handle ? 'Downloaded & Synced' : 'Loaded from URL (Pending Save)' }}
+            </span>
+          </div>
+          <p class="text-3xs text-slate-500 dark:text-slate-400 leading-normal">
+            {{ workspaceStore.handle
+              ? `This model is loaded from your local directory: "${workspaceStore.handle?.name}". All changes are saved directly to your local file system.`
+              : 'This model is currently loaded directly from a remote GitHub repository URL. Any edits are only in memory and won\'t be saved permanently until you download it.' }}
+          </p>
+          
+          <!-- Instructions for saving -->
+          <div
+            v-if="!workspaceStore.handle"
+            class="border-t border-slate-200 dark:border-slate-700/60 pt-2 mt-2"
+          >
+            <span class="font-bold text-slate-700 dark:text-slate-350 block mb-1">How to save the model:</span>
+            <p class="text-3xs text-slate-500 dark:text-slate-400 leading-normal">
+              Click the <strong class="text-slate-700 dark:text-slate-300">Save</strong> button (or <strong class="text-slate-700 dark:text-slate-300">Ctrl+S</strong>) in the top-right header. You will be prompted to choose a local directory on your device. The editor will then download and save all template and model files into that folder, setting up your offline workspace.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <!-- Right Column: Model Metadata -->
+      <!-- Right Column: File & Metamodel Details (replacing iNNfo Metadata) -->
       <div
         class="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 p-5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-xs space-y-4"
       >
@@ -96,56 +127,125 @@
             class="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2"
           >
             <Settings class="w-4 h-4 text-primary" />
-            iNNfo Metadata
+            File & Metamodel Details
           </h3>
         </div>
 
-        <div class="space-y-3.5 text-xs">
-          <div class="grid grid-cols-2 gap-4">
-            <div
-              class="p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900/50 space-y-1"
-            >
-              <span
-                class="text-slate-500 dark:text-slate-400 block text-xs uppercase font-bold tracking-wider"
-                >Format Version</span
+        <div class="flex flex-col gap-3.5 text-xs">
+          <!-- 1. Spec Info -->
+          <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-900/30">
+            <span class="font-bold text-slate-800 dark:text-slate-200 block mb-1">1. Spec</span>
+            <div class="grid grid-cols-[80px_1fr] gap-x-2 gap-y-1 mt-1.5 font-mono text-3xs text-slate-500">
+              <span class="font-sans font-medium text-slate-400">Filename:</span>
+              <span class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold">{{ specFileName }}</span>
+              
+              <span class="font-sans font-medium text-slate-400">Version:</span>
+              <span class="text-slate-750 dark:text-slate-300 font-semibold">{{ formatVersion }}</span>
+
+              <span class="font-sans font-medium text-slate-400">Remote URL:</span>
+              <a
+                :href="`https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/iNNfo_${formatVersion}_NN.md`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-primary hover:underline break-all select-all font-semibold"
               >
-              <span class="text-xl font-bold text-slate-900 dark:text-slate-100">{{
-                formatVersion
-              }}</span>
-            </div>
-            <div
-              class="p-3 border border-slate-200 dark:border-slate-700 rounded-md bg-slate-50 dark:bg-slate-900/50 space-y-1"
-            >
-              <span
-                class="text-slate-500 dark:text-slate-400 block text-xs uppercase font-bold tracking-wider"
-                >Specification</span
-              >
-              <span class="text-xs font-mono text-primary truncate block mt-1">{{ specUrl }}</span>
+                https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/iNNfo_{{ formatVersion }}_NN.md
+              </a>
+              
+              <span class="font-sans font-medium text-slate-400">Local Path:</span>
+              <span v-if="workspaceStore.handle" class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold">
+                specs/{{ specFileName }}
+              </span>
+              <span v-else class="text-red-555 text-red-500 dark:text-red-400 font-bold">
+                Pending Save / Download
+              </span>
             </div>
           </div>
 
-          <div class="pt-2 divide-y divide-slate-200/60 dark:divide-slate-700/60">
-            <div class="flex justify-between py-2">
-              <span class="text-slate-500 dark:text-slate-400">Template Name:</span>
-              <span class="font-medium text-slate-900 dark:text-slate-100 font-mono">{{
-                templateName
-              }}</span>
+          <!-- 2. Template Info -->
+          <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-900/30">
+            <span class="font-bold text-slate-800 dark:text-slate-200 block mb-1">2. Template</span>
+            <p class="text-3xs text-slate-505 text-slate-500 dark:text-slate-400 leading-normal mb-2 mt-0.5 font-sans">
+              <span v-if="templateRemoteUrl" class="text-slate-500 dark:text-slate-400">
+                <span v-if="workspaceStore.handle">
+                  You are using a local template, downloaded from a remote URL. The model references it in the same folder to guarantee your technological sovereignty—ensuring you always own it and can always use it.
+                </span>
+                <span v-else>
+                  You are currently using a remote template. When you save this model locally, the template will be downloaded to the same folder to guarantee your technological sovereignty—ensuring you always own it and can always use it.
+                </span>
+              </span>
+              <span v-else class="text-slate-500 dark:text-slate-400">
+                This document does not use an external template. Instead, it incorporates both the model and the template within the same file, making it 100% self-contained.
+              </span>
+            </p>
+            <div class="grid grid-cols-[80px_1fr] gap-x-2 gap-y-1 mt-1.5 font-mono text-3xs text-slate-500">
+              <span class="font-sans font-medium text-slate-400">Name:</span>
+              <span class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold">{{ fullTemplateName || '—' }}</span>
+              
+              <span class="font-sans font-medium text-slate-400">Version:</span>
+              <span class="text-slate-750 dark:text-slate-300 font-semibold">{{ templateVersion || '—' }}</span>
+
+              <span class="font-sans font-medium text-slate-400">Remote URL:</span>
+              <template v-if="templateRemoteUrl">
+                <a
+                  :href="templateRemoteUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary hover:underline break-all select-all font-semibold"
+                >
+                  {{ templateRemoteUrl }}
+                </a>
+              </template>
+              <span v-else class="text-slate-750 dark:text-slate-300 break-all select-all">—</span>
+              
+              <template v-if="templateRemoteUrl">
+                <span class="font-sans font-medium text-slate-400">Local Path:</span>
+                <span v-if="workspaceStore.handle" class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold">
+                  specs/{{ templateFileName }}
+                </span>
+                <span v-else class="text-red-555 text-red-500 dark:text-red-400 font-bold">
+                  Pending Save / Download
+                </span>
+              </template>
             </div>
-            <div class="flex justify-between py-2">
-              <span class="text-slate-500 dark:text-slate-400">Template Version:</span>
-              <span class="font-medium text-slate-900 dark:text-slate-100 font-mono">{{
-                templateVersion
-              }}</span>
-            </div>
-            <div class="flex justify-between py-2">
-              <span class="text-slate-500 dark:text-slate-400">Model Version:</span>
-              <span class="font-medium text-slate-900 dark:text-slate-100 font-mono">{{
-                modelVersion
-              }}</span>
-            </div>
-            <div class="flex justify-between py-2">
-              <span class="text-slate-500 dark:text-slate-400">Last Saved:</span>
-              <span class="font-medium text-slate-900 dark:text-slate-100">{{ lastSaved }}</span>
+          </div>
+
+          <!-- 3. Model Info -->
+          <div class="border border-slate-200 dark:border-slate-700 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-900/30">
+            <span class="font-bold text-slate-800 dark:text-slate-200 block mb-1">3. Model</span>
+            <div class="grid grid-cols-[80px_1fr] gap-x-2 gap-y-1 mt-1.5 font-mono text-3xs text-slate-500">
+              <span class="font-sans font-medium text-slate-400">Filename:</span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold">{{ modelFileName }}</span>
+                <button
+                  @click="renameModelFile"
+                  class="p-0.5 rounded text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer"
+                  title="Rename model file"
+                >
+                  <Edit2 class="w-3 h-3" />
+                </button>
+              </div>
+
+              <span class="font-sans font-medium text-slate-400">Version:</span>
+              <span class="text-slate-750 dark:text-slate-300 font-semibold">{{ modelVersion }}</span>
+
+              <span class="font-sans font-medium text-slate-400">Last Saved:</span>
+              <span class="text-slate-750 dark:text-slate-300 font-sans font-semibold">{{ lastSaved }}</span>
+
+              <span class="font-sans font-medium text-slate-400">{{ workspaceStore.handle ? 'Local Path:' : 'Source URL:' }}</span>
+              <template v-if="workspaceStore.handle">
+                <span class="text-slate-750 dark:text-slate-300 break-all select-all font-semibold text-3xs">{{ displayLocalPath }}</span>
+              </template>
+              <template v-else>
+                <a
+                  :href="filePath"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-primary hover:underline break-all select-all font-semibold"
+                >
+                  {{ filePath }}
+                </a>
+              </template>
             </div>
           </div>
         </div>
@@ -306,6 +406,8 @@ import {
   Save,
   ChevronDown,
   ChevronRight,
+  Edit2,
+  Info,
 } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
@@ -322,6 +424,7 @@ import {
   parseFormatFilename,
 } from '../../utils/version'
 import type { BumpLevel, SemVer } from '../../utils/version'
+import { useToast } from '../../shared/useToast'
 
 const props = defineProps<{
   rootNodeId: string
@@ -329,6 +432,7 @@ const props = defineProps<{
 
 const workspaceStore = useWorkspaceStore()
 const modelStore = useModelStore()
+const { show } = useToast()
 
 const showPlainTextView = ref(false)
 
@@ -501,6 +605,85 @@ async function saveVersion(): Promise<void> {
     selectedLevel.value = null
   } catch (err) {
     console.error('Version save failed:', err)
+  }
+}
+
+// ── Spec, Template, and Model details computed properties ──
+
+const filePath = computed(() => {
+  return rootNode.value?.source?.path || ''
+})
+
+const modelFileName = computed(() => {
+  const path = filePath.value || ''
+  if (!path) return 'model.md'
+  return path.split('/').pop()?.split('\\').pop() || path
+})
+
+const specFileName = computed(() => {
+  return `iNNfo_${formatVersion.value}_NN.md`
+})
+
+const templateFileName = computed(() => {
+  const name = fullTemplateName.value
+  if (!name) return ''
+  return name.endsWith('_NN') ? `${name}.md` : `${name}_NN.md`
+})
+
+const templateRemoteUrl = computed(() => {
+  const node = rootNode.value
+  return ((node?.fields?.parent_spec?.value as any)?.url ??
+    (node?.fields?.parent?.value as any)?.url ??
+    '') as string
+})
+
+const fullTemplateName = computed(() => {
+  const name = templateName.value || ''
+  if (!name || name.toLowerCase() === 'template') {
+    return templateVersion.value || DEFAULT_TEMPLATE_VERSION
+  }
+  const hasVersion = /_V_?\d+/i.test(name)
+  if (hasVersion || !templateVersion.value) {
+    return name
+  }
+  return `${name}_${templateVersion.value}`
+})
+
+const displayLocalPath = computed(() => {
+  if (!workspaceStore.handle) return ''
+  const wsName = workspaceStore.handle?.name || ''
+  const fullPath = filePath.value || ''
+  
+  if (!wsName) return fullPath
+  
+  const wsIndex = fullPath.indexOf('/' + wsName + '/')
+  const wsBackslashIndex = fullPath.indexOf('\\' + wsName + '\\')
+  
+  if (wsIndex !== -1) {
+    return '... / ' + wsName + fullPath.slice(wsIndex + wsName.length + 1)
+  } else if (wsBackslashIndex !== -1) {
+    const rel = fullPath.slice(wsBackslashIndex + wsName.length + 1).replace(/\\/g, '/')
+    return '... / ' + wsName + '/' + rel
+  }
+  
+  const parts = fullPath.replace(/\\/g, '/').split('/')
+  if (parts.length > 2) {
+    return '... / ' + parts.slice(-2).join('/')
+  }
+  return '... / ' + fullPath
+})
+
+function renameModelFile(): void {
+  const currentName = modelFileName.value
+  const newName = window.prompt('Enter new filename (e.g. MyModel_NN.md):', currentName)
+  if (newName && newName.trim() && newName !== currentName) {
+    workspaceStore.renameActiveFile(newName.trim())
+      .then(() => {
+        show('Filename updated successfully.', 'success')
+      })
+      .catch((err) => {
+        show(err instanceof Error ? err.message : 'Rename failed', 'error')
+      })
   }
 }
 </script>
