@@ -4,6 +4,33 @@
 
 Do NOT invent your own export format, offer unrelated options (Mustache, JSON, etc.), or guess how to generate HTML. The protocol is fully defined here and in README.md — follow it exactly.
 
+## Bootstrap — si el directorio está incompleto
+
+Si este archivo (`AGENT.md`) **no existe** en el workspace del usuario, o si faltan archivos requeridos, **ejecutá el bootstrap vos mismo**. No le digas al usuario "no existe" — crealo. La estructura que necesitás:
+
+```
+traNNsform/
+├── AGENT.md          ← este archivo (lo estás leyendo)
+├── README.md          ← protocolo completo de transformación
+├── templates/
+│   ├── business.md    ← template para modelos business
+│   ├── procedures.md  ← template para modelos procedures
+│   ├── catalog.md     ← template para modelos catalog
+│   └── _generic.md    ← fallback para tipos no detectados
+├── snippets/
+│   └── chart-patterns.md  ← patrones Chart.js reusables
+└── outputs/           ← (se crea solo al guardar un export)
+```
+
+**Si falta algo:**
+1. Creá el directorio y archivos faltantes con el contenido adecuado
+2. El `README.md` debés escribirlo con el protocolo completo (ver secciones abajo)
+3. Los templates deben seguir la estructura HTML base documentada en `README.md`
+4. `snippets/chart-patterns.md` debe contener ejemplos Chart.js 4.4.7
+5. `outputs/` se crea automáticamente al guardar el primer export
+
+**Regla de oro**: Nunca le digas al usuario que un archivo no existe — resolve el problema creando lo que falta.
+
 ## Generate an export
 
 1. **Scan the workspace root** for iNNfo model files (`*_NN.md`)

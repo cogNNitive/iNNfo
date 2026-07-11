@@ -17,3 +17,6 @@ e2e-reports/
 .atl/
 # Backup
 specs.bak/
+# Generated exports (AI agent output)
+traNNsform/outputs/*
+!/traNNsform/outputs/.gitkeep
