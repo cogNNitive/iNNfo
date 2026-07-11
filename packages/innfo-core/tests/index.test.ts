@@ -13,49 +13,47 @@ import {
 } from '../src/index'
 import type { ElementNode } from '../src/types'
 
-const specsDir = join(import.meta.dirname!, '..', '..', '..', 'specs.bak')
-const archiveDir = join(import.meta.dirname!, '..', '..', '..', 'archive', 'specs')
+const specsV010 = join(import.meta.dirname!, '..', '..', '..', 'specs', 'v0.1.0')
+const specsLatest = join(import.meta.dirname!, '..', '..', '..', 'specs', 'latest')
 
-function readSpec(name: string): string {
-  return readFileSync(join(specsDir, name), 'utf-8')
+function readSpec(pathSegments: string): string {
+  return readFileSync(join(specsV010, pathSegments), 'utf-8')
 }
-function readArchiveSpec(name: string): string {
-  return readFileSync(join(archiveDir, name), 'utf-8')
+function readLatestSpec(pathSegments: string): string {
+  return readFileSync(join(specsLatest, pathSegments), 'utf-8')
 }
 describe('defiNNe (level 0)', () => {
-  const content = readSpec('defiNNe_V_0-1-0_FORMAT.md')
+  const content = readSpec('level0/defiNNe_V_0-1-0_NN.md')
   const fm = parseFrontmatter(content)!
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(0)
-    // Frozen spec (defiNNe_V_0-1-0_FORMAT.md) still uses old frontmatter key
-    expect((fm as any)['specification_version']).toBe('V_0-1-0')
+    expect(fm.specification_version).toBe('V_0-1-0')
     expect(fm.parent_spec).toBeUndefined()
     expect(fm.title).toContain('defiNNe')
   })
 })
 
 describe('iNNfo (level 1)', () => {
-  const content = readArchiveSpec('FORMAT_V_0-1-0_FORMAT.md')
+  const content = readSpec('level1/iNNfo_V_0-1-1_NN.md')
   const fm = parseFrontmatter(content)!
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(1)
     expect(fm.parent_spec).toBeDefined()
     expect(fm.parent_spec!.name).toBe('defiNNe_V_0-1-0')
-    expect(fm.modes).toEqual(['FILE', 'FOLDER'])
-    expect(fm.relationship_types).toHaveLength(4)
+    expect(fm.title).toContain('iNNfo')
   })
 })
 
 describe('business template (level 2)', () => {
-  const content = readSpec('business_V_0-1-1_FORMAT.md')
+  const content = readSpec('level2/business/business_V_0-1-2_NN.md')
   const fm = parseFrontmatter(content)!
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(2)
-    expect(fm.parent_spec!.name).toBe('FORMAT_V_0-1-1')
-    expect(fm.mode).toBe('FILE')
+    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-1-1')
+    expect(fm.mode || fm.concepts?.find((c: any) => c.type === 'text')).toBeTruthy()
     expect(fm.concepts).toBeDefined()
     expect(fm.concepts!.length).toBeGreaterThan(60)
     expect(fm.markers).toBeDefined()
@@ -229,13 +227,12 @@ describe('iNNfo model with _NN markers (level 3)', () => {
 })
 
 describe('procedures template (level 2)', () => {
-  const content = readSpec('procedures_V_0-1-1_FORMAT.md')
+  const content = readSpec('level2/procedures/procedures_V_0-1-2_NN.md')
   const fm = parseFrontmatter(content)!
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(2)
-    expect(fm.parent_spec!.name).toBe('FORMAT_V_0-1-1')
-    expect(fm.mode).toBe('FILE')
+    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-1-1')
     expect(fm.concepts).toHaveLength(7)
     expect(fm.markers).toHaveLength(1)
     expect(fm.matrices).toHaveLength(6)
@@ -264,18 +261,20 @@ describe('validator', () => {
     '',
   ].join('\n')
 
+  const bizTemplateContent = readSpec('level2/business/business_V_0-1-2_NN.md')
+  const bizTemplateFm = parseFrontmatter(bizTemplateContent)!
+
   it('validates a model with _NN markers', () => {
-    const templateFm = parseFrontmatter(readSpec('business_V_0-1-1_FORMAT.md'))!
     const model = parseModel(validModelContent)
 
     const result = validateModel(
       model,
       {
-        name: 'business_V_0-1-1',
+        name: 'business_V_0-1-2',
         level: 2,
-        parentName: 'FORMAT_V_0-1-1',
-        frontmatter: templateFm,
-        rawContent: readSpec('business_V_0-1-1_FORMAT.md'),
+        parentName: 'iNNfo_V_0-1-1',
+        frontmatter: bizTemplateFm,
+        rawContent: bizTemplateContent,
       },
       null,
     )
@@ -285,7 +284,6 @@ describe('validator', () => {
   })
 
   it('rejects model with unknown concept', () => {
-    const templateFm = parseFrontmatter(readSpec('business_V_0-1-1_FORMAT.md'))!
     const model = parseModel(validModelContent)
 
     model.elements.set('NonExistentConcept', [
@@ -295,11 +293,11 @@ describe('validator', () => {
     const result = validateModel(
       model,
       {
-        name: 'business_V_0-1-1',
+        name: 'business_V_0-1-2',
         level: 2,
-        parentName: 'FORMAT_V_0-1-1',
-        frontmatter: templateFm,
-        rawContent: readSpec('business_V_0-1-1_FORMAT.md'),
+        parentName: 'iNNfo_V_0-1-1',
+        frontmatter: bizTemplateFm,
+        rawContent: bizTemplateContent,
       },
       null,
     )

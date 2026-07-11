@@ -398,11 +398,23 @@ function parseArgs() {
 }
 
 function main() {
-  const { version, byType, checkMode, inventory, includeArchives } = parseArgs()
+  const { version, byType, checkMode, inventory, includeArchives, checkUrls } = parseArgs()
 
   const allFiles = collectFiles(ROOT, includeArchives).filter(
     (f) => f.endsWith('.md') || f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue'),
   )
+
+  if (checkUrls) {
+    const sourceFiles = allFiles.filter(
+      (f) =>
+        (f.endsWith('.ts') || f.endsWith('.vue')) &&
+        !f.endsWith('.test.ts') &&
+        !f.endsWith('.spec.ts'),
+    )
+    const broken = scanUrls(sourceFiles)
+    printUrlResults(broken)
+    process.exit(broken.length > 0 ? 1 : 0)
+  }
 
   if (inventory) {
     const versionMap = categorizeByVersion(allFiles)
@@ -411,7 +423,7 @@ function main() {
   }
 
   if (!version) {
-    console.error('Required: --version V_x-y-z  or  --inventory')
+    console.error('Required: --version V_x-y-z  --inventory  or  --check-urls')
     console.error('  e.g.  node scripts/check-spec-version.mjs --version V_0-1-2')
     process.exit(1)
   }

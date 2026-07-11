@@ -13,14 +13,54 @@
     ></div>
 
     <div class="px-3 py-4 space-y-4">
-      <!-- Graph View button -->
-      <button
-        class="w-full flex items-center gap-2 rounded-md px-3 py-2 text-xs transition-all text-left cursor-pointer text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 border border-transparent"
-        @click="uiStore.setActiveView('graph')"
-      >
-        <LayoutDashboard class="w-4 h-4" />
-        <span>Graph View</span>
-      </button>
+      <!-- Navigation views -->
+      <div class="space-y-0.5">
+        <!-- Editor View button -->
+        <button
+          class="w-full flex items-center gap-2 rounded-md px-3 py-2 text-xs transition-all text-left cursor-pointer border border-transparent capitalize"
+          :class="
+            uiStore.activeView === 'editor'
+              ? 'bg-slate-200/60 dark:bg-slate-800/80 text-primary font-semibold shadow-2xs'
+              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'
+          "
+          @click="uiStore.setActiveView('editor')"
+          data-testid="view-switcher-editor"
+        >
+          <FileText class="w-4 h-4" />
+          <span>editor</span>
+        </button>
+
+        <!-- Graph View button -->
+        <button
+          class="w-full flex items-center gap-2 rounded-md px-3 py-2 text-xs transition-all text-left cursor-pointer border border-transparent capitalize"
+          :class="
+            uiStore.activeView === 'graph'
+              ? 'bg-slate-200/60 dark:bg-slate-800/80 text-primary font-semibold shadow-2xs'
+              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'
+          "
+          @click="uiStore.setActiveView('graph')"
+          data-testid="view-switcher-graph"
+        >
+          <LayoutDashboard class="w-4 h-4" />
+          <span>graph</span>
+        </button>
+
+        <!-- Matrices View button -->
+        <button
+          class="w-full flex items-center gap-2 rounded-md px-3 py-2 text-xs transition-all text-left cursor-pointer border border-transparent capitalize"
+          :class="
+            uiStore.activeView === 'matrices'
+              ? 'bg-slate-200/60 dark:bg-slate-800/80 text-primary font-semibold shadow-2xs'
+              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200'
+          "
+          @click="uiStore.setActiveView('matrices')"
+          data-testid="view-switcher-matrices"
+        >
+          <Table2 class="w-4 h-4" />
+          <span>matrices</span>
+        </button>
+      </div>
+
 
       <!-- Header with expand/collapse all + ghost filter -->
       <div class="flex items-center justify-between px-2">
@@ -66,30 +106,34 @@
       <!-- Tree section: complete-only or merged all -->
       <div class="space-y-0.5">
         <template v-if="ghostFilterMode === 'model'">
-          <!-- Complete only: real tree, no ghosts -->
-          <ConceptTreeNode
-            v-for="root in roots"
-            :key="root.id"
-            :node-id="root.id"
-            :selected-id="selectedId"
-            :depth="0"
-            :expanded-generation="expandedGeneration"
-            group-by-concept
-            @select="(id: string) => $emit('select-node', id)"
-          />
+          <!-- Complete only: non-ghost concepts, nested by _NN index -->
+          <div v-for="item in conceptTreeRoots" :key="item.name">
+            <VirtualGroupNode
+              :concept-name="item.name"
+              :elements="item.elements"
+              :sub-groups="item.children"
+              :selected-id="selectedId"
+              :depth="0"
+              :expanded-generation="expandedGeneration"
+              :ghost="false"
+              @select="(id: string) => $emit('select-node', id)"
+              @click-ghost="handleClickGhost"
+            />
+          </div>
           <p
-            v-if="roots.length === 0"
+            v-if="conceptTreeRoots.length === 0"
             class="px-2 py-4 text-xs text-slate-400 dark:text-slate-500 italic text-center"
           >
             No nodes loaded
           </p>
         </template>
         <template v-else>
-          <!-- Merged: present + ghost concepts sorted by template order -->
+          <!-- Merged: all concepts including ghosts, nested by _NN index -->
           <div v-for="item in mergedConcepts" :key="item.name">
             <VirtualGroupNode
               :concept-name="item.name"
-              :children="item.children"
+              :elements="item.elements"
+              :sub-groups="item.children"
               :selected-id="selectedId"
               :depth="0"
               :expanded-generation="expandedGeneration"
@@ -158,6 +202,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { ModelNode } from '../../model/types'
+import { parseModel } from '@innv0/innfo-core'
 import {
   ChevronsDown,
   ChevronsUp,
@@ -165,13 +210,14 @@ import {
   ChevronRight,
   Table2,
   Settings,
+  FileText,
 } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useMetamodelStore } from '../../stores/metamodelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { useResizablePanel } from '../../composables/useResizablePanel'
 import ConceptTreeNode from './ConceptTreeNode.vue'
-import VirtualGroupNode from './VirtualGroupNode.vue'
+import VirtualGroupNode, { type TreeGroup } from './VirtualGroupNode.vue'
 import MatrixPill from '../editor/MatrixPill.vue'
 
 const emit = defineEmits<{
@@ -192,26 +238,13 @@ const { width, startResize } = useResizablePanel({
   side: 'right',
 })
 
-const roots = computed(() =>
-  modelStore.getRoots().filter((r) => r.sourceMode !== 'structural'),
-)
-
 const ghostFilterMode = computed(() => uiStore.ghostFilterMode)
 
 function toggleGhostFilter(): void {
   uiStore.setGhostFilterMode(ghostFilterMode.value === 'model' ? 'all' : 'model')
 }
 
-interface MergedConceptItem {
-  name: string
-  ghost: boolean
-  children: ModelNode[]
-}
-
-const mergedConcepts = computed<MergedConceptItem[]>(() => {
-  const items: MergedConceptItem[] = []
-  const seen = new Set<string>()
-
+const mergedConcepts = computed<TreeGroup[]>(() => {
   // Collect children per concept type from all model nodes
   const childrenByType = new Map<string, ModelNode[]>()
   for (const node of Object.values(modelStore.nodes)) {
@@ -222,30 +255,121 @@ const mergedConcepts = computed<MergedConceptItem[]>(() => {
     }
   }
 
-  for (const concept of metamodelStore.concepts) {
-    if (seen.has(concept.name)) continue
-    seen.add(concept.name)
-    const children = childrenByType.get(concept.name) ?? []
-    const isPresent =
-      children.length > 0 ||
-      (concept.type === 'text' &&
-        // text concepts: check rawSections on root nodes
-        modelStore.rootIds.some((rid) => {
-          const root = modelStore.getNode(rid)
-          return (
-            root?.rawSections &&
-            Object.keys(root.rawSections).some(
-              (k) => k.toLowerCase() === concept.name.toLowerCase(),
-            )
+  // Helper: check if a concept has content (elements or text section) in the model
+  function hasContent(conceptName: string): boolean {
+    if ((childrenByType.get(conceptName)?.length ?? 0) > 0) return true
+    const concept = metamodelStore.getConceptByName(conceptName)
+    if (concept?.type === 'text') {
+      return modelStore.rootIds.some((rid) => {
+        const root = modelStore.getNode(rid)
+        return (
+          root?.rawSections &&
+          Object.keys(root.rawSections).some(
+            (k) => k.toLowerCase() === conceptName.toLowerCase(),
           )
-        }))
-    items.push({ name: concept.name, ghost: !isPresent, children })
+        )
+      })
+    }
+    return false
   }
 
-  // Sort by template declaration order (from metamodelStore.concepts)
-  const orderIndex = new Map(metamodelStore.concepts.map((c, i) => [c.name, i]))
-  items.sort((a, b) => (orderIndex.get(a.name) ?? 999) - (orderIndex.get(b.name) ?? 999))
+  // Parse _NN index taxonomy from ALL root models
+  let allTaxonomyEdges: Array<{ parent: string; child: string }> = []
+  for (const rootId of modelStore.rootIds) {
+    const root = modelStore.getNode(rootId)
+    if (root?.rawContent) {
+      try {
+        const parsed = parseModel(root.rawContent)
+        allTaxonomyEdges.push(...(parsed.taxonomy ?? []))
+      } catch {
+        // Silently fall back
+      }
+    }
+  }
+
+  // Build taxonomy tree: parent → children names
+  const taxonomyChildren = new Map<string, string[]>()
+  const allChildren = new Set<string>()
+  for (const e of allTaxonomyEdges) {
+    const list = taxonomyChildren.get(e.parent) ?? []
+    list.push(e.child)
+    taxonomyChildren.set(e.parent, list)
+    allChildren.add(e.child)
+  }
+
+  // Roots = parents that are never a child in the taxonomy
+  const taxonomyRoots =
+    [...taxonomyChildren.keys()].filter((p) => !allChildren.has(p))
+
+  // Build a recursive tree from taxonomy edges
+  function buildTree(name: string): TreeGroup {
+    const directElements = childrenByType.get(name) ?? []
+    const kids = taxonomyChildren.get(name) ?? []
+    const subGroups: TreeGroup[] = []
+    for (const k of kids) {
+      subGroups.push(buildTree(k))
+    }
+
+    // A node has content if it has direct elements, a text section, or any descendant has content
+    const isPresent = hasContent(name) || subGroups.some((s) => !s.ghost)
+
+    return {
+      name,
+      ghost: !isPresent,
+      elements: directElements,
+      children: subGroups,
+    }
+  }
+
+  const templateByName = new Map(metamodelStore.concepts.map((c) => [c.name, c]))
+  const templateOrder = new Map(metamodelStore.concepts.map((c, i) => [c.name, i]))
+  const seen = new Set<string>()
+  const items: TreeGroup[] = []
+
+  // Walk taxonomy roots preserving index order
+  for (const root of taxonomyRoots) {
+    walkTaxonomy(root)
+  }
+
+  // Append template concepts not in the taxonomy
+  for (const [cname] of templateByName) {
+    if (!seen.has(cname)) {
+      seen.add(cname)
+      items.push({
+        name: cname,
+        ghost: !hasContent(cname),
+        elements: childrenByType.get(cname) ?? [],
+        children: [],
+      })
+    }
+  }
+
+  // Stable sort
+  const orderedTaxonomyRoots = new Map(taxonomyRoots.map((r, i) => [r, i]))
+  items.sort((a, b) => {
+    const ia = orderedTaxonomyRoots.get(a.name) ?? 99999
+    const ib = orderedTaxonomyRoots.get(b.name) ?? 99999
+    if (ia !== ib) return ia - ib
+    return (templateOrder.get(a.name) ?? 999) - (templateOrder.get(b.name) ?? 999)
+  })
+
   return items
+
+  function walkTaxonomy(name: string): void {
+    if (seen.has(name)) return
+    seen.add(name)
+    const isTemplateConcept = metamodelStore.getConceptByName(name) !== undefined
+    if (isTemplateConcept) {
+      items.push(buildTree(name))
+    }
+    const kids = taxonomyChildren.get(name) ?? []
+    for (const k of kids) walkTaxonomy(k)
+  }
+})
+
+// Complete-only: filtered to non-ghost items
+const conceptTreeRoots = computed<TreeGroup[]>(() => {
+  return mergedConcepts.value.filter((item) => !item.ghost)
 })
 
 function handleClickGhost(conceptName: string): void {

@@ -327,6 +327,10 @@ async function runValidation(): Promise<void> {
 
 /** Resets the workspace and returns to home. */
 function closeWorkspace(): void {
+  if (modelStore.dirtyIds.size > 0) {
+    const confirmLeave = confirm('Tenés cambios sin guardar. ¿Estás seguro de que querés salir?')
+    if (!confirmLeave) return
+  }
   workspaceStore.reset()
   modelStore.setGraph({}, [])
   uiStore.selectNode(null)
@@ -351,18 +355,28 @@ async function onKeydown(e: KeyboardEvent): Promise<void> {
   }
 }
 
+function onBeforeUnload(e: BeforeUnloadEvent): string | void {
+  if (modelStore.dirtyIds.size > 0) {
+    e.preventDefault()
+    e.returnValue = 'Tenés cambios sin guardar. ¿Estás seguro de que querés salir?'
+    return e.returnValue
+  }
+}
+
 onMounted(() => {
   window.addEventListener('keydown', onKeydown)
+  window.addEventListener('beforeunload', onBeforeUnload)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
+  window.removeEventListener('beforeunload', onBeforeUnload)
 })
 </script>
 
 <template>
   <div class="flex flex-col h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-    <Header />
+    <Header @close-workspace="closeWorkspace" />
 
     <div class="flex flex-1 overflow-hidden">
       <LeftSidebar
@@ -372,52 +386,6 @@ onUnmounted(() => {
       />
 
       <main class="flex-1 flex flex-col overflow-y-auto min-w-0">
-        <!-- Toolbar -->
-        <div
-          class="flex items-center gap-2 px-4 py-2 border-b border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60"
-        >
-          <button
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all cursor-pointer"
-            @click="closeWorkspace"
-          >
-            &larr; Home
-          </button>
-
-          <!-- View switcher -->
-          <div class="flex items-center gap-1 px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800">
-            <button
-              v-for="view in ['editor', 'graph', 'matrices'] as const"
-              :key="view"
-              :data-testid="'view-switcher-' + view"
-              class="px-2.5 py-1 text-xs font-medium rounded transition-all cursor-pointer capitalize"
-              :class="
-                uiStore.activeView === view
-                  ? 'bg-white dark:bg-slate-700 text-primary shadow-xs'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              "
-              @click="setActiveView(view)"
-            >
-              {{ view }}
-            </button>
-          </div>
-
-          <button
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-primary bg-white dark:bg-slate-800 text-primary hover:bg-primary hover:text-white dark:hover:bg-primary/90 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="!selectedNodeId || validating"
-            @click="runValidation"
-          >
-            {{ validating ? 'Validating\u2026' : 'Validate' }}
-          </button>
-
-          <span class="text-xs text-slate-400 dark:text-slate-500 ml-auto">
-            {{
-              selectedNodeId
-                ? `Selected: ${modelStore.getNode(selectedNodeId)?.name ?? selectedNodeId}`
-                : 'No node selected'
-            }}
-          </span>
-        </div>
-
         <!-- ── Editor View ── -->
         <template v-if="uiStore.activeView === 'editor'">
           <div

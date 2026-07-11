@@ -136,6 +136,23 @@ function normalizeElementsIntoGraph(
     }
   }
 
+  // Re-sort elements by their position in the _NN index (if present).
+  // The index defines both hierarchy AND display order; elements not listed
+  // in the index get a high sort value so they appear after indexed ones.
+  if (parsed.taxonomy.length > 0) {
+    const indexOrder = new Map<string, number>()
+    let orderIdx = 0
+    for (const edge of parsed.taxonomy) {
+      if (!indexOrder.has(edge.parent)) indexOrder.set(edge.parent, orderIdx++)
+      if (!indexOrder.has(edge.child)) indexOrder.set(edge.child, orderIdx++)
+    }
+    allElements.sort((a, b) => {
+      const oa = indexOrder.get(a.name) ?? 99999
+      const ob = indexOrder.get(b.name) ?? 99999
+      return oa - ob
+    })
+  }
+
   // First pass: elements whose taxonomy parent has no listed parent themselves
   // (i.e. top-level relative to this document) get created first, so their
   // qualifiedId is available for children referencing them via taxonomy.
