@@ -7,20 +7,17 @@ parent_spec:
   url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "Procedures Template"
 concepts:
-  - name: "Procedure"
-    icon: "file-text"
-    type: "text"
-    color: "blue"
-    weight: 100
   - name: "Work"
     icon: "list-ordered"
-    type: "sequence"
+    type: "list"
     color: "blue"
-    weight: 90
+    weight: 100
     fields:
       - name: "step_type"
         type: "select"
         options: ["task", "decision", "event"]
+      - name: "parent"
+        type: "string"
       - name: "next"
         type: "string"
       - name: "condition"
@@ -98,11 +95,11 @@ matrices:
 
 ## Philosophy
 
-The Procedures Template is designed for modeling repeatable workflows with clear accountability. It follows the belief that any procedure can be understood as a sequence of steps, each producing or consuming artifacts, assigned to roles via a RACI matrix, and supported by tools. The template emphasizes traceability — every work step declares its inputs, outputs, and the roles responsible for it.
+The Procedures Template is designed for modeling repeatable workflows with clear accountability. It follows the belief that any procedure can be understood as a hierarchical tree of procedures and steps, each producing or consuming artifacts, assigned to roles via a RACI matrix, and supported by tools. Work elements form a tree: root elements (no `parent`) define a procedure, child elements (`parent` set) define its steps. The template emphasizes traceability — every work step declares its inputs, outputs, parent procedure, and the roles responsible for it.
 
 ## Objectives
 
-- Provide a complete set of concepts for workflow modeling: sequenced steps (Work), produced artifacts (Artifact), supporting tools (Tools), and functional roles (Roles).
+- Provide a complete set of concepts for workflow modeling: hierarchical procedures and steps (Work), produced artifacts (Artifact), supporting tools (Tools), and functional roles (Roles).
 - Enable RACI accountability mapping via evaluable matrices (Work ↔ Roles).
 - Support sequential step definitions with conditional branching, tool assignment, and artifact I/O.
 - Serve as the default template for procedure and process modeling in the iNNfo ecosystem.
@@ -113,8 +110,7 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 
 | Concept | Type | Purpose |
 |---|---|---|
-| **Procedure** | `text` | Free-form description of the overall procedure |
-| **Work** | `sequence` | Ordered list of steps; each step has fields for type, next, condition, I/O, tool |
+| **Work** | `list` | Hierarchical tree of procedures and steps. Root elements (no `parent`) = procedure; child elements (`parent` set) = step. Each element has fields for step_type, parent, next, condition, I/O, tool |
 | **Artifact** | `list` | Documents, deliverables, or data produced or consumed by work steps |
 | **Tools** | `list` | Software or hardware used to execute work steps |
 | **Roles** | `list` | Functional roles with accountability scope (internal/external) |
@@ -139,10 +135,10 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 
 | Type | Enabled | Representation |
 |---|---|---|
-| Hierarchy | ❌ | Not applicable |
+| Hierarchy | ✅ | Implicit via Work `parent` field — root elements are procedures, children are steps |
 | Evaluable matrix | ✅ | Source→target tables with RACI params |
 | Graph edge | ❌ | Not applicable |
-| Sequence | ✅ | Work concept type `sequence` with numbered steps |
+| Sequence | ✅ | Via Work `next` field — hand-linked order between siblings at same level |
 
 ## Template
 
@@ -166,19 +162,20 @@ title: "<Procedure Name>"
 > This is an **iNNfo document**...
 
 # _NN index
-* [[Procedure]]
 * [[Work]]
 * [[Artifact]]
 * [[Tools]]
 * [[Roles]]
 
 
-# _NN Procedure
-Description of the overall procedure.
-
 # _NN Work
+* _NN Work: Procedure Name
+  next: "Next Procedure Name"
+  Description of the overall procedure.
+
 * _NN Work: Step Name
   ```yaml
+  parent: "Procedure Name"
   step_type: "task"
   next: "Next Step Name"
   tool: "Tool Name"
@@ -199,7 +196,7 @@ Description of the overall procedure.
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises all concept types (text, sequence, list), YAML element fields, and the `work-roles` RACI matrix.
+The official sample for this template is at `specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), YAML element fields (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
 
 ### Model Directory after First Load
 
@@ -231,27 +228,13 @@ parent_spec:
 
 # Concept Guidance Documentation
 
-## Procedure
-
-### Summary
-The overall workflow this model describes.
-
-### Description
-Brief explanation of the procedure goals.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
 ## Work
 
 ### Summary
-The ordered steps, decisions, and events of the workflow.
+Hierarchical tree of procedures and their steps. Root elements (no `parent`) represent procedures; child elements (with `parent`) represent individual steps.
 
 ### Description
-Sequence of actions, decisions, and events in the workflow. Work items can reference artifacts as inputs and outputs, and tools as resources.
+Procedures and their ordered steps form a tree: root elements describe the procedure, child elements are the steps. Root elements use `next` to order procedures, child elements use `next` to order steps within a parent. All Work items can reference artifacts as inputs and outputs (`input`, `output`), and tools as resources (`tool`).
 
 ### Methodologies
 *No methodologies provided.*
