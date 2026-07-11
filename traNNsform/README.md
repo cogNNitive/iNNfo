@@ -24,6 +24,25 @@ Instrucciones maestras para el agente. Cuando el usuario pase un modelo iNNfo (`
    - Usá el `source-badge` en el header apuntando al filename
    - La fuente usa `_NN` markers y frontmatter YAML
 
+## Post-generación — ciclo de feedback
+
+Después de generar el HTML y confirmar al usuario:
+
+1. **Preguntá**: "¿Querés modificar algo? (layout, charts, secciones, colores…)"
+2. **Si el usuario pide cambios**:
+   a) Aplicá las modificaciones al HTML
+   b) **Preguntá**: "¿Actualizo la plantilla en `traNNsform/templates/` para que futuras exportaciones incluyan estos cambios?"
+   c) **Si acepta**, mostrá una lista numerada de los cambios, ej:
+      ```
+      1. Agregado radar chart a Overview
+      2. Cambiada matriz de heatmap a bar chart
+      3. Eliminado sidebar de navegación
+      ```
+      Preguntá: "¿Qué cambios conservo en la plantilla? (ej: 1,2 / all / none)"
+   d) Aplicá los cambios seleccionados al archivo `traNNsform/templates/<template>.md`
+   e) Regenerá el HTML con la plantilla actualizada
+3. Confirmá la ruta final y ofrecé repetir el ciclo si es necesario
+
 ## Estructura de templates
 
 Cada template en `templates/` define:

@@ -150,30 +150,25 @@
         </div>
 
         <div v-else class="space-y-3">
-          <div v-if="hasMultipleModels" class="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/30 rounded-lg px-4 py-3">
-            <p class="text-xs text-amber-700 dark:text-amber-400">
-              <strong>Multiple models detected.</strong> The prompt below targets "{{ modelFilename }}".
-              If you want to transform a different model, edit the filename in the prompt or tell your agent.
-            </p>
-          </div>
           <p class="text-xs text-slate-500 dark:text-slate-400">
-            Copy this prompt into your AI agent to transform <strong>{{ modelFilename }}</strong> into {{ exportFormat }}:
-          </p>
-          <p v-if="workspaceDirName" class="text-xs text-slate-400 dark:text-slate-500">
-            Make sure your AI agent's workspace is set to the <code class="text-2xs bg-slate-100 dark:bg-slate-800 px-1 rounded">{{ workspaceDirName }}</code> folder.
+            Tell your AI agent:
           </p>
           <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
             <div class="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-700">
-              <code class="block text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap font-mono">{{ exportPrompt }}</code>
+              <code class="block text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap font-mono">Generate an export for {{ modelFilename }}</code>
             </div>
             <div class="flex items-center justify-end gap-2 px-4 py-2 bg-white dark:bg-slate-900">
               <button @click="copyExportPrompt"
                 class="inline-flex items-center gap-1.5 text-2xs font-medium px-3 py-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors cursor-pointer">
                 <Copy class="w-3 h-3" />
-                Copy prompt
+                Copy
               </button>
             </div>
           </div>
+          <p class="text-xs text-slate-400 dark:text-slate-500">
+            The agent will read <code class="text-2xs bg-slate-100 dark:bg-slate-800 px-1 rounded">traNNsform/AGENT.md</code> for full instructions.
+            After generating, check the <strong>Navigator</strong> view to see your export.
+          </p>
         </div>
       </section>
 
@@ -186,7 +181,6 @@ import { ref, computed, onMounted } from 'vue'
 import { Wrench, ExternalLink, ListOrdered, Lightbulb, PanelRightOpen, FileOutput, Copy, AlertTriangle, Loader } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
-import { parseFormatFilename } from '../../utils/version'
 
 const workspaceStore = useWorkspaceStore()
 const modelStore = useModelStore()
@@ -198,87 +192,13 @@ const downloadError = ref(false)
 const TRANSFORM_BASE_URL = 'https://raw.githubusercontent.com/innV0/cogNNitive/main/traNNsform'
 const transformRepoUrl = 'https://github.com/innV0/cogNNitive/tree/main/traNNsform'
 
-/** Returns the template name for the current model, normalized. */
-const modelTemplateName = computed(() => {
-  const rootId = modelStore.rootIds[0]
-  if (!rootId) return null
-  const rootNode = modelStore.getNode(rootId)
-  if (!rootNode?.source?.path) return null
-  const parsed = parseFormatFilename(rootNode.source.path)
-  return parsed?.templateName ?? null
-})
-
-/** Returns the model filename for prompt context. */
+/** Returns the model filename for display. */
 const modelFilename = computed(() => {
   const rootId = modelStore.rootIds[0]
-  if (!rootId) return 'the current model'
+  if (!rootId) return 'your model'
   const rootNode = modelStore.getNode(rootId)
   const path = rootNode?.source?.path
-  return path?.split(/[/\\]/).pop() ?? 'the current model'
-})
-
-/** Returns the workspace directory name from the FSA handle. */
-const workspaceDirName = computed(() => {
-  return workspaceStore.handle?.name ?? null
-})
-
-/** True when multiple root models are loaded in the workspace. */
-const hasMultipleModels = computed(() => modelStore.rootIds.length > 1)
-
-/** Returns a list of all model filenames (for multi-model context). */
-const allModelFilenames = computed(() => {
-  return modelStore.rootIds
-    .map((id) => {
-      const node = modelStore.getNode(id)
-      return node?.source?.path?.split(/[/\\]/).pop()
-    })
-    .filter(Boolean)
-})
-
-const exportFormat = computed(() => {
-  const tmpl = modelTemplateName.value
-  if (tmpl === 'procedures') return 'a flowchart-based procedure visualizer'
-  if (tmpl === 'catalog') return 'a catalog explorer'
-  if (tmpl === 'business') return 'a business model visualizer'
-  return 'an HTML visualizer'
-})
-
-const exportPrompt = computed(() => {
-  const file = modelFilename.value
-  const tmpl = modelTemplateName.value ?? 'generic'
-  const dir = workspaceDirName.value
-
-  const lines: string[] = []
-
-  // Context header
-  if (dir) {
-    lines.push(`Workspace path: ./${dir}/`)
-  }
-  if (hasMultipleModels.value) {
-    const models = allModelFilenames.value.join(', ')
-    lines.push(`Models in this workspace: ${models}`)
-  }
-  lines.push('')
-
-  // Main instruction
-  lines.push(`Transform "${file}" to HTML using the traNNsform templates.`)
-
-  if (hasMultipleModels.value) {
-    lines.push('')
-    lines.push('⚠️ There are multiple models. If "${file}" is not the one you want, ask the user which model to transform.')
-  }
-
-  lines.push('')
-  lines.push('Steps:')
-  lines.push(`1. Your workspace directory is the project root (${dir || 'the same folder as this prompt source'}). Find "${file}" there.`)
-  lines.push(`2. Apply the template from traNNsform/templates/${tmpl}.md`)
-  lines.push('3. Use chart patterns from traNNsform/snippets/chart-patterns.md')
-  lines.push("4. Place the output HTML in traNNsform/outputs/ with the naming convention: <ModelBaseName>_V<version>_<templateName>_visualizer.html")
-  lines.push("5. Include a <script id=\"export-meta\" type=\"application/json\"> block inside the <head> with modelName, modelVersion, templateName, and exportedAt fields")
-  lines.push('')
-  lines.push('Follow the traNNsform/README.md for full instructions.')
-
-  return lines.join('\n')
+  return path?.split(/[/\\]/).pop() ?? 'your model'
 })
 
 /** Check if traNNsform/ exists in the workspace, try to download if not. */
@@ -339,9 +259,9 @@ async function ensureTemplates(): Promise<void> {
   }
 }
 
-/** Copies the export prompt to clipboard. */
+/** Copies the export instruction to clipboard. */
 function copyExportPrompt(): void {
-  const text = exportPrompt.value
+  const text = `Generate an export for ${modelFilename.value}`
   navigator.clipboard.writeText(text).catch(() => {
     const ta = document.createElement('textarea')
     ta.value = text
