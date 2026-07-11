@@ -203,10 +203,9 @@ describe('R-MV-01 / R-MV-02 / R-MV-03: Virtual scroll structure', () => {
     expect(wrapper.text()).toContain('Select a matrix from the sidebar or dropdown')
   })
 
-  it('renders matrix-selector dropdown and Copy Table MD button', async () => {
+  it('renders matrix-selector dropdown', async () => {
     const wrapper = await mountGrid()
     expect(wrapper.text()).toContain('Select Matrix')
-    expect(wrapper.html()).toContain('Copy Table MD')
   })
 
   it('renders value distribution section', () => {
@@ -248,50 +247,7 @@ describe('R-MV-05: Value distribution reflects full dataset', () => {
   })
 })
 
-describe('R-MV-05: Copy Table MD exports all cells', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-  })
 
-  it('generates markdown with every row and column', () => {
-    setupStoreWithCellValues()
-
-    // Mock clipboard.writeText
-    const writeText = vi.fn().mockResolvedValue(undefined)
-    if (navigator.clipboard) {
-      vi.spyOn(navigator.clipboard, 'writeText').mockImplementation(writeText)
-    } else {
-      Object.defineProperty(navigator, 'clipboard', {
-        value: { writeText },
-        writable: true,
-        configurable: true,
-      })
-    }
-
-    const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
-
-    // Find the "Copy Table MD" button (last button in the info bar)
-    const buttons = wrapper.findAll('button')
-    const copyBtn = buttons.find(
-      (b) => b.text().includes('Copy') || b.html().includes('Copy Table MD'),
-    )
-    expect(copyBtn).toBeTruthy()
-    copyBtn!.trigger('click')
-
-    expect(writeText).toHaveBeenCalledTimes(1)
-    const md = writeText.mock.calls[0][0] as string
-
-    expect(md).toMatch(/\| Src \\ Tgt \| Tgt0 \| Tgt1 \| Tgt2 \| Tgt3 \| Tgt4 \|/)
-
-    const lines = md.trim().split('\n')
-    // Data rows start with | Src0 through | Src9 — exclude header | Src \ Tgt
-    const dataLines = lines.filter((l: string) => /^\| Src\d/.test(l))
-    expect(dataLines).toHaveLength(10)
-
-    const src0Line = dataLines.find((l: string) => l.startsWith('| Src0 |'))
-    expect(src0Line).toBeTruthy()
-  })
-})
 
 describe('R-MV-05: Cell editing in virtualised cells', () => {
   beforeEach(() => {

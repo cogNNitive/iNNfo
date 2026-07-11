@@ -30,6 +30,7 @@ const MetamatrixConfig = defineAsyncComponent(
 )
 const ModelInfoPanel = defineAsyncComponent(() => import('../components/editor/ModelInfoPanel.vue'))
 const AIGuidePanel = defineAsyncComponent(() => import('../components/editor/AIGuidePanel.vue'))
+const ExportNavigator = defineAsyncComponent(() => import('../components/editor/ExportNavigator.vue'))
 
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
@@ -462,6 +463,11 @@ onUnmounted(() => {
         <!-- ── AI Guide View ── -->
         <template v-else-if="uiStore.activeView === 'ai-guide'">
           <AIGuidePanel />
+        </template>
+
+        <!-- ── Navigator View ── -->
+        <template v-else-if="uiStore.activeView === 'navigator'">
+          <ExportNavigator />
         </template>
       </main>
 

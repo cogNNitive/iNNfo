@@ -225,7 +225,8 @@ const exportPrompt = computed(() => {
 1. Read the model source file
 2. Apply the template from traNNsform/templates/${tmpl}.md
 3. Use chart patterns from traNNsform/snippets/chart-patterns.md
-4. Place the output HTML in output/ directory
+4. Place the output HTML in traNNsform/outputs/ directory with the naming convention: <ModelBaseName>_V<version>_<templateName>_visualizer.html
+5. Include an <script id="export-meta" type="application/json"> block inside the <head> with modelName, modelVersion, templateName, and exportedAt fields
 
 Follow the traNNsform/README.md for full instructions.`
 })
