@@ -25,13 +25,15 @@ export function validateFormatSyntax(content: string): SyntaxCheck[] {
     passed: true, // caller provides this context
   })
 
-  // Document structure checks
+  // Document structure checks (recommended — ordering defaults to front matter order)
   const hasIndex = parsed.taxonomy.length > 0
   checks.push({
     id: 'syntax-index',
-    label: '_NN index section present',
+    label: '_NN index section present (recommended)',
     passed: hasIndex,
-    message: hasIndex ? undefined : 'No _NN index with [[wikilinks]] found',
+    message: hasIndex
+      ? undefined
+      : 'No _NN index found — concepts will render in declaration order. Add one to control hierarchy and ordering.',
   })
 
   const hasConcepts = parsed.elements.size > 0

@@ -32,6 +32,14 @@ level: 0
 title: "Workspace Index"
 ---
 # _NN index
+* [[Doc_NN.md]]
+`,
+      'Doc_NN.md': `---
+spec_version: "V_0-1-2"
+model_version: "V_1-0-0"
+title: "Doc"
+---
+# _NN index
 `,
     })
 

@@ -25,22 +25,54 @@
         class="flex items-center gap-2 text-2xs text-slate-500 dark:text-slate-400 shrink-0 mr-auto"
       >
         <!-- Spec Badge -->
-        <div class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none">
-          <span class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider">Spec</span>
-          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{ specFileName }}</span>
+        <div
+          class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none"
+        >
+          <span
+            class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider"
+            >Spec</span
+          >
+          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{
+            specFileName
+          }}</span>
         </div>
 
         <!-- Template Badge -->
-        <div class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none">
-          <span class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider">Template</span>
-          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{ fullTemplateName }}</span>
+        <div
+          class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none"
+        >
+          <span
+            class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider"
+            >Template</span
+          >
+          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{
+            fullTemplateName
+          }}</span>
         </div>
 
         <!-- Model Badge -->
-        <div class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none">
-          <span class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider">Model</span>
-          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{ modelFileName }}</span>
+        <div
+          class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none"
+        >
+          <span
+            class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider"
+            >Model</span
+          >
+          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{
+            modelFileName
+          }}</span>
         </div>
+
+        <!-- Reload from Disk Button -->
+        <button
+          @click="handleReload"
+          :disabled="workspaceStore.isParsing"
+          class="p-1 rounded text-slate-400 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          :class="workspaceStore.isParsing ? 'text-primary bg-primary/5' : ''"
+          :title="workspaceStore.isParsing ? 'Reloading…' : 'Reload model from disk'"
+        >
+          <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': workspaceStore.isParsing }" />
+        </button>
 
         <!-- Details Info Trigger Button -->
         <button
@@ -172,10 +204,21 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Home, Save, ChevronDown, Info, CheckCircle, AlertTriangle, XCircle, Sparkles } from 'lucide-vue-next'
+import {
+  Home,
+  Save,
+  ChevronDown,
+  Info,
+  RefreshCw,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+  Sparkles,
+} from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
+import { useToast } from '../../shared/useToast'
 import {
   DEFAULT_INNFO_VERSION,
   DEFAULT_TEMPLATE_NAME,
@@ -185,6 +228,7 @@ import {
 const workspaceStore = useWorkspaceStore()
 const modelStore = useModelStore()
 const uiStore = useUiStore()
+const { show } = useToast()
 
 const hasErrors = computed(() => (modelStore.validationReport?.summary.errors ?? 0) > 0)
 const hasWarnings = computed(
@@ -317,6 +361,22 @@ async function handleSave(): Promise<void> {
     saveDropdownOpen.value = false
   } catch (err) {
     bumpError.value = err instanceof Error ? err.message : 'Save failed'
+  }
+}
+
+async function handleReload(): Promise<void> {
+  if (workspaceStore.isParsing) return
+  if (modelStore.dirtyIds.size > 0) {
+    const ok = confirm(
+      'Tenés cambios sin guardar. Al recargar desde el archivo se van a perder.\n¿Estás seguro?',
+    )
+    if (!ok) return
+  }
+  try {
+    await workspaceStore.reloadWorkspace()
+    show('Modelo recargado desde el archivo.', 'success')
+  } catch (err) {
+    show(err instanceof Error ? err.message : 'Error al recargar', 'error')
   }
 }
 

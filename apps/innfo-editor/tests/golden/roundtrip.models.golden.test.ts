@@ -82,7 +82,10 @@ describe('recursiveSerializer golden round-trip: frozen models/* fixtures', () =
       const secondParse = await recursiveParse(rewrittenRoot)
       const secondCollisionIssues = secondParse.issues.filter(
         (i) =>
-          i.message.includes('Duplicate sibling name') || i.message.includes('consider renaming'),
+          i.message.includes('Duplicate sibling name') ||
+          i.message.includes('consider renaming') ||
+          i.message.includes('Duplicate element name') ||
+          i.message.includes('Slug collision'),
       )
       expect(secondParse.issues.length).toBe(secondCollisionIssues.length)
 

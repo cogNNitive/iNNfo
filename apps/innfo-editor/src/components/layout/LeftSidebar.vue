@@ -61,8 +61,6 @@
         </button>
       </div>
 
-
-
       <!-- Header with expand/collapse all + ghost filter -->
       <div class="flex items-center justify-between px-2">
         <div class="flex items-center gap-1.5">
@@ -109,7 +107,7 @@
 
       <!-- Tree section: complete-only or merged all, grouped by model -->
       <div class="space-y-2">
-        <div v-for="rootId in modelStore.rootIds" :key="rootId" class="space-y-1">
+        <div v-for="rootId in visibleRootIds" :key="rootId" class="space-y-1">
           <!-- Model Header (File) -->
           <div
             class="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -120,7 +118,9 @@
               :class="{ '-rotate-90': !isModelExpanded(rootId) }"
             />
             <FileText class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-            <span class="truncate flex-1 text-slate-700 dark:text-slate-300">{{ getModelName(rootId) }}</span>
+            <span class="truncate flex-1 text-slate-700 dark:text-slate-300">{{
+              getModelName(rootId)
+            }}</span>
           </div>
 
           <!-- Concepts under this Model -->
@@ -128,10 +128,7 @@
             v-if="isModelExpanded(rootId)"
             class="ml-2 pl-1 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
           >
-            <div
-              v-for="item in getConceptsForModel(rootId, ghostFilterMode)"
-              :key="item.name"
-            >
+            <div v-for="item in getConceptsForModel(rootId, ghostFilterMode)" :key="item.name">
               <VirtualGroupNode
                 :concept-name="item.name"
                 :elements="item.elements"
@@ -153,19 +150,16 @@
           </div>
         </div>
         <p
-          v-if="modelStore.rootIds.length === 0"
+          v-if="visibleRootIds.length === 0"
           class="px-2 py-4 text-xs text-slate-400 dark:text-slate-500 italic text-center"
         >
           No models loaded
         </p>
       </div>
 
-
       <!-- Relations Section -->
       <div class="space-y-1">
-        <div
-          class="flex items-center justify-between px-2 py-1"
-        >
+        <div class="flex items-center justify-between px-2 py-1">
           <div class="flex items-center gap-1.5">
             <Table2 class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
             <h2
@@ -243,6 +237,10 @@ const modelStore = useModelStore()
 const metamodelStore = useMetamodelStore()
 const uiStore = useUiStore()
 
+const visibleRootIds = computed(() => {
+  return modelStore.rootIds.filter((id) => !id.startsWith('spec:'))
+})
+
 const { width, startResize } = useResizablePanel({
   storageKey: 'format.leftSidebarWidth',
   defaultWidth: 384,
@@ -273,13 +271,11 @@ const mergedConcepts = computed<TreeGroup[]>(() => {
     if ((childrenByType.get(conceptName)?.length ?? 0) > 0) return true
     const concept = metamodelStore.getConceptByName(conceptName)
     if (concept?.type === 'text') {
-      return modelStore.rootIds.some((rid) => {
+      return visibleRootIds.value.some((rid) => {
         const root = modelStore.getNode(rid)
         return (
           root?.rawSections &&
-          Object.keys(root.rawSections).some(
-            (k) => k.toLowerCase() === conceptName.toLowerCase(),
-          )
+          Object.keys(root.rawSections).some((k) => k.toLowerCase() === conceptName.toLowerCase())
         )
       })
     }
@@ -288,7 +284,7 @@ const mergedConcepts = computed<TreeGroup[]>(() => {
 
   // Parse _NN index taxonomy from ALL root models
   let allTaxonomyEdges: Array<{ parent: string; child: string }> = []
-  for (const rootId of modelStore.rootIds) {
+  for (const rootId of visibleRootIds.value) {
     const root = modelStore.getNode(rootId)
     if (root?.rawContent) {
       try {
@@ -311,8 +307,7 @@ const mergedConcepts = computed<TreeGroup[]>(() => {
   }
 
   // Roots = parents that are never a child in the taxonomy
-  const taxonomyRoots =
-    [...taxonomyChildren.keys()].filter((p) => !allChildren.has(p))
+  const taxonomyRoots = [...taxonomyChildren.keys()].filter((p) => !allChildren.has(p))
 
   // Build a recursive tree from taxonomy edges
   function buildTree(name: string): TreeGroup {
@@ -390,7 +385,7 @@ function handleClickGhost(conceptName: string): void {
   const type = concept?.type ?? 'text'
   if (type === 'text') {
     modelStore.addTextSection(conceptName)
-    uiStore.selectNode(modelStore.rootIds[0])
+    uiStore.selectNode(visibleRootIds.value[0])
   } else {
     const id = modelStore.addConceptElement(conceptName, `New ${conceptName}`)
     if (id) uiStore.selectNode(id)
@@ -431,7 +426,7 @@ function extractMatrixDefs(root: any): any[] {
 }
 
 const matrixDefs = computed(() => {
-  const rootIds = modelStore.rootIds
+  const rootIds = visibleRootIds.value
   for (const id of rootIds) {
     const root = modelStore.getNode(id)
     if (!root) continue
@@ -455,7 +450,7 @@ function navigateToConfig(): void {
 const expandedModels = ref<Record<string, boolean>>({})
 
 watch(
-  () => modelStore.rootIds,
+  visibleRootIds,
   (ids) => {
     for (const id of ids) {
       if (expandedModels.value[id] === undefined) {
@@ -463,7 +458,7 @@ watch(
       }
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 function isModelExpanded(rootId: string): boolean {
@@ -500,11 +495,13 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
   // Helper: check if a concept has content in this model
   function hasContent(conceptName: string): boolean {
     if ((childrenByType.get(conceptName)?.length ?? 0) > 0) return true
-    
+
     // Check if the rootNode itself contains a text section for this concept
-    if (rootNode && rootNode.rawSections && Object.keys(rootNode.rawSections).some(
-      (k) => k.toLowerCase() === conceptName.toLowerCase()
-    )) {
+    if (
+      rootNode &&
+      rootNode.rawSections &&
+      Object.keys(rootNode.rawSections).some((k) => k.toLowerCase() === conceptName.toLowerCase())
+    ) {
       return true
     }
     return false
@@ -532,8 +529,7 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
   }
 
   // Roots = parents that are never a child in the taxonomy
-  const taxonomyRoots =
-    [...taxonomyChildren.keys()].filter((p) => !allChildren.has(p))
+  const taxonomyRoots = [...taxonomyChildren.keys()].filter((p) => !allChildren.has(p))
 
   // Build a recursive tree from taxonomy edges
   function buildTree(name: string): TreeGroup {

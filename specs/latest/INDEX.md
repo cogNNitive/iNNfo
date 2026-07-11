@@ -15,6 +15,7 @@
 | [`level0/defiNNe_NN.md`](level0/defiNNe_NN.md) | `v0.2.0/level0/defiNNe_V_0-2-0_NN.md` |
 | [`level1/iNNfo_NN.md`](level1/iNNfo_NN.md) | `v0.2.0/level1/iNNfo_V_0-2-0_NN.md` |
 | [`level2/business/business_NN.md`](level2/business/business_NN.md) | `v0.2.0/level2/business/business_V_0-2-0_NN.md` |
+| [`level2/organization/organization_NN.md`](level2/organization/organization_NN.md) | `v0.2.0/level2/organization/organization_V_0-2-0_NN.md` |
 | [`level2/procedures/procedures_NN.md`](level2/procedures/procedures_NN.md) | `v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md` |
 
 ## Stable URLs
@@ -30,6 +31,9 @@ https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level1/iNNf
 
 # Always the latest business template:
 https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/business/business_NN.md
+
+# Always the latest organization template:
+https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/organization/organization_NN.md
 
 # Always the latest procedures template:
 https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/procedures/procedures_NN.md

@@ -126,6 +126,7 @@ describe('LeftSidebar — ghost filter toggle (R-TGC-01, R-TGC-05)', () => {
           parentId: 'Root',
           type: 'ExistingConcept',
           kind: 'element',
+          source: { path: 'Root' },
         }),
       },
       ['Root'],

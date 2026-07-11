@@ -8,6 +8,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses Comprehensive
     {
       "childCount": 0,
       "fieldKeys": [
+        "last_saved",
         "level",
         "mode",
         "model_version",
@@ -15,16 +16,48 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses Comprehensive
         "spec_url",
         "spec_version",
         "template",
+        "title",
       ],
       "id": "Comprehensive_Test_Procedure_V_1-0-0_procedures",
       "markerKeys": [],
       "name": "Comprehensive_Test_Procedure_V_1-0-0_procedures",
       "parentId": null,
-      "type": "document",
+      "type": "Comprehensive Test Procedure",
     },
   ],
   "rootIds": [
     "Comprehensive_Test_Procedure_V_1-0-0_procedures",
+  ],
+}
+`;
+
+exports[`recursiveParser golden: frozen models/* fixtures > parses EngineeringTeam_V_1-0-0_organization_F.md into a normalized graph snapshot 1`] = `
+{
+  "issueCount": 0,
+  "nodeCount": 1,
+  "nodes": [
+    {
+      "childCount": 0,
+      "fieldKeys": [
+        "last_saved",
+        "level",
+        "mode",
+        "model_version",
+        "parent_spec",
+        "spec_url",
+        "spec_version",
+        "template",
+        "title",
+      ],
+      "id": "EngineeringTeam_V_1-0-0_organization",
+      "markerKeys": [],
+      "name": "EngineeringTeam_V_1-0-0_organization",
+      "parentId": null,
+      "type": "Engineering Team",
+    },
+  ],
+  "rootIds": [
+    "EngineeringTeam_V_1-0-0_organization",
   ],
 }
 `;

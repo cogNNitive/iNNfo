@@ -184,16 +184,18 @@ export function validateFormatContent(
     })
   }
 
-  // 8. Index section
+  // 8. Index section (recommended — without it, concepts render in front matter order)
   const hasIndex = parsed.taxonomy.length > 0
   checks.push({
     id: 'body-index',
     label: 'Taxonomy index section',
-    description: 'Models must have a # _NN index section with [[wikilinks]]',
+    description: 'Models should have a # _NN index section with [[wikilinks]] to control ordering and hierarchy',
     category: 'body',
-    severity: 'error',
+    severity: 'warning',
     passed: hasIndex,
-    message: hasIndex ? undefined : 'No _NN index section found',
+    message: hasIndex
+      ? undefined
+      : 'No _NN index section found — concepts will render in front matter declaration order. Add a # _NN index section to control ordering and hierarchy.',
   })
 
   // 9. Concept section markers

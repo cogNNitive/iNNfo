@@ -4,7 +4,7 @@ spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/models/starte
 level: 3
 parent_spec:
   name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 model_version: "V_1-0-0"
 title: "Business Model Starter"
 mode: "FILE"

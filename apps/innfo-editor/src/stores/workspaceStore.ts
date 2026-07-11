@@ -34,6 +34,12 @@ export interface WorkspaceState {
   /** Whether auto-backup is enabled before saveActiveFile writes. Default true. */
   backupEnabled: boolean
   repository: IWorkspaceRepository
+  /** True when loaded from a sample/preview URL (no folder handle). */
+  isSampleSession: boolean
+  /** Human-readable template name for the sample banner. */
+  sampleTemplateName: string
+  /** Set by open() when folder contains zero _NN.md model files. */
+  emptyFolderError: boolean
 }
 
 /**
@@ -55,6 +61,9 @@ export const useWorkspaceStore = defineStore('workspace', {
     sourceUrl: null,
     backupEnabled: true,
     repository: new IndexedDbWorkspaceRepository(),
+    isSampleSession: false,
+    sampleTemplateName: '',
+    emptyFolderError: false,
   }),
   actions: {
     /**
@@ -66,6 +75,7 @@ export const useWorkspaceStore = defineStore('workspace', {
       this.handle = handle
       this.hasHandle = true
       this.error = null
+      this.emptyFolderError = false
 
       if (this.hasParsed && !options.force) {
         return
@@ -79,6 +89,19 @@ export const useWorkspaceStore = defineStore('workspace', {
         await this.repository.storeHandle(handle)
         const modelStore = useModelStore()
         await modelStore.parseFromHandle(handle, this.driver ?? undefined)
+
+        // Detect empty folder — no _NN.md model files found
+        const hasModelRoots = modelStore.rootIds.some(
+          (id) => !id.startsWith('spec:') && modelStore.nodes[id],
+        )
+        if (!hasModelRoots) {
+          this.emptyFolderError = true
+          this.hasHandle = false
+          this.handle = null
+          this.hasParsed = false
+          return
+        }
+
         this.hasParsed = true
         this.parseCount += 1
 
@@ -107,9 +130,10 @@ export const useWorkspaceStore = defineStore('workspace', {
      * block navigation to /workspace unless the caller sets hasHandle or
      * bypasses the guard.
      */
-    async loadFromUrl(url: string): Promise<void> {
+    async loadFromUrl(url: string, templateName?: string): Promise<void> {
       this.error = null
       this.sourceUrl = url
+      this.emptyFolderError = false
 
       // Reset handle so router guards know this is a virtual workspace
       this.handle = null
@@ -129,11 +153,30 @@ export const useWorkspaceStore = defineStore('workspace', {
 
         this.hasParsed = true
         this.parseCount += 1
+        if (templateName) {
+          this.isSampleSession = true
+          this.sampleTemplateName = templateName
+        }
       } catch (err) {
         this.error = err instanceof Error ? err.message : String(err)
         throw err
       } finally {
         this.isParsing = false
+      }
+    },
+
+    /**
+     * Reloads the entire model graph from disk (or source URL), discarding
+     * any in-memory-only changes. Caller must confirm if dirtyIds is non-empty.
+     */
+    async reloadWorkspace(): Promise<void> {
+      if (this.isParsing) return
+      if (this.handle) {
+        await this.open(this.handle, { force: true })
+      } else if (this.sourceUrl) {
+        await this.loadFromUrl(this.sourceUrl)
+      } else {
+        throw new Error('No hay un workspace activo para recargar')
       }
     },
 
@@ -197,6 +240,9 @@ export const useWorkspaceStore = defineStore('workspace', {
       this.error = null
       this.sourceUrl = null
       this.backupEnabled = true
+      this.isSampleSession = false
+      this.sampleTemplateName = ''
+      this.emptyFolderError = false
     },
 
     /**

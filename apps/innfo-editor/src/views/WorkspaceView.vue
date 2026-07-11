@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '../components/layout/Header.vue'
+import SampleBanner from '../components/layout/SampleBanner.vue'
 import LeftSidebar from '../components/layout/LeftSidebar.vue'
 import RightGuidanceSidebar from '../components/layout/RightGuidanceSidebar.vue'
 import ValidationReport from '../components/ValidationReport.vue'
@@ -326,6 +327,20 @@ async function runValidation(): Promise<void> {
   }
 }
 
+/** Creates a new model from the sample template. Closes workspace first. */
+function onSampleCreate(): void {
+  const templateName = workspaceStore.sampleTemplateName
+  workspaceStore.reset()
+  modelStore.setGraph({}, [])
+  uiStore.selectNode(null)
+  router.push({ name: 'home', query: { createTemplate: templateName || undefined } })
+}
+
+/** No-op — dismissal state handled by SampleBanner via sessionStorage. */
+function onSampleBannerDismiss(): void {
+  // handled internally by SampleBanner
+}
+
 /** Resets the workspace and returns to home. */
 function closeWorkspace(): void {
   if (modelStore.dirtyIds.size > 0) {
@@ -378,6 +393,13 @@ onUnmounted(() => {
 <template>
   <div class="flex flex-col h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
     <Header @close-workspace="closeWorkspace" />
+
+    <SampleBanner
+      v-if="workspaceStore.isSampleSession"
+      :template-name="workspaceStore.sampleTemplateName"
+      @create="onSampleCreate"
+      @dismiss="onSampleBannerDismiss"
+    />
 
     <div class="flex flex-1 overflow-hidden">
       <LeftSidebar

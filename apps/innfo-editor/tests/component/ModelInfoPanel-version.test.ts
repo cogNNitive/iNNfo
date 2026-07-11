@@ -75,7 +75,9 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
     expect(versionHeader).toBeDefined()
 
     // Click to expand
-    const collapsibleDiv = wrapper.find('.cursor-pointer')
+    const collapsibleDiv = wrapper
+      .findAll('.cursor-pointer')
+      .find((el) => el.text().includes('Version Management'))!
     await collapsibleDiv.trigger('click')
 
     // Now the expanded panel should show the current version
@@ -103,7 +105,9 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
     })
 
     // Expand the panel
-    const collapsibleDiv = wrapper.find('.cursor-pointer')
+    const collapsibleDiv = wrapper
+      .findAll('.cursor-pointer')
+      .find((el) => el.text().includes('Version Management'))!
     await collapsibleDiv.trigger('click')
 
     // Should show default V_1-0-0
@@ -135,7 +139,9 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
     })
 
     // Expand panel
-    const collapsibleDiv = wrapper.find('.cursor-pointer')
+    const collapsibleDiv = wrapper
+      .findAll('.cursor-pointer')
+      .find((el) => el.text().includes('Version Management'))!
     await collapsibleDiv.trigger('click')
 
     // There should be 3 buttons
@@ -176,7 +182,9 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
       props: { rootNodeId: 'Root' },
     })
 
-    const collapsibleDiv = wrapper.find('.cursor-pointer')
+    const collapsibleDiv = wrapper
+      .findAll('.cursor-pointer')
+      .find((el) => el.text().includes('Version Management'))!
     await collapsibleDiv.trigger('click')
 
     const buttons = wrapper.findAll('.grid-cols-3 button')
@@ -207,7 +215,9 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
         props: { rootNodeId: 'Root' },
       })
 
-      const collapsibleDiv = wrapper.find('.cursor-pointer')
+      const collapsibleDiv = wrapper
+        .findAll('.cursor-pointer')
+        .find((el) => el.text().includes('Version Management'))!
       await collapsibleDiv.trigger('click')
 
       const buttons = wrapper.findAll('.grid-cols-3 button')
@@ -236,7 +246,9 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
         props: { rootNodeId: 'Root' },
       })
 
-      const collapsibleDiv = wrapper.find('.cursor-pointer')
+      const collapsibleDiv = wrapper
+        .findAll('.cursor-pointer')
+        .find((el) => el.text().includes('Version Management'))!
       await collapsibleDiv.trigger('click')
 
       // Check that a disabled reason message is shown
@@ -266,7 +278,9 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
         props: { rootNodeId: 'Root' },
       })
 
-      const collapsibleDiv = wrapper.find('.cursor-pointer')
+      const collapsibleDiv = wrapper
+        .findAll('.cursor-pointer')
+        .find((el) => el.text().includes('Version Management'))!
       await collapsibleDiv.trigger('click')
 
       const buttons = wrapper.findAll('.grid-cols-3 button')
@@ -285,7 +299,9 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
         props: { rootNodeId: 'Root' },
       })
 
-      const collapsibleDiv = wrapper.find('.cursor-pointer')
+      const collapsibleDiv = wrapper
+        .findAll('.cursor-pointer')
+        .find((el) => el.text().includes('Version Management'))!
       await collapsibleDiv.trigger('click')
 
       const buttons = wrapper.findAll('.grid-cols-3 button')

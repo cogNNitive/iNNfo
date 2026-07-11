@@ -55,16 +55,7 @@ concepts:
       - name: "scope"
         type: "select"
         options: ["internal", "external"]
-  - name: "Position"
-    icon: "briefcase"
-    type: "list"
-    color: "green"
-    weight: 50
-  - name: "Person"
-    icon: "user"
-    type: "list"
-    color: "green"
-    weight: 40
+
 markers:
   - name: "complexity"
     icon: "gauge"
@@ -84,14 +75,7 @@ matrices:
     source: "Work"
     target: "Roles"
     values: [Responsible, Accountable, Consulted, Informed]
-  - name: "positions-roles matrix"
-    source: "Position"
-    target: "Roles"
-    values: [Assumes]
-  - name: "persons-positions matrix"
-    source: "Person"
-    target: "Position"
-    values: [Occupies]
+
   - name: "work-tools matrix"
     source: "Work"
     target: "Tools"
@@ -118,8 +102,8 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 
 ## Objectives
 
-- Provide a complete set of concepts for workflow modeling: sequenced steps (Work), produced artifacts (Artifact), supporting tools (Tools), and human resources (Roles, Position, Person).
-- Enable RACI accountability mapping via evaluable matrices (Work ↔ Roles, Position ↔ Roles, Person ↔ Position).
+- Provide a complete set of concepts for workflow modeling: sequenced steps (Work), produced artifacts (Artifact), supporting tools (Tools), and functional roles (Roles).
+- Enable RACI accountability mapping via evaluable matrices (Work ↔ Roles).
 - Support sequential step definitions with conditional branching, tool assignment, and artifact I/O.
 - Serve as the default template for procedure and process modeling in the iNNfo ecosystem.
 
@@ -134,8 +118,7 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 | **Artifact** | `list` | Documents, deliverables, or data produced or consumed by work steps |
 | **Tools** | `list` | Software or hardware used to execute work steps |
 | **Roles** | `list` | Functional roles with accountability scope (internal/external) |
-| **Position** | `list` | Organizational positions that assume one or more roles |
-| **Person** | `list` | Named individuals who occupy positions |
+
 
 ### Markers
 
@@ -148,8 +131,7 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 | Matrix | Source → Target | Purpose |
 |---|---|---|
 | Work-Roles | Work → Roles | RACI assignment (Responsible, Accountable, Consulted, Informed) |
-| Positions-Roles | Position → Roles | Which positions assume which roles |
-| Persons-Positions | Person → Position | Who occupies which position |
+
 | Work-Tools | Work → Tools | Which tools are used by each work step |
 | Work-Artifacts | Work → Artifact | I/O relationships (Creates, Modifies, Validates, Reviews) |
 
@@ -189,8 +171,7 @@ title: "<Procedure Name>"
 * [[Artifact]]
 * [[Tools]]
 * [[Roles]]
-* [[Position]]
-* [[Person]]
+
 
 # _NN Procedure
 Description of the overall procedure.
@@ -320,33 +301,7 @@ The functional responsibilities/actors in the workflow (e.g. Developer, QA).
 ### Prompts
 *No prompts provided.*
 
-## Position
 
-### Summary
-Organizational positions that assume roles.
-
-### Description
-Job roles or titles within the organization (e.g. Senior Developer).
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## Person
-
-### Summary
-Named individuals who occupy positions.
-
-### Description
-The actual team members occupying those positions.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
 
 ## complexity
 
@@ -376,33 +331,7 @@ Description of work-roles matrix.
 ### Prompts
 *No prompts provided.*
 
-## positions-roles matrix
 
-### Summary
-Description of positions-roles matrix.
-
-### Description
-Description of positions-roles matrix.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
-
-## persons-positions matrix
-
-### Summary
-Description of persons-positions matrix.
-
-### Description
-Description of persons-positions matrix.
-
-### Methodologies
-*No methodologies provided.*
-
-### Prompts
-*No prompts provided.*
 
 ## work-tools matrix
 

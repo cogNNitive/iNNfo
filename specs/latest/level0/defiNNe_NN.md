@@ -41,7 +41,7 @@ defiNNe is built on four foundational values:
 |---|---|---|
 | **0** | Meta-specification | `defiNNe` |
 | **1** | Concrete specification | `iNNfo` |
-| **2** | Template | `business`, `procedures`, `kb` |
+| **2** | Template | `business`, `procedures`, `organization`, `kb` |
 | **3** | Model | `Ghostbusters`, `CodeReviewProcess` |
 
 Rules:
@@ -241,6 +241,9 @@ specs/
 │   └── level2/
 │       ├── business/
 │       │   ├── business_V_0-2-0_NN.md
+│       │   └── samples/
+│       ├── organization/
+│       │   ├── organization_V_0-2-0_NN.md
 │       │   └── samples/
 │       └── procedures/
 └── latest/         ← stable filenames, mirrors the current version

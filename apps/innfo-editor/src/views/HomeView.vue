@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import type { DirectoryHandleLike } from '../model/fs-types'
 import type { FolderHistoryEntry, SampleFolder } from '../shared/validation-types'
@@ -13,15 +13,20 @@ import {
   formatTimestamp,
 } from '../stores/historyStore'
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
+import { useToast } from '../shared/useToast'
+import SetupWizard from '../components/layout/SetupWizard.vue'
 
 const router = useRouter()
+const route = useRoute()
 const workspace = useWorkspaceStore()
+const { show: showToast } = useToast()
 const error = ref<string | null>(null)
 const busy = ref(false)
 const urlInput = ref('')
 const urlBusy = ref(false)
 const history = ref<FolderHistoryEntry[]>([])
 const reopenBusy = ref<string | null>(null)
+const showAdvanced = ref(false)
 
 const samples: SampleFolder[] = [
   {
@@ -30,7 +35,7 @@ const samples: SampleFolder[] = [
     description:
       'FILE-mode business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations in a single _NN.md.',
     mode: 'FILE',
-    path: 'specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
+    path: 'specs/v0.2.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
     items: 1,
   },
   {
@@ -39,7 +44,7 @@ const samples: SampleFolder[] = [
     description:
       'FILE-mode procedure for PR-based code reviews: roles (Author, Reviewer, Maintainer), step-by-step workflow, tool bindings, and hotfix path.',
     mode: 'FILE',
-    path: 'specs/v0.1.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
+    path: 'specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
     items: 1,
   },
 ]
@@ -66,7 +71,7 @@ const starters: StarterTemplate[] = [
     url: `${starterBase}Business_V_1-0-0_starter_NN.md`,
     templateName: 'business',
     sampleUrl:
-      'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
+      'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
     sampleName: 'Ghostbusters',
   },
   {
@@ -77,14 +82,39 @@ const starters: StarterTemplate[] = [
     url: `${starterBase}Procedures_V_1-0-0_starter_NN.md`,
     templateName: 'procedures',
     sampleUrl:
-      'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
+      'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
     sampleName: 'Code Review Process',
+  },
+  {
+    id: 'starter-organization',
+    name: 'Organization',
+    description: 'Structure your organization: define positions, roles, members, and relations.',
+    icon: '👥',
+    url: `${starterBase}Organization_V_1-0-0_starter_NN.md`,
+    templateName: 'organization',
+    sampleUrl:
+      'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
+    sampleName: 'Engineering Team',
   },
 ]
 
 onMounted(async () => {
   history.value = await loadHistory()
 })
+
+// Watch for empty folder detection and notify the user
+watch(
+  () => workspace.emptyFolderError,
+  (val) => {
+    if (val) {
+      showToast('No iNNfo models found in this folder. Try the examples below to get started.', 'warning')
+      workspace.emptyFolderError = false
+      // Scroll to samples section
+      const el = document.querySelector('.samples')
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }
+  },
+)
 
 const sandboxUrl = `${import.meta.env.BASE_URL}starter/Sandbox_V_1-0-0_starter_NN.md`
 const sandboxBusy = ref(false)
@@ -252,7 +282,7 @@ async function previewSample(starter: StarterTemplate): Promise<void> {
   error.value = null
   urlBusy.value = true
   try {
-    await workspace.loadFromUrl(starter.sampleUrl)
+    await workspace.loadFromUrl(starter.sampleUrl, starter.templateName)
     await addToHistory(`${starter.name} Sample`, null as unknown as any)
     history.value = await loadHistory()
     router.push('/workspace')
@@ -364,6 +394,21 @@ async function clearAllHistory(): Promise<void> {
 }
 
 /**
+ * Creates a new model from a starter template looked up by name.
+ * Used by the SampleBanner CTA ("Crear mi propio modelo").
+ */
+async function createFromStarterByName(templateName: string): Promise<void> {
+  const starter = starters.find(
+    (s) => s.templateName.toLowerCase() === templateName.toLowerCase(),
+  )
+  if (!starter) {
+    error.value = `Template "${templateName}" not found.`
+    return
+  }
+  await createFromStarter(starter)
+}
+
+/**
  * Handles a sample card click — resolves the sample's parent directory from
  * workspace history and opens the folder picker starting at that location so
  * the user can quickly select the sample folder without browsing from scratch.
@@ -406,15 +451,16 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
 <template>
   <div class="home">
-    <!-- ── Hero ── -->
-    <div class="hero">
-      <h1 class="hero__title">iNNfo Model Editor</h1>
-      <p class="hero__desc">
-        Create and edit structured knowledge models in the iNNfo FORMAT. All files are plain-text
-        Markdown stored on your computer — nothing is uploaded to the cloud.
-      </p>
-    </div>
+    <!-- ── Setup Wizard (primary entry point) ── -->
+    <SetupWizard />
 
+    <!-- ── Advanced / Quick access ── -->
+    <button class="home__toggle-advanced" @click="showAdvanced = !showAdvanced">
+      {{ showAdvanced ? 'Hide advanced options' : 'Open existing workspace or browse samples' }}
+      <span class="home__toggle-arrow">{{ showAdvanced ? '▲' : '▼' }}</span>
+    </button>
+
+    <template v-if="showAdvanced">
     <!-- ── Sandbox ── -->
     <section v-if="showSandbox" class="sandbox">
       <div class="sandbox__card">
@@ -441,6 +487,147 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
           {{ sandboxBusy ? 'Loading\u2026' : 'Launch Sandbox' }}
         </button>
       </div>
+    </section>
+
+    <!-- ── Two-column layout: open existing / start new ── -->
+    <div class="cols">
+      <!-- Left column: open existing -->
+      <div class="col">
+        <h2 class="col__title">Open existing</h2>
+        <p class="col__desc">Select a folder that already contains iNNfo model files.</p>
+
+        <div class="open-action">
+          <button class="home__open" :disabled="busy" @click="openWorkspace">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              class="home__open-icon"
+            >
+              <path
+                d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+              />
+            </svg>
+            {{ busy ? 'Opening\u2026' : 'Open folder\u2026' }}
+          </button>
+        </div>
+
+        <!-- ── Recent folders ── -->
+        <section v-if="history.length" class="recent">
+          <div class="recent__header">
+            <h3 class="recent__title">Recent</h3>
+            <button class="recent__clear" @click="clearAllHistory">Clear</button>
+          </div>
+          <div class="recent__list">
+            <button
+              v-for="entry in history"
+              :key="entry.handleKey"
+              class="recent__item"
+              :disabled="reopenBusy === entry.handleKey"
+              @click="reopenFolder(entry)"
+            >
+              <svg
+                class="recent__icon"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path
+                  d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+                />
+              </svg>
+              <span class="recent__name">{{ entry.name }}</span>
+              <span class="recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
+              <span
+                class="recent__remove"
+                role="button"
+                tabindex="0"
+                @click.stop="removeEntry(entry.handleKey)"
+                @keydown.enter.prevent="removeEntry(entry.handleKey)"
+                @keydown.space.prevent="removeEntry(entry.handleKey)"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right column: official templates -->
+      <div class="col">
+        <h2 class="col__title">Official templates</h2>
+        <p class="col__desc">
+          Choose a template to start a new model. Preview a sample or create a full copy in a
+          folder.
+        </p>
+
+        <div class="starters">
+          <div v-for="s in starters" :key="s.id" class="starter-card">
+            <div class="starter-card__head">
+              <span class="starter-card__icon">{{ s.icon }}</span>
+              <strong class="starter-card__name">{{ s.name }}</strong>
+            </div>
+            <p class="starter-card__desc">{{ s.description }}</p>
+            <div class="starter-card__actions">
+              <button
+                v-if="s.sampleUrl"
+                class="starter-card__sample"
+                :disabled="urlBusy"
+                @click="previewSample(s)"
+              >
+                {{ urlBusy ? 'Loading\u2026' : 'Preview Sample' }}
+              </button>
+              <button class="starter-card__create" :disabled="busy" @click="createFromStarter(s)">
+                {{ busy ? 'Creating\u2026' : 'Create' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p v-if="error" class="home__error" role="alert">{{ error }}</p>
+
+    <!-- ── Community templates ── -->
+    <section class="community">
+      <h3 class="community__title">Community templates</h3>
+      <p class="community__desc">
+        You can also load any iNNfo model from a URL — including templates created by the community
+        or your own custom models hosted anywhere.
+      </p>
+
+      <div class="community__url">
+        <input
+          v-model="urlInput"
+          type="url"
+          placeholder="https://example.com/model_V_1-0-0_business_NN.md"
+          class="community__input"
+          @keydown.enter="loadFromUrl"
+        />
+        <button class="community__btn" :disabled="urlBusy || !urlInput.trim()" @click="loadFromUrl">
+          {{ urlBusy ? 'Loading\u2026' : 'Load' }}
+        </button>
+      </div>
+
+      <p class="community__docs">
+        📖 Learn how to use existing templates or create your own in the
+        <a :href="docsUrl" target="_blank" rel="noopener noreferrer">documentation</a>.
+      </p>
     </section>
 
     <!-- ── Two-column layout: open existing / start new ── -->
@@ -554,8 +741,6 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
       </div>
     </div>
 
-    <p v-if="error" class="home__error" role="alert">{{ error }}</p>
-
     <!-- ── Community templates ── -->
     <section class="community">
       <h3 class="community__title">Community templates</h3>
@@ -585,9 +770,10 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
     <!-- ── Sample models ── -->
     <section class="samples">
-      <h3 class="samples__title">Example models</h3>
+      <h3 class="samples__title">Explore example models</h3>
       <p class="samples__sub">
-        Open an iNNfo folder to explore, or try one of these samples from the repository.
+        See how iNNfo models work before creating your own. Open a sample to explore in read-only
+        mode.
       </p>
       <div class="samples__grid">
         <button v-for="s in samples" :key="s.id" class="sample-card" @click="onSampleClick(s)">
@@ -612,10 +798,11 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
             <span class="sample-card__badge">{{ s.mode }}</span>
           </div>
           <p class="sample-card__desc">{{ s.description }}</p>
-          <span class="sample-card__action">Open folder &rarr;</span>
+          <span class="sample-card__action">Explore &rarr;</span>
         </button>
       </div>
     </section>
+    </template>
   </div>
 </template>
 
@@ -1186,6 +1373,32 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 .sandbox__btn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* ── Toggle advanced ── */
+
+.home__toggle-advanced {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  transition: color 0.15s;
+}
+
+.home__toggle-advanced:hover {
+  color: #4d0e4e;
+}
+
+.home__toggle-arrow {
+  font-size: 10px;
 }
 
 /* ── Starter sample button ── */

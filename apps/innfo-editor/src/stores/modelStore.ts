@@ -67,7 +67,10 @@ export const useModelStore = defineStore('model', {
       (id: string): ModelNode[] =>
         (state.nodes[id]?.childIds ?? []).map((cid) => state.nodes[cid]).filter(Boolean),
     getRoots: (state) => (): ModelNode[] =>
-      state.rootIds.map((id) => state.nodes[id]).filter(Boolean),
+      state.rootIds
+        .filter((id) => !id.startsWith('spec:'))
+        .map((id) => state.nodes[id])
+        .filter(Boolean),
 
     /**
      * Returns the first root node id as the default "active" node.
@@ -199,7 +202,10 @@ export const useModelStore = defineStore('model', {
               specFilename = `specs/${parentName.replace(/\.md$/i, '')}${parentName.endsWith('_NN') ? '' : '_NN'}.md`
               try {
                 const specsDir = await handle.getDirectoryHandle('specs', { create: true })
-                const fileHandle = await specsDir.getFileHandle(specFilename.replace('specs/', ''), { create: true })
+                const fileHandle = await specsDir.getFileHandle(
+                  specFilename.replace('specs/', ''),
+                  { create: true },
+                )
                 if (fileHandle.createWritable) {
                   const w = await fileHandle.createWritable()
                   await w.write(text)
