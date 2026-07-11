@@ -71,16 +71,65 @@
           @click-ghost="(name: string) => $emit('click-ghost', name)"
         />
 
-        <!-- Direct element children -->
-        <ConceptTreeNode
-          v-for="child in elements"
-          :key="child.id"
-          :node-id="child.id"
-          :selected-id="selectedId"
-          :depth="depth + 1"
-          :expanded-generation="expandedGeneration"
-          @select="(id: string) => $emit('select', id)"
-        />
+        <!-- Direct element children (flat, no parent hierarchy) -->
+        <template v-if="!hasParentHierarchy">
+          <ConceptTreeNode
+            v-for="child in elements"
+            :key="child.id"
+            :node-id="child.id"
+            :selected-id="selectedId"
+            :depth="depth + 1"
+            :expanded-generation="expandedGeneration"
+            @select="(id: string) => $emit('select', id)"
+          />
+        </template>
+
+        <!-- Element children with parent-based hierarchy (e.g. Work procedures) -->
+        <template v-else>
+          <div v-for="root in treeRoots" :key="root.id" class="space-y-0.5">
+            <div
+              class="flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-xs group cursor-pointer"
+              :class="rootRowClasses(root)"
+              :style="rootRowStyle"
+              @click="$emit('select', root.id)"
+            >
+              <button
+                @click.stop="toggleTreeCollapsed(root.id)"
+                class="p-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors flex items-center justify-center shrink-0"
+              >
+                <ChevronDown
+                  class="transition-transform duration-200 w-3.5 h-3.5"
+                  :class="{ '-rotate-90': treeCollapsed[root.id] }"
+                />
+              </button>
+              <div class="relative shrink-0 flex items-center justify-center w-4 h-4">
+                <IconRenderer
+                  :icon="conceptIcon"
+                  fallback="circle"
+                  custom-class="shrink-0"
+                  :style="{ color: conceptColorHex, width: '14px', height: '14px' }"
+                />
+              </div>
+              <span class="flex-1 min-w-0 truncate text-xs font-medium text-slate-700 dark:text-slate-300">
+                {{ root.name }}
+              </span>
+            </div>
+            <div
+              v-if="!treeCollapsed[root.id]"
+              class="ml-3 pl-1 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
+            >
+              <ConceptTreeNode
+                v-for="child in getSemanticChildren(root.name)"
+                :key="child.id"
+                :node-id="child.id"
+                :selected-id="selectedId"
+                :depth="depth + 2"
+                :expanded-generation="expandedGeneration"
+                @select="(id: string) => $emit('select', id)"
+              />
+            </div>
+          </div>
+        </template>
       </div>
     </template>
 
@@ -164,9 +213,16 @@ const _emit = defineEmits<{
   'click-ghost': [conceptName: string]
 }>()
 
-const hasChildren = computed(() => props.elements.length > 0 || props.subGroups.length > 0)
+const hasChildren = computed(() => {
+  if (props.subGroups.length > 0) return true
+  if (hasParentHierarchy.value) return treeRoots.value.length > 0
+  return props.elements.length > 0
+})
 
 const totalElementCount = computed(() => {
+  if (hasParentHierarchy.value) {
+    return props.elements.length
+  }
   let count = props.elements.length
   for (const sub of props.subGroups) {
     count += countElements(sub)
@@ -180,6 +236,42 @@ function countElements(group: TreeGroup): number {
   return c
 }
 
+// ── Parent-based hierarchy (e.g. Work procedures with `parent` field) ──
+
+const hasParentHierarchy = computed(() =>
+  props.elements.some((el) => el.fields?.parent?.value),
+)
+
+const treeRoots = computed<ModelNode[]>(() => {
+  if (!hasParentHierarchy.value) return []
+  const allNames = new Set(props.elements.map((el) => el.name))
+  return props.elements.filter((el) => {
+    const parentName = el.fields?.parent?.value as string | undefined
+    return !parentName || !allNames.has(parentName)
+  })
+})
+
+function getSemanticChildren(parentName: string): ModelNode[] {
+  return props.elements.filter((el) => el.fields?.parent?.value === parentName)
+}
+
+const treeCollapsed = ref<Record<string, boolean>>({})
+
+function toggleTreeCollapsed(id: string): void {
+  treeCollapsed.value = { ...treeCollapsed.value, [id]: !treeCollapsed.value[id] }
+}
+
+function rootRowClasses(node: ModelNode): Record<string, boolean> {
+  return {
+    'font-semibold bg-slate-100 dark:bg-slate-800/80': node.id === props.selectedId,
+    'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60': node.id !== props.selectedId,
+  }
+}
+
+const rootRowStyle = computed(() => ({
+  paddingLeft: '0.5rem',
+}))
+
 const visuals = useConceptVisuals()
 const metamodelStore = useMetamodelStore()
 const isCollapsed = ref(false)
@@ -189,6 +281,7 @@ watch(
   (gen) => {
     if (gen !== undefined) {
       isCollapsed.value = gen < 0
+      treeCollapsed.value = {}
     }
   },
   { immediate: true },
