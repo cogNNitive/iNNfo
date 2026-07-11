@@ -9,8 +9,33 @@
         </div>
         <div>
           <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">Export Navigator</h1>
-          <p class="text-sm text-slate-500 dark:text-slate-400">Visualizers generated from your models via AI agents</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            HTML visualizers generated from your iNNfo models
+          </p>
         </div>
+      </div>
+
+      <!-- Workflow explanation -->
+      <div v-if="hasWorkspace" class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 border border-emerald-200/60 dark:border-emerald-800/30 rounded-xl p-5 space-y-3">
+        <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+          Export Navigator shows HTML visualizers created by an <strong>AI agent</strong>
+          using the <strong>traNNsform</strong> templates in this workspace.
+        </p>
+        <div class="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400">
+          <div class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-2xs font-bold shrink-0 mt-0.5">1</div>
+          <span>Open the <button @click="goToAiGuide" class="underline font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 cursor-pointer">AI Guide</button> to set up your agent and learn the workflow.</span>
+        </div>
+        <div class="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400">
+          <div class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-2xs font-bold shrink-0 mt-0.5">2</div>
+          <span>Tell your agent: <code class="text-2xs bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded font-mono">Generate an export for {{ modelFilename }}</code></span>
+        </div>
+        <div class="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400">
+          <div class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-2xs font-bold shrink-0 mt-0.5">3</div>
+          <span>After the agent finishes, refresh this view or switch tabs to see your export here.</span>
+        </div>
+        <p class="text-2xs text-slate-400 dark:text-slate-500 pt-1 border-t border-emerald-200/40 dark:border-emerald-800/20">
+          Each export shows its source model version. If the model has changed, the export is marked <span class="text-amber-600 dark:text-amber-400 font-medium">outdated</span> — regenerate it with the same trigger phrase.
+        </p>
       </div>
 
       <!-- No workspace -->
@@ -156,6 +181,14 @@ const uiStore = useUiStore()
 const hasWorkspace = computed(() => workspaceStore.hasHandle)
 const state = ref<ViewState>('loading')
 const exports = ref<ExportFile[]>([])
+
+const modelFilename = computed(() => {
+  const rootId = modelStore.rootIds[0]
+  if (!rootId) return 'your model'
+  const rootNode = modelStore.getNode(rootId)
+  const path = rootNode?.source?.path
+  return path?.split(/[/\\]/).pop() ?? 'your model'
+})
 
 const currentModelVersion = computed(() => {
   const rootId = modelStore.rootIds[0]
