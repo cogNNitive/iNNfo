@@ -225,9 +225,11 @@ async function ensureTemplates(): Promise<void> {
     const transformDir = await handle.getDirectoryHandle('traNNsform', { create: true })
     const templatesDir = await transformDir.getDirectoryHandle('templates', { create: true })
     const snippetsDir = await transformDir.getDirectoryHandle('snippets', { create: true })
+    await transformDir.getDirectoryHandle('outputs', { create: true })
 
     // List of files to download
     const files = [
+      { path: '', name: 'AGENT.md' },
       { path: '', name: 'README.md' },
       { path: 'templates', name: 'business.md' },
       { path: 'templates', name: 'procedures.md' },

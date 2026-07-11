@@ -1,5 +1,7 @@
 # traNNsform — iNNfo Model → HTML Visualizer
 
+**⚠️ Si `AGENT.md` no existe en este directorio, usá ESTE archivo como entry point.** Tenés que leerlo completo y seguirlo como protocolo. Si un paso referencia a `AGENT.md`, ignorá esa referencia — este archivo es suficiente.
+
 Instrucciones maestras para el agente. Cuando el usuario pase un modelo iNNfo (`.md`) y pida transformarlo, seguí este protocolo.
 
 ## Flujo general
