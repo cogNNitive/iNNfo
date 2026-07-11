@@ -7,8 +7,8 @@
  */
 
 import { readFile, writeFile } from 'node:fs/promises'
-import { parseModel, serializeModel, validateModel as coreValidate } from '@innv0/innfo-core'
-import type { ParsedModel, SpecDocument, ValidationError } from '@innv0/innfo-core'
+import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation } from '@innv0/innfo-core'
+import type { SpecDocument, ValidationError } from '@innv0/innfo-core'
 
 import { getTemplateFromUrl, findModelFile, deriveNameFromUrl } from './spec.js'
 
@@ -114,61 +114,6 @@ export async function validateModel(
 
 /* ── apply_change ────────────────────────────────────────────── */
 
-// Intent operations
-
-interface AddConceptArgs {
-  conceptName: string
-  icon?: string
-  type?: string
-  color?: string
-}
-
-interface AddFieldArgs {
-  conceptName: string
-  fieldName: string
-  fieldType?: string
-  options?: string[]
-}
-
-interface SetMarkerArgs {
-  markerName: string
-  symbol?: string
-  icon?: string
-  color?: string
-}
-
-interface AddElementArgs {
-  conceptName: string
-  elementName: string
-  description?: string
-  fields?: Record<string, unknown>
-}
-
-interface RemoveElementArgs {
-  conceptName: string
-  elementName: string
-}
-
-interface RenameConceptArgs {
-  conceptName: string
-  newName: string
-}
-
-interface RenameElementArgs {
-  conceptName: string
-  elementName: string
-  newName: string
-}
-
-type OpArgs =
-  | AddConceptArgs
-  | AddFieldArgs
-  | SetMarkerArgs
-  | AddElementArgs
-  | RemoveElementArgs
-  | RenameConceptArgs
-  | RenameElementArgs
-
 /**
  * Apply an intent-level change to a model.
  * Semantics: parse → mutate → serialize → validate.
@@ -192,11 +137,10 @@ export async function applyChange(
     return { success: false, errors: [{ path: '', message: `Failed to load model: ${err}` }] }
   }
 
-  // Apply the mutation
-  try {
-    applyMutation(model, op, args as unknown as OpArgs)
-  } catch (err) {
-    return { success: false, errors: [{ path: '', message: `Operation failed: ${err}` }] }
+  // Apply the mutation via the core enforcement engine (R-IE-01)
+  const mutationResult = coreApplyMutation(model, op, args as unknown as Record<string, unknown>)
+  if (!mutationResult.success) {
+    return mutationResult
   }
 
   // Validate after mutation — template resolved only from parent_spec.url.
@@ -226,191 +170,4 @@ export async function applyChange(
   }
 }
 
-/* ── Mutation implementations ───────────────────────────────── */
-
-function applyMutation(model: ParsedModel, op: string, args: OpArgs): void {
-  switch (op) {
-    case 'add_concept': {
-      const a = args as AddConceptArgs
-      if (!a.conceptName) throw new Error('conceptName is required')
-      const concepts = model.frontmatter.concepts ?? []
-      if (concepts.some((c) => c.name.toLowerCase() === a.conceptName.toLowerCase())) {
-        throw new Error(`Concept "${a.conceptName}" already exists`)
-      }
-      concepts.push({
-        name: a.conceptName,
-        icon: a.icon,
-        type: (a.type ?? 'text') as any,
-        color: a.color,
-      })
-      model.frontmatter.concepts = concepts
-      break
-    }
-
-    case 'add_field': {
-      const a = args as AddFieldArgs
-      if (!a.conceptName || !a.fieldName) throw new Error('conceptName and fieldName are required')
-      const concepts = model.frontmatter.concepts ?? []
-      const concept = concepts.find((c) => c.name.toLowerCase() === a.conceptName.toLowerCase())
-      if (!concept) throw new Error(`Concept "${a.conceptName}" not found`)
-      const fields = concept.fields ?? []
-      if (fields.some((f) => f.name.toLowerCase() === a.fieldName.toLowerCase())) {
-        throw new Error(`Field "${a.fieldName}" already exists on concept "${a.conceptName}"`)
-      }
-      fields.push({
-        name: a.fieldName,
-        type: (a.fieldType ?? 'string') as any,
-        options: a.options,
-      })
-      concept.fields = fields
-      break
-    }
-
-    case 'set_marker': {
-      const a = args as SetMarkerArgs
-      if (!a.markerName) throw new Error('markerName is required')
-      const markers = model.frontmatter.markers ?? []
-      const existing = markers.find((m) => m.name.toLowerCase() === a.markerName.toLowerCase())
-      if (existing) {
-        if (a.symbol !== undefined) existing.symbol = a.symbol
-        if (a.icon !== undefined) existing.icon = a.icon
-        if (a.color !== undefined) existing.color = a.color
-      } else {
-        markers.push({
-          name: a.markerName,
-          symbol: a.symbol,
-          icon: a.icon,
-          color: a.color,
-        })
-      }
-      model.frontmatter.markers = markers
-      break
-    }
-
-    case 'add_element': {
-      const a = args as AddElementArgs
-      if (!a.conceptName || !a.elementName)
-        throw new Error('conceptName and elementName are required')
-
-      const existingElements = model.elements.get(a.conceptName) ?? []
-      if (existingElements.some((e) => e.name.toLowerCase() === a.elementName.toLowerCase())) {
-        throw new Error(`Element "${a.elementName}" already exists in concept "${a.conceptName}"`)
-      }
-
-      const newElement = {
-        type: a.conceptName,
-        name: a.elementName,
-        description: a.description ?? '',
-        fields: (a.fields ?? {}) as Record<string, unknown>,
-        markers: {} as Record<string, number | string>,
-      }
-
-      existingElements.push(newElement)
-      model.elements.set(a.conceptName, existingElements)
-      break
-    }
-
-    case 'remove_element': {
-      const a = args as RemoveElementArgs
-      if (!a.conceptName || !a.elementName)
-        throw new Error('conceptName and elementName are required')
-
-      const existingElements = model.elements.get(a.conceptName) ?? []
-      const filtered = existingElements.filter(
-        (e) => e.name.toLowerCase() !== a.elementName.toLowerCase(),
-      )
-      if (filtered.length === existingElements.length) {
-        throw new Error(`Element "${a.elementName}" not found in concept "${a.conceptName}"`)
-      }
-      model.elements.set(a.conceptName, filtered)
-      break
-    }
-
-    case 'rename_concept': {
-      const a = args as RenameConceptArgs
-      if (!a.conceptName || !a.newName) throw new Error('conceptName and newName are required')
-      const lowerOld = a.conceptName.toLowerCase()
-      const lowerNew = a.newName.toLowerCase()
-      if (lowerOld === lowerNew) throw new Error('newName must differ from conceptName')
-
-      // Update frontmatter concepts[]
-      const concepts = model.frontmatter.concepts ?? []
-      const concept = concepts.find((c) => c.name.toLowerCase() === lowerOld)
-      if (!concept) throw new Error(`Concept "${a.conceptName}" not found in frontmatter`)
-      if (concepts.some((c) => c.name.toLowerCase() === lowerNew && c.name !== concept.name)) {
-        throw new Error(`Concept "${a.newName}" already exists in frontmatter`)
-      }
-      concept.name = a.newName
-      model.frontmatter.concepts = concepts
-
-      // Update elements map: copy nodes to new key, delete old
-      const nodes = model.elements.get(a.conceptName)
-      if (nodes) {
-        // Update each element's type to the new concept name
-        for (const node of nodes) {
-          node.type = a.newName
-        }
-        model.elements.set(a.newName, nodes)
-        model.elements.delete(a.conceptName)
-      }
-
-      // Update taxonomy edges
-      for (const edge of model.taxonomy) {
-        if (edge.parent.toLowerCase() === lowerOld) edge.parent = a.newName
-        if (edge.child.toLowerCase() === lowerOld) edge.child = a.newName
-      }
-
-      // Update rawSections key
-      if (model.rawSections) {
-        const raw = model.rawSections[a.conceptName]
-        if (raw !== undefined) {
-          delete model.rawSections[a.conceptName]
-          model.rawSections[a.newName] = raw
-        }
-      }
-
-      break
-    }
-
-    case 'rename_element': {
-      const a = args as RenameElementArgs
-      if (!a.conceptName || !a.elementName || !a.newName)
-        throw new Error('conceptName, elementName, and newName are required')
-      const lowerOld = a.elementName.toLowerCase()
-      const lowerNew = a.newName.toLowerCase()
-      if (lowerOld === lowerNew) throw new Error('newName must differ from elementName')
-
-      const existingElements = model.elements.get(a.conceptName)
-      if (!existingElements) throw new Error(`Concept "${a.conceptName}" not found`)
-
-      const element = existingElements.find((e) => e.name.toLowerCase() === lowerOld)
-      if (!element)
-        throw new Error(`Element "${a.elementName}" not found in concept "${a.conceptName}"`)
-      if (
-        existingElements.some((e) => e.name.toLowerCase() === lowerNew && e.name !== element.name)
-      ) {
-        throw new Error(`Element "${a.newName}" already exists in concept "${a.conceptName}"`)
-      }
-
-      element.name = a.newName
-
-      // Regenerate slug (only if auto-derived — leave explicit slugs alone)
-      // We always regenerate; the serializer will derive from the new name.
-      element.slug = undefined
-
-      // Update nodeMarkers key if present
-      if (model.nodeMarkers[a.elementName] !== undefined) {
-        model.nodeMarkers[a.newName] = model.nodeMarkers[a.elementName]
-        delete model.nodeMarkers[a.elementName]
-      }
-
-      // Also update nodeMarkers for any entry keyed by the element within a concept context
-      // (item-markers matrix uses element name as row key)
-      model.elements.set(a.conceptName, existingElements) // ensure write-back
-      break
-    }
-
-    default:
-      throw new Error(`Unknown operation: ${op}`)
-  }
-}
+/* ── All mutation operations delegated to innfo-core engine ─── */

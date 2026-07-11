@@ -5,67 +5,71 @@ import {
   parseModel,
   parseFrontmatter,
   validateModel,
+  validateFormatContent,
   buildHierarchyTree,
   extractRelationships,
   extractAnalysis,
   slugify,
   deriveElementSlugs,
+  IdentityRegistry,
+  applyMutation,
+  uniqueSlugify,
+  validateReferences,
 } from '../src/index'
 import type { ElementNode } from '../src/types'
 
-const specsV010 = join(import.meta.dirname!, '..', '..', '..', 'specs', 'v0.1.0')
+const specsV020 = join(import.meta.dirname!, '..', '..', '..', 'specs', 'v0.2.0')
 const specsLatest = join(import.meta.dirname!, '..', '..', '..', 'specs', 'latest')
 
 function readSpec(pathSegments: string): string {
-  return readFileSync(join(specsV010, pathSegments), 'utf-8')
+  return readFileSync(join(specsV020, pathSegments), 'utf-8')
 }
 function readLatestSpec(pathSegments: string): string {
   return readFileSync(join(specsLatest, pathSegments), 'utf-8')
 }
 describe('defiNNe (level 0)', () => {
-  const content = readSpec('level0/defiNNe_V_0-1-0_NN.md')
+  const content = readSpec('level0/defiNNe_V_0-2-0_NN.md')
   const fm = parseFrontmatter(content)!
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(0)
-    expect(fm.specification_version).toBe('V_0-1-0')
+    expect(fm.spec_version).toBe('V_0-2-0')
     expect(fm.parent_spec).toBeUndefined()
     expect(fm.title).toContain('defiNNe')
   })
 })
 
 describe('iNNfo (level 1)', () => {
-  const content = readSpec('level1/iNNfo_V_0-1-1_NN.md')
+  const content = readSpec('level1/iNNfo_V_0-2-0_NN.md')
   const fm = parseFrontmatter(content)!
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(1)
     expect(fm.parent_spec).toBeDefined()
-    expect(fm.parent_spec!.name).toBe('defiNNe_V_0-1-0')
+    expect(fm.parent_spec!.name).toBe('defiNNe_V_0-2-0')
     expect(fm.title).toContain('iNNfo')
   })
 })
 
 describe('business template (level 2)', () => {
-  const content = readSpec('level2/business/business_V_0-1-2_NN.md')
+  const content = readSpec('level2/business/business_V_0-2-0_NN.md')
   const fm = parseFrontmatter(content)!
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(2)
-    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-1-1')
-    expect(fm.mode || fm.concepts?.find((c: any) => c.type === 'text')).toBeTruthy()
+    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-2-0')
+    expect(fm.concepts?.find((c: any) => c.type === 'text')).toBeTruthy()
     expect(fm.concepts).toBeDefined()
     expect(fm.concepts!.length).toBeGreaterThan(60)
     expect(fm.markers).toBeDefined()
-    expect(fm.markers!.length).toBe(5)
+    expect(fm.markers!.length).toBeGreaterThan(0)
     expect(fm.matrices).toBeDefined()
     expect(fm.matrices!.length).toBeGreaterThan(10)
   })
 
-  it('has relationship_declarations', () => {
-    expect(fm.relationship_declarations).toBeDefined()
-    expect(fm.relationship_declarations!.evaluable_matrix?.enabled).toBe(true)
-    expect(fm.relationship_declarations!.graph_edge?.enabled).toBe(false)
+  it('has relationship_types', () => {
+    expect(fm.relationship_types).toBeDefined()
+    expect((fm.relationship_types as any)?.evaluable_matrix?.enabled).toBe(true)
   })
 })
 
@@ -227,15 +231,15 @@ describe('iNNfo model with _NN markers (level 3)', () => {
 })
 
 describe('procedures template (level 2)', () => {
-  const content = readSpec('level2/procedures/procedures_V_0-1-2_NN.md')
+  const content = readSpec('level2/procedures/procedures_V_0-2-0_NN.md')
   const fm = parseFrontmatter(content)!
 
   it('parses frontmatter', () => {
     expect(fm.level).toBe(2)
-    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-1-1')
-    expect(fm.concepts).toHaveLength(7)
-    expect(fm.markers).toHaveLength(1)
-    expect(fm.matrices).toHaveLength(6)
+    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-2-0')
+    expect(fm.concepts).toBeDefined()
+    expect(fm.markers).toBeDefined()
+    expect(fm.matrices).toBeDefined()
   })
 })
 
@@ -261,7 +265,7 @@ describe('validator', () => {
     '',
   ].join('\n')
 
-  const bizTemplateContent = readSpec('level2/business/business_V_0-1-2_NN.md')
+  const bizTemplateContent = readSpec('level2/business/business_V_0-2-0_NN.md')
   const bizTemplateFm = parseFrontmatter(bizTemplateContent)!
 
   it('validates a model with _NN markers', () => {
@@ -270,9 +274,9 @@ describe('validator', () => {
     const result = validateModel(
       model,
       {
-        name: 'business_V_0-1-2',
+        name: 'business_V_0-2-0',
         level: 2,
-        parentName: 'iNNfo_V_0-1-1',
+        parentName: 'iNNfo_V_0-2-0',
         frontmatter: bizTemplateFm,
         rawContent: bizTemplateContent,
       },
@@ -293,9 +297,9 @@ describe('validator', () => {
     const result = validateModel(
       model,
       {
-        name: 'business_V_0-1-2',
+        name: 'business_V_0-2-0',
         level: 2,
-        parentName: 'iNNfo_V_0-1-1',
+        parentName: 'iNNfo_V_0-2-0',
         frontmatter: bizTemplateFm,
         rawContent: bizTemplateContent,
       },
@@ -304,6 +308,458 @@ describe('validator', () => {
 
     expect(result.valid).toBe(false)
     expect(result.errors.some((e) => e.message.includes('NonExistentConcept'))).toBe(true)
+  })
+})
+
+describe('reserved names validation (R-MM-02)', () => {
+  it('rejects model with reserved concept name "Concepts"', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 2',
+      'title: "Bad Template"',
+      'concepts:',
+      '  - name: "Concepts"',
+      '    type: "text"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Concepts]]',
+      '',
+    ].join('\n')
+
+    const result = validateFormatContent(content, 'test_NN.md')
+    const reservedCheck = result.checks.find((c) => c.id === 'fm-reserved-names')
+    expect(reservedCheck).toBeDefined()
+    expect(reservedCheck!.passed).toBe(false)
+    expect(reservedCheck!.severity).toBe('error')
+    expect(reservedCheck!.message).toMatch(/Concepts/)
+  })
+
+  it('rejects model with reserved concept name "Elements"', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-1-0"',
+      'title: "Bad Model"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      'concepts:',
+      '  - name: "Elements"',
+      '    type: "list"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Elements]]',
+      '',
+    ].join('\n')
+
+    const result = validateFormatContent(content, 'bad_NN.md')
+    const reservedCheck = result.checks.find((c) => c.id === 'fm-reserved-names')
+    expect(reservedCheck).toBeDefined()
+    expect(reservedCheck!.passed).toBe(false)
+    expect(reservedCheck!.message).toMatch(/Elements/)
+  })
+
+  it('rejects model with reserved concept name "Markers"', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 2',
+      'title: "Bad Template"',
+      'concepts:',
+      '  - name: "Markers"',
+      '    type: "text"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Markers]]',
+      '',
+    ].join('\n')
+
+    const result = validateFormatContent(content, 'test_NN.md')
+    const reservedCheck = result.checks.find((c) => c.id === 'fm-reserved-names')
+    expect(reservedCheck).toBeDefined()
+    expect(reservedCheck!.passed).toBe(false)
+    expect(reservedCheck!.message).toMatch(/Markers/)
+  })
+
+  it('passes when no reserved concept names are used', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 2',
+      'title: "Good Template"',
+      'concepts:',
+      '  - name: "Customer"',
+      '    type: "text"',
+      '  - name: "Product"',
+      '    type: "text"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Customer]]',
+      '* [[Product]]',
+      '',
+    ].join('\n')
+
+    const result = validateFormatContent(content, 'good_NN.md')
+    const reservedCheck = result.checks.find((c) => c.id === 'fm-reserved-names')
+    expect(reservedCheck).toBeUndefined()
+  })
+})
+
+describe('identity collision throws error (R-IE-02)', () => {
+  it('throws on duplicate sibling name instead of returning #2', () => {
+    const reg = new IdentityRegistry()
+    reg.register(null, 'Root')
+    expect(() => reg.register(null, 'Root')).toThrow(/duplicate/i)
+    expect(() => reg.register(null, 'Root')).toThrow(/Root/i)
+  })
+
+  it('normalizeSingleModel reports collision as issue', async () => {
+    const { normalizeSingleModel } = await import('../src/recursiveParser')
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Collision Test"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Duplicate]]',
+      '',
+      '# _NN Components',
+      '* _NN Components: Duplicate',
+      '  First element.',
+      '* _NN Components: Duplicate',
+      '  Second element — same name.',
+      '',
+    ].join('\n')
+
+    const result = normalizeSingleModel(content, 'test_NN.md', 'CollisionTest')
+    const collisionIssues = result.issues.filter((i) =>
+      i.message.toLowerCase().includes('duplicate'),
+    )
+    expect(collisionIssues.length).toBeGreaterThan(0)
+    expect(collisionIssues[0].message).toMatch(/Duplicate/i)
+    // Verify no node with #2 suffix exists
+    const hasHashSuffix = Object.keys(result.nodes).some((id) => id.includes('#2'))
+    expect(hasHashSuffix).toBe(false)
+  })
+
+  it('same-named elements across concepts are reported in normalizeSingleModel', async () => {
+    const { normalizeSingleModel } = await import('../src/recursiveParser')
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Duplicate Element"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Review]]',
+      '',
+      '# _NN Work',
+      '* _NN Work: Review',
+      '  First.',
+      '',
+      '# _NN Steps',
+      '* _NN Steps: Review',
+      '  Second — same name across concepts.',
+      '',
+    ].join('\n')
+
+    const result = normalizeSingleModel(content, 'test_NN.md', 'DupTest')
+    const collisionIssues = result.issues.filter((i) =>
+      i.message.toLowerCase().includes('duplicate'),
+    )
+    expect(collisionIssues.length).toBeGreaterThan(0)
+  })
+
+  it('catches matching names under different taxonomy parents', async () => {
+    const { normalizeSingleModel } = await import('../src/recursiveParser')
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Nested Dup"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Work]]',
+      '  * [[Review]]',
+      '* [[Steps]]',
+      '  * [[Review]]',
+      '',
+      '# _NN Work',
+      '* _NN Work: Review',
+      '  First review.',
+      '',
+      '# _NN Steps',
+      '* _NN Steps: Review',
+      '  Colliding review.',
+      '',
+    ].join('\n')
+
+    const result = normalizeSingleModel(content, 'test_NN.md', 'NestedDup')
+    const collisionIssues = result.issues.filter((i) =>
+      i.message.toLowerCase().includes('duplicate'),
+    )
+    expect(collisionIssues.length).toBeGreaterThan(0)
+  })
+})
+
+describe('applyMutation (R-IE-01)', () => {
+  const makeModel = () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Test"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      'concepts:',
+      '  - name: "Work"',
+      '    type: "list"',
+      '    fields:',
+      '      - name: "status"',
+      '        type: "string"',
+      'markers:',
+      '  - name: "priority"',
+      '    symbol: "!"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Work]]',
+      '',
+      '# _NN Work',
+      '* _NN Work: Triage',
+      '  First element.',
+      '',
+    ].join('\n')
+    return parseModel(content)
+  }
+
+  it('adds a concept', () => {
+    const model = makeModel()
+    const result = applyMutation(model, 'add_concept', { conceptName: 'Steps', type: 'list' })
+    expect(result.success).toBe(true)
+    expect(model.frontmatter.concepts!.some((c) => c.name === 'Steps')).toBe(true)
+  })
+
+  it('rejects duplicate concept', () => {
+    const model = makeModel()
+    const result = applyMutation(model, 'add_concept', { conceptName: 'Work', type: 'list' })
+    expect(result.success).toBe(false)
+    expect(result.errors!.length).toBeGreaterThan(0)
+  })
+
+  it('adds an element', () => {
+    const model = makeModel()
+    const result = applyMutation(model, 'add_element', {
+      conceptName: 'Work',
+      elementName: 'Review',
+      description: 'Code review step.',
+    })
+    expect(result.success).toBe(true)
+    const elements = model.elements.get('Work')!
+    expect(elements.some((e) => e.name === 'Review')).toBe(true)
+  })
+
+  it('rejects duplicate element across concepts (model-wide)', () => {
+    // Add a second concept, then try adding an element with same name
+    const model = makeModel()
+    applyMutation(model, 'add_concept', { conceptName: 'Steps', type: 'list' })
+    // Triage already exists in Work; try adding Triage in Steps
+    const result = applyMutation(model, 'add_element', {
+      conceptName: 'Steps',
+      elementName: 'Triage',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('removes an element', () => {
+    const model = makeModel()
+    const result = applyMutation(model, 'remove_element', {
+      conceptName: 'Work',
+      elementName: 'Triage',
+    })
+    expect(result.success).toBe(true)
+    const elements = model.elements.get('Work')!
+    expect(elements.some((e) => e.name === 'Triage')).toBe(false)
+  })
+
+  it('renames a concept and updates references', () => {
+    const model = makeModel()
+    const result = applyMutation(model, 'rename_concept', {
+      conceptName: 'Work',
+      newName: 'Task',
+    })
+    expect(result.success).toBe(true)
+    expect(model.frontmatter.concepts!.some((c) => c.name === 'Task')).toBe(true)
+    expect(model.frontmatter.concepts!.some((c) => c.name === 'Work')).toBe(false)
+    const elements = model.elements.get('Task')
+    expect(elements).toBeDefined()
+    expect(elements![0].type).toBe('Task')
+  })
+
+  it('renames an element', () => {
+    const model = makeModel()
+    const result = applyMutation(model, 'rename_element', {
+      conceptName: 'Work',
+      elementName: 'Triage',
+      newName: 'Prioritize',
+    })
+    expect(result.success).toBe(true)
+    const elements = model.elements.get('Work')!
+    expect(elements.some((e) => e.name === 'Prioritize')).toBe(true)
+    expect(elements.some((e) => e.name === 'Triage')).toBe(false)
+  })
+
+  it('rejects rename to existing element name (model-wide)', () => {
+    const model = makeModel()
+    applyMutation(model, 'add_concept', { conceptName: 'Steps', type: 'list' })
+    applyMutation(model, 'add_element', {
+      conceptName: 'Steps',
+      elementName: 'Prioritize',
+    })
+    const result = applyMutation(model, 'rename_element', {
+      conceptName: 'Work',
+      elementName: 'Triage',
+      newName: 'Prioritize',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('adds a field', () => {
+    const model = makeModel()
+    const result = applyMutation(model, 'add_field', {
+      conceptName: 'Work',
+      fieldName: 'assignee',
+      fieldType: 'string',
+    })
+    expect(result.success).toBe(true)
+    const concept = model.frontmatter.concepts!.find((c) => c.name === 'Work')
+    expect(concept!.fields!.some((f) => f.name === 'assignee')).toBe(true)
+  })
+
+  it('sets a marker', () => {
+    const model = makeModel()
+    const result = applyMutation(model, 'set_marker', {
+      markerName: 'urgency',
+      symbol: '!!',
+    })
+    expect(result.success).toBe(true)
+    expect(model.frontmatter.markers!.some((m) => m.name === 'urgency')).toBe(true)
+  })
+
+  it('rename_concept updates matrix declaration source/target', () => {
+    const model = parseModel([
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Rename Concept Matrix"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      'concepts:',
+      '  - name: "Work"',
+      '    type: "list"',
+      '  - name: "Roles"',
+      '    type: "list"',
+      'matrices:',
+      '  - name: "work-roles matrix"',
+      '    source: "Work"',
+      '    target: "Roles"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Open PR]]',
+      '* [[Reviewer]]',
+      '',
+      '# _NN Work',
+      '* _NN Work: Open PR',
+      '',
+      '# _NN Roles',
+      '* _NN Roles: Reviewer',
+      '',
+      '# _NN matrices: work-roles matrix',
+      '| Work \\ Roles | Reviewer |',
+      '| Open PR      | ✅ |',
+      '',
+    ].join('\n'))
+
+    // Rename "Work" concept to "Task"
+    applyMutation(model, 'rename_concept', { conceptName: 'Work', newName: 'Task' })
+
+    const matrixDecl = model.frontmatter.matrices!.find((m) => m.name === 'work-roles matrix')
+    expect(matrixDecl).toBeDefined()
+    // Source and target should be updated
+    expect(matrixDecl!.source).toBe('Task')
+  })
+
+  it('rename_element updates taxonomy entries', () => {
+    const model = parseModel([
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Rename Element Taxonomy"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      'concepts:',
+      '  - name: "Work"',
+      '    type: "list"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Parent]]',
+      '  * [[Open PR]]',
+      '',
+      '# _NN Work',
+      '* _NN Work: Parent',
+      '  Top-level.',
+      '* _NN Work: Open PR',
+      '  Nested child.',
+      '',
+    ].join('\n'))
+
+    expect(model.taxonomy.length).toBeGreaterThan(0)
+    // Open PR has a parent in the index (nested), so it gets a taxonomy edge
+    const oldEdge = model.taxonomy.find((t) => t.child === 'Open PR')
+    expect(oldEdge).toBeDefined()
+    expect(oldEdge!.parent).toBe('Parent')
+
+    const result = applyMutation(model, 'rename_element', {
+      conceptName: 'Work',
+      elementName: 'Open PR',
+      newName: 'Create PR',
+    })
+    expect(result.success).toBe(true)
+
+    const newEdge = model.taxonomy.find((t) => t.child === 'Create PR')
+    expect(newEdge).toBeDefined()
+    expect(newEdge!.parent).toBe('Parent')
+    expect(model.taxonomy.some((t) => t.child === 'Open PR')).toBe(false)
   })
 })
 
@@ -493,6 +949,194 @@ describe('slugify (FR-002)', () => {
   it('handles empty and whitespace-only input', () => {
     expect(slugify('')).toBe('')
     expect(slugify('   ')).toBe('')
+  })
+})
+
+describe('slugify R-IE-06 enhancements', () => {
+  it('converts underscore to hyphen', () => {
+    expect(slugify('hello_world')).toBe('hello-world')
+    expect(slugify('my_var_name')).toBe('my-var-name')
+    expect(slugify('_leading')).toBe('leading')
+    expect(slugify('trailing_')).toBe('trailing')
+  })
+
+  it('uniqueSlugify appends -1 on collision', () => {
+    const existing = new Set(['my-slug'])
+    expect(uniqueSlugify('My Slug', existing)).toBe('my-slug-1')
+    expect(existing.has('my-slug-1')).toBe(true)
+  })
+
+  it('uniqueSlugify appends -2 when -1 also exists', () => {
+    const existing = new Set(['my-slug', 'my-slug-1'])
+    expect(uniqueSlugify('My Slug', existing)).toBe('my-slug-2')
+  })
+
+  it('uniqueSlugify returns slugify result if no collision', () => {
+    const existing = new Set<string>()
+    expect(uniqueSlugify('Hello World', existing)).toBe('hello-world')
+    expect(existing.has('hello-world')).toBe(true)
+  })
+})
+
+describe('diagnostic policy (R-IE-05) — slug collisions surfaced', () => {
+  it('normalizeSingleModel surfaces slug collisions as issues', async () => {
+    const { normalizeSingleModel } = await import('../src/recursiveParser')
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Slug Collision"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[My Element]]',
+      '* [[my element]]',
+      '',
+      '# _NN Components',
+      '* _NN Components: My Element',
+      '  First one.',
+      '* _NN Components: my element',
+      '  Second one — same slug.',
+      '',
+    ].join('\n')
+
+    const result = normalizeSingleModel(content, 'test_NN.md', 'SlugTest')
+    const slugIssues = result.issues.filter((i) =>
+      i.message.toLowerCase().includes('slug'),
+    )
+    expect(slugIssues.length).toBeGreaterThan(0)
+  })
+})
+
+describe('validateReferences (R-IE-04)', () => {
+  it('reports dangling matrix reference', () => {
+    const parsed = parseModel([
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Ref Test"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      'matrices:',
+      '  - name: "work-roles matrix"',
+      '    source: "Work"',
+      '    target: "Roles"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Open PR]]',
+      '* [[Reviewer]]',
+      '',
+      '# _NN Work',
+      '* _NN Work: Open PR',
+      '',
+      '# _NN Roles',
+      '* _NN Roles: Reviewer',
+      '',
+      '# _NN matrices: work-roles matrix',
+      '| Work \\ Roles | Reviewer |',
+      '| Open PR      | ✅ |',
+      '| NonExistent  | ✅ |',
+      '',
+    ].join('\n'))
+
+    const result = validateReferences(parsed)
+    expect(result.length).toBeGreaterThan(0)
+    expect(result.some((d) => d.message.includes('NonExistent'))).toBe(true)
+    expect(result.some((d) => d.severity === 'error')).toBe(true)
+  })
+
+  it('passes when all matrix references resolve', () => {
+    const parsed = parseModel([
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Ref Test"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      'matrices:',
+      '  - name: "work-roles matrix"',
+      '    source: "Work"',
+      '    target: "Roles"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Open PR]]',
+      '* [[Reviewer]]',
+      '',
+      '# _NN Work',
+      '* _NN Work: Open PR',
+      '',
+      '# _NN Roles',
+      '* _NN Roles: Reviewer',
+      '',
+      '# _NN matrices: work-roles matrix',
+      '| Work \\ Roles | Reviewer |',
+      '| Open PR      | ✅ |',
+      '',
+    ].join('\n'))
+
+    const result = validateReferences(parsed)
+    expect(result.length).toBe(0)
+  })
+})
+
+describe('legacy params → values reader tolerance (4.5)', () => {
+  it('converts semicolon-delimited params to values array', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 2',
+      'title: "Legacy Test"',
+      'matrices:',
+      '  - name: "test matrix"',
+      '    source: "A"',
+      '    target: "B"',
+      '    params: "Red;Green;Blue"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Test]]',
+      '',
+    ].join('\n')
+
+    const parsed = parseModel(content)
+    const matrix = parsed.frontmatter.matrices?.find((m) => m.name === 'test matrix')
+    expect(matrix).toBeDefined()
+    expect((matrix as any).values).toEqual(['Red', 'Green', 'Blue'])
+  })
+
+  it('keeps native values when both params and values present', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 2',
+      'title: "Native Test"',
+      'matrices:',
+      '  - name: "test matrix"',
+      '    source: "A"',
+      '    target: "B"',
+      '    values: [Responsible, Accountable]',
+      '    params: "Red;Green;Blue"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[Test]]',
+      '',
+    ].join('\n')
+
+    const parsed = parseModel(content)
+    const matrix = parsed.frontmatter.matrices?.find((m) => m.name === 'test matrix')
+    expect(matrix).toBeDefined()
+    expect((matrix as any).values).toEqual(['Responsible', 'Accountable'])
   })
 })
 

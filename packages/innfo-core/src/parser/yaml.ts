@@ -109,5 +109,14 @@ export function parseFrontmatter(content: string): SpecFrontmatter | null {
   if ((parsed as any).specification_url && !(parsed as any).spec_url) {
     ;(parsed as any).spec_url = (parsed as any).specification_url
   }
+  // Normalize legacy matrix params → values (R-MM-08 / 4.5 reader tolerance)
+  const matrices = (parsed as any).matrices
+  if (Array.isArray(matrices)) {
+    for (const m of matrices) {
+      if (m.params && !m.values) {
+        m.values = m.params.split(';').map((s: string) => s.trim())
+      }
+    }
+  }
   return parsed as SpecFrontmatter
 }

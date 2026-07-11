@@ -1,56 +1,40 @@
-/** Diagnostic emitted when two siblings share a name (identity collision). */
-export interface CollisionDiagnostic {
-  parentQualifiedId: string | null
-  name: string
-  message: string
+/** Error thrown when an identity collision is detected. */
+export class DuplicateNameError extends Error {
+  constructor(
+    public readonly duplicateName: string,
+    public readonly parentQualifiedId: string | null,
+  ) {
+    super(`Duplicate name "${duplicateName}" under ${parentQualifiedId ?? '<root>'}`)
+    this.name = 'DuplicateNameError'
+  }
 }
 
 /**
  * Tracks sibling name uniqueness per parent and builds qualified ids
  * (ancestor chain joined `Parent/Child`). Node identity is name-unique
  * among siblings; qualified path disambiguates across branches.
+ * Collisions throw a DuplicateNameError instead of silently disambiguating.
  */
 export class IdentityRegistry {
   private siblingNames = new Map<string | null, Set<string>>()
-  private occurrenceCounts = new Map<string, number>()
-  private collisions: CollisionDiagnostic[] = []
 
   /**
    * Registers a node name under its parent's qualified id (null for root).
    * Returns the qualified id for this node. If the sibling name already
-   * exists (collision), flags a collision diagnostic (without throwing)
-   * AND disambiguates the returned qualified id with an occurrence suffix
-   * (e.g. `Parent/Alpha#2`) so the colliding node still gets a unique,
-   * retrievable graph key instead of silently overwriting the first one (R11).
+   * exists (collision), throws a DuplicateNameError.
    */
   register(parentQualifiedId: string | null, name: string): string {
     const siblings = this.siblingNames.get(parentQualifiedId) ?? new Set<string>()
     const baseQualifiedId = buildQualifiedId(parentQualifiedId, name)
 
     if (siblings.has(name)) {
-      this.collisions.push({
-        parentQualifiedId,
-        name,
-        message: `Duplicate sibling name "${name}" under ${parentQualifiedId ?? '<root>'}`,
-      })
-      const nextOccurrence = (this.occurrenceCounts.get(baseQualifiedId) ?? 1) + 1
-      this.occurrenceCounts.set(baseQualifiedId, nextOccurrence)
-      return `${baseQualifiedId}#${nextOccurrence}`
+      throw new DuplicateNameError(name, parentQualifiedId)
     }
 
     siblings.add(name)
     this.siblingNames.set(parentQualifiedId, siblings)
-    this.occurrenceCounts.set(baseQualifiedId, 1)
 
     return baseQualifiedId
-  }
-
-  getCollisions(): CollisionDiagnostic[] {
-    return [...this.collisions]
-  }
-
-  hasCollisions(): boolean {
-    return this.collisions.length > 0
   }
 }
 

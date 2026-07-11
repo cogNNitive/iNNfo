@@ -31,11 +31,11 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses Comprehensive
 
 exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-0_business_F.md into a normalized graph snapshot 1`] = `
 {
-  "issueCount": 10,
-  "nodeCount": 137,
+  "issueCount": 11,
+  "nodeCount": 132,
   "nodes": [
     {
-      "childCount": 136,
+      "childCount": 131,
       "fieldKeys": [
         "activities-resources matrix||Business Template Cloud Development||AI Agent Skills",
         "activities-resources matrix||Business Template Cloud Development||Business Template (especificación + docs)",
@@ -435,20 +435,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
       "name": "Business Template Cloud Development",
       "parentId": "FORMAT_V_0-1-0_business",
       "type": "Activities",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
-        "description",
-        "projection",
-        "type",
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-0_business/Business Template Cloud#2",
-      "markerKeys": [],
-      "name": "Business Template Cloud",
-      "parentId": "FORMAT_V_0-1-0_business",
-      "type": "Revenue",
     },
     {
       "childCount": 0,
@@ -975,17 +961,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
     {
       "childCount": 0,
       "fieldKeys": [
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-0_business/Enterprise Sales#2",
-      "markerKeys": [],
-      "name": "Enterprise Sales",
-      "parentId": "FORMAT_V_0-1-0_business",
-      "type": "Functions",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
         "description",
         "revenue_model",
         "status",
@@ -996,20 +971,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
       "name": "Enterprise Suite",
       "parentId": "FORMAT_V_0-1-0_business",
       "type": "Offerings",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
-        "constraints",
-        "price",
-        "target",
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-0_business/Enterprise Suite#2",
-      "markerKeys": [],
-      "name": "Enterprise Suite",
-      "parentId": "FORMAT_V_0-1-0_business",
-      "type": "Pricing",
     },
     {
       "childCount": 0,
@@ -1618,20 +1579,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
       "childCount": 0,
       "fieldKeys": [
         "description",
-        "projection",
-        "type",
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-0_business/Procedures Template Cloud#2",
-      "markerKeys": [],
-      "name": "Procedures Template Cloud",
-      "parentId": "FORMAT_V_0-1-0_business",
-      "type": "Revenue",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
-        "description",
         "weight",
       ],
       "id": "FORMAT_V_0-1-0_business/Procedures Template: Procesos como código",
@@ -1703,20 +1650,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
       "name": "Professional Services",
       "parentId": "FORMAT_V_0-1-0_business",
       "type": "Offerings",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
-        "description",
-        "projection",
-        "type",
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-0_business/Professional Services#2",
-      "markerKeys": [],
-      "name": "Professional Services",
-      "parentId": "FORMAT_V_0-1-0_business",
-      "type": "Revenue",
     },
     {
       "childCount": 0,
@@ -2006,11 +1939,11 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
 
 exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-1_business_F.md into a normalized graph snapshot 1`] = `
 {
-  "issueCount": 10,
-  "nodeCount": 137,
+  "issueCount": 11,
+  "nodeCount": 132,
   "nodes": [
     {
-      "childCount": 136,
+      "childCount": 131,
       "fieldKeys": [
         "activities-resources matrix||Business Template Cloud Development||AI Agent Skills",
         "activities-resources matrix||Business Template Cloud Development||Business Template (especificación + docs)",
@@ -2409,20 +2342,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
       "name": "Business Template Cloud Development",
       "parentId": "FORMAT_V_0-1-1_business",
       "type": "Activities",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
-        "description",
-        "projection",
-        "type",
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-1_business/Business Template Cloud#2",
-      "markerKeys": [],
-      "name": "Business Template Cloud",
-      "parentId": "FORMAT_V_0-1-1_business",
-      "type": "Revenue",
     },
     {
       "childCount": 0,
@@ -2949,17 +2868,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
     {
       "childCount": 0,
       "fieldKeys": [
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-1_business/Enterprise Sales#2",
-      "markerKeys": [],
-      "name": "Enterprise Sales",
-      "parentId": "FORMAT_V_0-1-1_business",
-      "type": "Functions",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
         "description",
         "revenue_model",
         "status",
@@ -2970,20 +2878,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
       "name": "Enterprise Suite",
       "parentId": "FORMAT_V_0-1-1_business",
       "type": "Offerings",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
-        "constraints",
-        "price",
-        "target",
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-1_business/Enterprise Suite#2",
-      "markerKeys": [],
-      "name": "Enterprise Suite",
-      "parentId": "FORMAT_V_0-1-1_business",
-      "type": "Pricing",
     },
     {
       "childCount": 0,
@@ -3592,20 +3486,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
       "childCount": 0,
       "fieldKeys": [
         "description",
-        "projection",
-        "type",
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-1_business/Procedures Template Cloud#2",
-      "markerKeys": [],
-      "name": "Procedures Template Cloud",
-      "parentId": "FORMAT_V_0-1-1_business",
-      "type": "Revenue",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
-        "description",
         "weight",
       ],
       "id": "FORMAT_V_0-1-1_business/Procedures Template: Procesos como código",
@@ -3677,20 +3557,6 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
       "name": "Professional Services",
       "parentId": "FORMAT_V_0-1-1_business",
       "type": "Offerings",
-    },
-    {
-      "childCount": 0,
-      "fieldKeys": [
-        "description",
-        "projection",
-        "type",
-        "weight",
-      ],
-      "id": "FORMAT_V_0-1-1_business/Professional Services#2",
-      "markerKeys": [],
-      "name": "Professional Services",
-      "parentId": "FORMAT_V_0-1-1_business",
-      "type": "Revenue",
     },
     {
       "childCount": 0,

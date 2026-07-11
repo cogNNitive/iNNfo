@@ -42,15 +42,6 @@ const samples: SampleFolder[] = [
     path: 'specs/v0.1.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
     items: 1,
   },
-  {
-    id: 'sample-teamkb',
-    name: 'Team Knowledge Base',
-    description:
-      'FOLDER-mode KB root node ready for Persona, Topic, and Reference concept folders — the starting point for a team documentation base.',
-    mode: 'FOLDER',
-    path: 'archive/2026-07-02/models/TeamKB_V_0-1-1_kb/',
-    items: 1,
-  },
 ]
 
 interface StarterTemplate {
@@ -256,21 +247,6 @@ async function reopenFolder(entry: FolderHistoryEntry): Promise<void> {
  * because there's no local folder handle. Use createFromStarter() if you
  * need full save support.
  */
-async function previewStarter(starter: StarterTemplate): Promise<void> {
-  error.value = null
-  urlBusy.value = true
-  try {
-    await workspace.loadFromUrl(starter.url)
-    await addToHistory(starter.name, null as unknown as any)
-    history.value = await loadHistory()
-    router.push('/workspace')
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : String(err)
-  } finally {
-    urlBusy.value = false
-  }
-}
-
 async function previewSample(starter: StarterTemplate): Promise<void> {
   if (!starter.sampleUrl) return
   error.value = null
@@ -407,8 +383,6 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
     busy.value = true
 
     // Resolve the sample's parent directory from stored workspace history
-    // FILE-mode: parent = directory that contains the file (what user selects)
-    // FOLDER-mode: parent = directory that contains the sample folder
     const parentSegments = sample.path.replace(/\/+$/, '').split('/').slice(0, -1)
     const ancestorHandle =
       parentSegments.length > 0 ? await resolveAncestorHandle(parentSegments) : undefined
@@ -552,8 +526,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
       <div class="col">
         <h2 class="col__title">Official templates</h2>
         <p class="col__desc">
-          Choose a template to start a new model. Preview an empty starter, a partially-filled
-          sample, or create a full copy in a folder.
+          Choose a template to start a new model. Preview a sample or create a full copy in a folder.
         </p>
 
         <div class="starters">
@@ -564,9 +537,6 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
             </div>
             <p class="starter-card__desc">{{ s.description }}</p>
             <div class="starter-card__actions">
-              <button class="starter-card__preview" :disabled="urlBusy" @click="previewStarter(s)">
-                {{ urlBusy ? 'Loading\u2026' : 'Preview' }}
-              </button>
               <button
                 v-if="s.sampleUrl"
                 class="starter-card__sample"
