@@ -1,10 +1,10 @@
 ---
-specification_version: "V_0-1-3"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-2_NN.md"
+specification_version: "V_0-2-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-1_NN.md"
+  name: "iNNfo_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "Business Template"
 concepts:
   - name: "Business summary"
@@ -468,7 +468,7 @@ markers:
     symbol: "+"
     icon: "star"
     color: "green"
-relationship_declarations:
+relationship_types:
   hierarchy:
     enabled: true
     via: "index block"
@@ -482,58 +482,58 @@ matrices:
   - name: "Journey map"
     source: "Journey"
     target: "Emotions"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Segmentation-Profiles Matrix"
     source: "Segmentation"
     target: "Profiles"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Problems-Value propositions Matrix"
     source: "Problems"
     target: "Value propositions"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Value propositions-Messages Matrix"
     source: "Value propositions"
     target: "Messages"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Messages-Channels Matrix"
     source: "Messages"
     target: "Channels"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Assumptions-Risks Matrix"
     source: "Assumptions"
     target: "Risks"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Experiments-Assumptions Matrix"
     source: "Experiments"
     target: "Assumptions"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Metrics-Organizational goals Matrix"
     source: "Metrics"
     target: "Organizational goals"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Features-Milestones Matrix"
     source: "Features"
     target: "Milestones"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Organizational values-Organizational goals Matrix"
     source: "Organizational values"
     target: "Organizational goals"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Functions-Positions Matrix"
     source: "Functions"
     target: "Positions"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Activities-Resources Matrix"
     source: "Activities"
     target: "Resources"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "Problems-Competition Matrix"
     source: "Problems"
     target: "Competition"
-    params: "Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min"
+    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
   - name: "item-markers matrix"
-    source: "elements"
-    target: "markers"
+    source: "Elements"
+    target: "Markers"
 ---
 
 > [!NOTE]
@@ -556,11 +556,7 @@ The Business Template is designed for modeling complete business strategies in a
 
 ## Specification
 
-### 1. Supported Mode
-
-This template supports **FILE mode only**.
-
-### 2. Concepts
+### Concepts
 
 The template defines 70+ concepts organized into these categories:
 
@@ -586,7 +582,7 @@ Each concept has a `type` that determines its representation:
 | `steps` | Ordered sequence of steps |
 | `sequence` | Ordered list of events |
 
-### 3. Markers
+### Markers
 
 | Marker | Symbol | Purpose |
 |---|---|---|
@@ -596,7 +592,7 @@ Each concept has a `type` that determines its representation:
 | `priority` | `!` | Urgency flag |
 | `rating` | `+` | Quality rating |
 
-### 4. Matrices
+### Matrices
 
 The template declares the following evaluable matrices:
 
@@ -611,7 +607,7 @@ The template declares the following evaluable matrices:
 
 All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min`.
 
-### 5. Relationship Types
+### Relationship Types
 
 | Type | Enabled | Representation |
 |---|---|---|
@@ -620,7 +616,7 @@ All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Ne
 | Graph edge | ❌ | Not applicable |
 | Sequence | ✅ | concept type `steps` / `sequence` |
 
-### 6. Taxonomy Index
+### Taxonomy Index
 
 Concepts are organized in a multi-level hierarchy. The root categories are:
 
@@ -641,12 +637,12 @@ To create a business model, create a level 3 FILE mode document with:
 
 ```yaml
 ---
-specification_version: "V_0-1-1"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-1_NN.md"
+specification_version: "V_0-2-0"
+specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
-  name: "business_V_0-1-2"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-2_NN.md"
+  name: "business_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Your Business Name>"
 ---
@@ -681,7 +677,7 @@ The application will resolve the `parent_spec` URL, download this template, and 
 
 ### Canonical Sample
 
-The official sample for this template is `specs/v0.1.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md` (FILE mode). It exercises all concept types, two matrix types, and the `_NN index:` syntax.
+The official sample for this template is `specs/v0.2.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`. It exercises all concept types, two matrix types, and the index block.
 
 ### Model Directory after First Load
 
@@ -691,9 +687,9 @@ When the sample is loaded for the first time:
 📁 Ghostbusters_V_0-1-2_business/
   📄 Ghostbusters_V_0-1-2_business_NN.md
   📁 specs/
-    📄 business_V_0-1-1_NN.md         ← this file (downloaded from parent_spec.url)
-    📄 iNNfo_V_0-1-0_NN.md             ← downloaded from this file's parent_spec.url
-    📄 defiNNe_V_0-1-0_NN.md           ← downloaded from iNNfo's parent_spec.url
+    📄 business_V_0-2-0_NN.md         ← this file (downloaded from parent_spec.url)
+    📄 iNNfo_V_0-2-0_NN.md             ← downloaded from this file's parent_spec.url
+    📄 defiNNe_V_0-2-0_NN.md           ← downloaded from iNNfo's parent_spec.url
 ```
 
 ### Parent Chain
@@ -701,13 +697,13 @@ When the sample is loaded for the first time:
 ```yaml
 # From the Ghostbusters sample:
 parent_spec:
-  name: "business_V_0-1-2"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-2_NN.md"
+  name: "business_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 
 # This template's parent:
 parent_spec:
-  name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+  name: "iNNfo_V_0-2-0"
+  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 ```
 
 

@@ -218,7 +218,7 @@ Description of the overall procedure.
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/v0.1.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises all concept types (text, sequence, list), YAML element fields, and the `work-roles` RACI matrix.
+The official sample for this template is at `specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises all concept types (text, sequence, list), YAML element fields, and the `work-roles` RACI matrix.
 
 ### Model Directory after First Load
 
