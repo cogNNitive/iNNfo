@@ -43,6 +43,14 @@ Después de generar el HTML y confirmar al usuario:
    e) Regenerá el HTML con la plantilla actualizada
 3. Confirmá la ruta final y ofrecé repetir el ciclo si es necesario
 
+## Versionado sugerido
+
+Siempre que edites un modelo iNNfo (conceptos, elementos, matrices), **sugerile al usuario que guarde los cambios como una versión incremental**:
+
+> "Considerá guardar esto como un patch (ej: V_1-0-0 → V_1-0-1) para mantener el historial de versiones. El Export Navigator usa la versión para mostrar si los exports están actualizados o desactualizados."
+
+Esto aplica tanto si el usuario edita a través del agente como si usa la interfaz de cogNNitive.
+
 ## Estructura de templates
 
 Cada template en `templates/` define:
