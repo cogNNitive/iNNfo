@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
+import { ref, computed, onMounted, onUnmounted, defineAsyncComponent, type Component } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '../components/layout/Header.vue'
 import SampleBanner from '../components/layout/SampleBanner.vue'
@@ -203,7 +203,11 @@ const childItems = computed(() => {
 
 const isListConcept = computed(() => childItems.value.length > 0)
 
-const activeEditorComponent = computed(() => {
+// The active editor is a dynamic <component :is>: each editorView selects a
+// different component with a different prop shape, correlated at runtime but
+// not statically expressible. Type it as an opaque Component so vue-tsc does
+// not try (and fail) to reconcile the prop unions at the binding site.
+const activeEditorComponent = computed<Component>(() => {
   if (editorView.value === 'text') return TextEditor
   if (editorView.value === 'tree') return TreeEditor
   if (editorView.value === 'table') return BlockSheet

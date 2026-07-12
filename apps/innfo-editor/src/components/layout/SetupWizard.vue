@@ -290,44 +290,43 @@ git clone https://github.com/innV0/iNNv0_skills.git
 
 The \`innfo-mcp\` server wraps \`@innv0/innfo-core\` and provides deterministic model validation, spec resolution, and semantic mutation tools. The agent MUST NOT hand-validate or hand-resolve spec chains when the MCP is available.
 
-Since \`@innv0/innfo-mcp\` is not published on npm, you need a local clone of \`cogNNitive\`:
+**Recommended — zero-clone (CDN bootstrap).** You do NOT need to clone this repo. \`innfo-mcp\` is published as a single auto-updating bundle on the CDN (\`https://format.innv0.com/cdn/\`). Install the bootstrap script once — it downloads, caches, and auto-updates the bundle, with an offline fallback to the cached copy — then point your agent at it. Full per-platform steps and the script source: https://github.com/innV0/cogNNitive/blob/main/docs/mcp-setup.md
 
-\`\`\`
-git clone https://github.com/innV0/cogNNitive.git
-cd cogNNitive
-npm install
-npm run build --prefix packages/innfo-mcp
-\`\`\`
+- **macOS / Linux**: save \`bootstrap.sh\` into \`~/.cache/innfo-mcp/\` and run \`chmod +x\` on it.
+- **Windows**: save \`innfo-mcp.ps1\` and \`innfo-mcp.cmd\` into \`%USERPROFILE%\\.cache\\innfo-mcp\\\`.
 
-Then configure the MCP per your agent:
+Then configure the MCP per your agent, pointing \`command\` at the bootstrap script:
 
-**OpenCode** — add to \`opencode.json\` or \`~/.config/opencode/opencode.jsonc\` (note: OpenCode uses the \`mcp\` key with a \`command\` array, NOT \`mcpServers\`):
+**OpenCode** — add to \`opencode.json\` or \`~/.config/opencode/opencode.jsonc\` (OpenCode uses the \`mcp\` key with a \`command\` array, NOT \`mcpServers\`):
 \`\`\`jsonc
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "innfo-mcp": {
       "type": "local",
-      "command": ["node", "path/to/cogNNitive/packages/innfo-mcp/dist/server.js"],
+      "command": ["/home/<you>/.cache/innfo-mcp/bootstrap.sh"],
       "enabled": true
     }
   }
 }
 \`\`\`
 
-**Claude Code** — add to \`.mcp.json\` (or your MCP configuration), which uses the \`mcpServers\` key with a \`command\` + \`args\` split:
+**Claude Code** — add to \`.mcp.json\` (uses the \`mcpServers\` key with a \`command\` + \`args\` split):
 \`\`\`jsonc
 {
   "mcpServers": {
     "innfo-mcp": {
-      "command": "node",
-      "args": ["path/to/cogNNitive/packages/innfo-mcp/dist/server.js"]
+      "command": "/home/<you>/.cache/innfo-mcp/bootstrap.sh"
     }
   }
 }
 \`\`\`
 
-**anti-gravity** — add to your agent's MCP server configuration using the same \`node\` + path pattern (follow your client's schema — \`mcp\` array style or \`mcpServers\` command+args style).
+**anti-gravity** — same \`mcpServers\` shape as Claude Code, with \`command\` pointing at your platform's bootstrap script.
+
+On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`command\` instead of the \`bootstrap.sh\` path shown above (see \`docs/mcp-setup.md\` for the exact escaped JSON).
+
+**Alternative — clone-based (contributors).** If you already have \`cogNNitive\` cloned, build once with \`npm run build --prefix packages/innfo-mcp\` and point \`command\` at \`node <repo>/packages/innfo-mcp/dist/server.js\` instead. See \`docs/mcp-setup.md\`.
 
 ## Workspace structure
 
