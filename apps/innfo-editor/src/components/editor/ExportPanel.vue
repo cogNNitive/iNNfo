@@ -206,7 +206,11 @@ const modelFilename = computed(() => {
 
 const exportPrompt = computed(() => {
   const name = modelFilename.value || 'selected model'
-  return `Before starting, verify MCP tools are active (tell the agent to run the innv0-innfo skill's MCP Activation Protocol). Then generate an export for ${name} following traNNsform/AGENT.md`
+  return `I need to generate an HTML visualizer for the model "${name}".
+
+Load the **innv0-innfo** skill — it handles iNNfo model operations, MCP server activation (innfo-mcp), and visualizer generation. Follow traNNsform/AGENT.md for the export procedure.
+
+After the skill loads, verify the innfo-mcp MCP server is active (the skill includes this check), then generate the visualizer and save it to traNNsform/output/.`
 })
 
 function formatDate(ts: number): string {

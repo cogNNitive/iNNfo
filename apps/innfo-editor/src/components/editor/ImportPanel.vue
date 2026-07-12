@@ -243,9 +243,9 @@ const fileListText = computed(() => {
 })
 
 const agentPrompt = computed(() => {
-  let prompt = 'Before starting, verify MCP tools are active (run the innv0-innfo skill\'s MCP Activation Protocol). Then import documents from traNNsform/input/ following traNNsform/AGENT.md'
+  let prompt = 'I need to import the documents listed below and transform them into iNNfo models.\n\nLoad the **innv0-trannsform** skill — it handles document ingestion, normalization, and conversion. Follow traNNsform/AGENT.md for the exact procedure.\n\nAfter the skill loads, verify the innfo-mcp MCP server is active (the skill includes this check). Then process each file from traNNsform/input/ and write the resulting iNNfo models into the appropriate location.'
   if (fileListText.value) {
-    prompt += `\n\nFiles detected:\n${fileListText.value}`
+    prompt += `\n\nFiles to import:\n${fileListText.value}`
   }
   return prompt
 })
