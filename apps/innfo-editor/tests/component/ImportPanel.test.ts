@@ -129,7 +129,7 @@ describe('ImportPanel.vue', () => {
     expect(wrapper.text()).toContain('new-doc.md')
   })
 
-  it('prompt references traNNsform/AGENT.md', async () => {
+  it('agent prompt starts with "innfo:" prefix', async () => {
     const workspaceStore = useWorkspaceStore()
     const handle = buildFakeTree('workspace', {
       traNNsform: {
@@ -145,6 +145,85 @@ describe('ImportPanel.vue', () => {
     await new Promise((r) => setTimeout(r, 50))
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.text()).toContain('AGENT.md')
+    expect(wrapper.text()).toContain('innfo:')
+  })
+
+  it('agent prompt references workflows/import.workflow.md', async () => {
+    const workspaceStore = useWorkspaceStore()
+    const handle = buildFakeTree('workspace', {
+      traNNsform: {
+        input: {
+          'doc.md': 'content',
+        },
+      },
+    })
+    workspaceStore.handle = handle as DirectoryHandleLike
+    workspaceStore.hasHandle = true
+
+    const wrapper = mount(ImportPanel)
+    await new Promise((r) => setTimeout(r, 50))
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('workflows/import.workflow.md')
+  })
+
+  it('agent prompt does not contain explicit skill name', async () => {
+    const workspaceStore = useWorkspaceStore()
+    const handle = buildFakeTree('workspace', {
+      traNNsform: {
+        input: {
+          'doc.md': 'content',
+        },
+      },
+    })
+    workspaceStore.handle = handle as DirectoryHandleLike
+    workspaceStore.hasHandle = true
+
+    const wrapper = mount(ImportPanel)
+    await new Promise((r) => setTimeout(r, 50))
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).not.toContain('innv0-trannsform')
+  })
+
+  it('agent prompt does not contain "Files to import:" when input/ is empty', async () => {
+    const workspaceStore = useWorkspaceStore()
+    const handle = buildFakeTree('workspace', {
+      traNNsform: {
+        input: {},
+      },
+    })
+    workspaceStore.handle = handle as DirectoryHandleLike
+    workspaceStore.hasHandle = true
+
+    const wrapper = mount(ImportPanel)
+    await new Promise((r) => setTimeout(r, 50))
+    await wrapper.vm.$nextTick()
+
+    // Prompt content should show the static portion without file list
+    expect(wrapper.text()).toContain('innfo:')
+    expect(wrapper.text()).not.toContain('Files to import:')
+  })
+
+  it('agent prompt file list section is preserved', async () => {
+    const workspaceStore = useWorkspaceStore()
+    const handle = buildFakeTree('workspace', {
+      traNNsform: {
+        input: {
+          'report.docx': 'report content',
+          'notes.md': 'note content',
+        },
+      },
+    })
+    workspaceStore.handle = handle as DirectoryHandleLike
+    workspaceStore.hasHandle = true
+
+    const wrapper = mount(ImportPanel)
+    await new Promise((r) => setTimeout(r, 50))
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('Files to import:')
+    expect(wrapper.text()).toContain('report.docx')
+    expect(wrapper.text()).toContain('notes.md')
   })
 })

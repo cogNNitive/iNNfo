@@ -75,7 +75,71 @@ describe('ExportPanel.vue', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.text()).toContain('MyModel_V_1-0-0')
-    expect(wrapper.text()).toContain('traNNsform/AGENT.md')
+  })
+
+  it('export prompt starts with "innfo:" prefix', async () => {
+    const modelStore = useModelStore()
+    modelStore.rootIds = ['ModelA']
+    modelStore.nodes = {
+      ModelA: makeModelNode('ModelA', 'MyModel_V_1-0-0_Business_NN.md'),
+    }
+
+    const wrapper = mount(ExportPanel)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('innfo:')
+  })
+
+  it('export prompt references workflows/export.workflow.md', async () => {
+    const modelStore = useModelStore()
+    modelStore.rootIds = ['ModelA']
+    modelStore.nodes = {
+      ModelA: makeModelNode('ModelA', 'MyModel_V_1-0-0_Business_NN.md'),
+    }
+
+    const wrapper = mount(ExportPanel)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('workflows/export.workflow.md')
+  })
+
+  it('export prompt uses source.path (full path, not just filename)', async () => {
+    const modelStore = useModelStore()
+    modelStore.rootIds = ['ModelA']
+    modelStore.nodes = {
+      ModelA: makeModelNode('ModelA', 'Projects/Foo/MyModel_V_1-0-0_Business_NN.md'),
+    }
+
+    const wrapper = mount(ExportPanel)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('Projects/Foo/MyModel_V_1-0-0_Business_NN.md')
+  })
+
+  it('export prompt falls back to filename when source.path is undefined', async () => {
+    const modelStore = useModelStore()
+    modelStore.rootIds = ['ModelA']
+    modelStore.nodes = {
+      ModelA: {
+        id: 'ModelA',
+        name: 'FallbackModel',
+        parentId: null,
+        childIds: [],
+        type: 'document',
+        kind: 'root',
+        fields: {},
+        markers: {},
+        relationships: [],
+        rawSections: {},
+        source: {},
+      },
+    }
+
+    const wrapper = mount(ExportPanel)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('innfo:')
+    expect(wrapper.text()).toContain('FallbackModel')
   })
 
   it('shows a copy button for the export prompt', async () => {

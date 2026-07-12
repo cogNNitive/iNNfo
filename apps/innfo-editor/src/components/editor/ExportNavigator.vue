@@ -27,7 +27,7 @@
         </div>
         <div class="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400">
           <div class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-2xs font-bold shrink-0 mt-0.5">2</div>
-          <span>Tell your agent: <code class="text-2xs bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded font-mono">I need to generate an HTML visualizer for {{ modelFilename }}. Load the innv0-innfo skill — it handles model operations and visualizer generation. Follow traNNsform/AGENT.md for the export procedure.</code></span>
+          <span>Tell your agent: <code class="text-2xs bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded font-mono">{{ step2Prompt }}</code></span>
         </div>
         <div class="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400">
           <div class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-2xs font-bold shrink-0 mt-0.5">3</div>
@@ -154,6 +154,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
+import { innfoPrompt } from '../../ai-guide/prompt'
 import { parseFormatFilename, formatVersionString } from '../../utils/version'
 import type { DirectoryHandleLike, FileHandleLike } from '../../model/fs-types'
 import { FileOutput, ExternalLink, RefreshCw, AlertTriangle, Loader, Check } from 'lucide-vue-next'
@@ -188,6 +189,10 @@ const modelFilename = computed(() => {
   const rootNode = modelStore.getNode(rootId)
   const path = rootNode?.source?.path
   return path?.split(/[/\\]/).pop() ?? 'your model'
+})
+
+const step2Prompt = computed(() => {
+  return innfoPrompt(`I need to generate an HTML visualizer for ${modelFilename.value}. Load the innv0-innfo skill — it handles model operations and visualizer generation. Follow traNNsform/AGENT.md for the export procedure.`)
 })
 
 const currentModelVersion = computed(() => {

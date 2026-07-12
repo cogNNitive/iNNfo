@@ -187,6 +187,7 @@ async function initWorkspaceStructure(
   await traNNsformDir.getDirectoryHandle('output', { create: true })
   const templatesDir = await traNNsformDir.getDirectoryHandle('templates', { create: true })
   const snippetsDir = await traNNsformDir.getDirectoryHandle('snippets', { create: true })
+  const workflowsDir = await traNNsformDir.getDirectoryHandle('workflows', { create: true })
 
   // Download traNNsform files from GitHub (non-blocking — log on failure)
   const TRANSFORM_BASE_URL = 'https://raw.githubusercontent.com/innV0/cogNNitive/main/traNNsform'
@@ -199,6 +200,8 @@ async function initWorkspaceStructure(
     { path: 'templates', name: 'catalog.md' },
     { path: 'templates', name: '_generic.md' },
     { path: 'snippets', name: 'chart-patterns.md' },
+    { path: 'workflows', name: 'export.workflow.md' },
+    { path: 'workflows', name: 'import.workflow.md' },
   ]
 
   for (const file of transformFiles) {
@@ -209,7 +212,7 @@ async function initWorkspaceStructure(
       const text = await resp.text()
 
       const dir =
-        file.path === '' ? traNNsformDir : file.path === 'templates' ? templatesDir : snippetsDir
+        file.path === '' ? traNNsformDir : file.path === 'templates' ? templatesDir : file.path === 'snippets' ? snippetsDir : workflowsDir
 
       const fileHandle = await dir.getFileHandle(file.name, { create: true })
       if (fileHandle.createWritable) {

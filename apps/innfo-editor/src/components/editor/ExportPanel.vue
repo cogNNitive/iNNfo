@@ -163,6 +163,7 @@ import {
 } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
+import { innfoPrompt } from '../../ai-guide/prompt'
 import type { ModelNode } from '../../model/types'
 
 const workspaceStore = useWorkspaceStore()
@@ -204,13 +205,16 @@ const modelFilename = computed(() => {
   return path.split(/[/\\]/).pop() || selectedModel.value.name || ''
 })
 
+const modelSourcePath = computed(() => {
+  if (!selectedModel.value) return ''
+  return selectedModel.value.source?.path ?? ''
+})
+
 const exportPrompt = computed(() => {
-  const name = modelFilename.value || 'selected model'
-  return `I need to generate an HTML visualizer for the model "${name}".
+  const path = modelSourcePath.value || modelFilename.value || 'selected model'
+  return innfoPrompt(`I need to generate an HTML visualizer for the model at "${path}".
 
-Load the **innv0-innfo** skill — it handles iNNfo model operations, MCP server activation (innfo-mcp), and visualizer generation. Follow traNNsform/AGENT.md for the export procedure.
-
-After the skill loads, verify the innfo-mcp MCP server is active (the skill includes this check), then generate the visualizer and save it to traNNsform/output/.`
+Open traNNsform/workflows/export.workflow.md and follow the export pipeline step by step.`)
 })
 
 function formatDate(ts: number): string {

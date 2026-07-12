@@ -32,12 +32,10 @@ const MetamatrixConfig = defineAsyncComponent(
   () => import('../components/editor/MetamatrixConfig.vue'),
 )
 const ModelInfoPanel = defineAsyncComponent(() => import('../components/editor/ModelInfoPanel.vue'))
-const AIGuidePanel = defineAsyncComponent(() => import('../components/editor/AIGuidePanel.vue'))
+const AiWorkflowModal = defineAsyncComponent(() => import('../components/editor/AiWorkflowModal.vue'))
 const ExportNavigator = defineAsyncComponent(
   () => import('../components/editor/ExportNavigator.vue'),
 )
-const ImportPanel = defineAsyncComponent(() => import('../components/editor/ImportPanel.vue'))
-const ExportPanel = defineAsyncComponent(() => import('../components/editor/ExportPanel.vue'))
 
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
@@ -281,8 +279,7 @@ function onSelectNode(nodeId: string): void {
   uiStore.selectNode(nodeId)
   if (
     uiStore.activeView === 'matrices' ||
-    uiStore.activeView === 'info' ||
-    uiStore.activeView === 'ai-guide'
+    uiStore.activeView === 'info'
   ) {
     uiStore.setActiveView('editor')
   }
@@ -501,24 +498,9 @@ onUnmounted(() => {
           </div>
         </template>
 
-        <!-- ── AI Guide View ── -->
-        <template v-else-if="uiStore.activeView === 'ai-guide'">
-          <AIGuidePanel />
-        </template>
-
         <!-- ── Navigator View ── -->
         <template v-else-if="uiStore.activeView === 'navigator'">
           <ExportNavigator />
-        </template>
-
-        <!-- ── Import View ── -->
-        <template v-else-if="uiStore.activeView === 'import'">
-          <ImportPanel />
-        </template>
-
-        <!-- ── Export View ── -->
-        <template v-else-if="uiStore.activeView === 'export'">
-          <ExportPanel />
         </template>
       </main>
 
@@ -529,6 +511,7 @@ onUnmounted(() => {
 
       <ToastMessage />
       <SaveWorkspaceModal />
+      <AiWorkflowModal />
     </div>
   </div>
 </template>

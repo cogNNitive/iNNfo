@@ -4,6 +4,8 @@ import { ref } from 'vue'
 export type ActiveView =
   'editor' | 'graph' | 'matrices' | 'info' | 'ai-guide' | 'navigator' | 'import' | 'export'
 
+export type AiTab = 'guide' | 'import' | 'export'
+
 export type GhostFilterMode = 'model' | 'all'
 
 /**
@@ -23,6 +25,8 @@ export const useUiStore = defineStore('ui', () => {
   const showValidationReport = ref(false)
   const showMetamatrixConfig = ref(false)
   const showSaveWorkspaceModal = ref(false)
+  const showAiModal = ref(false)
+  const activeAiTab = ref<AiTab>('guide')
   const ghostFilterMode = ref<GhostFilterMode>('all')
 
   function setActiveConcept(name: string | null): void {
@@ -61,6 +65,14 @@ export const useUiStore = defineStore('ui', () => {
     ghostFilterMode.value = mode
   }
 
+  function setShowAiModal(val: boolean): void {
+    showAiModal.value = val
+  }
+
+  function setActiveAiTab(tab: AiTab): void {
+    activeAiTab.value = tab
+  }
+
   return {
     activeConcept,
     activePerspective,
@@ -71,6 +83,8 @@ export const useUiStore = defineStore('ui', () => {
     showValidationReport,
     showMetamatrixConfig,
     showSaveWorkspaceModal,
+    showAiModal,
+    activeAiTab,
     ghostFilterMode,
     setActiveConcept,
     setActivePerspective,
@@ -80,6 +94,8 @@ export const useUiStore = defineStore('ui', () => {
     setActiveMatrixIndex,
     setShowValidationReport,
     setShowSaveWorkspaceModal,
+    setShowAiModal,
+    setActiveAiTab,
     setGhostFilterMode,
   }
 })

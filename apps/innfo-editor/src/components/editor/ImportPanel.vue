@@ -184,6 +184,7 @@ import {
   AlertTriangle,
 } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
+import { innfoPrompt } from '../../ai-guide/prompt'
 
 const workspaceStore = useWorkspaceStore()
 
@@ -243,7 +244,9 @@ const fileListText = computed(() => {
 })
 
 const agentPrompt = computed(() => {
-  let prompt = 'I need to import the documents listed below and transform them into iNNfo models.\n\nLoad the **innv0-trannsform** skill — it handles document ingestion, normalization, and conversion. Follow traNNsform/AGENT.md for the exact procedure.\n\nAfter the skill loads, verify the innfo-mcp MCP server is active (the skill includes this check). Then process each file from traNNsform/input/ and write the resulting iNNfo models into the appropriate location.'
+  let prompt = innfoPrompt(`I need to import the documents in traNNsform/input/ and transform them into iNNfo models.
+
+Open traNNsform/workflows/import.workflow.md and follow the import pipeline step by step.`)
   if (fileListText.value) {
     prompt += `\n\nFiles to import:\n${fileListText.value}`
   }
