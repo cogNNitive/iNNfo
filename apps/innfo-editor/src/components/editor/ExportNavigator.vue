@@ -269,11 +269,13 @@ async function openExport(xf: ExportFile): Promise<void> {
 }
 
 function regenerate(_xf: ExportFile): void {
-  uiStore.setActiveView('ai-guide')
+  uiStore.setActiveAiTab('guide')
+  uiStore.setShowAiModal(true)
 }
 
 function goToAiGuide(): void {
-  uiStore.setActiveView('ai-guide')
+  uiStore.setActiveAiTab('guide')
+  uiStore.setShowAiModal(true)
 }
 
 onMounted(() => {

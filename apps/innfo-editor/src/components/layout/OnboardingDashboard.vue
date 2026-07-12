@@ -39,7 +39,8 @@ function selectConcept(conceptName: string): void {
 }
 
 function selectAIGuide(): void {
-  uiStore.setActiveView('ai-guide')
+  uiStore.setActiveAiTab('guide')
+  uiStore.setShowAiModal(true)
 }
 </script>
 
