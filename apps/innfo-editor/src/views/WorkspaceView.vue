@@ -238,7 +238,6 @@ const activeEditorProps = computed(() => {
       conceptFields: activeConceptFields.value,
       collapsed: false,
       isEditing: false,
-      disableExpand: true,
     }
   }
   return {

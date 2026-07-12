@@ -12,6 +12,7 @@
       :has-markers="hasMarkers"
       :collapsed="conceptCollapsed"
       :is-editing="editingId === 'concept'"
+      :show-tabs="false"
       :show-reorder="false"
       :show-delete="false"
       :show-add-child="isListConcept"

@@ -178,9 +178,9 @@
       </template>
     </div>
 
-    <!-- Tab bar (read mode only, when expanded) -->
+    <!-- Tab bar (read mode only, when expanded and showTabs enabled) -->
     <div
-      v-if="!collapsed && !isEditing"
+      v-if="showTabs && !collapsed && !isEditing"
       class="flex items-center gap-1 px-3 border-b border-slate-200 dark:border-slate-700 select-none"
     >
       <button
@@ -243,7 +243,7 @@
         <!-- Read-mode tabbed content -->
         <template v-else>
           <!-- ═══ Table Tab (default for concepts) ═══ -->
-          <div v-if="activeTab === 'table'" class="space-y-6">
+          <div v-if="resolvedTab === 'table'" class="space-y-6">
             <ConceptTableView
               v-if="block.id"
               :node-id="block.id"
@@ -326,7 +326,7 @@
           </div>
 
           <!-- ═══ View Tab ═══ -->
-          <div v-else-if="activeTab === 'view'" class="space-y-6">
+          <div v-else-if="resolvedTab === 'view'" class="space-y-6">
             <div
               v-if="renderedDescription"
               class="border-t border-slate-200 dark:border-slate-700 pt-5"
@@ -426,7 +426,7 @@
           </div>
 
           <!-- ═══ Code Tab ═══ -->
-          <div v-else-if="activeTab === 'code'" class="space-y-6">
+          <div v-else-if="resolvedTab === 'code'" class="space-y-6">
             <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
               <div
                 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
@@ -479,6 +479,7 @@ const props = withDefaults(
     conceptIcon?: string
     collapsed: boolean
     isEditing: boolean
+    showTabs?: boolean
     disableExpand?: boolean
     hasMarkers?: boolean
     showDelete?: boolean
@@ -491,6 +492,7 @@ const props = withDefaults(
     conceptFields: () => [],
     conceptColor: '',
     conceptIcon: '',
+    showTabs: true,
     disableExpand: false,
     hasMarkers: false,
     showDelete: false,
@@ -531,6 +533,9 @@ const tabDefs = computed(() => {
 })
 
 const activeTab = ref(isConcept.value ? 'table' : 'view')
+
+/** When showTabs is disabled, force the effective tab to 'view' (no tab bar). */
+const resolvedTab = computed(() => props.showTabs ? activeTab.value : 'view')
 
 // ── Palette ─────────────────────────────────────────────────────
 
