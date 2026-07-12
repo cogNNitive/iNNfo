@@ -12,17 +12,13 @@ test.describe('File System Operations — Directory Picker, URL Loading, Backup'
     const openBtn = page.locator('button', { hasText: /Open folder/i }).first()
     await expect(openBtn).toBeVisible()
 
-    const samples = page.getByText('Example models').or(page.getByText('Sample models'))
+    const samples = page.getByText('Explore example models').first()
     await expect(samples).toBeVisible()
   })
 
   test('R-FS-02: Open folder loads workspace and shows tree', async ({ page }) => {
     await loadHomePage(page)
-    await page
-      .locator('button', { hasText: /Open folder/i })
-      .first()
-      .click()
-    await page.waitForURL('**/workspace', { timeout: 15000 })
+    await openMockFolder(page)
 
     expect(page.url()).toContain('/workspace')
 
@@ -39,7 +35,7 @@ test.describe('File System Operations — Directory Picker, URL Loading, Backup'
       .first()
     await expect(urlInput).toBeVisible()
     await urlInput.fill('http://localhost:8000/Sandbox/HillValleyTimeTravel_V_1-0-0_business_F.md')
-    const loadBtn = page.getByText(/Load|Fetch|Open/i).first()
+    const loadBtn = page.getByText(/Load/i).first()
     await expect(loadBtn).toBeEnabled()
   })
 

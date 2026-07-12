@@ -21,12 +21,10 @@ test.describe('Tree Navigation — Colored Pills, Counters, Popups, Ghost States
   })
 
   test('R-TN-02: Concept groups show instance counters', async ({ page }) => {
-    const kbNode = page.getByText('BTTFKB').first()
-    await expect(kbNode).toBeVisible({ timeout: 10000 })
+    const virtualGroup = page.getByTestId('virtual-group-node').filter({ hasText: 'Topic' }).first()
+    await expect(virtualGroup).toBeVisible({ timeout: 10000 })
 
-    const counterBadge = kbNode
-      .locator('xpath=ancestor::div[@data-testid="concept-tree-node"]')
-      .locator('.tabular-nums')
+    const counterBadge = virtualGroup.locator('.tabular-nums')
     await expect(counterBadge.first()).toBeVisible()
   })
 
@@ -85,11 +83,8 @@ test.describe('Tree Navigation — Colored Pills, Counters, Popups, Ghost States
     await page.reload()
     await page.waitForLoadState('networkidle')
 
-    await page
-      .locator('button', { hasText: /Open folder/i })
-      .first()
-      .click()
-    await page.waitForURL('**/workspace', { timeout: 15000 })
+    await loadHomePage(page)
+    await openMockFolder(page)
 
     await expect(page.getByText('BTTFKB')).toBeVisible()
   })

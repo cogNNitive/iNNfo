@@ -32,11 +32,8 @@ test.describe('Session Persistence — IndexedDB Save/Restore', () => {
     await page.reload()
     await page.waitForLoadState('networkidle')
 
-    await page
-      .locator('button', { hasText: /Open folder/i })
-      .first()
-      .click()
-    await page.waitForURL('**/workspace', { timeout: 15000 })
+    await loadHomePage(page)
+    await openMockFolder(page)
 
     await expect(page.getByText('BTTFKB')).toBeVisible()
   })
@@ -47,8 +44,8 @@ test.describe('Session Persistence — IndexedDB Save/Restore', () => {
 
     await expect(page.getByTestId('resize-handle').first()).toBeVisible()
 
-    const initialWidth = await page.evaluate(() => {
-      return new Promise<number | null>((resolve) => {
+    const initialEntry = await page.evaluate(() => {
+      return new Promise<{ panelId: string; width: number } | null>((resolve) => {
         const req = indexedDB.open('format-editor')
         req.onsuccess = () => {
           const db = req.result
@@ -57,7 +54,7 @@ test.describe('Session Persistence — IndexedDB Save/Restore', () => {
           const getReq = store.get('format.leftSidebarWidth')
           getReq.onsuccess = () => {
             db.close()
-            resolve(getReq.result ?? null)
+            resolve((getReq.result as { panelId: string; width: number }) ?? null)
           }
           getReq.onerror = () => {
             db.close()
@@ -68,8 +65,10 @@ test.describe('Session Persistence — IndexedDB Save/Restore', () => {
       })
     })
 
-    if (initialWidth !== null && initialWidth !== undefined) {
-      expect(typeof initialWidth).toBe('number')
+    if (initialEntry !== null && initialEntry !== undefined) {
+      expect(initialEntry).toHaveProperty('panelId')
+      expect(initialEntry).toHaveProperty('width')
+      expect(typeof initialEntry.width).toBe('number')
     }
   })
 })
