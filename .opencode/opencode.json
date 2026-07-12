@@ -3,8 +3,8 @@
   "mcp": {
     "innfo-mcp": {
       "type": "local",
-      "command": ["node", "packages/innfo-mcp/dist/server.js"],
-      "enabled": true
+      "enabled": true,
+      "command": ["node", "packages/innfo-mcp/bin/innfo-mcp.bundle.js"]
     }
   },
   "watcher": {
