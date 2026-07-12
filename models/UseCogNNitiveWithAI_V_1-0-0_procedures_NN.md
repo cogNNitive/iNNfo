@@ -45,7 +45,7 @@ title: "Use cogNNitive with AI"
   step_type: task
   requires: MCP Server
   ```
-  When you ask OpenCode to work on an iNNfo model, load the **innv0-innfo** skill (available_skills lists it). The skill will detect if the **innfo-mcp** server is configured and guide you through any setup steps if needed. Reference: `docs/mcp-setup.md`.
+  The first time you work with models, tell OpenCode: *"Load the innv0-innfo skill and check that innfo-mcp is configured"*. The skill detects if the MCP server is set up and guides you through any steps if needed. Reference: `docs/mcp-setup.md`.
 * _NN Work: Edit models via chat
   ```yaml
   parent: "Use cogNNitive with AI"
@@ -54,7 +54,7 @@ title: "Use cogNNitive with AI"
   output: "Edited Model File"
   tool: "OpenCode"
   ```
-  Tell OpenCode what you want to do, for example: *"I want to edit a model — add a new concept to the business model"*. Load the **innv0-innfo** skill (available_skills lists it) if it hasn't loaded automatically. The skill provides model validation, MCP activation, and change workflows.
+  Tell OpenCode what you want to do including a reference to the skill you need, for example: *"Load the innv0-innfo skill — I need to edit the business model and add a new concept"*. The skill reference in your message helps OpenCode discover and activate the right skill automatically. The skill provides model validation, MCP activation, and change workflows.
 * _NN Work: Import documents into iNNfo models
   ```yaml
   parent: "Use cogNNitive with AI"
