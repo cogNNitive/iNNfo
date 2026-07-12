@@ -1,6 +1,6 @@
 # cogNNitive
 
-> Central hub for the iNNv0 FORMAT ecosystem.
+> The hub for the iNNfo ecosystem.
 
 Built with the [iNNv0 Web Design Guide](https://skills.innv0.com/innv0-web-design-guide) design system.
 
@@ -14,11 +14,12 @@ This is the public website for the **cogNNitive** monorepo, published via GitHub
 
 | Component | Description |
 |-----------|-------------|
-| `apps/format-editor` | Unified Vue 3 workspace editor (FILE + FOLDER in one tree) |
-| `apps/launcher` | Legacy drag-and-drop detector — being consolidated into format-editor |
-| `packages/format-core` | Shared TypeScript parser, resolver, and validator |
-| `specs/` | defiNNe, FORMAT, business, procedures, kb specs |
-| `models/` | Example FORMAT models |
+| `apps/innfo-editor` | Vue 3 workspace editor — the iNNfo Modeler |
+| `packages/innfo-core` | Shared TypeScript parser, resolver, and validator |
+| `packages/innfo-mcp` | MCP server exposing iNNfo as semantic tools for AI agents |
+| `packages/pipeline-gates` | Validation & integration gates for iNNfo model pipelines |
+| `specs/` | defiNNe, iNNfo, and the business/procedures/organization templates |
+| `traNNsform/` | Agent-driven import/export pipeline |
 | `docs/` | This website + Docsify documentation at `/documentation` |
 
 ## Analytics (Umami)

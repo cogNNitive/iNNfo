@@ -5,9 +5,13 @@
  * Uses v-model contract: modelValue / update:modelValue.
  * No label — rendered by parent (WidgetField or BlockSheet).
  */
-defineProps<{
-  modelValue: boolean
-}>()
+withDefaults(
+  defineProps<{
+    modelValue: boolean
+    readonly?: boolean
+  }>(),
+  { readonly: false },
+)
 
 defineEmits<{
   'update:modelValue': [value: boolean]
@@ -19,6 +23,7 @@ defineEmits<{
     type="checkbox"
     class="field-boolean"
     :checked="!!modelValue"
+    :disabled="readonly"
     @change="(e) => $emit('update:modelValue', (e.target as HTMLInputElement).checked)"
   />
 </template>

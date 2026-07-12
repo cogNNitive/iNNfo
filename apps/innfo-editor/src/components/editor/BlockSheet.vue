@@ -98,25 +98,60 @@
         </button>
       </template>
 
-      <!-- Pencil edit button -->
-      <button
-        @click.stop="$emit('edit-toggle')"
-        aria-label="Edit"
-        class="p-0.5 hover:bg-current/10 rounded transition-all cursor-pointer flex items-center justify-center shrink-0"
-        :class="isEditing ? 'text-current' : 'text-current/60'"
-      >
-        <component :is="isEditing ? Check : Pencil" class="w-3.5 h-3.5" />
-      </button>
+      <!-- Edit mode: big action buttons -->
+      <template v-if="isEditing">
+        <div class="flex items-center gap-1.5 shrink-0">
+          <!-- Save -->
+          <button
+            @click.stop="$emit('edit-toggle')"
+            class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-md transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Check class="w-4 h-4" />
+            Save
+          </button>
 
-      <!-- Delete -->
-      <button
-        v-if="showDelete"
-        @click.stop="$emit('delete')"
-        aria-label="Delete"
-        class="p-0.5 text-current/50 hover:text-rose-600 hover:scale-105 active:scale-95 rounded transition-all cursor-pointer flex items-center justify-center shrink-0"
-      >
-        <Trash2 class="w-3.5 h-3.5" />
-      </button>
+          <!-- Close -->
+          <button
+            @click.stop="$emit('edit-toggle')"
+            class="px-3 py-1.5 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <X class="w-4 h-4" />
+            Close
+          </button>
+
+          <!-- Delete -->
+          <button
+            v-if="showDelete"
+            @click.stop="$emit('delete')"
+            class="px-3 py-1.5 bg-rose-100 dark:bg-rose-900/30 hover:bg-rose-200 dark:hover:bg-rose-800/40 text-rose-700 dark:text-rose-300 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Trash2 class="w-4 h-4" />
+            Delete
+          </button>
+        </div>
+      </template>
+
+      <!-- Read mode: compact icon-only controls -->
+      <template v-else>
+        <!-- Pencil edit button -->
+        <button
+          @click.stop="$emit('edit-toggle')"
+          aria-label="Edit"
+          class="p-0.5 hover:bg-current/10 rounded transition-all cursor-pointer flex items-center justify-center shrink-0 text-current/60"
+        >
+          <Pencil class="w-3.5 h-3.5" />
+        </button>
+
+        <!-- Delete -->
+        <button
+          v-if="showDelete"
+          @click.stop="$emit('delete')"
+          aria-label="Delete"
+          class="p-0.5 text-current/50 hover:text-rose-600 hover:scale-105 active:scale-95 rounded transition-all cursor-pointer flex items-center justify-center shrink-0"
+        >
+          <Trash2 class="w-3.5 h-3.5" />
+        </button>
+      </template>
 
       <!-- Chevron expand/collapse (far right) -->
       <button
@@ -207,9 +242,91 @@
 
         <!-- Read-mode tabbed content -->
         <template v-else>
-          <!-- ═══ View Tab (default) ═══ -->
-          <div v-if="activeTab === 'view'" class="space-y-6">
-            <!-- Content section: full Markdown rendering -->
+          <!-- ═══ Table Tab (default for concepts) ═══ -->
+          <div v-if="activeTab === 'table'" class="space-y-6">
+            <ConceptTableView
+              v-if="block.id"
+              :node-id="block.id"
+              :concept-type="conceptType"
+              :concept-fields="conceptFields"
+            />
+
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
+              <div
+                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
+              >
+                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
+                Description
+              </div>
+              <div
+                v-if="renderedDescription"
+                class="prose prose-slate max-w-none text-lg text-slate-600 dark:text-slate-300 leading-relaxed break-words bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-100 dark:border-slate-700"
+                v-html="renderedDescription"
+              ></div>
+              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No description</div>
+            </div>
+
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
+              <div
+                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
+              >
+                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
+                Fields
+              </div>
+              <div
+                v-if="conceptFields && conceptFields.length > 0"
+                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
+              >
+                <FieldViewer :node-id="blockIdForFields" :field-definitions="conceptFields" readonly />
+              </div>
+              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No fields defined</div>
+            </div>
+
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
+              <div
+                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
+              >
+                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
+                Relationships
+              </div>
+              <div
+                v-if="hasRelationships"
+                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
+              >
+                <BlockRelationships :relationships="relationshipsList" :on-navigate="navigateToNode" />
+              </div>
+              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No relationships</div>
+            </div>
+
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
+              <div
+                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
+              >
+                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
+                Matrix
+              </div>
+              <div
+                v-if="hasMatrices && block.id"
+                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
+              >
+                <BlockMatrixSummary :root-node-id="rootNodeId" :node-concept="conceptType" :node-id="block.id" />
+              </div>
+              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No matrix participation</div>
+            </div>
+
+            <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
+              <div
+                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
+              >
+                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
+                Media &amp; Attachments
+              </div>
+              <NodeMedia :assets="resolvedAssetItems" />
+            </div>
+          </div>
+
+          <!-- ═══ View Tab ═══ -->
+          <div v-else-if="activeTab === 'view'" class="space-y-6">
             <div
               v-if="renderedDescription"
               class="border-t border-slate-200 dark:border-slate-700 pt-5"
@@ -226,7 +343,6 @@
               ></div>
             </div>
 
-            <!-- Fields via FieldViewer -->
             <div
               v-if="conceptFields && conceptFields.length > 0"
               class="border-t border-slate-200 dark:border-slate-700 pt-5"
@@ -257,7 +373,6 @@
               </div>
             </div>
 
-            <!-- Relationships via BlockRelationships -->
             <div
               v-if="hasRelationships"
               class="border-t border-slate-200 dark:border-slate-700 pt-5"
@@ -278,7 +393,6 @@
               </div>
             </div>
 
-            <!-- Matrix participation via BlockMatrixSummary -->
             <div
               v-if="hasMatrices && block.id"
               class="border-t border-slate-200 dark:border-slate-700 pt-5"
@@ -300,7 +414,6 @@
               </div>
             </div>
 
-            <!-- Media: image gallery + file attachments via NodeMedia -->
             <div v-if="block.id" class="border-t border-slate-200 dark:border-slate-700 pt-5">
               <div
                 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
@@ -312,72 +425,18 @@
             </div>
           </div>
 
-          <!-- ═══ Visual Tab: inline GraphViewer ═══ -->
-          <div v-else-if="activeTab === 'visual'" class="pt-2">
-            <GraphViewer v-if="block.id" :inline="true" :local-node-id="block.id" :height="320" />
-            <p v-else class="text-xs text-slate-400 dark:text-slate-500 italic px-3 py-2">
-              No node selected for graph view.
-            </p>
-          </div>
-
-          <!-- ═══ Table Tab ═══ -->
-          <div v-else-if="activeTab === 'table'" class="pt-2">
-            <ConceptTableView
-              v-if="block.id"
-              :node-id="block.id"
-              :concept-type="conceptType"
-              :concept-fields="conceptFields"
-            />
-          </div>
-
-          <!-- ═══ History Tab ═══ -->
-          <div v-else-if="activeTab === 'history'">
-            <div class="border-t border-slate-200 dark:border-slate-700 pt-5 space-y-3">
-              <div
-                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
-              >
-                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                History
-              </div>
-              <div
-                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4 space-y-3 text-sm"
-              >
-                <div class="flex items-start gap-2">
-                  <span class="font-semibold text-slate-500 dark:text-slate-400 w-24 shrink-0"
-                    >Name</span
-                  >
-                  <span class="text-slate-700 dark:text-slate-300">{{
-                    block.name || '(Empty)'
-                  }}</span>
-                </div>
-                <div class="flex items-start gap-2">
-                  <span class="font-semibold text-slate-500 dark:text-slate-400 w-24 shrink-0"
-                    >Path</span
-                  >
-                  <span class="text-slate-700 dark:text-slate-300 font-mono text-xs break-all">{{
-                    nodePath
-                  }}</span>
-                </div>
-                <div v-if="lastSaved" class="flex items-start gap-2">
-                  <span class="font-semibold text-slate-500 dark:text-slate-400 w-24 shrink-0"
-                    >Last saved</span
-                  >
-                  <span class="text-slate-700 dark:text-slate-300">{{ lastSaved }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ═══ Compliance Tab ═══ -->
-          <div v-else-if="activeTab === 'compliance'">
+          <!-- ═══ Code Tab ═══ -->
+          <div v-else-if="activeTab === 'code'" class="space-y-6">
             <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
               <div
                 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
               >
                 <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Compliance
+                Raw Markdown
               </div>
-              <ComplianceTab :report="complianceReport" :concept-type="conceptType" />
+              <pre
+                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 overflow-x-auto text-xs leading-relaxed font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap"
+              ><code>{{ rawMarkdown || 'No source available' }}</code></pre>
             </div>
           </div>
         </template>
@@ -388,7 +447,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { ChevronDown, ArrowUp, ArrowDown, Pencil, Check, Trash2, PlusCircle } from 'lucide-vue-next'
+import { ChevronDown, ArrowUp, ArrowDown, Pencil, Check, Trash2, PlusCircle, X } from 'lucide-vue-next'
 import IconRenderer from './IconRenderer.vue'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
 import { getMarkerIcon, getMarkerClasses } from './MarkerIcons'
@@ -402,15 +461,12 @@ import { getColorClasses } from '../../utils/colors'
 import type { BlockKind } from '../../utils/conceptVisuals'
 
 // Tab dependencies
-import GraphViewer from './GraphViewer.vue'
 import FieldViewer from './FieldViewer.vue'
 import BlockRelationships from './BlockRelationships.vue'
 import BlockMatrixSummary from './BlockMatrixSummary.vue'
 import NodeMedia from './NodeMedia.vue'
-import ComplianceTab from './ComplianceTab.vue'
 import ConceptTableView from './ConceptTableView.vue'
 import { parseFrontmatter } from '@innv0/innfo-core'
-import type { ValidationReport } from '../../shared/validation-types'
 
 const props = withDefaults(
   defineProps<{
@@ -430,7 +486,6 @@ const props = withDefaults(
     showAddChild?: boolean
     isFirst?: boolean
     isLast?: boolean
-    validationReport?: ValidationReport | null
   }>(),
   {
     conceptFields: () => [],
@@ -443,7 +498,6 @@ const props = withDefaults(
     showAddChild: false,
     isFirst: false,
     isLast: false,
-    validationReport: null,
   },
 )
 
@@ -464,25 +518,19 @@ const modelStore = useModelStore()
 
 // ── Tab state ───────────────────────────────────────────────────
 
-const hasChildren = computed(() => {
-  if (!props.block.id || props.kind !== 'concept') return false
-  return modelStore.getChildren(props.block.id).length > 0
-})
+const isConcept = computed(() => props.kind === 'concept')
 
 const tabDefs = computed(() => {
-  const tabs: { id: string; label: string }[] = [
-    { id: 'view', label: 'View' },
-    { id: 'visual', label: 'Visual' },
-  ]
-  if (hasChildren.value) {
+  const tabs: { id: string; label: string }[] = []
+  if (isConcept.value) {
     tabs.push({ id: 'table', label: 'Table' })
   }
-  tabs.push({ id: 'history', label: 'History' })
-  tabs.push({ id: 'compliance', label: 'Compliance' })
+  tabs.push({ id: 'view', label: 'View' })
+  tabs.push({ id: 'code', label: 'Code' })
   return tabs
 })
 
-const activeTab = ref('view')
+const activeTab = ref(isConcept.value ? 'table' : 'view')
 
 // ── Palette ─────────────────────────────────────────────────────
 
@@ -566,6 +614,14 @@ const renderedDescription = computed(() => {
       ? stripBlockDefinitions(props.block.description)
       : props.block.description
   return renderMarkdown(text)
+})
+
+// ── Raw markdown source for Code tab ──────────────────────────
+
+const rawMarkdown = computed(() => {
+  if (!props.block.id) return ''
+  const node = modelStore.getNode(props.block.id)
+  return node?.rawContent || node?.rawSections?.description || ''
 })
 
 // ── Node from store (full model data) ───────────────────────────
@@ -709,33 +765,6 @@ watch(
   },
   { immediate: true, deep: true },
 )
-
-// ── History tab ─────────────────────────────────────────────────
-
-const nodePath = computed(() => {
-  const node = nodeFromStore.value
-  return node?.source?.path ?? ''
-})
-
-const lastSaved = computed<string | null>(() => {
-  const node = nodeFromStore.value
-  if (!node?.rawContent) return null
-  try {
-    const fm = parseFrontmatter(node.rawContent)
-    return (fm as any)?.last_saved ?? null
-  } catch {
-    return null
-  }
-})
-
-// ── Compliance tab ──────────────────────────────────────────────
-
-const emptyReport: ValidationReport = {
-  checks: [],
-  summary: { total: 0, passed: 0, errors: 0, warnings: 0 },
-}
-
-const complianceReport = computed(() => props.validationReport ?? emptyReport)
 
 // ── Field viewer node ID ────────────────────────────────────────
 

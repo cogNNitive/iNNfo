@@ -27,7 +27,7 @@ import {
   getTemplateFromModel,
   deriveNameFromUrl,
 } from './tools/spec.js'
-import { validateModel, applyChange } from './tools/mutate.js'
+import { validateModel, validateModelUrl, applyChange } from './tools/mutate.js'
 
 /** Root directory for model scanning (defaults to `models/` under CWD) */
 const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd()
@@ -144,6 +144,25 @@ const toolDefinitions: Tool[] = [
       required: ['id', 'op', 'args'],
     },
   },
+  {
+    name: 'validate_model_url',
+    description:
+      'Validate an iNNfo model fetched from a URL without writing to disk. Accepts a model URL and optional template_url. Returns validation results.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        model_url: {
+          type: 'string',
+          description: 'URL pointing to the iNNfo model content to validate',
+        },
+        template_url: {
+          type: 'string',
+          description: 'Optional explicit template URL when the model has no resolvable parent_spec.url',
+        },
+      },
+      required: ['model_url'],
+    },
+  },
 ]
 
 /* ── Tool call dispatcher ────────────────────────────────────── */
@@ -163,6 +182,8 @@ async function dispatchTool(name: string, args: Record<string, unknown>): Promis
         return await handleValidateModel(args)
       case 'apply_change':
         return await handleApplyChange(args)
+      case 'validate_model_url':
+        return await handleValidateModelUrl(args)
       default:
         return errorResult(`Unknown tool: ${name}`)
     }
@@ -220,6 +241,14 @@ async function handleValidateModel(args: Record<string, unknown>): Promise<CallT
   const templateUrl = args.template_url as string | undefined
   if (!id && !content) return errorResult('Provide either id or content')
   const result = await validateModel(ROOT_DIR, id, content, templateUrl)
+  return textResult(JSON.stringify(result, null, 2))
+}
+
+async function handleValidateModelUrl(args: Record<string, unknown>): Promise<CallToolResult> {
+  const modelUrl = args.model_url as string | undefined
+  if (!modelUrl) return errorResult('Missing required argument: model_url')
+  const templateUrl = args.template_url as string | undefined
+  const result = await validateModelUrl(ROOT_DIR, modelUrl, templateUrl)
   return textResult(JSON.stringify(result, null, 2))
 }
 

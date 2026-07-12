@@ -13,7 +13,7 @@ The **iNNfo agent** lets you create, edit, and query iNNfo models through natura
 1. Open the project in OpenCode Desktop
 2. Look for the **mode dropdown** in the chat/composer toolbar (shows the current agent name)
 3. Select **iNNfo** from the dropdown
-4. The six iNNfo MCP tools are now available in your session
+4. The seven iNNfo MCP tools are now available in your session
 
 If iNNfo doesn't appear in the dropdown, verify:
 - `opencode.json` exists at the project root

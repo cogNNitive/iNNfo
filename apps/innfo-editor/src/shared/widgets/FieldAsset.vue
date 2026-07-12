@@ -12,7 +12,9 @@
  *
  * Shows a warning if the path appears stale (placeholder — UI can refine later).
  */
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useWorkspaceStore } from '../../stores/workspaceStore'
+import { useModelStore } from '../../stores/modelStore'
 
 const props = withDefaults(
   defineProps<{
@@ -25,8 +27,11 @@ const props = withDefaults(
       target_concepts?: string[]
       default?: unknown
     }
+    nodeId?: string
+    fieldKey?: string
+    readonly?: boolean
   }>(),
-  { widgetType: 'file' },
+  { widgetType: 'file', readonly: false },
 )
 
 const emit = defineEmits<{
@@ -47,13 +52,115 @@ const isVideo = computed(() => assetType.value === 'video')
 const isAudio = computed(() => assetType.value === 'audio')
 const isFile = computed(() => assetType.value === 'file')
 
-/** For image thumbnails, display the path as image source. */
-const thumbnailSrc = computed(() => {
-  if (!assetPath.value) return ''
-  // In a real app this would be resolved to an absolute/relative URL.
-  // For now, pass the path as-is for the parent to resolve.
-  return assetPath.value
-})
+const ws = useWorkspaceStore()
+const modelStore = useModelStore()
+const resolvedAssetUrl = ref('')
+const fileExists = ref(true)
+const blobUrlCache = new Map<string, string>()
+
+watch(
+  [() => assetPath.value, () => ws.handle],
+  async ([path, handle]) => {
+    if (!path) {
+      resolvedAssetUrl.value = ''
+      fileExists.value = true
+      return
+    }
+    if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) {
+      resolvedAssetUrl.value = path
+      fileExists.value = true
+      return
+    }
+    const cached = blobUrlCache.get(path)
+    if (cached) {
+      resolvedAssetUrl.value = cached
+      fileExists.value = true
+      return
+    }
+    if (!handle) {
+      console.log('[FieldAsset] no handle, using fallback path:', path)
+      resolvedAssetUrl.value = path
+      fileExists.value = true
+      return
+    }
+
+    const node = props.nodeId ? modelStore.getNode(props.nodeId) : null
+    let slug = ''
+    if (node) {
+      slug =
+        node.slug ||
+        node.name
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .trim()
+          .replace(/[\s_]+/g, '-')
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '')
+    }
+
+    console.log('[FieldAsset] resolving:', { path, nodeId: props.nodeId, nodeName: node?.name, slug })
+
+    // 1. Try canonical per-element assets: assets/{slug}/{filename}
+    if (slug) {
+      try {
+        const assetsDir = await handle.getDirectoryHandle('assets')
+        const slugDir = await assetsDir.getDirectoryHandle(slug)
+        const fh = await slugDir.getFileHandle(path)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const file = (await fh.getFile()) as any
+        const url = URL.createObjectURL(file)
+        blobUrlCache.set(path, url)
+        resolvedAssetUrl.value = url
+        fileExists.value = true
+        console.log('[FieldAsset] resolved via canonical path:', url)
+        return
+      } catch (err) {
+        console.warn(`[FieldAsset] canonical path failed for slug="${slug}" path="${path}":`, err)
+      }
+    }
+
+    // 2. Try centralized assets: assets/{filename}
+    try {
+      const assetsDir = await handle.getDirectoryHandle('assets')
+      const fh = await assetsDir.getFileHandle(path)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const file = (await fh.getFile()) as any
+      const url = URL.createObjectURL(file)
+      blobUrlCache.set(path, url)
+      resolvedAssetUrl.value = url
+      fileExists.value = true
+      console.log('[FieldAsset] resolved via centralized assets path:', url)
+      return
+    } catch (err) {
+      console.warn(`[FieldAsset] centralized path failed for path="${path}":`, err)
+    }
+
+    // 3. Try direct workspace path (e.g. subfolders or root file)
+    try {
+      const parts = path.split('/').filter(Boolean)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let current: any = handle
+      for (let i = 0; i < parts.length - 1; i++) {
+        current = await current.getDirectoryHandle(parts[i])
+      }
+      const fh = await current.getFileHandle(parts[parts.length - 1])
+      const file = await fh.getFile()
+      const url = URL.createObjectURL(file)
+      blobUrlCache.set(path, url)
+      resolvedAssetUrl.value = url
+      fileExists.value = true
+      console.log('[FieldAsset] resolved via direct workspace path:', url)
+      return
+    } catch (err) {
+      console.warn(`[FieldAsset] direct path failed for path="${path}":`, err)
+      resolvedAssetUrl.value = path
+      fileExists.value = false
+    }
+  },
+  { immediate: true },
+)
 
 function onInput(e: Event): void {
   emit('update:modelValue', (e.target as HTMLInputElement).value)
@@ -65,7 +172,8 @@ function onInput(e: Event): void {
     <!-- Image thumbnail -->
     <div v-if="isImage && assetPath" class="field-asset__preview">
       <img
-        :src="thumbnailSrc"
+        v-if="resolvedAssetUrl"
+        :src="resolvedAssetUrl"
         :alt="fileName"
         class="field-asset__image"
         @error="($event.target as HTMLImageElement).style.display = 'none'"
@@ -75,14 +183,14 @@ function onInput(e: Event): void {
 
     <!-- Video player -->
     <div v-else-if="isVideo && assetPath" class="field-asset__preview">
-      <video :src="assetPath" controls class="field-asset__video" preload="metadata">
+      <video v-if="resolvedAssetUrl" :src="resolvedAssetUrl" controls class="field-asset__video" preload="metadata">
         Your browser does not support the video element.
       </video>
     </div>
 
     <!-- Audio player -->
     <div v-else-if="isAudio && assetPath" class="field-asset__preview">
-      <audio :src="assetPath" controls class="field-asset__audio" preload="metadata">
+      <audio v-if="resolvedAssetUrl" :src="resolvedAssetUrl" controls class="field-asset__audio" preload="metadata">
         Your browser does not support the audio element.
       </audio>
     </div>
@@ -94,7 +202,7 @@ function onInput(e: Event): void {
     </div>
 
     <!-- Editable path input -->
-    <div class="field-asset__input-row">
+    <div v-if="!readonly" class="field-asset__input-row">
       <input
         type="text"
         class="field-asset__input"
@@ -105,10 +213,10 @@ function onInput(e: Event): void {
       <span class="field-asset__type-badge">{{ assetType }}</span>
     </div>
 
-    <!-- Missing file warning (placeholder) -->
-    <div v-if="assetPath" class="field-asset__warning">
+    <!-- Missing file warning (real validation) -->
+    <div v-if="assetPath && !fileExists && !readonly" class="field-asset__warning">
       <span class="field-asset__warning-icon">⚠️</span>
-      Asset path validation is not yet implemented. Verify the file exists at:
+      Asset file not found in workspace:
       <code>{{ assetPath }}</code>
     </div>
   </div>

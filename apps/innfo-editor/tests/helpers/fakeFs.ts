@@ -23,10 +23,18 @@ class FakeFileHandle implements FileHandleLike {
   constructor(
     public name: string,
     public content: string,
+    public fileSize: number = content.length,
+    public fileLastModified: number = Date.now(),
   ) {}
   async getFile() {
     const content = this.content
+    const name = this.name
+    const size = this.fileSize
+    const lastModified = this.fileLastModified
     return {
+      name,
+      size,
+      lastModified,
       async text() {
         return content
       },

@@ -14,15 +14,54 @@ title: "Use cogNNitive with AI"
 
 # _NN index
 
-* _NN index: Procedure
-* _NN index: Roles
 * _NN index: Work
+* _NN index: Roles
 * _NN index: Artifact
 * _NN index: Tools
 
-# _NN Procedure
+# _NN Work
 
-cogNNitive lets you edit and view iNNfo models both from its graphical interface and through AI agents. This procedure describes how to set up and use tools like anti-gravity, Claude Code, or OpenCode to work with your models via natural language conversation, leveraging the contextual prompts the application provides.
+* _NN Work: Use cogNNitive with AI
+  cogNNitive lets you edit and view iNNfo models both from its graphical interface and through AI agents. This procedure describes how to set up and use tools like anti-gravity, Claude Code, or OpenCode to work with your models via natural language conversation, leveraging the contextual prompts the application provides.
+
+* _NN Work: Download and choose an AI agent
+  ```yaml
+  parent: "Use cogNNitive with AI"
+  step_type: task
+  tool: "anti-gravity"
+  ```
+  Download and choose one of these tools: **anti-gravity**, **Claude Code**, or **OpenCode**. You can use their desktop, CLI, or TUI versions. Pick the one you know best. We recommend Claude Code by default — it has a generous free tier.
+* _NN Work: Open the workspace folder in your AI agent
+  ```yaml
+  parent: "Use cogNNitive with AI"
+  step_type: task
+  input: "Workspace Folder"
+  tool: "Claude Code"
+  ```
+  Add a workspace pointing to the same folder you use in cogNNitive. You can find the exact path at the top of the header by clicking the info icon. All mentioned agents work directly on the file system.
+* _NN Work: Configure MCP tools
+  ```yaml
+  parent: "Use cogNNitive with AI"
+  step_type: task
+  requires: MCP Server
+  ```
+  Your agent needs the **innfo-mcp** server to validate model structure and apply changes correctly. When you say *"I want to edit a model"*, the agent will run the MCP Activation Protocol: check if the tools are available, locate or create the config for your client, and guide you through any reload steps if needed. Reference: `docs/mcp-setup.md`.
+* _NN Work: Edit models via chat
+  ```yaml
+  parent: "Use cogNNitive with AI"
+  step_type: task
+  input: "Model File"
+  output: "Edited Model File"
+  tool: "Claude Code"
+  ```
+  Once configured, just say: *"I want to edit a model in the chat"*. The agent will activate and you can request modifications in natural language: add concepts, change fields, restructure sections, and more.
+* _NN Work: Use right sidebar prompts to go deeper
+  ```yaml
+  parent: "Use cogNNitive with AI"
+  step_type: task
+  input: "Suggested Prompts"
+  ```
+  When viewing a model in cogNNitive, the right sidebar shows **suggested prompts** for each concept. Copy and paste them into your AI agent to dive deeper into that specific concept or element.
 
 # _NN Roles
 
@@ -36,36 +75,6 @@ cogNNitive lets you edit and view iNNfo models both from its graphical interface
   scope: external
   ```
   AI agent that interprets user instructions and modifies model files directly on the file system.
-
-# _NN Work
-
-* _NN Work: Download and choose an AI agent
-  ```yaml
-  step_type: task
-  tool: "anti-gravity"
-  ```
-  Download and choose one of these tools: **anti-gravity**, **Claude Code**, or **OpenCode**. You can use their desktop, CLI, or TUI versions. Pick the one you know best. We recommend Claude Code by default — it has a generous free tier.
-* _NN Work: Open the workspace folder in your AI agent
-  ```yaml
-  step_type: task
-  input: "Workspace Folder"
-  tool: "Claude Code"
-  ```
-  Add a workspace pointing to the same folder you use in cogNNitive. You can find the exact path at the top of the header by clicking the info icon. All mentioned agents work directly on the file system.
-* _NN Work: Edit models via chat
-  ```yaml
-  step_type: task
-  input: "Model File"
-  output: "Edited Model File"
-  tool: "Claude Code"
-  ```
-  Once configured, just say: *"I want to edit a model in the chat"*. The agent will activate and you can request modifications in natural language: add concepts, change fields, restructure sections, and more.
-* _NN Work: Use right sidebar prompts to go deeper
-  ```yaml
-  step_type: task
-  input: "Suggested Prompts"
-  ```
-  When viewing a model in cogNNitive, the right sidebar shows **suggested prompts** for each concept. Copy and paste them into your AI agent to dive deeper into that specific concept or element.
 
 # _NN Artifact
 

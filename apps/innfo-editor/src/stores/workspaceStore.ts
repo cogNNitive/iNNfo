@@ -301,7 +301,7 @@ export const useWorkspaceStore = defineStore('workspace', {
     },
 
     /**
-     * Downloads the generic iNNfo specification (level-1) into specs/ when
+     * Downloads the generic iNNfo specification (level-1) into .specs/ when
      * the root node declares a spec_version and the file is not already present.
      *
      * Best-effort: network failures or missing versions degrade gracefully.
@@ -320,7 +320,7 @@ export const useWorkspaceStore = defineStore('workspace', {
       const specFilename = `iNNfo_${specVersion}_NN.md`
 
       try {
-        const specsDir = await handle.getDirectoryHandle('specs', { create: true })
+        const specsDir = await handle.getDirectoryHandle('.specs', { create: true })
 
         // Skip if already exists
         try {
@@ -388,8 +388,8 @@ export const useWorkspaceStore = defineStore('workspace', {
         const modelStore = useModelStore()
         await recursiveSerialize(modelStore.nodes, modelStore.dirtyIds, this.driver ?? undefined)
 
-        // Persist spec:* nodes (templates/specs) to specs/ directory
-        const specsDir = await this.handle.getDirectoryHandle('specs', { create: true })
+        // Persist spec:* nodes (templates/specs) to .specs/ directory
+        const specsDir = await this.handle.getDirectoryHandle('.specs', { create: true })
         for (const [id, node] of Object.entries(modelStore.nodes)) {
           if (id.startsWith('spec:') && node.rawContent) {
             const specName = node.name || id.substring(5)

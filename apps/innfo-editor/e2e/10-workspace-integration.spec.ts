@@ -16,12 +16,6 @@ test.describe('Workspace Integration — Full Workflow & UI Pattern Compliance',
     const body = page.locator('main')
     await expect(body).toContainText(/DeLorean|time machine/i)
 
-    for (const tab of ['Visual', 'Compliance']) {
-      const tabEl = page.getByText(tab, { exact: true })
-      await expect(tabEl).toBeVisible()
-      await tabEl.click()
-    }
-
     await page.getByTestId('view-switcher-matrices').click()
     await expect(page.getByTestId('matrices-grid')).toBeVisible()
 

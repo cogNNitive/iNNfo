@@ -4,6 +4,25 @@
 
 Instrucciones maestras para el agente. Cuando el usuario pase un modelo iNNfo (`.md`) y pida transformarlo, seguí este protocolo.
 
+## Estructura del directorio
+
+```
+traNNsform/
+├── AGENT.md          ← entry point del agente
+├── README.md         ← este archivo (protocolo de transformación)
+├── input/            ← documentos fuente para import
+├── output/           ← visualizadores HTML generados
+├── templates/        ← plantillas HTML por tipo de modelo
+└── snippets/         ← patrones Chart.js reusables
+```
+
+## Importar documentos
+
+Ver `traNNsform/AGENT.md` → sección **Import documents** para el flujo completo.
+Pasos resumidos:
+1. Colocar los archivos fuente en `traNNsform/input/`
+2. El agente los detecta y guía el proceso de transformación a modelo iNNfo
+
 ## Flujo general
 
 1. **Leé el modelo fuente**. Identificá su tipo por `parent_spec.name` en el frontmatter YAML.
@@ -17,7 +36,7 @@ Instrucciones maestras para el agente. Cuando el usuario pase un modelo iNNfo (`
    - Usá el mismo diseño CSS (header gradient con `--primary`, nav tabs sticky, cards, tablas responsive)
    - Usá `Chart.js 4.4.7` via CDN
    - Nombrá el archivo: `<ModelBaseName>_V<version>_<templateName>_visualizer.html` (ej: `Ghostbusters_V0-1-2_business_visualizer.html`)
-   - Guardalo en **`traNNsform/outputs/`** dentro del workspace
+   - Guardalo en **`traNNsform/output/`** dentro del workspace
    - Incluí un bloque `<script id="export-meta" type="application/json">` en el `<head>` con `modelName`, `modelVersion`, `templateName`, y `exportedAt`
 4. **Reglas estrictas**:
    - NO inventes datos. Solo lo que está en el modelo fuente.

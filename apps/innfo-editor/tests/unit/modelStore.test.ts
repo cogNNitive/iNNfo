@@ -102,14 +102,14 @@ describe('modelStore', () => {
     const fakeTree = buildFakeTree('workspace', {
       'index.md': indexMd,
       'model_NN.md': modelMd,
-      specs: {
+      '.specs': {
         'test-template_V_1-0-0_NN.md': specMd,
       },
     })
 
     const modelStore = useModelStore()
 
-    // We expect parseFromHandle to resolve parent_spec from the local specs/ directory handle
+    // We expect parseFromHandle to resolve parent_spec from the local .specs/ directory handle
     await modelStore.parseFromHandle(fakeTree)
 
     // Verify that the synthetic spec node was created and populated with rawContent from local file

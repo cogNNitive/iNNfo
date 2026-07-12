@@ -5,9 +5,13 @@
  * Uses v-model contract: modelValue / update:modelValue.
  * Emits the number value, not the raw string.
  */
-defineProps<{
-  modelValue: number
-}>()
+withDefaults(
+  defineProps<{
+    modelValue: number
+    readonly?: boolean
+  }>(),
+  { readonly: false },
+)
 
 const emit = defineEmits<{
   'update:modelValue': [value: number]
@@ -21,7 +25,8 @@ function onInput(e: Event): void {
 </script>
 
 <template>
-  <input type="number" class="field-number" :value="modelValue" @input="onInput" />
+  <span v-if="readonly" class="field-number-readonly">{{ modelValue ?? '—' }}</span>
+  <input v-else type="number" class="field-number" :value="modelValue" @input="onInput" />
 </template>
 
 <style scoped>

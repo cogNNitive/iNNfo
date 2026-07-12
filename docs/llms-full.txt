@@ -1,73 +1,79 @@
 # cogNNitive — Full Site Content
 
-> Central hub for the iNNv0 FORMAT ecosystem.
+> The hub for the iNNfo ecosystem.
 > Generator: https://skills.innv0.com/innv0-web-design-guide
 
 ---
 
-# cogNNitive — iNNv0 Ecosystem Hub
+# cogNNitive — the iNNfo modeling hub
 
-Open, edit, and validate FORMAT models. cogNNitive is the central hub for the iNNv0 ecosystem.
+Model, edit, and validate iNNfo knowledge models. cogNNitive is the hub for the iNNfo ecosystem.
 
 ## What is cogNNitive?
 
-A monorepo that ties together the iNNv0 specification ecosystem:
-- **format-editor** — unified Vue 3 workspace editor. Open any folder, parse FILE and FOLDER mode models into a single tree.
-- **@innv0/format-core** — shared TypeScript parser, resolver, validator
-- **Spec Chain** — defiNNe -> FORMAT -> Templates -> Models
+A monorepo that ties the iNNfo ecosystem together:
+- **iNNfo Modeler** (`innfo-editor`) — a Vue 3 workspace editor. Open any folder, parse it into one normalized model tree, edit, and validate in the browser.
+- **@innv0/innfo-core** — the shared TypeScript parser, resolver, validator.
+- **@innv0/innfo-mcp** — an MCP server exposing iNNfo as semantic tools for AI agents.
+- **Spec Chain** — defiNNe -> iNNfo -> Templates -> Models.
 
-The **launcher** app (legacy two-app routing) is being consolidated into format-editor.
+## How the iNNfo Modeler works
 
-## How format-editor works
-
-1. Open workspace — pick a folder via the File System Access API
-2. Single parse pass — recursive parser walks every directory, building one unified tree
-3. Edit & validate — sidebar tree + metamodel-driven forms + FORMAT compliance validation
+1. Open workspace — pick a folder via the File System Access API (or resume a recent one)
+2. Single parse pass — one recursive pass folds every `_NN.md` file and its structural children into one normalized tree
+3. Edit & validate — sidebar tree + block sheets / table view + automatic validation against the iNNfo spec
 
 ## Ecosystem Architecture
 
 - Level 0: defiNNe — Meta-specification, RFC 2119, versioning
-- Level 1: FORMAT — Central spec with FILE and FOLDER modes
-- Level 2: Templates — business, procedures, kb
+- Level 1: iNNfo — Central spec; single-file `_NN.md` models with YAML frontmatter
+- Level 2: Templates — business, procedures, organization
 - Level 3: Models — Concrete data instances
+
+## Built for AI agents
+
+- **innfo-mcp** — a stdio MCP server with seven semantic tools (`list_models`, `read_model`, `get_spec`, `get_template`, `validate_model`, `apply_change`, `validate_model_url`).
+- **traNNsform** — an agent-driven import/export pipeline: turn source files into iNNfo models, or export a model to a self-contained HTML visualizer.
+- **Use cogNNitive with AI** — a built-in checklist to connect your workspace to Claude Code, Google Antigravity, or OpenCode.
 
 ## Monorepo structure
 
 ```
 cogNNitive/
 ├── apps/
-│   ├── format-editor/  <- Vue 3 unified workspace editor
-│   └── launcher/       <- Legacy — being consolidated
+│   └── innfo-editor/     <- Vue 3 workspace editor (the iNNfo Modeler)
 ├── packages/
-│   └── format-core/    <- TS parser, resolver, validator
-├── specs/              <- Specification files
-├── models/             <- Example models
-└── docs/               <- This website
+│   ├── innfo-core/       <- TS parser, resolver, validator
+│   ├── innfo-mcp/        <- MCP server for AI agents
+│   └── pipeline-gates/   <- Validation & integration gates
+├── specs/                <- defiNNe, iNNfo, templates, samples
+├── traNNsform/           <- Agent-driven import/export pipeline
+└── docs/                 <- This website
 ```
 
 ---
 
 # About cogNNitive
 
-The monorepo that ties the iNNv0 FORMAT ecosystem together.
+The monorepo that ties the iNNfo ecosystem together.
 
 ## Architecture
 
-npm workspaces monorepo with apps/, packages/, specs/, models/, and docs/.
+npm workspaces monorepo — one editor app (`innfo-editor`), three packages (`innfo-core`, `innfo-mcp`, `pipeline-gates`), the spec chain (`specs/`), the agent pipeline (`traNNsform/`), and this website (`docs/`).
 
-## Apps
+## App
 
-**format-editor** — unified Vue 3 workspace editor with File System Access API, single recursive parse pass, mixed FILE+FOLDER tree, metamodel-driven NodeForm, and IndexedDB handle persistence.
+**iNNfo Modeler** (`@innv0/innfo-editor`) — a Vue 3 workspace editor with the File System Access API, a single recursive parse pass into one normalized model graph, block sheets / table view / metamodel-driven forms, automatic validation, a graph viewer, matrix grids, and IndexedDB handle persistence.
 
-**cogNNitive Launcher** — legacy. The original drag-and-drop app that detected FILE vs FOLDER mode. Being consolidated into format-editor.
+## Packages
 
-## Package
-
-@innv0/format-core — framework-agnostic TypeScript library with unified parser for FILE and FOLDER modes.
+- **@innv0/innfo-core** — framework-agnostic TypeScript library: the iNNfo parser, model types, IO drivers, validator, and parent-spec-chain resolver.
+- **@innv0/innfo-mcp** — an MCP server (stdio) wrapping innfo-core with seven semantic tools for AI agents.
+- **@innv0/pipeline-gates** — validation and integration gates for iNNfo model pipelines.
 
 ## Specifications
 
 - Level 0: defiNNe — Meta-specification
-- Level 1: FORMAT — Central spec with FILE and FOLDER modes
-- Level 2: Templates — business, procedures, kb
-- Level 3: Models — Concrete data instances
+- Level 1: iNNfo — Central spec; single-file `_NN.md` models
+- Level 2: Templates — business, procedures, organization
+- Level 3: Models — Concrete data instances (Ghostbusters, Engineering Team)

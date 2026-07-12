@@ -8,6 +8,7 @@ import RightGuidanceSidebar from '../components/layout/RightGuidanceSidebar.vue'
 import ValidationReport from '../components/ValidationReport.vue'
 import ToastMessage from '../components/ToastMessage.vue'
 import SaveWorkspaceModal from '../components/layout/SaveWorkspaceModal.vue'
+import OnboardingDashboard from '../components/layout/OnboardingDashboard.vue'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import { useModelStore } from '../stores/modelStore'
 import { useUiStore, type ActiveView } from '../stores/uiStore'
@@ -19,6 +20,7 @@ import type { ModelNode } from '../model/types'
 
 // Dynamic sub-editors
 const BlockFeed = defineAsyncComponent(() => import('../components/editor/BlockFeed.vue'))
+const BlockSheet = defineAsyncComponent(() => import('../components/editor/BlockSheet.vue'))
 const TextEditor = defineAsyncComponent(() => import('../components/editor/TextEditor.vue'))
 const TreeEditor = defineAsyncComponent(() => import('../components/editor/TreeEditor.vue'))
 const GraphViewer = defineAsyncComponent(() => import('../components/editor/GraphViewer.vue'))
@@ -31,7 +33,11 @@ const MetamatrixConfig = defineAsyncComponent(
 )
 const ModelInfoPanel = defineAsyncComponent(() => import('../components/editor/ModelInfoPanel.vue'))
 const AIGuidePanel = defineAsyncComponent(() => import('../components/editor/AIGuidePanel.vue'))
-const ExportNavigator = defineAsyncComponent(() => import('../components/editor/ExportNavigator.vue'))
+const ExportNavigator = defineAsyncComponent(
+  () => import('../components/editor/ExportNavigator.vue'),
+)
+const ImportPanel = defineAsyncComponent(() => import('../components/editor/ImportPanel.vue'))
+const ExportPanel = defineAsyncComponent(() => import('../components/editor/ExportPanel.vue'))
 
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
@@ -200,7 +206,7 @@ const isListConcept = computed(() => childItems.value.length > 0)
 const activeEditorComponent = computed(() => {
   if (editorView.value === 'text') return TextEditor
   if (editorView.value === 'tree') return TreeEditor
-  if (editorView.value === 'table') return ConceptTableView
+  if (editorView.value === 'table') return BlockSheet
   return BlockFeed
 })
 
@@ -221,9 +227,14 @@ const activeEditorProps = computed(() => {
   }
   if (editorView.value === 'table') {
     return {
-      nodeId: nid,
+      block: conceptBlock.value,
+      kind: 'concept',
       conceptType: selectedNodeType.value,
+      conceptName: selectedNodeName.value,
       conceptFields: activeConceptFields.value,
+      collapsed: false,
+      isEditing: false,
+      disableExpand: true,
     }
   }
   return {
@@ -233,7 +244,6 @@ const activeEditorProps = computed(() => {
     conceptFields: activeConceptFields.value,
     items: childItems.value,
     isListConcept: isListConcept.value,
-    validationReport: validationReport.value,
   }
 })
 
@@ -248,6 +258,13 @@ const activeEditorEvents = computed(() => {
       'navigate-to-node': onNavigateToNode,
     }
   }
+  if (editorView.value === 'table') {
+    return {
+      change: onEditorChange,
+      'navigate-to-node': onNavigateToNode,
+      'update:concept-name': onConceptNameChange,
+    }
+  }
   return {
     'change-concept': onEditorChange,
     'change-item': onEditorChange,
@@ -259,7 +276,11 @@ const activeEditorEvents = computed(() => {
 
 function onSelectNode(nodeId: string): void {
   uiStore.selectNode(nodeId)
-  if (uiStore.activeView === 'matrices' || uiStore.activeView === 'info' || uiStore.activeView === 'ai-guide') {
+  if (
+    uiStore.activeView === 'matrices' ||
+    uiStore.activeView === 'info' ||
+    uiStore.activeView === 'ai-guide'
+  ) {
     uiStore.setActiveView('editor')
   }
 }
@@ -439,12 +460,7 @@ onUnmounted(() => {
             <ValidationReport :report="validationReport" />
           </div>
 
-          <p
-            v-else
-            class="flex-1 flex items-center justify-center text-sm text-slate-400 dark:text-slate-500"
-          >
-            Select a node to edit or validate.
-          </p>
+          <OnboardingDashboard v-else />
         </template>
 
         <!-- ── Graph View ── -->
@@ -490,6 +506,16 @@ onUnmounted(() => {
         <!-- ── Navigator View ── -->
         <template v-else-if="uiStore.activeView === 'navigator'">
           <ExportNavigator />
+        </template>
+
+        <!-- ── Import View ── -->
+        <template v-else-if="uiStore.activeView === 'import'">
+          <ImportPanel />
+        </template>
+
+        <!-- ── Export View ── -->
+        <template v-else-if="uiStore.activeView === 'export'">
+          <ExportPanel />
         </template>
       </main>
 

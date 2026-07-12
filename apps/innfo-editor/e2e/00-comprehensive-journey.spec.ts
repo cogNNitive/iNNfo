@@ -90,25 +90,7 @@ test.describe('Flujo de Negocio Completo: Edición, Guardado y Validación', () 
     })
   })
 
-  test('Paso 4: Abrir la pestaña de Compliance y verificar el estado de validación', async () => {
-    // Depende del Paso 3.
-    await test.step('Dado que el usuario guardó los cambios y sigue visualizando el elemento', async () => {
-      await expect(pageInstance.getByTestId('block-sheet')).toBeVisible()
-    })
-
-    await test.step('Cuando hace clic en la pestaña "Compliance"', async () => {
-      const complianceTabBtn = pageInstance.getByText('Compliance', { exact: true })
-      await expect(complianceTabBtn).toBeVisible()
-      await complianceTabBtn.click()
-    })
-
-    await test.step('Entonces se debe visualizar el reporte de cumplimiento y validaciones', async () => {
-      const complianceTab = pageInstance.locator('[class*="compliance"], [id*="compliance"]')
-      await expect(complianceTab.first()).toBeVisible()
-    })
-  })
-
-  test('Paso 5: Abrir la tabla de conceptos desde el panel del Header (Info) y Table tab', async () => {
+  test('Paso 4: Abrir la tabla de conceptos desde el panel del Header (Info) y Table tab', async () => {
     await test.step('Dado que el usuario ve el panel de información del modelo en el header', async () => {
       const infoBtn = pageInstance.getByRole('button', { name: /Model Info/i })
       await expect(infoBtn).toBeVisible()

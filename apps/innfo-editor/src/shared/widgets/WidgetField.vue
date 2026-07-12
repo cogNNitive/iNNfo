@@ -28,8 +28,9 @@ const props = withDefaults(
       target_concepts?: string[]
       default?: unknown
     }
+    readonly?: boolean
   }>(),
-  { authorId: 'anonymous' },
+  { authorId: 'anonymous', readonly: false },
 )
 
 const modelStore = useModelStore()
@@ -54,6 +55,7 @@ function onCommit(value: unknown): void {
     :field-definition="fieldDefinition"
     :node-id="nodeId"
     :field-key="fieldKey"
+    :readonly="readonly"
     @update:model-value="onCommit"
   />
 </template>

@@ -5,14 +5,44 @@
       <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
         {{ conceptType || 'Elements' }} List
       </h3>
-      <button
-        @click="addElement"
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-indigo-500 bg-indigo-500 text-white hover:bg-indigo-600 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-xs"
-        data-testid="add-element-btn"
-      >
-        <Plus class="w-3.5 h-3.5" />
-        Add {{ conceptType || 'Element' }}
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- View/Edit mode switcher -->
+        <div class="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
+          <button
+            @click="isEditMode = false"
+            class="inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-semibold rounded-md transition-all cursor-pointer border border-transparent"
+            :class="
+              !isEditMode
+                ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+            "
+          >
+            <Eye class="w-3 h-3" />
+            <span>View</span>
+          </button>
+          <button
+            @click="isEditMode = true"
+            class="inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-semibold rounded-md transition-all cursor-pointer border border-transparent"
+            :class="
+              isEditMode
+                ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+            "
+          >
+            <Pencil class="w-3 h-3" />
+            <span>Edit</span>
+          </button>
+        </div>
+
+        <button
+          @click="addElement"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-indigo-500 bg-indigo-500 text-white hover:bg-indigo-600 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-xs"
+          data-testid="add-element-btn"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          Add {{ conceptType || 'Element' }}
+        </button>
+      </div>
     </div>
 
     <!-- Table Container -->
@@ -76,6 +106,7 @@
                 :field-key="field.name"
                 :widget-type="field.type || 'string'"
                 :field-definition="field"
+                :readonly="!isEditMode"
               />
             </td>
             <td class="px-3 py-2 text-sm text-slate-700 dark:text-slate-300 text-center">
@@ -120,11 +151,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ChevronUp, ChevronDown, Plus } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
+import { ChevronUp, ChevronDown, Plus, Eye, Pencil } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
+
+const isEditMode = ref(false)
 import BlockPill from './BlockPill.vue'
 import type { FieldValue } from '@innv0/innfo-core'
 

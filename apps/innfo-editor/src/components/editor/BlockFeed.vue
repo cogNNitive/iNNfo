@@ -9,7 +9,6 @@
       :concept-color="conceptColor"
       :concept-icon="conceptIcon"
       :concept-fields="conceptFields"
-      :validation-report="validationReport"
       :has-markers="hasMarkers"
       :collapsed="conceptCollapsed"
       :is-editing="editingId === 'concept'"
@@ -43,7 +42,6 @@
         :concept-color="conceptColor"
         :concept-icon="conceptIcon"
         :concept-fields="conceptFields"
-        :validation-report="validationReport"
         :has-markers="hasMarkers"
         :show-reorder="true"
         :show-delete="true"
@@ -68,7 +66,6 @@
 import { ref, watch } from 'vue'
 import BlockSheet from './BlockSheet.vue'
 import type { ParsedItem } from '../../stores/types'
-import type { ValidationReport } from '../../shared/validation-types'
 
 const props = withDefaults(
   defineProps<{
@@ -82,7 +79,6 @@ const props = withDefaults(
     isListConcept: boolean
     hasMarkers?: boolean
     selectedItemName?: string
-    validationReport?: ValidationReport | null
   }>(),
   {
     conceptColor: '',
@@ -90,7 +86,6 @@ const props = withDefaults(
     conceptFields: () => [],
     hasMarkers: false,
     selectedItemName: '',
-    validationReport: null,
   },
 )
 

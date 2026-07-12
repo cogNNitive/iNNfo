@@ -70,10 +70,9 @@ test.describe('Widget Registry — 14 Widget Types', () => {
   })
 
   test('ToggleGroupWidget renders segmented buttons', async ({ page }) => {
-    const tabs = ['View', 'Visual', 'History', 'Compliance']
-    const viewTab = tabs.map((t) => page.getByRole('button', { name: t, exact: true }).first())
-    await expect(viewTab[0]).toBeVisible()
-    const activeClass = await viewTab[0].getAttribute('class')
+    const viewTab = page.getByRole('button', { name: 'View', exact: true })
+    await expect(viewTab).toBeVisible()
+    const activeClass = await viewTab.getAttribute('class')
     expect(activeClass?.includes('border-b') || activeClass?.includes('indigo')).toBeTruthy()
   })
 
@@ -85,9 +84,8 @@ test.describe('Widget Registry — 14 Widget Types', () => {
   })
 
   test('MermaidWidget renders diagrams', async ({ page }) => {
-    const visualTab = page.getByRole('button', { name: 'Visual', exact: true })
-    await expect(visualTab).toBeVisible()
-    await visualTab.click()
+    const viewTab = page.getByRole('button', { name: 'View', exact: true })
+    await expect(viewTab).toBeVisible()
     const graphSvg = page.locator('svg').first()
     await expect(graphSvg).toBeVisible()
   })

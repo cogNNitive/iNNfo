@@ -115,6 +115,38 @@
         <span>Use AI</span>
       </button>
 
+      <!-- Import Button -->
+      <button
+        @click="uiStore.setActiveView('import')"
+        :disabled="!workspaceStore.hasHandle"
+        class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        :class="
+          uiStore.activeView === 'import'
+            ? 'bg-blue-600 text-white ring-blue-500/30 hover:bg-blue-700'
+            : 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 ring-blue-300 dark:ring-blue-700/50 hover:bg-blue-50 dark:hover:bg-blue-950/30'
+        "
+        title="Import documents for AI transformation"
+      >
+        <FileDown class="w-3.5 h-3.5" />
+        <span>Import</span>
+      </button>
+
+      <!-- Export Button -->
+      <button
+        @click="uiStore.setActiveView('export')"
+        :disabled="!workspaceStore.hasHandle"
+        class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+        :class="
+          uiStore.activeView === 'export'
+            ? 'bg-emerald-600 text-white ring-emerald-500/30 hover:bg-emerald-700'
+            : 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 ring-emerald-300 dark:ring-emerald-700/50 hover:bg-emerald-50 dark:hover:bg-emerald-950/30'
+        "
+        title="Export model as visualizer"
+      >
+        <FileUp class="w-3.5 h-3.5" />
+        <span>Export</span>
+      </button>
+
       <!-- Save Button with integrated Saved status -->
       <div class="relative" ref="saveDropdownRef">
         <div class="relative inline-flex rounded-md shadow-xs">
@@ -214,6 +246,8 @@ import {
   AlertTriangle,
   XCircle,
   Sparkles,
+  FileDown,
+  FileUp,
 } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'

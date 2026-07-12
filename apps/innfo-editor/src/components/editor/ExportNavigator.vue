@@ -27,7 +27,7 @@
         </div>
         <div class="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400">
           <div class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-2xs font-bold shrink-0 mt-0.5">2</div>
-          <span>Tell your agent: <code class="text-2xs bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded font-mono">Generate an export for {{ modelFilename }} following traNNsform/AGENT.md</code></span>
+          <span>Tell your agent: <code class="text-2xs bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded font-mono">Verify MCP tools are active (run the innv0-innfo skill's MCP Activation Protocol), then generate an export for {{ modelFilename }} following traNNsform/AGENT.md</code></span>
         </div>
         <div class="flex items-start gap-3 text-xs text-slate-600 dark:text-slate-400">
           <div class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-2xs font-bold shrink-0 mt-0.5">3</div>
@@ -215,7 +215,7 @@ async function scanExports(): Promise<void> {
     const transformDir = await workspaceStore.handle.getDirectoryHandle('traNNsform')
     let outputsDir: DirectoryHandleLike
     try {
-      outputsDir = await transformDir.getDirectoryHandle('outputs')
+      outputsDir = await transformDir.getDirectoryHandle('output')
     } catch {
       state.value = 'empty'
       return

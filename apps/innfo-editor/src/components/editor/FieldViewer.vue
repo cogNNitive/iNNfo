@@ -41,8 +41,24 @@
             </span>
           </template>
           <template v-else-if="entry.def.type === 'reference'">
+            <BlockPill
+              v-if="entry.refNode"
+              :node-id="entry.refNode.id"
+              :name="entry.refNode.name"
+              :kind="entry.refNode.conceptBinding?.name ? 'instance' : 'concept'"
+              :concept-type="entry.refNode.type"
+              :block-id="entry.refNode.id"
+              :description="entry.refNode.rawContent || entry.refNode.rawSections?.description || ''"
+              :fields="entry.refNode.fields"
+              :concept-fields="getConceptFields(entry.refNode.type)"
+              interactive
+              class="cursor-pointer"
+              @click="uiStore.selectNode(entry.refNode.id)"
+            />
             <span
-              class="text-indigo-600 dark:text-indigo-400 underline decoration-dotted cursor-default"
+              v-else
+              class="text-slate-400 dark:text-slate-500 italic underline decoration-dotted cursor-help"
+              title="Referenced node not found in this model"
             >
               [[{{ entry.displayValue }}]]
             </span>
@@ -80,6 +96,9 @@
 import { computed } from 'vue'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
 import { useModelStore } from '../../stores/modelStore'
+import { useUiStore } from '../../stores/uiStore'
+import type { ModelNode } from '../../model/types'
+import BlockPill from './BlockPill.vue'
 
 const MARKDOWN_FIELD_TYPES = new Set(['markdown_inline', 'markdown_file', 'markdown'])
 
@@ -93,6 +112,7 @@ interface FieldEntry {
   hasValue: boolean
   displayValue: unknown
   isMarkdownType: boolean
+  refNode?: ModelNode | null
 }
 
 /**
@@ -119,6 +139,17 @@ const props = withDefaults(
 )
 
 const modelStore = useModelStore()
+const uiStore = useUiStore()
+
+const getConceptFields = (typeName: string | undefined) => {
+  if (!typeName) return []
+  const rootId = modelStore.rootIds[0]
+  if (!rootId) return []
+  const root = modelStore.getNode(rootId)
+  return root?.localMetamodel?.concepts?.find(
+    (c) => c.name.toLowerCase() === typeName.toLowerCase(),
+  )?.fields ?? []
+}
 
 /**
  * Computes an array of field entries pairing each field definition
@@ -132,11 +163,24 @@ const fieldEntries = computed<FieldEntry[]>(() => {
     const rawValue = fv?.value ?? fv ?? undefined
     const hasValue = rawValue !== undefined && rawValue !== null && rawValue !== ''
 
+    let refNode = null
+    if (def.type === 'reference' && hasValue && typeof rawValue === 'string') {
+      const cleanName = rawValue.trim()
+      if (modelStore.nodes[cleanName]) {
+        refNode = modelStore.nodes[cleanName]
+      } else {
+        refNode = Object.values(modelStore.nodes).find(
+          (n) => n.name.toLowerCase() === cleanName.toLowerCase()
+        ) || null
+      }
+    }
+
     return {
       def,
       hasValue,
       displayValue: rawValue ?? '',
       isMarkdownType: MARKDOWN_FIELD_TYPES.has(def.type),
+      refNode,
     }
   })
 })

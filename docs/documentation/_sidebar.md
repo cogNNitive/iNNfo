@@ -1,8 +1,9 @@
 - [Home](README)
 - [iNNfo Agent (OpenCode)](opencode-innfo-agent)
-- [format-editor](format-editor)
-- [format-core](format-core)
-- [Launcher](launcher) *(legacy)*
+- [innfo-editor](innfo-editor)
+- [innfo-core](innfo-core)
+- [innfo-mcp](innfo-mcp)
+- [traNNsform](trannsform)
 - [Ecosystem](ecosystem)
 - [Specifications](specifications)
 - [OKF Compatibility](ecosystem?id=open-knowledge-format-compatibility)

@@ -14,7 +14,6 @@ title: "Time Travel Protocol — Standard Operating Procedure"
 
 # _NN index
 
-* [[Procedure]]
 * [[Work]]
 * [[Artifact]]
 * [[Tools]]
@@ -22,28 +21,28 @@ title: "Time Travel Protocol — Standard Operating Procedure"
 * [[Position]]
 * [[Person]]
 
-# _NN Procedure
-
-## Protocolo estándar de viaje temporal (SOP-TT-001)
-
-Procedimiento para ejecutar un viaje temporal utilizando el DeLorean DMC-12
-con condensador de flujo. Rango operativo probado: 1885–2015.
-
-**Requisitos previos:**
-- DeLorean DMC-12 con condensador de flujo calibrado
-- Sr. Fusión o fuente de 1.21 GW verificada
-- Coordenadas temporales validadas
-- Tripulación mínima: 1 piloto
-
-**Advertencias:**
-- NO modificar la línea temporal sin autorización del Dr. Brown
-- En caso de paradoja inminente, activar protocolo de auto-corrección
-- No mirar directamente al vórtice temporal
-
 # _NN Work
+
+* _NN Work: Time Travel Protocol
+  ## Protocolo estándar de viaje temporal (SOP-TT-001)
+
+  Procedimiento para ejecutar un viaje temporal utilizando el DeLorean DMC-12
+  con condensador de flujo. Rango operativo probado: 1885–2015.
+
+  **Requisitos previos:**
+  - DeLorean DMC-12 con condensador de flujo calibrado
+  - Sr. Fusión o fuente de 1.21 GW verificada
+  - Coordenadas temporales validadas
+  - Tripulación mínima: 1 piloto
+
+  **Advertencias:**
+  - NO modificar la línea temporal sin autorización del Dr. Brown
+  - En caso de paradoja inminente, activar protocolo de auto-corrección
+  - No mirar directamente al vórtice temporal
 
 * _NN Work: Calibración del condensador de flujo
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   next: "Verificación de combustible"
   tool: "Condensador de flujo"
@@ -55,6 +54,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Verificación de combustible
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   next: "Ingreso de coordenadas temporales"
   condition: "Si el nivel de combustible es >= 100%"
@@ -66,6 +66,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Ingreso de coordenadas temporales
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   next: "Abrir compuertas de flujo"
   tool: "Pantalla de destino del DeLorean"
@@ -76,6 +77,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Abrir compuertas de flujo
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   next: "Acelerar a 88 mph"
   tool: "DeLorean DMC-12"
@@ -86,6 +88,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Acelerar a 88 mph
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   next: "Activar condensador"
   tool: "DeLorean DMC-12"
@@ -95,6 +98,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Activar condensador
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "event"
   next: "Verificar llegada"
   tool: "Condensador de flujo"
@@ -105,6 +109,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Verificar llegada
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   next: "Ocultar el DeLorean"
   condition: "Fecha y lugar de destino confirmados"
@@ -115,6 +120,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Ocultar el DeLorean
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   tool: "Generador de moscas"
   output: "DeLorean oculto"
@@ -123,6 +129,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Ejecutar misión
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   condition: "Misión completada o peligro inminente"
   tool: "Reloj de pulsera sincronizado"
@@ -131,6 +138,7 @@ con condensador de flujo. Rango operativo probado: 1885–2015.
 
 * _NN Work: Regresar a la línea temporal original
   ```yaml
+  parent: "Time Travel Protocol"
   step_type: "task"
   condition: "Tripulación a bordo + 88 mph alcanzable"
   tool: "DeLorean DMC-12"

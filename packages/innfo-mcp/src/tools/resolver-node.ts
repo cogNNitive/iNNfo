@@ -104,7 +104,7 @@ export async function resolveParentChainNode(
 ): Promise<SpecCache> {
   const maxDepth = options.maxDepth ?? MAX_DEPTH_DEFAULT
   const timeout = options.timeout ?? 10000
-  const specsDir = join(rootDir, 'specs')
+  const specsDirs = [join(rootDir, 'specs'), join(rootDir, '.specs')]
   const specs = new Map<string, SpecDocument>()
   const chain: string[] = []
 
@@ -117,10 +117,13 @@ export async function resolveParentChainNode(
   while (currentUrl && currentName && depth < maxDepth) {
     let content: string | null = null
 
-    // 1. Try local specs/ directory recursively
-    const localPath = await findLocalSpec(specsDir, currentName)
-    if (localPath) {
-      content = await readFile(localPath, 'utf-8')
+    // 1. Try local specs/ or .specs/ directory recursively
+    for (const dir of specsDirs) {
+      const localPath = await findLocalSpec(dir, currentName)
+      if (localPath) {
+        content = await readFile(localPath, 'utf-8')
+        break
+      }
     }
 
     // 2. Try cache directory

@@ -1,57 +1,64 @@
 ---
-title: cogNNitive — iNNv0 FORMAT Ecosystem Hub
-description: cogNNitive is the central hub for the iNNv0 FORMAT ecosystem. Open, edit, and validate FORMAT models with the unified format-editor.
+title: cogNNitive — the iNNfo modeling hub
+description: cogNNitive is the hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, the innfo-core library, and an MCP server for AI agents.
 html_url: https://innv0.github.io/cogNNitive/
 generator: https://skills.innv0.com/innv0-web-design-guide
 ---
 
-# cogNNitive — iNNv0 Ecosystem Hub
+# cogNNitive — the iNNfo modeling hub
 
-Open, edit, and validate FORMAT models. cogNNitive is the central hub for the iNNv0 ecosystem.
+Model, edit, and validate iNNfo knowledge models. cogNNitive is the hub for the iNNfo ecosystem.
 
 ## What is cogNNitive?
 
-A monorepo that ties together the iNNv0 specification ecosystem:
-- **format-editor** — unified Vue 3 workspace editor. Open any folder, parse FILE and FOLDER mode models into a single tree.
-- **@innv0/format-core** — shared TypeScript parser, resolver, validator
-- **Spec Chain** — defiNNe &rarr; FORMAT &rarr; Templates &rarr; Models
+A monorepo that ties the iNNfo ecosystem together:
 
-The **launcher** app (legacy two-app routing) is being consolidated into format-editor.
+- **iNNfo Modeler** (`innfo-editor`) — a Vue 3 workspace editor. Open any folder, parse it into one normalized model tree, edit nodes, and validate in the browser.
+- **@innv0/innfo-core** — the shared TypeScript parser, spec-chain resolver, and validator.
+- **@innv0/innfo-mcp** — an MCP server exposing iNNfo as semantic tools for AI agents.
+- **Spec Chain** — defiNNe &rarr; iNNfo &rarr; Templates &rarr; Models.
 
-## How format-editor works
+## How the iNNfo Modeler works
 
-1. **Open workspace** — pick a folder via the File System Access API
-2. **Single parse pass** — recursive parser walks every directory, building one unified tree
-3. **Edit & validate** — sidebar tree + metamodel-driven forms + FORMAT compliance validation
+1. **Open workspace** — pick a folder via the File System Access API (or resume a recent one).
+2. **Single parse pass** — one recursive pass walks the workspace; each `_NN.md` file and its structural children fold into a single normalized tree.
+3. **Edit & validate** — sidebar tree + block sheets / table view + automatic validation against the iNNfo spec on every parse.
 
 ## Ecosystem Architecture
 
-- **Level 0: defiNNe** — Meta-specification, RFC 2119, versioning
-- **Level 1: FORMAT** — Central spec with FILE and FOLDER modes
-- **Level 2: Templates** — business, procedures, kb
-- **Level 3: Models** — Concrete data instances
+- **Level 0: defiNNe** — meta-specification, RFC 2119, versioning.
+- **Level 1: iNNfo** — the central spec; single-file `_NN.md` models with YAML frontmatter.
+- **Level 2: Templates** — business, procedures, organization.
+- **Level 3: Models** — concrete data instances.
+
+## Built for AI agents
+
+- **innfo-mcp** — a stdio MCP server with seven semantic tools (`list_models`, `read_model`, `get_spec`, `get_template`, `validate_model`, `apply_change`, `validate_model_url`) so agents mutate models safely and re-validate every step.
+- **traNNsform** — Import/Export panels generate a ready-to-run agent prompt. Drop sources into `traNNsform/input/` to build iNNfo models, or export a model to a self-contained HTML visualizer in `traNNsform/output/`.
+- **Use cogNNitive with AI** — a built-in checklist to connect your workspace to Claude Code, Google Antigravity, or OpenCode.
 
 ## Open Knowledge Format compatibility
 
-FORMAT is **100% compatible** with [OKF v0.1](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) (Open Knowledge Format). Every FORMAT document is a valid OKF knowledge bundle:
+iNNfo is **100% compatible** with [OKF v0.1](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) (Open Knowledge Format). Every iNNfo document is a valid OKF knowledge bundle:
 
 - **Shared substrate**: Markdown + YAML frontmatter — no proprietary tooling required.
-- **Conformance**: OKF's three conformance requirements (parseable frontmatter, non-empty `type`, reserved filenames) are all met by FORMAT. The `level` and template system provide type semantics; `index.md` follows the same progressive-disclosure convention.
-- **Extensions tolerated**: OKF explicitly tolerates unknown frontmatter keys and unknown `type` values. FORMAT's richer frontmatter (`spec_version`, `level`, `parent`, `concepts`, `markers`, `matrices`) is fully compatible.
-- **FOLDER mode = OKF Bundle**: FORMAT FOLDER mode produces exactly the directory-of-Markdown-files structure OKF defines as its knowledge bundle. Each `_F.md` is an OKF concept document.
+- **Conformance**: OKF's three conformance requirements (parseable frontmatter, non-empty `type`, reserved filenames) are all met by iNNfo. The `level` and template system provide type semantics; `index.md` follows the same progressive-disclosure convention.
+- **Extensions tolerated**: OKF explicitly tolerates unknown frontmatter keys and `type` values. iNNfo's richer frontmatter (`spec_version`, `level`, `parent`, `concepts`, `markers`, `matrices`) is fully compatible.
+- **A workspace = an OKF Bundle**: an iNNfo workspace is exactly the directory-of-Markdown-files structure OKF defines as its knowledge bundle. Each `_NN.md` is an OKF concept document.
 
 ## Monorepo structure
 
 ```
 cogNNitive/
 ├── apps/
-│   ├── format-editor/  ← Vue 3 unified workspace editor
-│   └── launcher/       ← Legacy — being consolidated
+│   └── innfo-editor/     ← Vue 3 workspace editor (the iNNfo Modeler)
 ├── packages/
-│   └── format-core/    ← TS parser, resolver, validator
-├── specs/              ← Specification files
-├── models/             ← Example models
-└── docs/               ← This website
+│   ├── innfo-core/       ← TS parser, resolver, validator
+│   ├── innfo-mcp/        ← MCP server for AI agents
+│   └── pipeline-gates/   ← Validation & integration gates
+├── specs/                ← defiNNe, iNNfo, templates, samples
+├── traNNsform/           ← Agent-driven import/export pipeline
+└── docs/                 ← This website
 ```
 
 [About the project](https://innv0.github.io/cogNNitive/about)

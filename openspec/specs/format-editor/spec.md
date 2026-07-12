@@ -243,3 +243,39 @@ A new `utils/db.ts` module MUST provide IndexedDB persistence: generic wrapper w
 ### Requirement: ModelInfoPanel — Version Management Section
 
 `ModelInfoPanel.vue` MUST add a version management section with current version display, three bump buttons (major/minor/patch) with hover preview, description text, and save button. The version panel MUST be disabled when no handle, currently saving, or no root node. The existing model metadata display, workspace info, and plain text view MUST remain unchanged.
+
+### Requirement: Header Import/Export Buttons
+
+`Header.vue` MUST render [Import] and [Export] buttons after [Use AI]. [Import] MUST set `uiStore.activeView` to `'import'`. [Export] MUST set `uiStore.activeView` to `'export'`. Both buttons MUST be visible regardless of workspace state.
+
+#### Scenario: Import button activates import view
+
+- GIVEN the editor is open with Header visible
+- WHEN the user clicks [Import]
+- THEN `uiStore.activeView` equals `'import'`
+- AND ImportPanel is displayed
+
+#### Scenario: Export button activates export view
+
+- GIVEN the editor is open with Header visible
+- WHEN the user clicks [Export]
+- THEN `uiStore.activeView` equals `'export'`
+- AND ExportPanel is displayed
+
+### Requirement: AIGuidePanel Separates Import and Export Sections
+
+`AIGuidePanel.vue` MUST render distinct Import and Export sections with headings. Each section provides a copiable agent prompt. The Import section MUST list detected files from `traNNsform/input/`. The Export section MUST include a model selector. The panel no longer performs downloads or contains download-related state.
+
+#### Scenario: Import section shows input file list
+
+- GIVEN `traNNsform/input/` contains `notes.docx`
+- WHEN AIGuidePanel is opened and Import section is visible
+- THEN `notes.docx` is listed in the Import section
+- AND a prompt referencing `traNNsform/AGENT.md` is displayed
+
+#### Scenario: Export section shows model selector
+
+- GIVEN the workspace has model `MyModel_V_1-0-0`
+- WHEN AIGuidePanel is opened and Export section is visible
+- THEN `MyModel_V_1-0-0` is available in the model selector
+- AND an export prompt referencing `traNNsform/output/` is displayed

@@ -170,4 +170,42 @@ export async function applyChange(
   }
 }
 
+/* ── validate_model_url ─────────────────────────────────────── */
+
+/**
+ * Validate a model fetched from a URL without writing to disk.
+ * Accepts a model URL and optional template_url. Fetches the model content,
+ * then delegates to validateModel (content mode).
+ */
+export async function validateModelUrl(
+  rootDir: string,
+  modelUrl: string,
+  templateUrl?: string,
+): Promise<{
+  valid: boolean
+  errors: ValidationError[]
+  warnings: ValidationError[]
+}> {
+  let content: string
+  try {
+    const response = await fetch(modelUrl)
+    if (!response.ok) {
+      return {
+        valid: false,
+        errors: [{ path: '', message: `Failed to fetch model URL: ${response.status} ${response.statusText}`, severity: 'error' }],
+        warnings: [],
+      }
+    }
+    content = await response.text()
+  } catch (err) {
+    return {
+      valid: false,
+      errors: [{ path: '', message: `Model URL unreachable: ${err}`, severity: 'error' }],
+      warnings: [],
+    }
+  }
+
+  return validateModel(rootDir, undefined, content, templateUrl)
+}
+
 /* ── All mutation operations delegated to innfo-core engine ─── */

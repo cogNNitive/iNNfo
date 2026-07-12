@@ -6,7 +6,7 @@
     <title>About — cogNNitive</title>
     <meta
       name="description"
-      content="Learn about cogNNitive, the central hub for the iNNv0 FORMAT ecosystem — format-editor, format-core, and the spec chain."
+      content="Learn about cogNNitive, the hub for the iNNfo ecosystem — the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain."
     />
     <meta name="generator" content="https://skills.innv0.com/innv0-web-design-guide" />
     <link rel="canonical" href="https://innv0.github.io/cogNNitive/about" />
@@ -22,7 +22,7 @@
         "@type": "WebSite",
         "name": "cogNNitive",
         "url": "https://innv0.github.io/cogNNitive/",
-        "description": "Central hub for the iNNv0 FORMAT ecosystem. format-editor, format-core, and spec chain.",
+        "description": "The hub for the iNNfo ecosystem. iNNfo Modeler, innfo-core, innfo-mcp, and the spec chain.",
         "author": { "@type": "Organization", "name": "iNNv0" },
         "inLanguage": "en",
         "isAccessibleForFree": true
@@ -55,13 +55,14 @@
         <div class="container">
           <div class="section-header">
             <h1>About <span class="serif-accent">cogNNitive</span></h1>
-            <p>The monorepo that ties the iNNv0 FORMAT ecosystem together.</p>
+            <p>The monorepo that ties the iNNfo ecosystem together.</p>
           </div>
 
           <div style="max-width: 720px; margin: 0 auto">
             <h2 style="font-size: 22px; margin-bottom: var(--space-md)">Architecture</h2>
             <p style="margin-bottom: var(--space-lg)">
-              cogNNitive is organized as an npm workspaces monorepo with two main areas:
+              cogNNitive is organized as an npm workspaces monorepo — one editor app, three shared
+              packages, the spec chain, and an agent-driven pipeline:
             </p>
 
             <div
@@ -78,71 +79,88 @@
             >
               cogNNitive/<br />
               ├── apps/<br />
-              │&nbsp;&nbsp; ├── format-editor/ &nbsp;<span
+              │&nbsp;&nbsp; └── innfo-editor/ &nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
-                >// Vue 3 unified workspace editor (FILE + FOLDER)</span
-              ><br />
-              │&nbsp;&nbsp; └── launcher/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
-                style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
-                >// Legacy — being consolidated into format-editor</span
+                >// Vue 3 workspace editor — the iNNfo Modeler</span
               ><br />
               ├── packages/<br />
-              │&nbsp;&nbsp; └── format-core/
-              <span style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
+              │&nbsp;&nbsp; ├── innfo-core/ &nbsp;&nbsp;&nbsp;<span
+                style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// TS parser, resolver, validator</span
               ><br />
-              ├── specs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+              │&nbsp;&nbsp; ├── innfo-mcp/ &nbsp;&nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
-                >// Specification files</span
+                >// MCP server for AI agents</span
               ><br />
-              ├── models/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+              │&nbsp;&nbsp; └── pipeline-gates/ <span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
-                >// Example models</span
+                >// Validation &amp; integration gates</span
               ><br />
-              └── docs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+              ├── specs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
+                >// defiNNe, iNNfo, templates, samples</span
+              ><br />
+              ├── traNNsform/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+                style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
+                >// Agent-driven import/export pipeline</span
+              ><br />
+              └── docs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// This website</span
               >
             </div>
 
-            <h2 style="font-size: 22px; margin-bottom: var(--space-md)">Apps</h2>
+            <h2 style="font-size: 22px; margin-bottom: var(--space-md)">App</h2>
 
             <div class="card" style="margin-bottom: var(--space-md)">
-              <span class="card-tag">@innv0/format-editor v0.1.0</span>
-              <h3 style="margin-top: var(--space-sm)">format-editor</h3>
+              <span class="card-tag">@innv0/innfo-editor v0.1.0</span>
+              <h3 style="margin-top: var(--space-sm)">iNNfo Modeler</h3>
               <p>
-                Unified Vue 3 workspace editor with Pinia state management and Vue Router. Uses the
-                File System Access API to open workspace folders, runs a single recursive parse pass
-                over every directory, and renders FILE and FOLDER mode models in one mixed tree.
-                Features a sidebar tree navigator, metamodel-driven NodeForm, and IndexedDB handle
-                persistence for fast reopen.
-              </p>
-            </div>
-
-            <div class="card" style="margin-bottom: var(--space-md)">
-              <span class="card-tag">@innv0/launcher v0.1.0 &mdash; Legacy</span>
-              <h3 style="margin-top: var(--space-sm)">cogNNitive Launcher</h3>
-              <p>
-                The original Vue 3 drag-and-drop app that detected FILE vs FOLDER mode and routed to
-                separate editors. Now being consolidated into format-editor — its validation,
-                history, and toast components are being ported over. Still available during the
-                transition.
+                A Vue 3 workspace editor with Pinia state management and Vue Router. Uses the File
+                System Access API to open a workspace folder, runs a single recursive parse pass into
+                one normalized model graph, and edits nodes through block sheets, a table view, and
+                metamodel-driven forms. Validation runs automatically on every parse; a graph viewer,
+                matrix grids, and an AI-guidance sidebar round out the workspace. Directory handles
+                persist in IndexedDB for a fast reopen.
               </p>
             </div>
 
             <h2
               style="font-size: 22px; margin-bottom: var(--space-md); margin-top: var(--space-xl)"
             >
-              Package
+              Packages
             </h2>
 
             <div class="card" style="margin-bottom: var(--space-md)">
-              <span class="card-tag">@innv0/format-core v0.1.0</span>
-              <h3 style="margin-top: var(--space-sm)">format-core</h3>
+              <span class="card-tag">@innv0/innfo-core v0.1.0</span>
+              <h3 style="margin-top: var(--space-sm)">innfo-core</h3>
               <p>
-                Framework-agnostic TypeScript library with a unified parser for FILE and FOLDER
-                modes, model types, a validator against template schemas, IO drivers for both modes,
-                and a parent-spec-chain resolver.
+                Framework-agnostic TypeScript library: the iNNfo parser, model types (Concept,
+                Element, Field, Marker, Matrix, Relationship), IO drivers for the browser and Node, a
+                validator against template schemas, and a parent-spec-chain resolver. Both the Modeler
+                and the MCP server run on top of it.
+              </p>
+            </div>
+
+            <div class="card" style="margin-bottom: var(--space-md)">
+              <span class="card-tag">@innv0/innfo-mcp v0.1.0</span>
+              <h3 style="margin-top: var(--space-sm)">innfo-mcp</h3>
+              <p>
+                A Model Context Protocol server (stdio) wrapping innfo-core. It exposes seven semantic
+                tools — <code>list_models</code>, <code>read_model</code>, <code>get_spec</code>,
+                <code>get_template</code>, <code>validate_model</code>, <code>apply_change</code>, and
+                <code>validate_model_url</code> — so any MCP-capable AI agent can read, validate, and
+                safely mutate iNNfo models. Spec and template resolution follow the model's parent
+                chain, with no hardcoded URLs.
+              </p>
+            </div>
+
+            <div class="card" style="margin-bottom: var(--space-md)">
+              <span class="card-tag">@innv0/pipeline-gates</span>
+              <h3 style="margin-top: var(--space-sm)">pipeline-gates</h3>
+              <p>
+                Validation and integration gates for iNNfo model pipelines — the dev-tooling layer
+                that validates, integrates, and versions models in CI so a broken model never ships.
               </p>
             </div>
 
@@ -163,26 +181,26 @@
               </div>
               <div class="card">
                 <span class="card-tag">Level 1</span>
-                <h3 style="margin-top: var(--space-sm); font-size: 18px">FORMAT</h3>
+                <h3 style="margin-top: var(--space-sm); font-size: 18px">iNNfo</h3>
                 <p>
-                  Central specification with FILE (single document) and FOLDER (node-as-folder)
-                  modes.
+                  The central specification. A single-file <code>_NN.md</code> model with YAML
+                  frontmatter, concepts, elements, markers, and relationships.
                 </p>
               </div>
               <div class="card">
                 <span class="card-tag">Level 2</span>
                 <h3 style="margin-top: var(--space-sm); font-size: 18px">Templates</h3>
                 <p>
-                  business, procedures, kb — each declares concepts, markers, and relationship
-                  types.
+                  business, procedures, organization — each declares concepts, markers, and
+                  relationship types on top of iNNfo.
                 </p>
               </div>
               <div class="card">
                 <span class="card-tag">Level 3</span>
                 <h3 style="margin-top: var(--space-sm); font-size: 18px">Models</h3>
                 <p>
-                  Concrete instances like Ghostbusters or TeamKB. Lightweight — just data and parent
-                  pointer.
+                  Concrete instances like Ghostbusters or Engineering Team. Lightweight — just data
+                  and a parent pointer.
                 </p>
               </div>
             </div>
@@ -191,14 +209,14 @@
               Open Knowledge Format compatibility
             </h2>
             <p style="margin-bottom: var(--space-lg)">
-              The FORMAT specification is <strong>100% compatible</strong> with
+              The iNNfo specification is <strong>100% compatible</strong> with
               <a
                 href="https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md"
                 target="_blank"
                 rel="noopener noreferrer"
                 >OKF v0.1</a
               >
-              (Open Knowledge Format) by Google Cloud Platform. Every FORMAT document is a valid OKF
+              (Open Knowledge Format) by Google Cloud Platform. Every iNNfo document is a valid OKF
               knowledge bundle.
             </p>
 
@@ -206,10 +224,10 @@
               <div class="card">
                 <h3 style="margin-top: var(--space-sm); font-size: 18px">Shared substrate</h3>
                 <p>
-                  Both formats use Markdown files with YAML frontmatter as their core
-                  representation. No proprietary tooling, no centralized schema registry — just text
-                  files in version control. OKF's "if you can <code>cat</code> a file, you can read
-                  OKF" applies equally to FORMAT.
+                  Both formats use Markdown files with YAML frontmatter as their core representation.
+                  No proprietary tooling, no centralized schema registry — just text files in version
+                  control. OKF's "if you can <code>cat</code> a file, you can read OKF" applies equally
+                  to iNNfo.
                 </p>
               </div>
               <div class="card">
@@ -217,10 +235,10 @@
                 <p>
                   OKF v0.1 conformance (§9) requires: (1) parseable YAML frontmatter on every
                   non-reserved <code>.md</code> file, (2) a non-empty <code>type</code> field, (3)
-                  reserved filenames follow OKF conventions. FORMAT satisfies all three: every
-                  <code>_F.md</code> has frontmatter, the <code>level</code>+template system
-                  provides type semantics, and <code>index.md</code> follows the same
-                  progressive-disclosure pattern.
+                  reserved filenames follow OKF conventions. iNNfo satisfies all three: every
+                  <code>_NN.md</code> has frontmatter, the <code>level</code>+template system provides
+                  type semantics, and <code>index.md</code> follows the same progressive-disclosure
+                  pattern.
                 </p>
               </div>
               <div class="card">
@@ -228,19 +246,19 @@
                 <p>
                   OKF explicitly states consumers MUST NOT reject bundles because of unknown
                   additional frontmatter keys, unknown <code>type</code> values, or missing optional
-                  fields. FORMAT's richer frontmatter — <code>spec_version</code>,
-                  <code>level</code>, <code>parent</code>, <code>concepts</code>,
-                  <code>markers</code>, <code>matrices</code> — is fully tolerated by OKF consumers.
+                  fields. iNNfo's richer frontmatter — <code>spec_version</code>, <code>level</code>,
+                  <code>parent</code>, <code>concepts</code>, <code>markers</code>,
+                  <code>matrices</code> — is fully tolerated by OKF consumers.
                 </p>
               </div>
               <div class="card">
                 <h3 style="margin-top: var(--space-sm); font-size: 18px">
-                  FOLDER mode = OKF Bundle
+                  A workspace = an OKF Bundle
                 </h3>
                 <p>
-                  FORMAT FOLDER mode produces exactly the directory-of-Markdown-files structure that
-                  OKF defines as a <em>knowledge bundle</em> (§3). Each <code>_F.md</code> maps to
-                  an OKF <em>concept document</em> (§4) with <code>index.md</code> as the directory
+                  An iNNfo workspace produces exactly the directory-of-Markdown-files structure that
+                  OKF defines as a <em>knowledge bundle</em> (§3). Each <code>_NN.md</code> maps to an
+                  OKF <em>concept document</em> (§4) with <code>index.md</code> as the directory
                   listing (§6). Wikilinks and standard Markdown links coexist for cross-linking.
                 </p>
               </div>
@@ -287,7 +305,7 @@
         <div class="footer-grid">
           <div class="footer-brand">
             <a href="/" class="logo">cogNNitive</a>
-            <p>Central hub for the iNNv0 FORMAT ecosystem.</p>
+            <p>The hub for the iNNfo ecosystem.</p>
           </div>
           <div>
             <h4>Ecosystem</h4>

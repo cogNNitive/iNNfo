@@ -10,10 +10,14 @@
 import { ref, computed } from 'vue'
 import { useModelStore } from '../../stores/modelStore'
 
-const props = defineProps<{
-  modelValue: string
-  fieldDefinition?: { target_concepts?: string[] }
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: string
+    fieldDefinition?: { target_concepts?: string[] }
+    readonly?: boolean
+  }>(),
+  { readonly: false },
+)
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
@@ -66,7 +70,9 @@ function onBlur(): void {
 
 <template>
   <div class="field-reference-container">
+    <span v-if="readonly" class="field-reference-readonly">{{ query || '—' }}</span>
     <input
+      v-else
       type="text"
       class="field-reference-input"
       :value="query"
@@ -75,7 +81,7 @@ function onBlur(): void {
       @focus="showDropdown = true"
       @blur="onBlur"
     />
-    <ul v-if="showDropdown && filteredSuggestions.length > 0" class="field-reference-dropdown">
+    <ul v-if="!readonly && showDropdown && filteredSuggestions.length > 0" class="field-reference-dropdown">
       <li
         v-for="suggestion in filteredSuggestions"
         :key="suggestion"

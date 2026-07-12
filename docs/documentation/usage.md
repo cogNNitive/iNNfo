@@ -1,8 +1,8 @@
 # Usage Guide
 
-## Creating a FORMAT Model
+## Creating an iNNfo Model
 
-A FORMAT model is a Markdown file with YAML frontmatter following the spec chain conventions.
+An iNNfo model is a single Markdown file (`_NN.md`) with YAML frontmatter following the spec chain conventions.
 
 ```markdown
 ---
@@ -11,35 +11,45 @@ level: 3
 parent: "business_V_1-0-0"
 model_version: "V_0-1-0"
 title: "My Model"
-mode: "FILE"
 ---
 
 # My Model
 
-_F Strategy
+_NN Strategy
 
-* _F Strategy: Core Objective
+* _NN Strategy: Core Objective
   * type: text
   * value: "Build the next generation of..."
 
-_F Metrics
+_NN Metrics
 
-* _F Metrics: KPI
+* _NN Metrics: KPI
   * type: text
   * value: "Monthly active users"
 ```
 
-## FILE vs FOLDER Mode
+## Templates
 
-- **FILE mode**: everything in one `.md` file. Best for text-heavy models with matrix relationships.
-- **FOLDER mode**: each element is a directory with `_F.md`. Best for models with physical assets (images, PDFs).
+Level 2 templates declare the concepts, markers, and relationship types available to a model:
 
-## Running the Launcher
+- **business** — business strategy modeling
+- **procedures** — workflows, SOPs, processes
+- **organization** — organizational structure modeling
+
+## Working with the ecosystem
+
+1. Open [innfo-editor](innfo-editor) and start from a starter template, a sample model, or an existing workspace folder.
+2. Edit concepts, elements, and fields through the editor's per-node views.
+3. Validation runs automatically on every parse — check the header badge or open the full validation report.
+4. Use the Export/Import panels to generate an agent prompt for the [traNNsform](trannsform) pipeline, or connect an AI agent directly via [innfo-mcp](innfo-mcp).
+
+## Running the editor
 
 ```bash
 # From the cogNNitive repo root
 npm install
-npm run dev -w @innv0/launcher
+npm run build -w @innv0/innfo-core
+npm run dev -w @innv0/innfo-editor
 ```
 
-Open http://localhost:5173 in your browser.
+Open the local dev server URL printed in the terminal.

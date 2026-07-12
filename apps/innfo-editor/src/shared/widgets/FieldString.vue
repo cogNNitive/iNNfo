@@ -4,9 +4,13 @@
  * Part of the unified widget registry (rebuild-format-editor-ui Phase 4).
  * Uses v-model contract: modelValue / update:modelValue.
  */
-defineProps<{
-  modelValue: string
-}>()
+withDefaults(
+  defineProps<{
+    modelValue: string
+    readonly?: boolean
+  }>(),
+  { readonly: false },
+)
 
 defineEmits<{
   'update:modelValue': [value: string]
@@ -14,7 +18,9 @@ defineEmits<{
 </script>
 
 <template>
+  <span v-if="readonly" class="field-string-readonly">{{ modelValue || '—' }}</span>
   <input
+    v-else
     type="text"
     class="field-string"
     :value="modelValue"

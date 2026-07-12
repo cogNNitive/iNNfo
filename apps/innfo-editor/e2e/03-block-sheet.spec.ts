@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { injectMockFileSystem, loadHomePage, openMockFolder, expandAllNodes } from './helpers/setup'
 
-test.describe('BlockSheet — 4 Tabs, Markdown, Relationships, Matrix Summary, Media, Field Viewer, Compliance', () => {
+test.describe('BlockSheet — Markdown, Relationships, Matrix Summary, Media, Field Viewer', () => {
   test.beforeEach(async ({ page, context }) => {
     page.on('console', (msg) => console.log('BROWSER:', msg.text()))
     await injectMockFileSystem(page, context)
@@ -22,19 +22,6 @@ test.describe('BlockSheet — 4 Tabs, Markdown, Relationships, Matrix Summary, M
 
     const table = page.locator('table')
     await expect(table.first()).toBeVisible()
-  })
-
-  test('R-SC-02: Inline GraphViewer in Visual tab', async ({ page }) => {
-    const visualTab = page.getByText('Visual', { exact: true })
-    await expect(visualTab).toBeVisible()
-    await visualTab.click()
-
-    await expect(page.getByTestId('graph-viewer')).toBeVisible()
-
-    const bbox = await page.locator('svg').first().boundingBox()
-    if (bbox) {
-      expect(bbox.height).toBeLessThanOrEqual(400)
-    }
   })
 
   test('R-SC-03: BlockRelationships shows clickable pills', async ({ page }) => {
@@ -81,33 +68,15 @@ test.describe('BlockSheet — 4 Tabs, Markdown, Relationships, Matrix Summary, M
     await expect(inputs.first()).toBeVisible()
   })
 
-  test('R-SC-07: Four detail tabs with underline-style active indicator', async ({ page }) => {
-    const tabs = ['View', 'Visual', 'History', 'Compliance']
-    for (const tabName of tabs) {
-      const tab = page.getByText(tabName, { exact: true })
-      await expect(tab).toBeVisible()
-    }
-
+  test('R-SC-07: View tab is active by default with underline indicator', async ({ page }) => {
     const viewTab = page.getByRole('button', { name: 'View', exact: true })
+    await expect(viewTab).toBeVisible()
     const isActive = await viewTab.getAttribute('class')
     expect(
       isActive?.includes('active') ||
         isActive?.includes('underline') ||
         isActive?.includes('border-b'),
     ).toBeTruthy()
-
-    const complianceTab = page.getByRole('button', { name: 'Compliance', exact: true })
-    await complianceTab.click()
-
-    const compActive = await complianceTab.getAttribute('class')
-    expect(
-      compActive?.includes('active') ||
-        compActive?.includes('underline') ||
-        compActive?.includes('border-b'),
-    ).toBeTruthy()
-
-    const viewActive = await viewTab.getAttribute('class')
-    expect(viewActive?.includes('active') || viewActive?.includes('underline')).toBeFalsy()
   })
 
   test('R-SC-08: File attachments section', async ({ page }) => {

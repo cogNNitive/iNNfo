@@ -31,6 +31,11 @@ const folderPath = ref('')
 const templateChoice = ref<TemplateChoice>('blank')
 const modelName = ref('')
 
+function clearFolderSelection() {
+  folderHandle.value = null
+  folderPath.value = ''
+}
+
 const STARTER_BASE = `${import.meta.env.BASE_URL}starter/`
 
 const samples: SampleInfo[] = [
@@ -47,7 +52,8 @@ const samples: SampleInfo[] = [
     template: 'procedures',
     templateLabel: 'Procedures',
     sampleName: 'Code Review Process',
-    description: 'PR-based code reviews: roles, step-by-step workflow, tool bindings, and hotfix path.',
+    description:
+      'PR-based code reviews: roles, step-by-step workflow, tool bindings, and hotfix path.',
     url: 'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
   },
   {
@@ -167,7 +173,11 @@ async function createFolder(): Promise<void> {
 /**
  * Creates the standard workspace directory structure and support files.
  */
-async function initWorkspaceStructure(handle: DirectoryHandleLike, modelName: string, chosenTemplate: TemplateChoice): Promise<void> {
+async function initWorkspaceStructure(
+  handle: DirectoryHandleLike,
+  modelName: string,
+  chosenTemplate: TemplateChoice,
+): Promise<void> {
   // Create dot-directories (application-managed)
   await handle.getDirectoryHandle('.specs', { create: true })
 
@@ -185,6 +195,7 @@ async function initWorkspaceStructure(handle: DirectoryHandleLike, modelName: st
     { path: '', name: 'README.md' },
     { path: 'templates', name: 'business.md' },
     { path: 'templates', name: 'procedures.md' },
+    { path: 'templates', name: 'organization.md' },
     { path: 'templates', name: 'catalog.md' },
     { path: 'templates', name: '_generic.md' },
     { path: 'snippets', name: 'chart-patterns.md' },
@@ -197,9 +208,8 @@ async function initWorkspaceStructure(handle: DirectoryHandleLike, modelName: st
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
       const text = await resp.text()
 
-      const dir = file.path === ''
-        ? traNNsformDir
-        : file.path === 'templates' ? templatesDir : snippetsDir
+      const dir =
+        file.path === '' ? traNNsformDir : file.path === 'templates' ? templatesDir : snippetsDir
 
       const fileHandle = await dir.getFileHandle(file.name, { create: true })
       if (fileHandle.createWritable) {
@@ -224,6 +234,7 @@ This workspace was created by cogNNitive — a structured knowledge model editor
 | \`index.md\` | Entry point that maps your model structure |
 | \`${modelName}_V_1-0-0_${chosenTemplate}_NN.md\` | Your model file |
 | \`cogNNitive.html\` | Open this to launch the editor |
+| \`AGENTS.md\` | AI agent entry point — skill and MCP setup instructions |
 | \`.specs/\` | Template specifications (auto-managed) |
 | \`.backups/\` | Auto-save history (auto-managed) |
 | \`traNNsform/\` | AI-powered transformation tools for import and export |
@@ -231,12 +242,107 @@ This workspace was created by cogNNitive — a structured knowledge model editor
 ## How to edit
 
 - **cogNNitive editor**: Open \`cogNNitive.html\` in your browser
-- **AI agent**: Use Claude Code, OpenCode, or anti-gravity to edit via natural language
+- **AI agent**: Use Claude Code, OpenCode, or anti-gravity to edit via natural language.
+  Your agent MUST read \`AGENTS.md\` first for skill and MCP setup instructions.
 `
   const readmeHandle = await handle.getFileHandle('README.md', { create: true })
   if (readmeHandle.createWritable) {
     const w = await readmeHandle.createWritable()
     await w.write(readmeContent)
+    await w.close()
+  }
+
+  // Create AGENTS.md — AI agent entry point with skill and MCP instructions
+  const agentsContent = `# AGENT Instructions
+
+Read this file FIRST when entering this workspace. It tells you how to configure yourself to work with iNNfo models.
+
+## Skills
+
+iNNv0 skills are maintained at \`https://github.com/innV0/iNNv0_skills\`. Clone the repo to get all skills:
+
+\`\`\`
+git clone https://github.com/innV0/iNNv0_skills.git
+\`\`\`
+
+### Installing skills per agent
+
+| Agent | Method |
+|-------|--------|
+| **OpenCode** | Clone the repo, then run the \`innv0-skills-manager\` skill to install via junctions. Skills are auto-discovered from \`~/.config/opencode/skills/\` and project \`.agents/skills/\`. |
+| **Claude Code** | Add the SKILL.md file paths to your \`CLAUDE.md\` or reference them in the MCP config. |
+| **anti-gravity** | Point your agent configuration to the cloned skill directory. |
+
+### Workspace skills triggered by file/task type
+
+| Trigger | Skill |
+|---------|-------|
+| Editing \`*_NN.md\` files | \`innv0-innfo\` |
+| Document ingestion, normalization, transformation | \`innv0-trannsform\` |
+| Web design, branding, analytics | \`innv0-web-design-guide\` |
+| Workflow orchestration across skills | \`innv0-workflow-orchestrator\` |
+| Model cost and tier evaluation | \`innv0-opencode-model-router\` |
+| Skill lifecycle management | \`innv0-skills-manager\` |
+
+## MCP Servers
+
+### innfo-mcp (required for model editing)
+
+The \`innfo-mcp\` server wraps \`@innv0/innfo-core\` and provides deterministic model validation, spec resolution, and semantic mutation tools. The agent MUST NOT hand-validate or hand-resolve spec chains when the MCP is available.
+
+Since \`@innv0/innfo-mcp\` is not published on npm, you need a local clone of \`cogNNitive\`:
+
+\`\`\`
+git clone https://github.com/innV0/cogNNitive.git
+cd cogNNitive
+npm install
+npm run build --prefix packages/innfo-mcp
+\`\`\`
+
+Then configure the MCP per your agent:
+
+**OpenCode** — add to \`opencode.json\` or \`~/.config/opencode/opencode.jsonc\` (note: OpenCode uses the \`mcp\` key with a \`command\` array, NOT \`mcpServers\`):
+\`\`\`jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "innfo-mcp": {
+      "type": "local",
+      "command": ["node", "path/to/cogNNitive/packages/innfo-mcp/dist/server.js"],
+      "enabled": true
+    }
+  }
+}
+\`\`\`
+
+**Claude Code** — add to \`.mcp.json\` (or your MCP configuration), which uses the \`mcpServers\` key with a \`command\` + \`args\` split:
+\`\`\`jsonc
+{
+  "mcpServers": {
+    "innfo-mcp": {
+      "command": "node",
+      "args": ["path/to/cogNNitive/packages/innfo-mcp/dist/server.js"]
+    }
+  }
+}
+\`\`\`
+
+**anti-gravity** — add to your agent's MCP server configuration using the same \`node\` + path pattern (follow your client's schema — \`mcp\` array style or \`mcpServers\` command+args style).
+
+## Workspace structure
+
+| Path | Purpose |
+|------|---------|
+| \`*_NN.md\` | iNNfo model files |
+| \`index.md\` | Entry point with [[wikilinks]] to models |
+| \`.specs/\` | Spec chain cache (auto-managed) |
+| \`traNNsform/\` | AI-powered transform pipeline (import/export) |
+| \`README.md\` | Workspace overview |
+`
+  const agentsHandle = await handle.getFileHandle('AGENTS.md', { create: true })
+  if (agentsHandle.createWritable) {
+    const w = await agentsHandle.createWritable()
+    await w.write(agentsContent)
     await w.close()
   }
 
@@ -269,7 +375,11 @@ This workspace was created by cogNNitive — a structured knowledge model editor
 /**
  * Creates an index.md entry point for the workspace.
  */
-async function createIndexMd(handle: DirectoryHandleLike, modelName: string, templateName: string): Promise<void> {
+async function createIndexMd(
+  handle: DirectoryHandleLike,
+  modelName: string,
+  templateName: string,
+): Promise<void> {
   const content = `---
 spec_version: "V_0-1-5"
 level: 0
@@ -291,10 +401,7 @@ title: "${modelName} Index"
  * and pre-populates .specs/ so both the editor and AI agents have
  * local copies without fetching on first use.
  */
-async function prepopulateSpecs(
-  handle: DirectoryHandleLike,
-  starterUrl: string,
-): Promise<void> {
+async function prepopulateSpecs(handle: DirectoryHandleLike, starterUrl: string): Promise<void> {
   const starterResp = await window.fetch(starterUrl)
   if (!starterResp.ok) return
   const starterFm = parseFrontmatter(await starterResp.text())
@@ -320,6 +427,7 @@ async function prepopulateSpecs(
       // Not found — download
     }
 
+    if (!currentUrl) break
     try {
       const resp = await window.fetch(currentUrl)
       if (!resp.ok) break
@@ -367,7 +475,7 @@ async function finishWizard(): Promise<void> {
 
     // Pre-populate .specs/ with the full spec chain so both the editor
     // and AI agents have local copies without fetching on first use.
-    if (templateChoice.value !== 'blank' && templateChoice.value !== 'sandbox') {
+    if (templateChoice.value !== 'blank') {
       const starter = getStarterByTemplate(templateChoice.value)
       if (starter) {
         await prepopulateSpecs(handle, starter.url)
@@ -408,7 +516,9 @@ async function finishWizard(): Promise<void> {
     let content = await response.text()
     content = content.replace(/^title:.*$/m, `title: "${name}"`)
 
-    const filename = fileName.value || `${name.replace(/[^a-zA-Z0-9._-]/g, '_')}_V_1-0-0_${templateChoice.value}_NN.md`
+    const filename =
+      fileName.value ||
+      `${name.replace(/[^a-zA-Z0-9._-]/g, '_')}_V_1-0-0_${templateChoice.value}_NN.md`
     const fileHandle = await handle.getFileHandle(filename, { create: true })
     if (!fileHandle.createWritable) throw new Error('File handle does not support writing')
     const writable = await fileHandle.createWritable()
@@ -431,15 +541,18 @@ async function finishWizard(): Promise<void> {
 function getStarterByTemplate(tpl: TemplateChoice) {
   const starters = [
     {
-      id: 'starter-business', templateName: 'business',
+      id: 'starter-business',
+      templateName: 'business',
       url: `${STARTER_BASE}Business_V_1-0-0_starter_NN.md`,
     },
     {
-      id: 'starter-procedures', templateName: 'procedures',
+      id: 'starter-procedures',
+      templateName: 'procedures',
       url: `${STARTER_BASE}Procedures_V_1-0-0_starter_NN.md`,
     },
     {
-      id: 'starter-organization', templateName: 'organization',
+      id: 'starter-organization',
+      templateName: 'organization',
       url: `${STARTER_BASE}Organization_V_1-0-0_starter_NN.md`,
     },
   ]
@@ -466,7 +579,7 @@ const stepTitles = [
   'Workspace contents',
   'Choose how to start',
   'Name your model',
-  'You\'re all set',
+  "You're all set",
 ]
 </script>
 
@@ -497,8 +610,8 @@ const stepTitles = [
       <div v-if="currentStep === 0" class="wizard__step">
         <h2 class="wizard__title">Before you start...</h2>
         <p class="wizard__desc">
-          Do you know what an iNNfo model looks like? We recommend exploring a completed model
-          first — it takes 2 minutes and helps you understand how everything works.
+          Do you know what an iNNfo model looks like? We recommend exploring a completed model first
+          — it takes 2 minutes and helps you understand how everything works.
         </p>
 
         <div class="wizard__samples">
@@ -518,10 +631,7 @@ const stepTitles = [
         </div>
 
         <div class="wizard__actions">
-          <button
-            class="wizard__btn wizard__btn--ghost"
-            @click="goToStep(1)"
-          >
+          <button class="wizard__btn wizard__btn--prominent" @click="goToStep(1)">
             I already know — create a model
           </button>
         </div>
@@ -538,9 +648,7 @@ const stepTitles = [
           processes, and data. Your models are plain Markdown files stored on YOUR computer —
           nothing is uploaded to the cloud.
         </p>
-        <p class="wizard__desc">
-          We'll guide you through the setup in just a few steps.
-        </p>
+        <p class="wizard__desc">We'll guide you through the setup in just a few steps.</p>
 
         <div class="wizard__actions">
           <button class="wizard__btn" @click="goToStep(2)">Get started &#8594;</button>
@@ -554,29 +662,32 @@ const stepTitles = [
         <div class="wizard__icon">📁</div>
         <h2 class="wizard__title">Where to save your models</h2>
         <p class="wizard__desc">
-          Your models are saved as plain Markdown files in a folder on your computer.
-          We recommend creating a folder in your Documents directory:
+          Your models are saved as plain Markdown files in a folder on your computer. We recommend
+          creating a folder in your Documents directory:
         </p>
         <code class="wizard__path">~/Documents/iNNfo/</code>
 
         <div v-if="folderHandle" class="wizard__folder-selected">
           <span class="wizard__folder-icon">&#128193;</span>
           <span>{{ folderPath }}</span>
-          <button class="wizard__btn-link" @click="folderHandle = null; folderPath = ''">Change</button>
+          <button
+            class="wizard__btn-link"
+            @click="clearFolderSelection"
+          >
+            Change
+          </button>
         </div>
 
         <div v-else class="wizard__folder-actions">
           <button class="wizard__btn" @click="openFolderPicker">Choose existing folder</button>
-          <button class="wizard__btn wizard__btn--outline" @click="createFolder">Create new folder</button>
+          <button class="wizard__btn wizard__btn--outline" @click="createFolder">
+            Create new folder
+          </button>
         </div>
 
         <div class="wizard__actions">
           <button class="wizard__btn wizard__btn--ghost" @click="goToStep(1)">Back</button>
-          <button
-            class="wizard__btn"
-            :disabled="!folderHandle"
-            @click="goToStep(3)"
-          >
+          <button class="wizard__btn" :disabled="!folderHandle" @click="goToStep(3)">
             Next &#8594;
           </button>
         </div>
@@ -605,7 +716,10 @@ const stepTitles = [
             <code>index.md</code>
             <span>Entry point that maps your model structure</span>
           </div>
-          <div class="wizard__file" v-if="templateChoice !== 'blank' && templateChoice !== 'sandbox'">
+          <div
+            class="wizard__file"
+            v-if="templateChoice !== 'blank' && templateChoice !== 'sandbox'"
+          >
             <code>{{ fileName || 'MyModel_V_1-0-0_template_NN.md' }}</code>
             <span>Your model file with semantic versioning and template type</span>
           </div>
@@ -618,8 +732,6 @@ const stepTitles = [
             <span>AI-powered transformation tools for import and export</span>
           </div>
         </div>
-
-
 
         <div class="wizard__actions">
           <button class="wizard__btn wizard__btn--ghost" @click="goToStep(2)">Back</button>
@@ -658,19 +770,10 @@ const stepTitles = [
 
         <div class="wizard__actions">
           <button class="wizard__btn wizard__btn--ghost" @click="goToStep(3)">Back</button>
-          <button
-            v-if="templateChoice !== 'sandbox'"
-            class="wizard__btn"
-            @click="goToStep(5)"
-          >
+          <button v-if="templateChoice !== 'sandbox'" class="wizard__btn" @click="goToStep(5)">
             Next &#8594;
           </button>
-          <button
-            v-else
-            class="wizard__btn"
-            :disabled="busy"
-            @click="finishWizard"
-          >
+          <button v-else class="wizard__btn" :disabled="busy" @click="finishWizard">
             {{ busy ? 'Loading...' : 'Open sandbox 🧪' }}
           </button>
         </div>
@@ -701,11 +804,7 @@ const stepTitles = [
 
         <div class="wizard__actions">
           <button class="wizard__btn wizard__btn--ghost" @click="goToStep(4)">Back</button>
-          <button
-            class="wizard__btn"
-            :disabled="busy"
-            @click="finishWizard"
-          >
+          <button class="wizard__btn" :disabled="busy" @click="finishWizard">
             {{ busy ? 'Creating...' : 'Create model &#128640;' }}
           </button>
         </div>
@@ -717,20 +816,22 @@ const stepTitles = [
       <div v-if="currentStep === 6" class="wizard__step">
         <div class="wizard__icon">🎉</div>
         <h2 class="wizard__title">You're all set!</h2>
-        <p class="wizard__desc">
-          You can edit your model in two ways:
-        </p>
+        <p class="wizard__desc">You can edit your model in two ways:</p>
 
         <div class="wizard__editors">
           <div class="wizard__editor-card">
             <strong>cogNNitive editor</strong>
-            <p>Open <code>cogNNitive.html</code> in your workspace folder to launch the app.
-            Use the full UI: tree navigation, graph view, matrices, and structured fields.</p>
+            <p>
+              Open <code>cogNNitive.html</code> in your workspace folder to launch the app. Use the
+              full UI: tree navigation, graph view, matrices, and structured fields.
+            </p>
           </div>
           <div class="wizard__editor-card">
             <strong>AI agent</strong>
-            <p>Edit via natural language with Claude Code, OpenCode, or anti-gravity.
-            In the editor, click <strong>"Use AI"</strong> in the top bar for setup instructions.</p>
+            <p>
+              Edit via natural language with Claude Code, OpenCode, or anti-gravity. In the editor,
+              click <strong>"Use AI"</strong> in the top bar for setup instructions.
+            </p>
           </div>
         </div>
 
@@ -739,11 +840,7 @@ const stepTitles = [
         </p>
 
         <div class="wizard__actions">
-          <button
-            class="wizard__btn"
-            :disabled="busy"
-            @click="finishWizard"
-          >
+          <button class="wizard__btn" :disabled="busy" @click="finishWizard">
             {{ busy ? 'Creating...' : 'Open my model &#128640;' }}
           </button>
         </div>
@@ -1159,6 +1256,21 @@ const stepTitles = [
 .wizard__btn--ghost:hover:not(:disabled) {
   color: #4d0e4e;
   background: #f5f5f5;
+}
+
+.wizard__btn--prominent {
+  background: #4d0e4e;
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.85rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(77, 14, 78, 0.3);
+}
+
+.wizard__btn--prominent:hover:not(:disabled) {
+  background: #3a0b3b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(77, 14, 78, 0.4);
 }
 
 .wizard__btn-link {

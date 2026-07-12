@@ -8,25 +8,32 @@
  */
 import { computed } from 'vue'
 
-const props = defineProps<{
-  modelValue: string
-  options?: string[]
-  fieldDefinition?: {
+const props = withDefaults(
+  defineProps<{
+    modelValue: string
     options?: string[]
-  }
-}>()
+    fieldDefinition?: {
+      options?: string[]
+      values?: string[]
+    }
+    readonly?: boolean
+  }>(),
+  { readonly: false },
+)
 
 defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
 const selectOptions = computed(() => {
-  return props.options ?? props.fieldDefinition?.options ?? []
+  return props.options ?? props.fieldDefinition?.options ?? props.fieldDefinition?.values ?? []
 })
 </script>
 
 <template>
+  <span v-if="readonly" class="field-select-readonly">{{ modelValue || '—' }}</span>
   <select
+    v-else
     class="field-select"
     :value="modelValue"
     @change="(e) => $emit('update:modelValue', (e.target as HTMLSelectElement).value)"

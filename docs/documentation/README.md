@@ -1,6 +1,6 @@
 # cogNNitive Documentation
 
-Welcome to the cogNNitive documentation. cogNNitive is the monorepo that powers the iNNv0 FORMAT ecosystem.
+Welcome to the cogNNitive documentation. cogNNitive is the monorepo (`@innv0/cognnitive`) that powers the iNNv0 **iNNfo** ecosystem.
 
 ## Quick Start
 
@@ -8,31 +8,26 @@ Welcome to the cogNNitive documentation. cogNNitive is the monorepo that powers 
 # Install dependencies
 npm install
 
-# Build format-core first (required by the editor)
-npm run build -w @innv0/format-core
+# Build innfo-core first (required by the editor)
+npm run build -w @innv0/innfo-core
 
-# Start the format-editor dev server
-npm run dev -w @innv0/format-editor
-
-# Or start the legacy launcher (during transition)
-npm run dev -w @innv0/launcher
+# Start the innfo-editor dev server
+npm run dev -w @innv0/innfo-editor
 ```
 
 ## Sections
 
-### [format-editor](format-editor)
-The unified Vue 3 workspace editor. Opens any folder via the File System Access API, runs a single recursive parse pass, and renders FILE and FOLDER mode models in one mixed tree. Features a sidebar tree navigator and metamodel-driven NodeForm.
+### [innfo-editor](innfo-editor)
+**iNNfo Modeler** — the unified Vue 3 workspace editor. Opens any folder via the File System Access API, runs a single recursive parse into one normalized node graph, validates automatically, and lets you edit, export, and import iNNfo models.
 
-### [Launcher](launcher) *(legacy)*
-The original drag-and-drop app that detected FILE vs FOLDER mode and routed to separate editors. Being consolidated into format-editor — its validation, history, and toast components are being ported over.
+### [innfo-core](innfo-core)
+`@innv0/innfo-core` is the framework-agnostic TypeScript library shared across the ecosystem: parser, model types, validator, IO drivers, and the spec-chain resolver.
 
-### [format-core](format-core)
-`@innv0/format-core` is a framework-agnostic TypeScript library providing:
-- Unified parser for FILE and FOLDER mode documents
-- Model types: Concept, Element, Field, Marker, Matrix, Relationship
-- Validator against template schemas
-- IO drivers for both modes
-- Parent-spec-chain resolver
+### [innfo-mcp](innfo-mcp)
+`@innv0/innfo-mcp` is an MCP server that exposes iNNfo models and operations to AI coding agents (Claude Code, OpenCode, and others) over stdio.
+
+### [traNNsform](trannsform)
+The export/import pipeline that turns iNNfo models into self-contained HTML visualizers, and turns source documents back into iNNfo models — driven by an external AI agent following the protocol in `traNNsform/AGENT.md`.
 
 ### [Ecosystem](ecosystem)
 The four-level specification chain:
@@ -40,15 +35,18 @@ The four-level specification chain:
 | Level | Name | Description |
 |-------|------|-------------|
 | 0 | **defiNNe** | Meta-specification: structure, SemVer, RFC 2119 |
-| 1 | **FORMAT** | Central spec with FILE and FOLDER modes |
-| 2 | **Templates** | business, procedures, kb |
-| 3 | **Models** | Concrete instances (Ghostbusters, TeamKB) |
+| 1 | **iNNfo** | Central spec — single-file `_NN.md` documents |
+| 2 | **Templates** | business, procedures, organization |
+| 3 | **Models** | Concrete instances (Ghostbusters, Code Review Process, Engineering Team) |
 
 ### [Specifications](specifications)
 Complete listing of all specs and models at every level, with links to source files.
 
 ### [Open Knowledge Format (OKF)](ecosystem?id=open-knowledge-format-compatibility)
-FORMAT is **100% compatible** with OKF v0.1 by Google Cloud Platform. Every FORMAT document is a valid OKF knowledge bundle.
+iNNfo is **compatible** with OKF v0.1 by Google Cloud Platform. Every iNNfo document is a valid OKF knowledge bundle.
 
 ### [Usage](usage)
-How to create FORMAT models, templates, and work with the ecosystem.
+How to create iNNfo models, use templates, and work with the ecosystem.
+
+### [iNNfo Agent (OpenCode)](opencode-innfo-agent)
+Connect the iNNfo MCP agent to OpenCode Desktop for natural-language model editing.

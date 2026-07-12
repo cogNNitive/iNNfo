@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import type { Component } from 'vue'
+import { Building2, ClipboardList, Users, FlaskConical, BookOpen } from 'lucide-vue-next'
 import { useRouter, useRoute } from 'vue-router'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import type { DirectoryHandleLike } from '../model/fs-types'
-import type { FolderHistoryEntry, SampleFolder } from '../shared/validation-types'
+import type { FolderHistoryEntry } from '../shared/validation-types'
 import {
   loadHistory,
   addToHistory,
@@ -26,26 +28,40 @@ const urlInput = ref('')
 const urlBusy = ref(false)
 const history = ref<FolderHistoryEntry[]>([])
 const reopenBusy = ref<string | null>(null)
-const showAdvanced = ref(false)
+interface ExampleModel {
+  id: string
+  name: string
+  description: string
+  templateName: string
+  url: string
+}
 
-const samples: SampleFolder[] = [
+const SAMPLE_BASE = 'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2'
+
+const samples: ExampleModel[] = [
   {
     id: 'sample-ghostbusters',
     name: 'Ghostbusters',
     description:
-      'FILE-mode business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations in a single _NN.md.',
-    mode: 'FILE',
-    path: 'specs/v0.2.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
-    items: 1,
+      'Business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations.',
+    templateName: 'business',
+    url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-1-2_business_NN.md`,
   },
   {
     id: 'sample-code-review',
     name: 'Code Review Process',
     description:
-      'FILE-mode procedure for PR-based code reviews: roles (Author, Reviewer, Maintainer), step-by-step workflow, tool bindings, and hotfix path.',
-    mode: 'FILE',
-    path: 'specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
-    items: 1,
+      'Procedure for PR-based code reviews: roles, step-by-step workflow, tool bindings, and hotfix path.',
+    templateName: 'procedures',
+    url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`,
+  },
+  {
+    id: 'sample-engineering-team',
+    name: 'Engineering Team',
+    description:
+      'Organization structure: positions, roles, members, reporting lines, and a skills matrix.',
+    templateName: 'organization',
+    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`,
   },
 ]
 
@@ -53,7 +69,7 @@ interface StarterTemplate {
   id: string
   name: string
   description: string
-  icon: string
+  icon: Component
   url: string
   templateName: string
   sampleUrl?: string
@@ -67,7 +83,7 @@ const starters: StarterTemplate[] = [
     id: 'starter-business',
     name: 'Business',
     description: 'Model your business idea: market, team, finance, operations, and strategy.',
-    icon: '🏢',
+    icon: Building2,
     url: `${starterBase}Business_V_1-0-0_starter_NN.md`,
     templateName: 'business',
     sampleUrl:
@@ -78,7 +94,7 @@ const starters: StarterTemplate[] = [
     id: 'starter-procedures',
     name: 'Procedures',
     description: 'Define step-by-step workflows, roles, artifacts, and decision points.',
-    icon: '📋',
+    icon: ClipboardList,
     url: `${starterBase}Procedures_V_1-0-0_starter_NN.md`,
     templateName: 'procedures',
     sampleUrl:
@@ -89,7 +105,7 @@ const starters: StarterTemplate[] = [
     id: 'starter-organization',
     name: 'Organization',
     description: 'Structure your organization: define positions, roles, members, and relations.',
-    icon: '👥',
+    icon: Users,
     url: `${starterBase}Organization_V_1-0-0_starter_NN.md`,
     templateName: 'organization',
     sampleUrl:
@@ -345,42 +361,6 @@ async function createFromStarter(starter: StarterTemplate): Promise<void> {
   }
 }
 
-/**
- * Tries to resolve a relative directory path from any previously stored handle
- * in the workspace history. This lets us navigate to a sample's parent folder
- * from a previously-opened workspace root without knowing the absolute path.
- *
- * Iterates each history handle and attempts to walk through the path segments
- * via getDirectoryHandle(). Returns the first handle that fully resolves, or
- * undefined if none of the stored handles contain the full path.
- */
-async function resolveAncestorHandle(
-  segments: string[],
-): Promise<FileSystemDirectoryHandle | undefined> {
-  for (const entry of history.value) {
-    try {
-      const handle = await getStoredHandle(entry.handleKey)
-      if (!handle) continue
-
-      // At runtime, stored handles are real FileSystemDirectoryHandle instances.
-      let dir: FileSystemDirectoryHandle = handle as unknown as FileSystemDirectoryHandle
-      for (const seg of segments) {
-        const next = await dir.getDirectoryHandle(seg).catch(() => null)
-        if (!next) {
-          dir = null!
-          break
-        }
-        dir = next
-      }
-      if (dir) return dir
-    } catch {
-      // Stale handle or permission issue — try the next history entry
-      continue
-    }
-  }
-  return undefined
-}
-
 /** Removes a single history entry. */
 async function removeEntry(handleKey: string): Promise<void> {
   await removeFromHistory(handleKey)
@@ -409,42 +389,22 @@ async function createFromStarterByName(templateName: string): Promise<void> {
 }
 
 /**
- * Handles a sample card click — resolves the sample's parent directory from
- * workspace history and opens the folder picker starting at that location so
- * the user can quickly select the sample folder without browsing from scratch.
+ * Opens an example model read-only by loading it from its raw URL into a
+ * virtual workspace. No folder is needed, so this works for first-time
+ * visitors who don't have the repository checked out locally.
  */
-async function onSampleClick(sample: SampleFolder): Promise<void> {
+async function onSampleClick(sample: ExampleModel): Promise<void> {
   error.value = null
-  const picker = (
-    window as unknown as {
-      showDirectoryPicker?: (opts?: { startIn?: FileSystemHandle }) => Promise<DirectoryHandleLike>
-    }
-  ).showDirectoryPicker
-  if (!picker) {
-    error.value = 'This browser does not support the File System Access API. Use Chrome or Edge.'
-    return
-  }
+  urlBusy.value = true
   try {
-    busy.value = true
-
-    // Resolve the sample's parent directory from stored workspace history
-    const parentSegments = sample.path.replace(/\/+$/, '').split('/').slice(0, -1)
-    const ancestorHandle =
-      parentSegments.length > 0 ? await resolveAncestorHandle(parentSegments) : undefined
-
-    const pickerOpts = ancestorHandle ? { startIn: ancestorHandle as FileSystemHandle } : undefined
-
-    const dirHandle = pickerOpts ? await picker.call(window, pickerOpts) : await picker.call(window)
-
-    await workspace.open(dirHandle)
-    await addToHistory(dirHandle.name, dirHandle)
+    await workspace.loadFromUrl(sample.url, sample.templateName)
+    await addToHistory(`${sample.name} Sample`, null as unknown as any)
     history.value = await loadHistory()
     router.push('/workspace')
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') return
     error.value = err instanceof Error ? err.message : String(err)
   } finally {
-    busy.value = false
+    urlBusy.value = false
   }
 }
 </script>
@@ -454,13 +414,58 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
     <!-- ── Setup Wizard (primary entry point) ── -->
     <SetupWizard />
 
-    <!-- ── Advanced / Quick access ── -->
-    <button class="home__toggle-advanced" @click="showAdvanced = !showAdvanced">
-      {{ showAdvanced ? 'Hide advanced options' : 'Open existing workspace or browse samples' }}
-      <span class="home__toggle-arrow">{{ showAdvanced ? '▲' : '▼' }}</span>
-    </button>
+    <!-- ── Recent folders ── -->
+    <section v-if="history.length" class="recent">
+      <div class="recent__header">
+        <h3 class="recent__title">Recent</h3>
+        <button class="recent__clear" @click="clearAllHistory">Clear</button>
+      </div>
+      <div class="recent__list">
+        <button
+          v-for="entry in history"
+          :key="entry.handleKey"
+          class="recent__item"
+          :disabled="reopenBusy === entry.handleKey"
+          @click="reopenFolder(entry)"
+        >
+          <svg
+            class="recent__icon"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path
+              d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
+            />
+          </svg>
+          <span class="recent__name">{{ entry.name }}</span>
+          <span class="recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
+          <span
+            class="recent__remove"
+            role="button"
+            tabindex="0"
+            @click.stop="removeEntry(entry.handleKey)"
+            @keydown.enter.prevent="removeEntry(entry.handleKey)"
+            @keydown.space.prevent="removeEntry(entry.handleKey)"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </section>
 
-    <template v-if="showAdvanced">
     <!-- ── Sandbox ── -->
     <section v-if="showSandbox" class="sandbox">
       <div class="sandbox__card">
@@ -476,7 +481,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
-        <div class="sandbox__icon">🧪</div>
+        <FlaskConical class="sandbox__icon" />
         <h2 class="sandbox__title">TRY THE SANDBOX</h2>
         <p class="sandbox__desc">
           Never used iNNfo before? This tiny example model teaches you how the editor works as you
@@ -515,57 +520,6 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
           </button>
         </div>
 
-        <!-- ── Recent folders ── -->
-        <section v-if="history.length" class="recent">
-          <div class="recent__header">
-            <h3 class="recent__title">Recent</h3>
-            <button class="recent__clear" @click="clearAllHistory">Clear</button>
-          </div>
-          <div class="recent__list">
-            <button
-              v-for="entry in history"
-              :key="entry.handleKey"
-              class="recent__item"
-              :disabled="reopenBusy === entry.handleKey"
-              @click="reopenFolder(entry)"
-            >
-              <svg
-                class="recent__icon"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
-                />
-              </svg>
-              <span class="recent__name">{{ entry.name }}</span>
-              <span class="recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
-              <span
-                class="recent__remove"
-                role="button"
-                tabindex="0"
-                @click.stop="removeEntry(entry.handleKey)"
-                @keydown.enter.prevent="removeEntry(entry.handleKey)"
-                @keydown.space.prevent="removeEntry(entry.handleKey)"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </span>
-            </button>
-          </div>
-        </section>
       </div>
 
       <!-- Right column: official templates -->
@@ -579,7 +533,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
         <div class="starters">
           <div v-for="s in starters" :key="s.id" class="starter-card">
             <div class="starter-card__head">
-              <span class="starter-card__icon">{{ s.icon }}</span>
+              <component :is="s.icon" class="starter-card__icon" />
               <strong class="starter-card__name">{{ s.name }}</strong>
             </div>
             <p class="starter-card__desc">{{ s.description }}</p>
@@ -625,145 +579,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
       </div>
 
       <p class="community__docs">
-        📖 Learn how to use existing templates or create your own in the
-        <a :href="docsUrl" target="_blank" rel="noopener noreferrer">documentation</a>.
-      </p>
-    </section>
-
-    <!-- ── Two-column layout: open existing / start new ── -->
-    <div class="cols">
-      <!-- Left column: open existing -->
-      <div class="col">
-        <h2 class="col__title">Open existing</h2>
-        <p class="col__desc">Select a folder that already contains iNNfo model files.</p>
-
-        <div class="open-action">
-          <button class="home__open" :disabled="busy" @click="openWorkspace">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              class="home__open-icon"
-            >
-              <path
-                d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
-              />
-            </svg>
-            {{ busy ? 'Opening\u2026' : 'Open folder\u2026' }}
-          </button>
-        </div>
-
-        <!-- ── Recent folders ── -->
-        <section v-if="history.length" class="recent">
-          <div class="recent__header">
-            <h3 class="recent__title">Recent</h3>
-            <button class="recent__clear" @click="clearAllHistory">Clear</button>
-          </div>
-          <div class="recent__list">
-            <button
-              v-for="entry in history"
-              :key="entry.handleKey"
-              class="recent__item"
-              :disabled="reopenBusy === entry.handleKey"
-              @click="reopenFolder(entry)"
-            >
-              <svg
-                class="recent__icon"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
-                />
-              </svg>
-              <span class="recent__name">{{ entry.name }}</span>
-              <span class="recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
-              <span
-                class="recent__remove"
-                role="button"
-                tabindex="0"
-                @click.stop="removeEntry(entry.handleKey)"
-                @keydown.enter.prevent="removeEntry(entry.handleKey)"
-                @keydown.space.prevent="removeEntry(entry.handleKey)"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </span>
-            </button>
-          </div>
-        </section>
-      </div>
-
-      <!-- Right column: official templates -->
-      <div class="col">
-        <h2 class="col__title">Official templates</h2>
-        <p class="col__desc">
-          Choose a template to start a new model. Preview a sample or create a full copy in a folder.
-        </p>
-
-        <div class="starters">
-          <div v-for="s in starters" :key="s.id" class="starter-card">
-            <div class="starter-card__head">
-              <span class="starter-card__icon">{{ s.icon }}</span>
-              <strong class="starter-card__name">{{ s.name }}</strong>
-            </div>
-            <p class="starter-card__desc">{{ s.description }}</p>
-            <div class="starter-card__actions">
-              <button
-                v-if="s.sampleUrl"
-                class="starter-card__sample"
-                :disabled="urlBusy"
-                @click="previewSample(s)"
-              >
-                {{ urlBusy ? 'Loading\u2026' : 'Preview Sample' }}
-              </button>
-              <button class="starter-card__create" :disabled="busy" @click="createFromStarter(s)">
-                {{ busy ? 'Creating\u2026' : 'Create' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Community templates ── -->
-    <section class="community">
-      <h3 class="community__title">Community templates</h3>
-      <p class="community__desc">
-        You can also load any iNNfo model from a URL — including templates created by the community
-        or your own custom models hosted anywhere.
-      </p>
-
-      <div class="community__url">
-        <input
-          v-model="urlInput"
-          type="url"
-          placeholder="https://example.com/model_V_1-0-0_business_NN.md"
-          class="community__input"
-          @keydown.enter="loadFromUrl"
-        />
-        <button class="community__btn" :disabled="urlBusy || !urlInput.trim()" @click="loadFromUrl">
-          {{ urlBusy ? 'Loading\u2026' : 'Load' }}
-        </button>
-      </div>
-
-      <p class="community__docs">
-        📖 Learn how to use existing templates or create your own in the
+        <BookOpen class="community__docs-icon" /> Learn how to use existing templates or create your own in the
         <a :href="docsUrl" target="_blank" rel="noopener noreferrer">documentation</a>.
       </p>
     </section>
@@ -776,7 +592,13 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
         mode.
       </p>
       <div class="samples__grid">
-        <button v-for="s in samples" :key="s.id" class="sample-card" @click="onSampleClick(s)">
+        <button
+          v-for="s in samples"
+          :key="s.id"
+          class="sample-card"
+          :disabled="urlBusy"
+          @click="onSampleClick(s)"
+        >
           <div class="sample-card__head">
             <svg
               class="sample-card__icon"
@@ -793,16 +615,14 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
             </svg>
             <div class="sample-card__info">
               <span class="sample-card__name">{{ s.name }}</span>
-              <span class="sample-card__meta">{{ s.mode }} &middot; {{ s.items }} items</span>
             </div>
-            <span class="sample-card__badge">{{ s.mode }}</span>
+            <span class="sample-card__badge">{{ s.templateName }}</span>
           </div>
           <p class="sample-card__desc">{{ s.description }}</p>
-          <span class="sample-card__action">Explore &rarr;</span>
+          <span class="sample-card__action">{{ urlBusy ? 'Loading…' : 'Explore →' }}</span>
         </button>
       </div>
     </section>
-    </template>
   </div>
 </template>
 
@@ -943,8 +763,10 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 }
 
 .starter-card__icon {
-  font-size: 1.2rem;
-  line-height: 1;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: #4d0e4e;
+  flex-shrink: 0;
 }
 
 .starter-card__name {
@@ -1015,7 +837,7 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 
 .recent {
   width: 100%;
-  margin-top: 0.25rem;
+  max-width: 860px;
 }
 
 .recent__header {
@@ -1331,8 +1153,9 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 }
 
 .sandbox__icon {
-  font-size: 2.5rem;
-  line-height: 1;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #4d0e4e;
 }
 
 .sandbox__title {
@@ -1373,32 +1196,6 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
 .sandbox__btn:disabled {
   opacity: 0.5;
   cursor: default;
-}
-
-/* ── Toggle advanced ── */
-
-.home__toggle-advanced {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  background: none;
-  border: none;
-  color: #888;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: system-ui, sans-serif;
-  padding: 0.5rem 1rem;
-  margin-top: 0.5rem;
-  transition: color 0.15s;
-}
-
-.home__toggle-advanced:hover {
-  color: #4d0e4e;
-}
-
-.home__toggle-arrow {
-  font-size: 10px;
 }
 
 /* ── Starter sample button ── */
@@ -1504,6 +1301,15 @@ async function onSampleClick(sample: SampleFolder): Promise<void> {
   font-size: 13px;
   color: #888;
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.community__docs-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .community__docs a {

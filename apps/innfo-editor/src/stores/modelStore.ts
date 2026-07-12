@@ -181,11 +181,11 @@ export const useModelStore = defineStore('model', {
         let specFilename = ''
         if (handle) {
           try {
-            const specsDir = await handle.getDirectoryHandle('specs')
+            const specsDir = await handle.getDirectoryHandle('.specs')
             const localResult = await findLocalSpecInHandle(specsDir, parentName)
             if (localResult) {
               text = localResult.content
-              specFilename = `specs/${localResult.filename}`
+              specFilename = `.specs/${localResult.filename}`
             }
           } catch (e) {
             // specs directory not found or error accessing it
@@ -197,13 +197,13 @@ export const useModelStore = defineStore('model', {
             const resp = await fetch(parentUrl)
             if (!resp.ok) continue
             text = await resp.text()
-            // Persist to specs/ when handle is available
+            // Persist to .specs/ when handle is available
             if (handle) {
-              specFilename = `specs/${parentName.replace(/\.md$/i, '')}${parentName.endsWith('_NN') ? '' : '_NN'}.md`
+              specFilename = `.specs/${parentName.replace(/\.md$/i, '')}${parentName.endsWith('_NN') ? '' : '_NN'}.md`
               try {
-                const specsDir = await handle.getDirectoryHandle('specs', { create: true })
+                const specsDir = await handle.getDirectoryHandle('.specs', { create: true })
                 const fileHandle = await specsDir.getFileHandle(
-                  specFilename.replace('specs/', ''),
+                  specFilename.replace('.specs/', ''),
                   { create: true },
                 )
                 if (fileHandle.createWritable) {
@@ -212,7 +212,7 @@ export const useModelStore = defineStore('model', {
                   await w.close()
                 }
               } catch (e) {
-                console.warn(`[template] Could not persist spec to specs/:`, e)
+                console.warn(`[template] Could not persist spec to .specs/:`, e)
               }
             }
           } catch (err) {
