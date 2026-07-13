@@ -1,1 +1,0 @@
-import{_ as s}from"./BlockSheet.vue_vue_type_script_setup_true_lang-CJe_5NcB.js";import{s as o}from"./GraphViewer.vue_vue_type_script_setup_true_lang-DxVBdTpC.js";var d=s((t,e)=>{let n;return e==="sandbox"&&(n=o("#i"+t)),(e==="sandbox"?o(n.nodes()[0].contentDocument.body):o("body")).select(`[id="${t}"]`)},"getDiagramElement");export{d as g};

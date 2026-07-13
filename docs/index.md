@@ -61,5 +61,6 @@ cogNNitive/
 └── docs/                 ← This website
 ```
 
+[Launch App](https://innv0.github.io/cogNNitive/app/)
 [About the project](https://innv0.github.io/cogNNitive/about)
 [Documentation](https://innv0.github.io/cogNNitive/documentation)
