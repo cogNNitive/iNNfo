@@ -32,10 +32,8 @@ const MetamatrixConfig = defineAsyncComponent(
   () => import('../components/editor/MetamatrixConfig.vue'),
 )
 const ModelInfoPanel = defineAsyncComponent(() => import('../components/editor/ModelInfoPanel.vue'))
-const AiWorkflowModal = defineAsyncComponent(() => import('../components/editor/AiWorkflowModal.vue'))
-const ExportNavigator = defineAsyncComponent(
-  () => import('../components/editor/ExportNavigator.vue'),
-)
+const AiWorkflowPanel = defineAsyncComponent(() => import('../components/editor/AiWorkflowPanel.vue'))
+
 
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
@@ -498,9 +496,22 @@ onUnmounted(() => {
           </div>
         </template>
 
-        <!-- ── Navigator View ── -->
-        <template v-else-if="uiStore.activeView === 'navigator'">
-          <ExportNavigator />
+        <!-- ── Exports View ── -->
+        <template v-else-if="uiStore.activeView === 'exports'">
+          <div class="flex-1 flex items-center justify-center p-4">
+            <div class="text-center max-w-sm">
+              <p class="text-sm text-slate-500 dark:text-slate-400">
+                Pick an export from the sidebar to open it in a new tab.
+              </p>
+            </div>
+          </div>
+        </template>
+
+        <!-- ── AI Workflow View ── -->
+        <template v-else-if="uiStore.activeView === 'ai-guide'">
+          <div class="flex-1 flex flex-col min-h-0">
+            <AiWorkflowPanel />
+          </div>
         </template>
       </main>
 
@@ -511,7 +522,6 @@ onUnmounted(() => {
 
       <ToastMessage />
       <SaveWorkspaceModal />
-      <AiWorkflowModal />
     </div>
   </div>
 </template>
