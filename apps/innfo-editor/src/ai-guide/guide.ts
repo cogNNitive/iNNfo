@@ -49,7 +49,7 @@ export function parseGuide(content: string): GuideData {
   let matrixHeaders: string[] = []
   const matrixRows: string[][] = []
   let title = 'Use cogNNitive with AI'
-  let subtitle = 'Edit your iNNfo models using OpenCode'
+  const subtitle = 'Edit your iNNfo models using OpenCode'
 
   let currentStep: Partial<WorkStep> | null = null
   let currentTool: Partial<ToolEntry> | null = null
