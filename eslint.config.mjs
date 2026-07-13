@@ -27,7 +27,9 @@ export default tseslint.config(
       // Published/built site output (bundled + minified) — not source.
       'docs/app/**',
       '**/*.min.js',
+      '**/*.bundle.js',
       'packages/innfo-mcp/bin/**',
+      'apps/innfo-editor/scratch_graph_test.mjs',
     ],
   },
 
