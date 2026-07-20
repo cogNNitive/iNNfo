@@ -1,11 +1,11 @@
-# Changelog
+﻿# Changelog
 
 ## v0.2.0 (2026-07-03)
 
 ### BREAKING: Renamed FORMAT → iNNfo
 - **Structural marker**: `_F` → `_NN` across all source code, tests, and documentation
 - **File suffix**: `_F.md` → `_NN.md` for all current-version files
-- **Packages**: `@innv0/format-core` → `@cogNNitive/cogNNitive-core`, `@innv0/format-mcp` → `@cogNNitive/cogNNitive-mcp`, `@innv0/format-editor` → `@cogNNitive/cogNNitive-editor`
+- **Packages**: `@cognnitive/format-core` → `@cognnitive/innfo-core`, `@cognnitive/format-mcp` → `@cognnitive/innfo-mcp`, `@cognnitive/format-editor` → `@cognnitive/innfo-editor`
 - **Version bump**: V_0-1-5 → V_0-2-0 (MAJOR, breaking)
 - Legacy `_F.md` files are no longer parsed by the V_0-2-0 parser
 
@@ -25,4 +25,4 @@ Initial release of the iNNv0 specification ecosystem.
 - TeamKB V_0-1-0_kb — Knowledge base model example
 
 ### Packages
-- @innv0/format-core v0.1.0 — TypeScript parser, resolver, validator
+- @cognnitive/format-core v0.1.0 — TypeScript parser, resolver, validator

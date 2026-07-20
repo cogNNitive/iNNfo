@@ -1,10 +1,10 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { marked } from 'marked'
 import { FileText, Pencil, Save, X, ArrowLeftFromLine } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
-import type { FileHandleLike } from '@cogNNitive/cogNNitive-core'
+import type { FileHandleLike } from '@cognnitive/innfo-core'
 
 const props = withDefaults(
   defineProps<{

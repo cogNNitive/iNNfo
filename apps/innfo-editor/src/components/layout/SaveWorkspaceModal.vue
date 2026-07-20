@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { FolderOpen, X, AlertTriangle } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
@@ -8,7 +8,7 @@ import { recursiveSerialize } from '../../model/recursiveSerializer'
 import { parseFormatFilename } from '../../utils/version'
 import { addToHistory } from '../../stores/historyStore'
 import { useToast } from '../../shared/useToast'
-import { serializeModel } from '@cogNNitive/cogNNitive-core'
+import { serializeModel } from '@cognnitive/innfo-core'
 import type { DirectoryHandleLike } from '../../model/fs-types'
 
 const workspaceStore = useWorkspaceStore()

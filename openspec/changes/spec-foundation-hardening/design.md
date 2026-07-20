@@ -1,4 +1,4 @@
-# Design: Spec Foundation Hardening
+﻿# Design: Spec Foundation Hardening
 
 ## Technical Approach
 
@@ -6,7 +6,7 @@ Two coordinated tracks. **Track A (documents):** rewrite the reference specifica
 (defiNNe L0, iNNfo L1, business/procedures L2) to a single canonical glossary and the
 agreed format conventions, publish them as **V_0-2-0**, and relocate superseded
 versions to `archived/`. **Track B (enforcement):** move identity/uniqueness/rename
-invariants into `@cogNNitive/cogNNitive-core` as the single engine, add a reference-integrity
+invariants into `@cognnitive/innfo-core` as the single engine, add a reference-integrity
 validator and a transactional rename operation, and make the editor UI and the MCP thin
 clients of that engine. The name is the single source of truth; slugs are derived and
 never persisted; there is no content hash.

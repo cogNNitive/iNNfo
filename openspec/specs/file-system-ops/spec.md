@@ -1,4 +1,4 @@
-# Delta: File System Operations — Directory Picker, Auto-Backup, URL Loading, Folder Init
+﻿# Delta: File System Operations â€” Directory Picker, Auto-Backup, URL Loading, Folder Init
 
 ## Purpose
 
@@ -48,7 +48,7 @@ Backups MUST only be created when the node is dirty (has unsaved changes). If th
 A new `useUrlDocLoader.ts` composable MUST load a FORMAT model file from a given URL. The composable MUST:
 
 - Fetch the URL content via `fetch()` with CORS handling
-- Parse the fetched Markdown with `parseModel` from `@innv0/format-core`
+- Parse the fetched Markdown with `parseModel` from `@cognnitive/format-core`
 - Insert the parsed nodes into `modelStore` as a virtual workspace (no File System handle)
 - Track the URL as the node's `source.path`
 - Handle errors gracefully: network errors, CORS failures, unparseable content
@@ -67,7 +67,7 @@ The `urlDocLoader` result MUST include `{ nodes, rootIds, sourceUrl, error }`.
 
 A folder initialization modal MUST allow creating a new workspace from scratch. The modal MUST present:
 
-- A template selector (dropdown of available templates — resolving from the peer model or documentation path)
+- A template selector (dropdown of available templates â€” resolving from the peer model or documentation path)
 - A model name input
 - An optional description textarea
 - A "Create" button that generates a minimal `_F.md` with the correct frontmatter structure and creates the directory structure
@@ -79,7 +79,7 @@ The generated file MUST include:
 - `title:` = the entered model name
 - Empty `concepts: []` and `markers: []`
 
-The modal MUST NOT create any files on disk — it MUST emit a `create` event with the frontmatter data for the caller to handle.
+The modal MUST NOT create any files on disk â€” it MUST emit a `create` event with the frontmatter data for the caller to handle.
 
 #### Scenario: Folder init generates frontmatter
 
@@ -111,9 +111,9 @@ The store MUST remain backward-compatible: existing `open(handle)` and `recoverH
 - THEN `saveActiveFile()` intercepts the save
 - AND triggers the guided `SaveWorkspaceModal` to pick a local folder
 
-### R-FS-06: Scope Guard — No FILE↔FOLDER Mode Conversion
+### R-FS-06: Scope Guard â€” No FILEâ†”FOLDER Mode Conversion
 
-This slice MUST NOT introduce FILE↔FOLDER mode conversion, index-block generation on save, or any changes to the serializer's file layout.
+This slice MUST NOT introduce FILEâ†”FOLDER mode conversion, index-block generation on save, or any changes to the serializer's file layout.
 
 #### Scenario: Mode conversion not introduced
 
@@ -146,7 +146,7 @@ When saving a virtual workspace, the system MUST execute a guided folder selecti
 
 ### R-FS-08: Workspace Init Downloads traNNsform
 
-`SetupWizard.initWorkspaceStructure()` MUST download traNNsform files from GitHub when creating a new workspace. The download MUST create `traNNsform/` (visible, no dot prefix) with subdirectories `input/`, `output/`, `templates/`, `snippets/` and fetch `AGENT.md`, `README.md`, templates, and snippets from the configured `TRANSFORM_BASE_URL`. The function MUST NOT overwrite an existing `traNNsform/` — it MUST check existence via `getDirectoryHandle('traNNsform')` without `create` first.
+`SetupWizard.initWorkspaceStructure()` MUST download traNNsform files from GitHub when creating a new workspace. The download MUST create `traNNsform/` (visible, no dot prefix) with subdirectories `input/`, `output/`, `templates/`, `snippets/` and fetch `AGENT.md`, `README.md`, templates, and snippets from the configured `TRANSFORM_BASE_URL`. The function MUST NOT overwrite an existing `traNNsform/` â€” it MUST check existence via `getDirectoryHandle('traNNsform')` without `create` first.
 
 (Previously: `ensureTemplates()` in `AIGuidePanel.onMounted()` created `.traNNsform/` and `outputs/` on panel open, without `input/` and with hidden/plural paths.)
 
@@ -195,7 +195,7 @@ When saving a virtual workspace, the system MUST execute a guided folder selecti
 
 (Previously: `AIGuidePanel.onMounted()` called `ensureTemplates()` that fetched all traNNsform files from GitHub.)
 
-#### Scenario: traNNsform exists — panel renders normally
+#### Scenario: traNNsform exists â€” panel renders normally
 
 - GIVEN `traNNsform/` exists in the workspace
 - WHEN AIGuidePanel mounts
@@ -203,7 +203,7 @@ When saving a virtual workspace, the system MUST execute a guided folder selecti
 - AND Import/Export sections render
 - AND no fetch occurs
 
-#### Scenario: traNNsform missing — panel shows guidance
+#### Scenario: traNNsform missing â€” panel shows guidance
 
 - GIVEN `traNNsform/` does not exist
 - WHEN AIGuidePanel mounts

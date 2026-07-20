@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup'
+﻿import { defineConfig } from 'tsup'
 
 export default defineConfig([
   {
@@ -9,7 +9,7 @@ export default defineConfig([
     clean: true,
     outDir: 'dist',
     dts: false,
-    noExternal: ['@cogNNitive/cogNNitive-core'],
+    noExternal: ['@cognnitive/innfo-core'],
     external: ['yaml'],
   },
   {

@@ -1,7 +1,7 @@
----
+﻿---
 type: "app"
 fields:
-  name: "@innv0/launcher"
+  name: "@cognnitive/launcher"
   path: "apps/launcher"
   framework: "Vue 3"
   build: "Vite"

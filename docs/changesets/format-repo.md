@@ -1,6 +1,6 @@
-# Architecture Decision: file-format
+﻿# Architecture Decision: file-format
 
-> **Status**: Executed â€” 2026-07-01
+> **Status**: Executed Ã¢â‚¬â€ 2026-07-01
 > **Supersedes**: Original FORMAT repo changeset
 
 The old `innV0/FORMAT` repo is archived. A new clean repo `innV0/file-format` was created as the canonical home for the FILE mode editor.
@@ -9,7 +9,7 @@ The old `innV0/FORMAT` repo is archived. A new clean repo `innV0/file-format` wa
 
 1. **Created** `https://github.com/innV0/file-format` as a fresh repo
 2. **Copied** source code from `innV0/FORMAT`, stripped of legacy files (agent configs, stale docs, master data)
-3. **Added** `@innv0/format-core: "file:../iNNfo/packages/format-core"` dependency
+3. **Added** `@cognnitive/format-core: "file:../iNNfo/packages/format-core"` dependency
 4. **Added** `scripts/bootstrap-specs.mjs` for CI setup
 5. **Pushed** as single initial commit `a5b824e`
 
@@ -18,7 +18,7 @@ The old `innV0/FORMAT` repo is archived. A new clean repo `innV0/file-format` wa
 | Aspect | Old FORMAT | file-format |
 |--------|-----------|-------------|
 | Name | FORMAT | file-format |
-| Dependency | No format-core | `@innv0/format-core` via `file:` |
+| Dependency | No format-core | `@cognnitive/format-core` via `file:` |
 | Spec source | Embedded in `docs/` | Consumed from iNNfo |
 | CI bootstrap | Manual clone | `npm run setup` |
 | Version | 1.0.0 | 0.1.0 |
@@ -26,14 +26,14 @@ The old `innV0/FORMAT` repo is archived. A new clean repo `innV0/file-format` wa
 ## Relationship
 
 ```
-file-format/         â† this repo (Vue 3 SPA)
-iNNfo/          â† sibling dir: specs + format-core library
+file-format/         Ã¢â€ Â this repo (Vue 3 SPA)
+iNNfo/          Ã¢â€ Â sibling dir: specs + format-core library
 ```
 
 ## Spec resolution chain
 
 ```
-FORMAT spec  â†’ iNNfo/specs/FORMAT_V_0-1-0_FORMAT.md
-Parent       â†’ iNNfo/specs/defiNNe_V_0-1-0_FORMAT.md
-Templates    â†’ iNNfo/specs/{business,procedures}_V_0-1-0_FORMAT.md
+FORMAT spec  Ã¢â€ â€™ iNNfo/specs/FORMAT_V_0-1-0_FORMAT.md
+Parent       Ã¢â€ â€™ iNNfo/specs/defiNNe_V_0-1-0_FORMAT.md
+Templates    Ã¢â€ â€™ iNNfo/specs/{business,procedures}_V_0-1-0_FORMAT.md
 ```

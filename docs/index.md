@@ -1,7 +1,7 @@
----
+﻿---
 title: iNNfo â€” the iNNfo modeling hub
 description: iNNfo is the hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, the innfo-core library, and an MCP server for AI agents.
-html_url: https://innv0.github.io/iNNfo/
+html_url: https://innfo.cognitive.com/
 generator: https://skills.innv0.com/innv0-web-design-guide
 ---
 
@@ -14,8 +14,8 @@ Model, edit, and validate iNNfo knowledge models. iNNfo is the hub for the iNNfo
 A monorepo that ties the iNNfo ecosystem together:
 
 - **iNNfo Modeler** (`innfo-editor`) â€” a Vue 3 workspace editor. Open any folder, parse it into one normalized model tree, edit nodes, and validate in the browser.
-- **@cogNNitive/cogNNitive-core** â€” the shared TypeScript parser, spec-chain resolver, and validator.
-- **@cogNNitive/cogNNitive-mcp** â€” an MCP server exposing iNNfo as semantic tools for AI agents.
+- **@cognnitive/innfo-core** â€” the shared TypeScript parser, spec-chain resolver, and validator.
+- **@cognnitive/innfo-mcp** â€” an MCP server exposing iNNfo as semantic tools for AI agents.
 - **Spec Chain** â€” defiNNe &rarr; iNNfo &rarr; Templates &rarr; Models.
 
 ## How the iNNfo Modeler works
@@ -61,6 +61,6 @@ iNNfo/
 â””â”€â”€ docs/                 â† This website
 ```
 
-[Launch App](https://innv0.github.io/iNNfo/app/)
-[About the project](https://innv0.github.io/iNNfo/about)
-[Documentation](https://innv0.github.io/iNNfo/documentation)
+[Launch App](https://innfo.cognitive.com/app/)
+[About the project](https://innfo.cognitive.com/about)
+[Documentation](https://innfo.cognitive.com/documentation)

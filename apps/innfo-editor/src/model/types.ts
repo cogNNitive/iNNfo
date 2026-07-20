@@ -1,5 +1,5 @@
-/**
- * App re-export — all graph-model types now live in @cogNNitive/cogNNitive-core.
+﻿/**
+ * App re-export — all graph-model types now live in @cognnitive/innfo-core.
  * This file preserves import paths for existing app code.
  */
 export type {
@@ -11,4 +11,4 @@ export type {
   MetamodelMarker,
   LocalMetamodel,
   ModelNode,
-} from '@cogNNitive/cogNNitive-core'
+} from '@cognnitive/innfo-core'

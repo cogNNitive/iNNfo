@@ -1,14 +1,14 @@
-# opencode-innfo-agent Specification
+﻿# opencode-innfo-agent Specification
 
 ## Purpose
 
-Enable natural-language creation, editing, and querying of iNNfo models through OpenCode Desktop, backed by an iNNfo-aware MCP server over `@cogNNitive/cogNNitive-core`. The capability is delivered as an MCP server (semantic iNNfo tools), a behavior-only rules file, and a committed thin iNNfo primary agent. The iNNfo specification and templates are consumed from a single, versioned, public source of truth — never duplicated into any skill, rule, prompt, or agent config. This slice covers the OpenCode Desktop frontend only; an embedded chat inside `apps/innfo-editor`, any OpenCode plugin, custom UI panels, and remote MCP hosting are explicitly out of scope.
+Enable natural-language creation, editing, and querying of iNNfo models through OpenCode Desktop, backed by an iNNfo-aware MCP server over `@cognnitive/innfo-core`. The capability is delivered as an MCP server (semantic iNNfo tools), a behavior-only rules file, and a committed thin iNNfo primary agent. The iNNfo specification and templates are consumed from a single, versioned, public source of truth — never duplicated into any skill, rule, prompt, or agent config. This slice covers the OpenCode Desktop frontend only; an embedded chat inside `apps/innfo-editor`, any OpenCode plugin, custom UI panels, and remote MCP hosting are explicitly out of scope.
 
 ## Requirements
 
 | # | Requirement | S | Description |
 |---|------------|---|-------------|
-| R1 | MCP Server Over innfo-core | MUST | A local stdio MCP server wraps `@cogNNitive/cogNNitive-core` and exposes the iNNfo tool surface; `opencode.json` registers `mcp.servers.innfo-mcp` at `packages/innfo-mcp/dist/server.js`. Starts as an OpenCode child process. |
+| R1 | MCP Server Over innfo-core | MUST | A local stdio MCP server wraps `@cognnitive/innfo-core` and exposes the iNNfo tool surface; `opencode.json` registers `mcp.servers.innfo-mcp` at `packages/innfo-mcp/dist/server.js`. Starts as an OpenCode child process. |
 | R2 | Semantic Tool Surface | MUST | Server exposes `list_models`, `read_model`, `validate_model`, `apply_change`, `get_spec`, `get_template`. Edits are intent ops, not raw line/byte edits. Template and model names follow `_NN.md` suffix. |
 | R3 | Deterministic Tool-Owned Validation | MUST | Validation is performed by `innfo-core` inside `validate_model`/`apply_change`; the model's validity is decided by the tool, never asserted by the LLM |
 | R4 | Self-Correction Loop | MUST | On an edit, the agent calls validation; if `errors[]` is non-empty it MUST fix and re-validate before reporting success |

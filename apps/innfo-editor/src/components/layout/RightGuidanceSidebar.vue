@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div
     data-testid="right-guidance-sidebar"
     class="relative flex shrink-0"
@@ -214,10 +214,10 @@ import { useMetamodelStore } from '../../stores/metamodelStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
-import { parseFrontmatter } from '@cogNNitive/cogNNitive-core'
+import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { parseFormatFilename } from '../../utils/version'
 import type { DocumentationEntry } from '../../utils/documentationParser'
-import type { MatrixDecl } from '@cogNNitive/cogNNitive-core'
+import type { MatrixDecl } from '@cognnitive/innfo-core'
 
 const props = defineProps<{
   conceptName?: string | null

@@ -1,6 +1,6 @@
-import { parseModel, serializeModel } from '@cogNNitive/cogNNitive-core'
+﻿import { parseModel, serializeModel } from '@cognnitive/innfo-core'
 import type { ModelNode } from './types'
-import type { ModelDriver } from '@cogNNitive/cogNNitive-core'
+import type { ModelDriver } from '@cognnitive/innfo-core'
 
 export interface WriteReport {
   path: string

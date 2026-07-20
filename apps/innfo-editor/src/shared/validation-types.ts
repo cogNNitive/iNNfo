@@ -1,8 +1,8 @@
-/**
- * App re-export — validation check types now live in @cogNNitive/cogNNitive-core.
+﻿/**
+ * App re-export — validation check types now live in @cognnitive/innfo-core.
  * This file preserves import paths for existing app code.
  */
-export type { ValidationCheck, ValidationSummary, ValidationReport } from '@cogNNitive/cogNNitive-core'
+export type { ValidationCheck, ValidationSummary, ValidationReport } from '@cognnitive/innfo-core'
 
 /** Recent folder entry stored in IndexedDB-backed history. */
 export interface FolderHistoryEntry {

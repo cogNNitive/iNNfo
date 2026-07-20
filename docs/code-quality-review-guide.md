@@ -1,4 +1,4 @@
-# GuÃ­a de RevisiÃ³n de Calidad de CÃ³digo â€” iNNfo
+﻿# GuÃ­a de RevisiÃ³n de Calidad de CÃ³digo â€” iNNfo
 
 > QuÃ© mirar en este proyecto para garantizar **coherencia**, **buena estructura**,
 > **aplicaciÃ³n de mejores prÃ¡cticas** y, en general, **buena calidad de cÃ³digo**.
@@ -53,9 +53,9 @@ Severidades:
 Lo que hace que el cÃ³digo parezca escrito por **una sola cabeza**, no por diez.
 
 - [ ] **Rutas de import unificadas.** Hoy conviven TRES formas de importar lo mismo:
-      `@cogNNitive/cogNNitive-core`, `../model/types` (shims de re-export) y el alias `@/*`
+      `@cognnitive/innfo-core`, `../model/types` (shims de re-export) y el alias `@/*`
       declarado en `tsconfig` pero casi sin uso. DecidÃ­ UNA convenciÃ³n por capa y aplicala:
-  - Tipos/lÃ³gica de dominio â†’ siempre desde `@cogNNitive/cogNNitive-core` (o el shim `@/model/*`),
+  - Tipos/lÃ³gica de dominio â†’ siempre desde `@cognnitive/innfo-core` (o el shim `@/model/*`),
     pero no ambos indistintamente.
   - Dentro del app â†’ alias `@/` en vez de `../../..`.
 - [ ] **PatrÃ³n de stores consistente.** Todos los stores usan Pinia Options API
@@ -151,7 +151,7 @@ AquÃ­ estÃ¡ el **mayor dÃ©ficit del repo hoy**:
       Ojo con CRLF en Windows en los golden (ya hubo fixes por `autocrlf`).
 - [ ] **`console.*` fuera de producciÃ³n.** Hay ~5 llamadas `console` en el app. DefinÃ­ una
       polÃ­tica: logger centralizado o eliminarlas antes de mergear.
-- [ ] **Dependencias sin fijar / duplicadas.** `@cogNNitive/cogNNitive-core` estÃ¡ referenciado como
+- [ ] **Dependencias sin fijar / duplicadas.** `@cognnitive/innfo-core` estÃ¡ referenciado como
       `"*"` en el app y `"^0.1.0"` en el mcp. UnificÃ¡ el criterio de versionado interno.
 
 ---
@@ -163,7 +163,7 @@ AquÃ­ estÃ¡ el **mayor dÃ©ficit del repo hoy**:
 | 1 | ALTO | Sin ESLint/Prettier/Biome en todo el monorepo | raÃ­z + todos los workspaces |
 | 2 | ALTO | Sin CI (`.github/workflows` inexistente) | raÃ­z |
 | 3 | MEDIO | Packages muertos `format-core`/`format-mcp` (solo `dist/`) | `packages/format-*` |
-| 4 | MEDIO | Tres estilos de import para el dominio (`@innv0/...`, `../model/*`, alias `@/` sin uso) | `apps/innfo-editor/src` |
+| 4 | MEDIO | Tres estilos de import para el dominio (`@cognnitive/...`, `../model/*`, alias `@/` sin uso) | `apps/innfo-editor/src` |
 | 5 | MEDIO | ~57 usos de `any`/`as any` erosionan `strict: true` | ~11 archivos del app |
 | 6 | MEDIO | SFCs > 500 lÃ­neas difÃ­ciles de mantener/testear | `DirectoryPickerModal`, `GraphViewer`, `MatricesGrid`, `BlockSheet` |
 | 7 | BAJO | Versionado interno inconsistente (`"*"` vs `"^0.1.0"`) | `package.json` del app y del mcp |

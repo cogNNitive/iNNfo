@@ -1,4 +1,4 @@
-# iNNfo â€” Full Site Content
+﻿# iNNfo â€” Full Site Content
 
 > The hub for the iNNfo ecosystem.
 > Generator: https://skills.innv0.com/innv0-web-design-guide
@@ -13,8 +13,8 @@ Model, edit, and validate iNNfo knowledge models. iNNfo is the hub for the iNNfo
 
 A monorepo that ties the iNNfo ecosystem together:
 - **iNNfo Modeler** (`innfo-editor`) â€” a Vue 3 workspace editor. Open any folder, parse it into one normalized model tree, edit, and validate in the browser.
-- **@cogNNitive/cogNNitive-core** â€” the shared TypeScript parser, resolver, validator.
-- **@cogNNitive/cogNNitive-mcp** â€” an MCP server exposing iNNfo as semantic tools for AI agents.
+- **@cognnitive/innfo-core** â€” the shared TypeScript parser, resolver, validator.
+- **@cognnitive/innfo-mcp** â€” an MCP server exposing iNNfo as semantic tools for AI agents.
 - **Spec Chain** â€” defiNNe -> iNNfo -> Templates -> Models.
 
 ## How the iNNfo Modeler works
@@ -63,13 +63,13 @@ npm workspaces monorepo â€” one editor app (`innfo-editor`), three packages
 
 ## App
 
-**iNNfo Modeler** (`@cogNNitive/cogNNitive-editor`) â€” a Vue 3 workspace editor with the File System Access API, a single recursive parse pass into one normalized model graph, block sheets / table view / metamodel-driven forms, automatic validation, a graph viewer, matrix grids, and IndexedDB handle persistence.
+**iNNfo Modeler** (`@cognnitive/innfo-editor`) â€” a Vue 3 workspace editor with the File System Access API, a single recursive parse pass into one normalized model graph, block sheets / table view / metamodel-driven forms, automatic validation, a graph viewer, matrix grids, and IndexedDB handle persistence.
 
 ## Packages
 
-- **@cogNNitive/cogNNitive-core** â€” framework-agnostic TypeScript library: the iNNfo parser, model types, IO drivers, validator, and parent-spec-chain resolver.
-- **@cogNNitive/cogNNitive-mcp** â€” an MCP server (stdio) wrapping innfo-core with seven semantic tools for AI agents.
-- **@innv0/pipeline-gates** â€” validation and integration gates for iNNfo model pipelines.
+- **@cognnitive/innfo-core** â€” framework-agnostic TypeScript library: the iNNfo parser, model types, IO drivers, validator, and parent-spec-chain resolver.
+- **@cognnitive/innfo-mcp** â€” an MCP server (stdio) wrapping innfo-core with seven semantic tools for AI agents.
+- **@cognnitive/pipeline-gates** â€” validation and integration gates for iNNfo model pipelines.
 
 ## Specifications
 

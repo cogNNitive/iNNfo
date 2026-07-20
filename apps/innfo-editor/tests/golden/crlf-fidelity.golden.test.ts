@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest'
+﻿import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { recursiveParse } from '../../src/model/recursiveParser'
 import { recursiveSerialize } from '../../src/model/recursiveSerializer'
 import { buildFakeTree } from '../helpers/fakeFs'
 import type { FakeTree } from '../helpers/fakeFs'
-import type { ParsedModel, ModelDriver } from '@cogNNitive/cogNNitive-core'
+import type { ParsedModel, ModelDriver } from '@cognnitive/innfo-core'
 import type { ModelNode } from '../../src/model/types'
 
 // The frozen fixtures under tests/fixtures/models/ are LF-only (git

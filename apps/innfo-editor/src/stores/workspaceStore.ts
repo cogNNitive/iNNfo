@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+﻿import { defineStore } from 'pinia'
 import { useModelStore } from './modelStore'
 import { useUiStore } from './uiStore'
 import { recursiveSerialize } from '../model/recursiveSerializer'
@@ -11,11 +11,11 @@ import {
 import { buildSpecificationUrl, buildSpecificationUrlFromMain } from '../utils/constants'
 import { IndexedDbWorkspaceRepository } from '../repositories/IndexedDbWorkspaceRepository'
 import type { IWorkspaceRepository } from '../repositories/IWorkspaceRepository'
-import { parseFrontmatter } from '@cogNNitive/cogNNitive-core'
+import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
 import type { DirectoryHandleLike } from '../model/fs-types'
 import type { BumpLevel } from '../utils/version'
-import type { ModelDriver } from '@cogNNitive/cogNNitive-core'
+import type { ModelDriver } from '@cognnitive/innfo-core'
 import type { ActiveView } from './uiStore'
 
 export type { DirectoryHandleLike }

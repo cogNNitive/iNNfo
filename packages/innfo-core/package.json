@@ -1,5 +1,5 @@
 {
-  "name": "@cogNNitive/cogNNitive-core",
+  "name": "@cognnitive/innfo-core",
   "version": "0.1.0",
   "description": "Core library for iNNfo parser, model, IO drivers, and validator",
   "type": "module",
@@ -9,7 +9,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "browser": "./dist/browser.js",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "files": [

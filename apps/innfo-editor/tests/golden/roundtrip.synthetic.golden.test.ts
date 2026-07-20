@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest'
+﻿import { describe, it, expect } from 'vitest'
 import { recursiveParse } from '../../src/model/recursiveParser'
 import { recursiveSerialize } from '../../src/model/recursiveSerializer'
 import { buildFakeTree } from '../helpers/fakeFs'
-import type { ParsedModel, ModelDriver } from '@cogNNitive/cogNNitive-core'
+import type { ParsedModel, ModelDriver } from '@cognnitive/innfo-core'
 import type { ModelNode } from '../../src/model/types'
 
 const fileDocMd = `---

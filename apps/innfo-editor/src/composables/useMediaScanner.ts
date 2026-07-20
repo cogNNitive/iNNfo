@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useMediaScanner — scans element folders for media files (images, video, audio,
  * markdown, pdf, etc.) and returns discovered assets for display in BlockPill,
  * NodeMedia, and BlockSheet.
@@ -9,7 +9,7 @@
  *
  * The scanner tries per-element first, then falls back to centralized.
  */
-import type { DirectoryHandleLike } from '@cogNNitive/cogNNitive-core'
+import type { DirectoryHandleLike } from '@cognnitive/innfo-core'
 
 export interface ScannedAsset {
   filename: string

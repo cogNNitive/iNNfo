@@ -1,12 +1,12 @@
-# Resolver Protocol — Test Plan
+﻿# Resolver Protocol â€” Test Plan
 
 > Date: 2026-07-01
 > Status: Draft
-> Purpose: Define test scenarios for the spec resolver protocol before implementing it in `@innv0/format-core`.
+> Purpose: Define test scenarios for the spec resolver protocol before implementing it in `@cognnitive/format-core`.
 
 ## Protocol Summary
 
-As defined in defiNNe §3, when an application loads a level 3 model:
+As defined in defiNNe Â§3, when an application loads a level 3 model:
 
 1. Read the model's `parent.url`
 2. If not cached in `specs/`, download from URL
@@ -17,27 +17,27 @@ As defined in defiNNe §3, when an application loads a level 3 model:
 
 ## Test Scenarios
 
-### T1: First Load — Full Chain Resolution
+### T1: First Load â€” Full Chain Resolution
 
 **Input**: Ghostbusters_V_0-3-0_business_FORMAT.md
 
 **Expected behavior**:
-1. Read `parent.url` → download `business_V_1-0-0_FORMAT.md`
+1. Read `parent.url` â†’ download `business_V_1-0-0_FORMAT.md`
 2. Save to `specs/business_V_1-0-0_FORMAT.md`
-3. Read its `parent.url` → download `FORMAT_V_0-2-0_FORMAT.md`
+3. Read its `parent.url` â†’ download `FORMAT_V_0-2-0_FORMAT.md`
 4. Save to `specs/FORMAT_V_0-2-0_FORMAT.md`
-5. Read its `parent.url` → download `defiNNe_V_0-2-0_FORMAT.md`
+5. Read its `parent.url` â†’ download `defiNNe_V_0-2-0_FORMAT.md`
 6. Save to `specs/defiNNe_V_0-2-0_FORMAT.md`
-7. No more `parent` → chain complete
+7. No more `parent` â†’ chain complete
 
 **Resulting structure**:
 ```
-📁 Ghostbusters_V_0-3-0_business/
-  📄 Ghostbusters_V_0-3-0_business_FORMAT.md
-  📁 specs/
-    📄 business_V_1-0-0_FORMAT.md
-    📄 FORMAT_V_0-2-0_FORMAT.md
-    📄 defiNNe_V_0-2-0_FORMAT.md
+ðŸ“ Ghostbusters_V_0-3-0_business/
+  ðŸ“„ Ghostbusters_V_0-3-0_business_FORMAT.md
+  ðŸ“ specs/
+    ðŸ“„ business_V_1-0-0_FORMAT.md
+    ðŸ“„ FORMAT_V_0-2-0_FORMAT.md
+    ðŸ“„ defiNNe_V_0-2-0_FORMAT.md
 ```
 
 **Verification**:
@@ -45,14 +45,14 @@ As defined in defiNNe §3, when an application loads a level 3 model:
 - Each cached file has correct `level` in frontmatter
 - Each cached file's `parent` matches the expected chain
 
-### T2: Second Load — Cache Hit
+### T2: Second Load â€” Cache Hit
 
 **Input**: Same model, same session
 
 **Expected behavior**:
-1. Check `specs/business_V_1-0-0_FORMAT.md` — exists → skip download
-2. Check `specs/FORMAT_V_0-2-0_FORMAT.md` — exists → skip download
-3. Check `specs/defiNNe_V_0-2-0_FORMAT.md` — exists → skip download
+1. Check `specs/business_V_1-0-0_FORMAT.md` â€” exists â†’ skip download
+2. Check `specs/FORMAT_V_0-2-0_FORMAT.md` â€” exists â†’ skip download
+3. Check `specs/defiNNe_V_0-2-0_FORMAT.md` â€” exists â†’ skip download
 
 **Verification**: Zero HTTP requests made.
 
@@ -85,9 +85,9 @@ As defined in defiNNe §3, when an application loads a level 3 model:
 **Input**: `specs/` contains `business_V_1-0-0_FORMAT.md` but not the others
 
 **Expected behavior**:
-1. `specs/business_V_1-0-0_FORMAT.md` found → skip download
-2. Read its `parent.url` → `specs/FORMAT_V_0-2-0_FORMAT.md` not found → download
-3. Read FORMAT's `parent.url` → `specs/defiNNe_V_0-2-0_FORMAT.md` not found → download
+1. `specs/business_V_1-0-0_FORMAT.md` found â†’ skip download
+2. Read its `parent.url` â†’ `specs/FORMAT_V_0-2-0_FORMAT.md` not found â†’ download
+3. Read FORMAT's `parent.url` â†’ `specs/defiNNe_V_0-2-0_FORMAT.md` not found â†’ download
 
 **Verification**: Only 2 HTTP requests made (for FORMAT and defiNNe).
 
@@ -121,16 +121,16 @@ As defined in defiNNe §3, when an application loads a level 3 model:
 **Input**: TeamKB_V_1-0-0_kb/ (FOLDER mode model)
 
 **Expected behavior**:
-1. Read root `_FORMAT.md` → `parent` = `kb_V_1-0-0`
-2. Download `kb_V_1-0-0_FORMAT.md` → save to `specs/`
+1. Read root `_FORMAT.md` â†’ `parent` = `kb_V_1-0-0`
+2. Download `kb_V_1-0-0_FORMAT.md` â†’ save to `specs/`
 3. Continue chain until level 0
-4. FOLDER mode element `_FORMAT.md` files do NOT have `parent` — they inherit from root
+4. FOLDER mode element `_FORMAT.md` files do NOT have `parent` â€” they inherit from root
 
 **Verification**:
 - Only the root `_FORMAT.md` triggers a chain resolution
 - Element `_FORMAT.md` files under `Alice/`, `MachineLearning/` etc. are NOT resolved independently
 
-## Implementation Notes for `@innv0/format-core`
+## Implementation Notes for `@cognnitive/format-core`
 
 The resolver should provide these functions in `io/`:
 

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="flex flex-col gap-3">
     <!-- Action Bar -->
     <div class="flex items-center justify-between">
@@ -159,7 +159,7 @@ import WidgetField from '../../shared/widgets/WidgetField.vue'
 
 const isEditMode = ref(false)
 import BlockPill from './BlockPill.vue'
-import type { FieldValue } from '@cogNNitive/cogNNitive-core'
+import type { FieldValue } from '@cognnitive/innfo-core'
 
 const props = defineProps<{
   nodeId: string

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * validate_model and apply_change tools.
  *
  * validate_model runs the innfo-core validator against the resolved template.
@@ -7,8 +7,8 @@
  */
 
 import { readFile, writeFile } from 'node:fs/promises'
-import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation } from '@cogNNitive/cogNNitive-core'
-import type { SpecDocument, ValidationError } from '@cogNNitive/cogNNitive-core'
+import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation } from '@cognnitive/innfo-core'
+import type { SpecDocument, ValidationError } from '@cognnitive/innfo-core'
 
 import { getTemplateFromUrl, findModelFile, deriveNameFromUrl } from './spec.js'
 

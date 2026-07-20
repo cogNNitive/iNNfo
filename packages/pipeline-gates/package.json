@@ -1,5 +1,5 @@
 {
-  "name": "@innv0/pipeline-gates",
+  "name": "@cognnitive/pipeline-gates",
   "version": "0.1.0",
   "description": "Validation and integration gates for iNNfo model pipelines",
   "type": "module",
@@ -25,6 +25,6 @@
     "vitest": "^1.6.0"
   },
   "dependencies": {
-    "@cogNNitive/cogNNitive": "file:../.."
+    "@cognnitive/innfo": "file:../.."
   }
 }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * list_models and read_model tools.
  *
  * list_models scans the root directory for iNNfo model files (`*_NN.md`)
@@ -9,8 +9,8 @@
 
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { listModels as coreListModels, parseModel } from '@cogNNitive/cogNNitive-core'
-import type { ModelInfo, ParsedModel } from '@cogNNitive/cogNNitive-core'
+import { listModels as coreListModels, parseModel } from '@cognnitive/innfo-core'
+import type { ModelInfo, ParsedModel } from '@cognnitive/innfo-core'
 
 /**
  * Scan a directory for iNNfo models.

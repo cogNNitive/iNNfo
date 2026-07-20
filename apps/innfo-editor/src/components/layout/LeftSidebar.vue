@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <aside
     data-testid="left-sidebar"
     class="relative border-r border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 flex flex-col overflow-y-auto shrink-0"
@@ -239,7 +239,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { ModelNode } from '../../model/types'
-import { parseModel } from '@cogNNitive/cogNNitive-core'
+import { parseModel } from '@cognnitive/innfo-core'
 import {
   ChevronsDown,
   ChevronsUp,

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * useConceptVisuals
  *
  * Resolves the visual identity (icon + color) for any model node from the
@@ -17,7 +17,7 @@
  * Color utility: `getHexColor(name)` mirrors GraphViewer.vue's palette.
  */
 
-import { parseFrontmatter } from '@cogNNitive/cogNNitive-core'
+import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { resolveEffectiveMetamodel } from '../model/metamodel'
 import { useModelStore } from '../stores/modelStore'
 import type { MetamodelConcept, ModelNode } from '../model/types'

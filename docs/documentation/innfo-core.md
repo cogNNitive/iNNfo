@@ -1,4 +1,4 @@
-# @cogNNitive/cogNNitive-core
+﻿# @cognnitive/innfo-core
 
 Framework-agnostic TypeScript library shared across the iNNv0 ecosystem. Used by both `innfo-editor` and `innfo-mcp`.
 
@@ -13,7 +13,7 @@ Framework-agnostic TypeScript library shared across the iNNv0 ecosystem. Used by
 ## API
 
 ```typescript
-import { parseFrontmatter, validateModel } from '@cogNNitive/cogNNitive-core'
+import { parseFrontmatter, validateModel } from '@cognnitive/innfo-core'
 
 // Parse YAML frontmatter from an iNNfo document
 const fm = parseFrontmatter(content)
@@ -27,8 +27,8 @@ const result = validateModel(model, template, formatSpec)
 
 ```bash
 # Build the library
-npm run build -w @cogNNitive/cogNNitive-core
+npm run build -w @cognnitive/innfo-core
 
 # Run tests
-npm run test -w @cogNNitive/cogNNitive-core
+npm run test -w @cognnitive/innfo-core
 ```

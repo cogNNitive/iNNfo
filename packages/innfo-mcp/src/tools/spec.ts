@@ -1,4 +1,4 @@
-/**
+﻿/**
  * get_spec and get_template tools.
  *
  * The MCP is publisher-agnostic: it never stores spec/template URLs or
@@ -12,8 +12,8 @@
 
 import { join, basename } from 'node:path'
 import { readFile, stat } from 'node:fs/promises'
-import { getTemplate as coreGetTemplate, getFormatSpec, parseFrontmatter } from '@cogNNitive/cogNNitive-core'
-import type { SpecDocument, SpecCache } from '@cogNNitive/cogNNitive-core'
+import { getTemplate as coreGetTemplate, getFormatSpec, parseFrontmatter } from '@cognnitive/innfo-core'
+import type { SpecDocument, SpecCache } from '@cognnitive/innfo-core'
 import { resolveParentChainNode } from './resolver-node.js'
 
 /**

@@ -1,12 +1,12 @@
-/**
+﻿/**
  * useUrlDocLoader — Load a FORMAT model document from a URL.
  *
- * Fetches the raw markdown, parses it with @cogNNitive/cogNNitive-core's `parseModel`,
+ * Fetches the raw markdown, parses it with @cognnitive/innfo-core's `parseModel`,
  * builds a minimal in-memory graph, and optionally populates modelStore.
  *
  * URL-loaded workspaces have NO File System handle — save is disabled.
  */
-import { normalizeSingleModel } from '@cogNNitive/cogNNitive-core'
+import { normalizeSingleModel } from '@cognnitive/innfo-core'
 import type { ModelNode } from '../model/types'
 import { useModelStore } from '../stores/modelStore'
 

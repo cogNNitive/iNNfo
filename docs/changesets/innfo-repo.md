@@ -1,6 +1,6 @@
-# Architecture Decision: folder-format
+﻿# Architecture Decision: folder-format
 
-> **Status**: Historical â€” FOLDER mode and `kb` template removed in V_0-2-0 (2026-07-11).
+> **Status**: Historical Ã¢â‚¬â€ FOLDER mode and `kb` template removed in V_0-2-0 (2026-07-11).
 > The `folder-format` repo and KB template are no longer part of the iNNfo ecosystem.
 > **Executed**: 2026-07-01
 > **Supersedes**: Original iNNfo repo changeset
@@ -11,7 +11,7 @@ The old `cogNNitive/cogNNitive` repo is archived. A new clean repo `innV0/folder
 
 1. **Created** `https://github.com/innV0/folder-format` as a fresh repo
 2. **Copied** source code from `cogNNitive/cogNNitive`, stripped of legacy files
-3. **Added** `@innv0/format-core: "file:../iNNfo/packages/format-core"` dependency
+3. **Added** `@cognnitive/format-core: "file:../iNNfo/packages/format-core"` dependency
 4. **Added** `scripts/bootstrap-specs.mjs` for CI setup
 5. **Pushed** as single initial commit `ecc1bd1`
 
@@ -21,21 +21,21 @@ The old `cogNNitive/cogNNitive` repo is archived. A new clean repo `innV0/folder
 |--------|-----------|---------------|
 | Name | iNNfo | folder-format |
 | Identity | Knowledge mgmt system | FORMAT FOLDER mode |
-| Dependency | No format-core | `@innv0/format-core` via `file:` |
+| Dependency | No format-core | `@cognnitive/format-core` via `file:` |
 | Spec source | Implicit | Consumed from iNNfo |
 | CI bootstrap | Manual | `npm run setup` |
 
 ## Relationship
 
 ```
-folder-format/       â† this repo (React SPA)
-iNNfo/          â† sibling dir: specs + format-core library
+folder-format/       Ã¢â€ Â this repo (React SPA)
+iNNfo/          Ã¢â€ Â sibling dir: specs + format-core library
 ```
 
 ## Spec resolution chain
 
 ```
-FORMAT spec  â†’ iNNfo/specs/FORMAT_V_0-1-0_FORMAT.md
-Parent       â†’ iNNfo/specs/defiNNe_V_0-1-0_FORMAT.md
-Template     â†’ iNNfo/specs/kb_V_0-1-0_FORMAT.md
+FORMAT spec  Ã¢â€ â€™ iNNfo/specs/FORMAT_V_0-1-0_FORMAT.md
+Parent       Ã¢â€ â€™ iNNfo/specs/defiNNe_V_0-1-0_FORMAT.md
+Template     Ã¢â€ â€™ iNNfo/specs/kb_V_0-1-0_FORMAT.md
 ```
