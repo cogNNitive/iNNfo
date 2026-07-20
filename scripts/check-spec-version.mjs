@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// check-spec-version.mjs — Scan the repo for files referencing a given spec version.
+// check-spec-version.mjs â€” Scan the repo for files referencing a given spec version.
 //
 // Usage:
 //   node scripts/check-spec-version.mjs --version V_0-1-2
@@ -13,28 +13,28 @@
 //   node scripts/check-spec-version.mjs --check-urls
 //
 // Modes:
-//   default         — Print all files referencing the given version
-//   --by-type       — Group results by category
-//   --check         — Exit code 1 if any references found (for CI/git hooks)
-//   --include-archives — Include archive/ and openspec/changes/archive/ in scan
-//   --inventory     — Print ALL spec versions found in the repo
-//   --check-urls    — Verify all hardcoded raw.githubusercontent.com URLs in source files point to existing files
+//   default         â€” Print all files referencing the given version
+//   --by-type       â€” Group results by category
+//   --check         â€” Exit code 1 if any references found (for CI/git hooks)
+//   --include-archives â€” Include archive/ and openspec/changes/archive/ in scan
+//   --inventory     â€” Print ALL spec versions found in the repo
+//   --check-urls    â€” Verify all hardcoded raw.githubusercontent.com URLs in source files point to existing files
 
 import { readFileSync, existsSync } from 'node:fs'
 import { readdirSync, statSync } from 'node:fs'
 import { join, relative, resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-// ── Config ──────────────────────────────────────────────────────────
+// â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const ARCHIVE_DIRS = new Set(['archive', 'node_modules', '.git', '.playwright-mcp', 'home-page'])
 const ACTIVE_IGNORE = new Set(['node_modules', '.git', '.playwright-mcp', 'home-page'])
 
 const FORMAT_VERSION_RE = /V_\d+-\d+-\d+/g
-const GITHUB_RAW_URL_RE = /https:\/\/raw\.githubusercontent\.com\/innV0\/cogNNitive\/(?:main|v[\d.]+)\/([^\s"')\]]+)/g
+const GITHUB_RAW_URL_RE = /https:\/\/raw\.githubusercontent\.com\/innV0\/iNNfo\/(?:main|v[\d.]+)\/([^\s"')\]]+)/g
 
-// ── File Collection ─────────────────────────────────────────────────
+// â”€â”€ File Collection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function collectFiles(dir, includeArchives) {
   const files = []
@@ -66,7 +66,7 @@ function collectFiles(dir, includeArchives) {
   return files
 }
 
-// ── Classification ──────────────────────────────────────────────────
+// â”€â”€ Classification â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function classifyFile(relPath) {
   const isFormatFile = relPath.endsWith('_FORMAT.md') || relPath.endsWith('_F.md')
@@ -106,7 +106,7 @@ function classifyFile(relPath) {
   return 'other'
 }
 
-// ── Frontmatter Scanning ────────────────────────────────────────────
+// â”€â”€ Frontmatter Scanning â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function parseFrontmatterBlocks(content) {
   // Extract YAML frontmatter between --- markers
@@ -142,14 +142,14 @@ function extractVersionRefs(relPath, content) {
       if (urlVer) refs.push({ field: 'spec_url', value: urlVer[0], location: relPath })
     }
 
-    // parent block — name
+    // parent block â€” name
     const pn = fm.match(/^parent:\s*\n\s+name:\s*['"]?([^\s'"]+_V_\d+-\d+-\d+[^\s'"]*)['"]?\s*$/m)
     if (pn) {
       const parentVer = pn[1].match(/V_\d+-\d+-\d+/)
       if (parentVer) refs.push({ field: 'parent.name', value: parentVer[0], location: relPath })
     }
 
-    // parent block — url
+    // parent block â€” url
     const pu = fm.match(/^parent:\s*\n(?:\s+.*\n)*?\s+url:\s*['"](https?:\/\/[^'"]+)['"]\s*$/m)
     if (pu) {
       const urlVer = pu[1].match(/V_\d+-\d+-\d+/)
@@ -160,7 +160,7 @@ function extractVersionRefs(relPath, content) {
   return refs
 }
 
-// ── Version Matching ────────────────────────────────────────────────
+// â”€â”€ Version Matching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -171,7 +171,7 @@ function contentContainsVersion(content, version) {
   return re.test(content)
 }
 
-// ── URL Integrity Check ─────────────────────────────────────────────
+// â”€â”€ URL Integrity Check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function scanUrls(files) {
   const broken = []
@@ -221,7 +221,7 @@ function printUrlResults(broken) {
   }
 }
 
-// ── Scan Logic ──────────────────────────────────────────────────────
+// â”€â”€ Scan Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function categorizeByVersion(files) {
   const versionMap = new Map()
@@ -276,7 +276,7 @@ function scanForVersion(version, files) {
   return results
 }
 
-// ── Output ──────────────────────────────────────────────────────────
+// â”€â”€ Output â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const CATEGORY_LABELS = {
   spec: '\u{1F4C4} Specs',
@@ -361,7 +361,7 @@ function printInventory(versionMap) {
   console.log(`  Total: ${sorted.length} unique spec versions across the repo.\n`)
 }
 
-// ── CLI ─────────────────────────────────────────────────────────────
+// â”€â”€ CLI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function parseArgs() {
   const args = process.argv.slice(2)

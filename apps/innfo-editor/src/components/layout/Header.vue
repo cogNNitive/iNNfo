@@ -102,8 +102,9 @@
     <div class="flex items-center gap-2.5 shrink-0">
       <!-- Use AI Button — opens unified modal -->
       <button
-        @click="uiStore.setShowAiModal(true)"
+        @click="uiStore.setActiveView('ai-guide')"
         class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition-all cursor-pointer bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 ring-purple-300 dark:ring-purple-700/50 hover:bg-purple-50 dark:hover:bg-purple-950/30"
+        :class="uiStore.activeView === 'ai-guide' ? 'bg-purple-50 dark:bg-purple-950/30 ring-purple-400 dark:ring-purple-600' : ''"
         title="Use AI to edit models"
       >
         <Sparkles class="w-3.5 h-3.5" />

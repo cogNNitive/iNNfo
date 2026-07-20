@@ -1,78 +1,21 @@
-# OpenCode iNNfo Agent
+# OpenCode iNNfo Agent (Legacy)
 
-The **iNNfo agent** lets you create, edit, and query iNNfo models through natural language in **OpenCode Desktop**.
+> **This agent definition has been superseded by the [actioNN bundle](/USE_AI).**
+>
+> Instead of maintaining agent rules in this repo, install the full actioNN suite â€” it includes the `nn-innfo` skill plus router, trannsform, workflow orchestrator, and more.
 
-## Prerequisites
+The agent definition files (`.opencode/agents/innfo.md`, `.opencode/rules/innfo.md`) have been removed from this repo. The MCP server registration remains for local development of `innfo-core` and `innfo-mcp`.
 
-- OpenCode Desktop v1.17.x (or later)
-- This project cloned and opened in OpenCode
-- The `innfo-mcp` MCP server built once: `npm run build --workspace=packages/innfo-mcp`
+## For AI interaction with iNNfo models
 
-## Selecting the iNNfo Agent
+See [USE_AI.md](/USE_AI) â€” install the actioNN bundle and the skills auto-load when you edit `_NN.md` files.
 
-1. Open the project in OpenCode Desktop
-2. Look for the **mode dropdown** in the chat/composer toolbar (shows the current agent name)
-3. Select **iNNfo** from the dropdown
-4. The seven iNNfo MCP tools are now available in your session
+## For local development of iNNfo
 
-If iNNfo doesn't appear in the dropdown, verify:
-- `opencode.json` exists at the project root
-- `.opencode/agents/innfo.md` exists with valid frontmatter
-- The MCP server was built (`packages/innfo-mcp/dist/server.js` exists)
+The MCP server is still available locally for testing:
 
-## Example Prompts
-
-```
-List all available iNNfo models
+```bash
+npm run build --workspace=packages/innfo-mcp
 ```
 
-```
-Read the Ghostbusters model and show me its structure
-```
-
-```
-Add a new concept "Innovation" with type "text" to the Ghostbusters model
-```
-
-```
-Add a new element "Cloud Infrastructure" to the Components concept with description "All cloud-hosted services"
-```
-
-```
-Validate the Ghostbusters model
-```
-
-```
-What does the business template define? Use get_template
-```
-
-## Architecture
-
-```
-OpenCode Desktop → innfo-mcp (MCP server) → @innv0/innfo-core
-                        ↓
-            Public iNNfo Spec URL (single source of truth)
-```
-
-- All iNNfo logic lives in the MCP server and `innfo-core`
-- Validation is **deterministic** — the validator decides validity, not the LLM
-- Specification content is never duplicated into rules/agent config — always fetched via `get_spec` / `get_template`
-- Edits are scoped to `models/` by permission configuration
-
-## Troubleshooting
-
-| Symptom | Solution |
-|---------|----------|
-| Agent not in dropdown | Check `opencode.json` and `.opencode/agents/innfo.md` exist |
-| MCP tools not loading | Rebuild with `npm run build --workspace=packages/innfo-mcp` |
-| Validation fails | Ensure the model's `parent_spec.url` is reachable (public GitHub URL) |
-| `apply_change` returns errors | The change was rejected by the validator — fix errors and retry |
-
-## Files Added by This Change
-
-| File | Purpose |
-|------|---------|
-| `packages/innfo-mcp/` | MCP server wrapping `@innv0/innfo-core` |
-| `opencode.json` | Registers `innfo-mcp` server and iNNfo agent |
-| `.opencode/agents/innfo.md` | iNNfo primary agent definition |
-| `.opencode/rules/innfo.md` | Behavior-only workflow rules |
+This registers `innfo-mcp` in OpenCode via `opencode.json`. No agent-level rules are needed â€” the actioNN provide those.

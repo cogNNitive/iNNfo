@@ -1,7 +1,10 @@
-# Pruebas Progresivas — format-editor
+# Pruebas — innfo-editor
 
-Este directorio contiene modelos FORMAT de prueba para verificar que la aplicación
-format-editor carga, parsea y muestra correctamente modelos en modo FILE y FOLDER.
+Este directorio contiene modelos iNNfo de prueba para verificar que la aplicación
+carga, parsea y muestra correctamente modelos.
+
+> **Nota**: El template `kb` y el modo `FOLDER` fueron eliminados en V_0-2-0.
+> Todos los modelos usan modo `centralized` (single-file, `_NN.md`).
 
 ## Estructura completa
 
@@ -10,43 +13,22 @@ tests/
 ├── README.md                        # ⬅ estás acá
 └── fixtures/
     ├── workspace-index.md           # Índice del workspace de prueba
-    ├── file-model_F.md         # Business FILE — progressive smoke test
-    ├── sample-model_F.md       # Business FILE — minimal shape validation
-    ├── folder-model/                # KB FOLDER — progressive smoke test
-    │   ├── _F.md
-    │   ├── Risk/
-    │   │   ├── tech-debt/_F.md
-    │   │   └── timeline/_F.md
-    │   ├── Feature/
-    │   │   ├── auth/_F.md
-    │   │   └── dashboard/_F.md
-    │   └── Meeting/_F.md
+    ├── file-model_F.md         # Business — smoke test
+    ├── sample-model_F.md       # Business — validación mínima
     ├── music-business/
-    │   └── music-business_F.md  # Business FILE — Vinyl Records Inc.
-    ├── music-production/
-    │   └── music-production_F.md # Procedures FILE — Song Recording
-    └── music-kb/                     # KB FOLDER
-        ├── _F.md
-        ├── Producer/_F.md
-        ├── Music Theory/_F.md
-        └── Mixing Guide/_F.md
+    │   └── music-business_F.md  # Business — Vinyl Records Inc.
+    └── music-production/
+        └── music-production_F.md # Procedures — Song Recording
 ```
 
 ## Propósito de cada modelo
 
-| Modelo | Template | Modo | Propósito |
-|--------|----------|------|-----------|
-| `file-model_F.md` | business_V_0-1-1 | FILE | Smoke test FILE — 5 elementos inline con Business summary, Problems, Value propositions |
-| `sample-model_F.md` | business_V_0-1-1 | FILE | Validación mínima de forma — 1 elemento Problem |
-| `folder-model/` | kb_V_0-1-1 | FOLDER | Smoke test FOLDER — Topics anidados (Risk, Feature) y sub-modelo Meeting |
-| `music-business/` | business_V_0-1-1 | FILE | Negocio discográfico completo — Problems, Value propositions, Channels, Stakeholders, matriz |
-| `music-production/` | procedures_V_0-1-1 | FILE | Workflow de grabación — Work steps, Artifacts, Tools, Roles, 3 matrices |
-| `music-kb/` | kb_V_0-1-1 | FOLDER | Base de conocimiento — Personas, Topics, References con graph_edges |
-
-> ⚠️ **Nota técnica**: El parser (`recursiveParse`) ignora archivos `_F.md`
-> al nivel raíz del workspace (línea 408 de recursiveParser.ts). Por eso los
-> modelos FILE se llaman `*_F.md` y no `*/_F.md`.
-> Los modelos FOLDER se representan como carpetas con `_F.md` adentro.
+| Modelo | Template | Propósito |
+|--------|----------|-----------|
+| `file-model_F.md` | business_V_0-1-1 | Smoke test — 5 elementos inline con Business summary, Problems, Value propositions |
+| `sample-model_F.md` | business_V_0-1-1 | Validación mínima de forma — 1 elemento Problem |
+| `music-business/` | business_V_0-1-1 | Negocio discográfico completo — Problems, Value propositions, Channels, Stakeholders, matriz |
+| `music-production/` | procedures_V_0-1-1 | Workflow de grabación — Work steps, Artifacts, Tools, Roles, 3 matrices |
 
 ---
 
@@ -112,22 +94,6 @@ npx vitest run tests/progressive-smoke.test.ts --reporter=verbose
 | Onboarding exprés | element | FILE | file-model |
 | Infraestructura optimizada | element | FILE | file-model |
 
-### Paso 3 — Modelo FOLDER (`folder-model/`)
-
-| Nodo | Tipo/Kind | StorageMode | Padre |
-|------|-----------|-------------|-------|
-| folder-model | root | FOLDER | null |
-| Risk | concept | FOLDER | folder-model |
-| tech-debt | element | FOLDER | Risk |
-| timeline | element | FOLDER | Risk |
-| Feature | concept | FOLDER | folder-model |
-| auth | element | FOLDER | Feature |
-| dashboard | element | FOLDER | Feature |
-| Meeting | root | FOLDER | folder-model |
-| Morning sync | element | FOLDER | Meeting |
-| End-of-day check | element | FOLDER | Meeting |
-| Sprint 12 | element | FOLDER | Meeting |
-
 ### Modelo — Music Business (`music-business/music-business_F.md`)
 
 | Nodo | Tipo/Kind | StorageMode | Padre |
@@ -175,15 +141,6 @@ npx vitest run tests/progressive-smoke.test.ts --reporter=verbose
 | work-tools matrix | matrix | FILE | music-production |
 | work-artifacts matrix | matrix | FILE | music-production |
 
-### Modelo — Music KB (`music-kb/`)
-
-| Nodo | Tipo/Kind | StorageMode | Padre |
-|------|-----------|-------------|-------|
-| music-kb | root | FOLDER | null |
-| Producer | element (Persona) | FOLDER | music-kb |
-| Music Theory | element (Topic) | FOLDER | music-kb |
-| Mixing Guide | element (Reference) | FOLDER | music-kb |
-
 ---
 
 ## Checklist de validación
@@ -191,17 +148,9 @@ npx vitest run tests/progressive-smoke.test.ts --reporter=verbose
 Al final de las pruebas deberías poder marcar todo esto:
 
 - [ ] **Paso 1**: La home carga sin errores
-- [ ] **Paso 2a**: Abro `tests/fixtures/` y veo `file-model` (FILE) en el árbol
-- [ ] **Paso 2b**: Los 5 elementos inline aparecen bajo file-model
-- [ ] **Paso 2c**: Cada elemento muestra su badge "FILE"
-- [ ] **Paso 3a**: `folder-model` aparece como root FOLDER
-- [ ] **Paso 3b**: Risk y Feature aparecen como concept (badge "concept")
-- [ ] **Paso 3c**: tech-debt y timeline son hijos de Risk (type: Topic)
-- [ ] **Paso 3d**: auth y dashboard son hijos de Feature (type: Topic)
-- [ ] **Paso 3e**: Meeting es un sub-FOLDER con Morning sync, End-of-day check, Sprint 12
-- [ ] **Paso 4**: Navego entre vistas (editor/graph/matrices/info)
-- [ ] **Paso 5**: Los tests automatizados pasan
-- [ ] **Music Business**: Aparece music-business (FILE) con 12 elementos y 1 matriz
-- [ ] **Music Production**: Aparece music-production (FILE) con 6 Work steps, 4 Artifacts, 4 Tools, 4 Roles, 3 matrices
-- [ ] **Music KB**: Aparece music-kb (FOLDER) con Producer (Persona), Music Theory (Topic), Mixing Guide (Reference)
-- [ ] **Music KB**: Music Theory tiene graph_edge hacia Producer
+- [ ] **Paso 2a**: Abro `tests/fixtures/` y veo los modelos en el árbol
+- [ ] **Paso 2b**: Los elementos inline aparecen bajo cada modelo
+- [ ] **Paso 3**: Navego entre vistas (editor/graph/matrices/info)
+- [ ] **Paso 4**: Los tests automatizados pasan
+- [ ] **Music Business**: Aparece music-business con 12 elementos y 1 matriz
+- [ ] **Music Production**: Aparece music-production con 6 Work steps, 4 Artifacts, 4 Tools, 4 Roles, 3 matrices

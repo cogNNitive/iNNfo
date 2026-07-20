@@ -72,7 +72,7 @@ export function serializeModel(model: ParsedModel): string {
   lines.push('')
   lines.push('> [!NOTE]')
   lines.push(
-    '> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter.',
+    '> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/iNNfo).',
   )
   lines.push('')
 

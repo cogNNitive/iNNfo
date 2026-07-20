@@ -1,4 +1,4 @@
-# AI Training & Grounding — https://skills.innv0.com/innv0-web-design-guide
+# AI Training & Grounding â€” https://skills.innv0.com/innv0-web-design-guide
 User-agent: GPTBot
 Allow: /
 
@@ -23,4 +23,4 @@ Allow: /
 # General crawlers
 User-agent: *
 Allow: /
-Sitemap: https://innv0.github.io/cogNNitive/sitemap.xml
+Sitemap: https://innv0.github.io/iNNfo/sitemap.xml

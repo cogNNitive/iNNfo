@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Define two standardized pipeline workflow files (`export.workflow.md` and `import.workflow.md`) in the `traNNsform/workflows/` directory. These replace the monolithic procedure instructions previously embedded in `AGENT.md` and provide a staged pipeline format consumable by both the `innv0-workflow-orchestrator` (for direct execution) and the AI agent (for manual step-by-step execution).
+Define two standardized pipeline workflow files (`export.workflow.md` and `import.workflow.md`) in the `traNNsform/workflows/` directory. These replace the monolithic procedure instructions previously embedded in `AGENT.md` and provide a staged pipeline format consumable by both the `nn-workflow-orchestrator` (for direct execution) and the AI agent (for manual step-by-step execution).
 
 ## Format Reference
 
-Workflow files follow the `_NN` pipeline format defined in `innv0-workflow-orchestrator/reference/workflow-format.md`. Each file defines a named pipeline with sequential stages. Each stage declares:
+Workflow files follow the `_NN` pipeline format defined in `nn-workflow-orchestrator/reference/workflow-format.md`. Each file defines a named pipeline with sequential stages. Each stage declares:
 
 - **Stage name** and step number
 - **Input** required (files, directories, context)
@@ -58,7 +58,7 @@ The `traNNsform/workflows/import.workflow.md` file MUST define a pipeline named 
 |---|-------|-------|--------|--------|
 | 1 | Scan input directory | `traNNsform/input/` | List all files with name, size, type | File list |
 | 2 | Classify file types | File list | Detect format (txt, md, csv, json, docx, pdf, xlsx) | Per-file processing strategy |
-| 3 | Normalize to Markdown | Source files | Run the appropriate normalizer: copy `txt`/`md`, convert `docx`/`pdf`/`xlsx` via the innv0-trannsform pipeline | Raw Markdown in `traNNsform/raw/` |
+| 3 | Normalize to Markdown | Source files | Run the appropriate normalizer: copy `txt`/`md`, convert `docx`/`pdf`/`xlsx` via the nn-trannsform pipeline | Raw Markdown in `traNNsform/raw/` |
 | 4 | Detect template and structure | Normalized Markdown | Analyze content to determine the most likely iNNfo template (business, procedures, catalog, etc.) | Template type + extracted concepts |
 | 5 | Generate iNNfo model | Template + extracted data | Apply template to produce a valid `_NN.md` file | Model file in workspace root |
 | 6 | Validate output model | Generated model file | Run `innfo-mcp validate` to check structural correctness | Validation report |
@@ -92,7 +92,7 @@ Both workflow files MUST:
 - Be valid `_NN` format documents with YAML frontmatter containing `specification_version`, `model_version`, `title`, and `parent_spec`
 - Include `# _NN index` entries for pipeline, stages, artifacts
 - Follow the stage schema defined in `workflow-format.md`
-- Be consumable by both `innv0-workflow-orchestrator` (direct-execution mode) and a human agent reading the file
+- Be consumable by both `nn-workflow-orchestrator` (direct-execution mode) and a human agent reading the file
 
 ### R-WD-04: SetupWizard Downloads Workflow Files
 
@@ -118,7 +118,7 @@ The SetupWizard's `initWorkspaceStructure()` MUST create the `traNNsform/workflo
 - [ ] `traNNsform/workflows/import.workflow.md` exists with 7 stages in pipeline format
 - [ ] Both files have valid `_NN` frontmatter with `specification_version`, `model_version`, `title`, `parent_spec`
 - [ ] SetupWizard creates `workflows/` dir and downloads both files on workspace init
-- [ ] Workflow format matches `innv0-workflow-orchestrator/reference/workflow-format.md`
+- [ ] Workflow format matches `nn-workflow-orchestrator/reference/workflow-format.md`
 - [ ] Agent can read and execute the pipelines manually step-by-step
 - [ ] Orchestrator can read and execute the pipelines in direct-execution mode
 

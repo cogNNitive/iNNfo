@@ -192,7 +192,7 @@ const modelFilename = computed(() => {
 })
 
 const step2Prompt = computed(() => {
-  return innfoPrompt(`I need to generate an HTML visualizer for ${modelFilename.value}. Load the innv0-innfo skill — it handles model operations and visualizer generation. Follow traNNsform/AGENT.md for the export procedure.`)
+  return innfoPrompt(`I need to generate an HTML visualizer for ${modelFilename.value}. Load the nn-innfo skill — it handles model operations and visualizer generation. Follow traNNsform/AGENT.md for the export procedure.`)
 })
 
 const currentModelVersion = computed(() => {

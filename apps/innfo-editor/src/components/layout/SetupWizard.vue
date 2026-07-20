@@ -45,7 +45,7 @@ const samples: SampleInfo[] = [
     templateLabel: 'Business',
     sampleName: 'Ghostbusters',
     description: 'Ghost-catching franchise: SWOT, risks, market, finance, legal, and operations.',
-    url: 'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
+    url: 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
   },
   {
     id: 'sample-procedures',
@@ -54,7 +54,7 @@ const samples: SampleInfo[] = [
     sampleName: 'Code Review Process',
     description:
       'PR-based code reviews: roles, step-by-step workflow, tool bindings, and hotfix path.',
-    url: 'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
+    url: 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
   },
   {
     id: 'sample-organization',
@@ -62,7 +62,7 @@ const samples: SampleInfo[] = [
     templateLabel: 'Organization',
     sampleName: 'Engineering Team',
     description: 'Team structure: positions, roles, members, reporting lines, and skills matrix.',
-    url: 'https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
+    url: 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
   },
 ]
 
@@ -139,7 +139,7 @@ async function openFolderPicker(): Promise<void> {
     return
   }
   try {
-    const handle = await picker.call(window, { id: 'cognnitive-workspace' })
+    const handle = await picker.call(window, { id: 'innfo-workspace' })
     folderHandle.value = handle
     folderPath.value = handle.name
   } catch (err) {
@@ -161,7 +161,7 @@ async function createFolder(): Promise<void> {
   }
   try {
     // Browser FS API creates a directory when the user picks a new folder
-    const handle = await picker.call(window, { id: 'cognnitive-create' })
+    const handle = await picker.call(window, { id: 'innfo-create' })
     folderHandle.value = handle
     folderPath.value = handle.name
   } catch (err) {
@@ -190,7 +190,7 @@ async function initWorkspaceStructure(
   const workflowsDir = await traNNsformDir.getDirectoryHandle('workflows', { create: true })
 
   // Download traNNsform files from GitHub (non-blocking — log on failure)
-  const TRANSFORM_BASE_URL = 'https://raw.githubusercontent.com/innV0/cogNNitive/main/traNNsform'
+  const TRANSFORM_BASE_URL = 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/traNNsform'
   const transformFiles = [
     { path: '', name: 'AGENT.md' },
     { path: '', name: 'README.md' },
@@ -221,14 +221,14 @@ async function initWorkspaceStructure(
         await w.close()
       }
     } catch (err) {
-      console.warn(`[cogNNitive] Failed to download traNNsform/${file.path}/${file.name}:`, err)
+      console.warn(`[iNNfo] Failed to download traNNsform/${file.path}/${file.name}:`, err)
     }
   }
 
   // Create README
   const readmeContent = `# ${modelName}
 
-This workspace was created by cogNNitive — a structured knowledge model editor for the iNNfo format.
+This workspace was created by iNNfo — a structured knowledge model editor for the iNNfo format.
 
 ## Workspace contents
 
@@ -236,7 +236,7 @@ This workspace was created by cogNNitive — a structured knowledge model editor
 |------|---------|
 | \`index.md\` | Entry point that maps your model structure |
 | \`${modelName}_V_1-0-0_${chosenTemplate}_NN.md\` | Your model file |
-| \`cogNNitive.html\` | Open this to launch the editor |
+| \`iNNfo.html\` | Open this to launch the editor |
 | \`AGENTS.md\` | AI agent entry point — skill and MCP setup instructions |
 | \`.specs/\` | Template specifications (auto-managed) |
 | \`.backups/\` | Auto-save history (auto-managed) |
@@ -244,7 +244,7 @@ This workspace was created by cogNNitive — a structured knowledge model editor
 
 ## How to edit
 
-- **cogNNitive editor**: Open \`cogNNitive.html\` in your browser
+- **iNNfo editor**: Open \`iNNfo.html\` in your browser
 - **AI agent**: Use Claude Code, OpenCode, or anti-gravity to edit via natural language.
   Your agent MUST read \`AGENTS.md\` first for skill and MCP setup instructions.
 `
@@ -262,17 +262,17 @@ Read this file FIRST when entering this workspace. It tells you how to configure
 
 ## Skills
 
-iNNv0 skills are maintained at \`https://github.com/innV0/iNNv0_skills\`. Clone the repo to get all skills:
+iNNv0 skills are maintained at \`https://github.com/cogNNitive/actioNN\`. Clone the repo to get all skills:
 
 \`\`\`
-git clone https://github.com/innV0/iNNv0_skills.git
+git clone https://github.com/cogNNitive/actioNN.git
 \`\`\`
 
 ### Installing skills per agent
 
 | Agent | Method |
 |-------|--------|
-| **OpenCode** | Clone the repo, then run the \`innv0-skills-manager\` skill to install via junctions. Skills are auto-discovered from \`~/.config/opencode/skills/\` and project \`.agents/skills/\`. |
+| **OpenCode** | Clone the repo, then run the \`nn-skills-manager\` skill to install via junctions. Skills are auto-discovered from \`~/.config/opencode/skills/\` and project \`.agents/skills/\`. |
 | **Claude Code** | Add the SKILL.md file paths to your \`CLAUDE.md\` or reference them in the MCP config. |
 | **anti-gravity** | Point your agent configuration to the cloned skill directory. |
 
@@ -280,12 +280,12 @@ git clone https://github.com/innV0/iNNv0_skills.git
 
 | Trigger | Skill |
 |---------|-------|
-| Editing \`*_NN.md\` files | \`innv0-innfo\` |
-| Document ingestion, normalization, transformation | \`innv0-trannsform\` |
-| Web design, branding, analytics | \`innv0-web-design-guide\` |
-| Workflow orchestration across skills | \`innv0-workflow-orchestrator\` |
-| Model cost and tier evaluation | \`innv0-opencode-model-router\` |
-| Skill lifecycle management | \`innv0-skills-manager\` |
+| Editing \`*_NN.md\` files | \`nn-innfo\` |
+| Document ingestion, normalization, transformation | \`nn-trannsform\` |
+| Web design, branding, analytics | \`nn-web-design-guide\` |
+| Workflow orchestration across skills | \`nn-workflow-orchestrator\` |
+| Model cost and tier evaluation | \`nn-opencode-model-router\` |
+| Skill lifecycle management | \`nn-skills-manager\` |
 
 ## MCP Servers
 
@@ -293,7 +293,7 @@ git clone https://github.com/innV0/iNNv0_skills.git
 
 The \`innfo-mcp\` server wraps \`@innv0/innfo-core\` and provides deterministic model validation, spec resolution, and semantic mutation tools. The agent MUST NOT hand-validate or hand-resolve spec chains when the MCP is available.
 
-**Recommended — zero-clone (CDN bootstrap).** You do NOT need to clone this repo. \`innfo-mcp\` is published as a single auto-updating bundle on the CDN (\`https://format.innv0.com/cdn/\`). Install the bootstrap script once — it downloads, caches, and auto-updates the bundle, with an offline fallback to the cached copy — then point your agent at it. Full per-platform steps and the script source: https://github.com/innV0/cogNNitive/blob/main/docs/mcp-setup.md
+**Recommended — zero-clone (CDN bootstrap).** You do NOT need to clone this repo. \`innfo-mcp\` is published as a single auto-updating bundle on the CDN (\`https://format.innv0.com/cdn/\`). Install the bootstrap script once — it downloads, caches, and auto-updates the bundle, with an offline fallback to the cached copy — then point your agent at it. Full per-platform steps and the script source: https://github.com/cogNNitive/iNNfo/blob/main/docs/mcp-setup.md
 
 - **macOS / Linux**: save \`bootstrap.sh\` into \`~/.cache/innfo-mcp/\` and run \`chmod +x\` on it.
 - **Windows**: save \`innfo-mcp.ps1\` and \`innfo-mcp.cmd\` into \`%USERPROFILE%\\.cache\\innfo-mcp\\\`.
@@ -329,7 +329,7 @@ Then configure the MCP per your agent, pointing \`command\` at the bootstrap scr
 
 On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`command\` instead of the \`bootstrap.sh\` path shown above (see \`docs/mcp-setup.md\` for the exact escaped JSON).
 
-**Alternative — clone-based (contributors).** If you already have \`cogNNitive\` cloned, build once with \`npm run build --prefix packages/innfo-mcp\` and point \`command\` at \`node <repo>/packages/innfo-mcp/dist/server.js\` instead. See \`docs/mcp-setup.md\`.
+**Alternative — clone-based (contributors).** If you already have \`iNNfo\` cloned, build once with \`npm run build --prefix packages/innfo-mcp\` and point \`command\` at \`node <repo>/packages/innfo-mcp/dist/server.js\` instead. See \`docs/mcp-setup.md\`.
 
 ## Workspace structure
 
@@ -348,14 +348,14 @@ On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`com
     await w.close()
   }
 
-  // Create cogNNitive.html — redirects to the deployed app URL
-  const appUrl = import.meta.env.BASE_URL || 'https://cognnitive.app'
+  // Create iNNfo.html — redirects to the deployed app URL
+  const appUrl = import.meta.env.BASE_URL || 'https://innfo.app'
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cogNNitive — ${modelName}</title>
+  <title>iNNfo — ${modelName}</title>
   <meta http-equiv="refresh" content="0; url=${appUrl}">
   <style>
     body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #fafafa; color: #333; text-align: center; }
@@ -363,10 +363,10 @@ On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`com
   </style>
 </head>
 <body>
-  <p>Redirecting to <a href="${appUrl}">cogNNitive</a> — if you are not redirected, click the link.</p>
+  <p>Redirecting to <a href="${appUrl}">iNNfo</a> — if you are not redirected, click the link.</p>
 </body>
 </html>`
-  const htmlFileHandle = await handle.getFileHandle('cogNNitive.html', { create: true })
+  const htmlFileHandle = await handle.getFileHandle('iNNfo.html', { create: true })
   if (htmlFileHandle.createWritable) {
     const w = await htmlFileHandle.createWritable()
     await w.write(htmlContent)
@@ -644,9 +644,9 @@ const stepTitles = [
       <!-- ════════════════════════════════════════ -->
       <div v-if="currentStep === 1" class="wizard__step">
         <div class="wizard__icon">🧠</div>
-        <h2 class="wizard__title">Welcome to cogNNitive</h2>
+        <h2 class="wizard__title">Welcome to iNNfo</h2>
         <p class="wizard__desc">
-          cogNNitive lets you create structured knowledge models — like a database for ideas,
+          iNNfo lets you create structured knowledge models — like a database for ideas,
           processes, and data. Your models are plain Markdown files stored on YOUR computer —
           nothing is uploaded to the cloud.
         </p>
@@ -702,12 +702,12 @@ const stepTitles = [
         <div class="wizard__icon">📄</div>
         <h2 class="wizard__title">Workspace contents</h2>
         <p class="wizard__desc">
-          cogNNitive will create these files and folders in your workspace:
+          iNNfo will create these files and folders in your workspace:
         </p>
 
         <div class="wizard__file-list">
           <div class="wizard__file">
-            <code>cogNNitive.html</code>
+            <code>iNNfo.html</code>
             <span>Bookmark to launch the application — redirects to the editor URL</span>
           </div>
           <div class="wizard__file">
@@ -822,9 +822,9 @@ const stepTitles = [
 
         <div class="wizard__editors">
           <div class="wizard__editor-card">
-            <strong>cogNNitive editor</strong>
+            <strong>iNNfo editor</strong>
             <p>
-              Open <code>cogNNitive.html</code> in your workspace folder to launch the app. Use the
+              Open <code>iNNfo.html</code> in your workspace folder to launch the app. Use the
               full UI: tree navigation, graph view, matrices, and structured fields.
             </p>
           </div>

@@ -1,10 +1,10 @@
-# Guía de Revisión de Calidad de Código — cogNNitive
+# GuÃ­a de RevisiÃ³n de Calidad de CÃ³digo â€” iNNfo
 
-> Qué mirar en este proyecto para garantizar **coherencia**, **buena estructura**,
-> **aplicación de mejores prácticas** y, en general, **buena calidad de código**.
+> QuÃ© mirar en este proyecto para garantizar **coherencia**, **buena estructura**,
+> **aplicaciÃ³n de mejores prÃ¡cticas** y, en general, **buena calidad de cÃ³digo**.
 >
 > Este documento sirve para dos cosas:
-> 1. Como **prompt reutilizable** para lanzar una revisión (humana o con un agente).
+> 1. Como **prompt reutilizable** para lanzar una revisiÃ³n (humana o con un agente).
 > 2. Como **checklist accionable** con hallazgos concretos ya detectados en el repo.
 
 ---
@@ -16,114 +16,114 @@ Monorepo con **npm workspaces** (`packages/*`, `apps/*`):
 | Paquete | Rol | Stack |
 |---|---|---|
 | `apps/innfo-editor` | Editor visual (UI) | Vue 3 (SFC, `<script setup>`), Vite 6, TS 5, Pinia, Vue Router, Tailwind 3, d3/dagre/mermaid, radix-vue |
-| `packages/innfo-core` | Librería de dominio: parser, modelo, drivers IO, validador | TS puro, compilado con `tsc`, sin dependencias de UI |
+| `packages/innfo-core` | LibrerÃ­a de dominio: parser, modelo, drivers IO, validador | TS puro, compilado con `tsc`, sin dependencias de UI |
 | `packages/innfo-mcp` | Servidor MCP sobre `innfo-core` (stdio) | TS + `@modelcontextprotocol/sdk`, build con `tsup` |
-| `packages/format-core`, `packages/format-mcp` | ⚠️ **Legacy** — solo `dist/`, sin `src/` ni `package.json` de origen | Copias viejas anteriores al rename a `innfo-*` |
+| `packages/format-core`, `packages/format-mcp` | âš ï¸ **Legacy** â€” solo `dist/`, sin `src/` ni `package.json` de origen | Copias viejas anteriores al rename a `innfo-*` |
 
 **Regla de oro de arquitectura**: `innfo-core` es el dominio y **no debe** conocer a Vue,
-Pinia ni al navegador (salvo los drivers `-browser` explícitos). La UI depende del core,
-nunca al revés.
+Pinia ni al navegador (salvo los drivers `-browser` explÃ­citos). La UI depende del core,
+nunca al revÃ©s.
 
 ---
 
-## 2. Cómo usar este archivo como prompt
+## 2. CÃ³mo usar este archivo como prompt
 
-Pegá esto (o delegá a un agente de revisión) apuntando a un diff o al repo completo:
+PegÃ¡ esto (o delegÃ¡ a un agente de revisiÃ³n) apuntando a un diff o al repo completo:
 
 ```
-Revisá este código de cogNNitive usando docs/code-quality-review-guide.md.
-Evaluá los cuatro ejes: coherencia, estructura, mejores prácticas y calidad general.
-Para cada hallazgo indicá: archivo:línea, severidad (CRÍTICO/ALTO/MEDIO/BAJO),
-el POR QUÉ técnico, y la corrección propuesta. No inventes problemas: si algo está
-bien, decilo. Priorizá los hallazgos por impacto real, no por cantidad.
+RevisÃ¡ este cÃ³digo de iNNfo usando docs/code-quality-review-guide.md.
+EvaluÃ¡ los cuatro ejes: coherencia, estructura, mejores prÃ¡cticas y calidad general.
+Para cada hallazgo indicÃ¡: archivo:lÃ­nea, severidad (CRÃTICO/ALTO/MEDIO/BAJO),
+el POR QUÃ‰ tÃ©cnico, y la correcciÃ³n propuesta. No inventes problemas: si algo estÃ¡
+bien, decilo. PriorizÃ¡ los hallazgos por impacto real, no por cantidad.
 ```
 
 Severidades:
-- **CRÍTICO**: rompe build/tests, bug de datos, vulnerabilidad, o viola el límite de capas.
+- **CRÃTICO**: rompe build/tests, bug de datos, vulnerabilidad, o viola el lÃ­mite de capas.
 - **ALTO**: deuda que va a doler pronto (SFC inmanejable, `any` en dominio, falta de tooling).
-- **MEDIO**: incoherencia de convención, duplicación evitable, test faltante.
-- **BAJO**: naming, formato, nit estético.
+- **MEDIO**: incoherencia de convenciÃ³n, duplicaciÃ³n evitable, test faltante.
+- **BAJO**: naming, formato, nit estÃ©tico.
 
 ---
 
-## 3. Ejes de revisión
+## 3. Ejes de revisiÃ³n
 
 ### 3.1 Coherencia
 
-Lo que hace que el código parezca escrito por **una sola cabeza**, no por diez.
+Lo que hace que el cÃ³digo parezca escrito por **una sola cabeza**, no por diez.
 
 - [ ] **Rutas de import unificadas.** Hoy conviven TRES formas de importar lo mismo:
       `@innv0/innfo-core`, `../model/types` (shims de re-export) y el alias `@/*`
-      declarado en `tsconfig` pero casi sin uso. Decidí UNA convención por capa y aplicala:
-  - Tipos/lógica de dominio → siempre desde `@innv0/innfo-core` (o el shim `@/model/*`),
+      declarado en `tsconfig` pero casi sin uso. DecidÃ­ UNA convenciÃ³n por capa y aplicala:
+  - Tipos/lÃ³gica de dominio â†’ siempre desde `@innv0/innfo-core` (o el shim `@/model/*`),
     pero no ambos indistintamente.
-  - Dentro del app → alias `@/` en vez de `../../..`.
-- [ ] **Patrón de stores consistente.** Todos los stores usan Pinia Options API
+  - Dentro del app â†’ alias `@/` en vez de `../../..`.
+- [ ] **PatrÃ³n de stores consistente.** Todos los stores usan Pinia Options API
       (`state/getters/actions`). Si aparece un store en Composition/Setup API, es una
-      incoherencia: elegí un estilo y mantenelo.
+      incoherencia: elegÃ­ un estilo y mantenelo.
 - [ ] **Naming coherente**: `useXxx` para composables, `XxxStore`/`useXxxStore` para
       stores, `XxxWidget.vue` para widgets del registry, `FieldXxx.vue` para campos.
-      Verificá que ningún archivo nuevo rompa la familia.
-- [ ] **Idioma coherente**: código, identificadores y comentarios en inglés;
-      documentación de proyecto (`AGENTS.md`, `openspec/`, esta guía) en español.
+      VerificÃ¡ que ningÃºn archivo nuevo rompa la familia.
+- [ ] **Idioma coherente**: cÃ³digo, identificadores y comentarios en inglÃ©s;
+      documentaciÃ³n de proyecto (`AGENTS.md`, `openspec/`, esta guÃ­a) en espaÃ±ol.
       No mezclar dentro de un mismo artefacto.
 - [ ] **Un solo origen de verdad para el modelo.** `src/model/*.ts` deben seguir siendo
-      shims finos de re-export; si empieza a aparecer lógica de dominio dentro del app,
+      shims finos de re-export; si empieza a aparecer lÃ³gica de dominio dentro del app,
       es una fuga de capa.
 
 ### 3.2 Estructura
 
-- [ ] **Límite de capas app ↔ core.** `innfo-core` no debe importar nada de `apps/`,
-      de Vue, de Pinia ni de `window`/DOM fuera de los drivers `-browser`. Buscá
+- [ ] **LÃ­mite de capas app â†” core.** `innfo-core` no debe importar nada de `apps/`,
+      de Vue, de Pinia ni de `window`/DOM fuera de los drivers `-browser`. BuscÃ¡
       violaciones: `rg "from '.*apps/" packages/innfo-core/src`.
-- [ ] **Tamaño de los SFC.** Componentes > ~300 líneas son señal de que hacen demasiado.
+- [ ] **TamaÃ±o de los SFC.** Componentes > ~300 lÃ­neas son seÃ±al de que hacen demasiado.
       Candidatos actuales a descomponer:
   - `components/layout/DirectoryPickerModal.vue` (~777)
   - `components/editor/GraphViewer.vue` (~669)
   - `components/editor/MatricesGrid.vue` (~561)
   - `components/editor/BlockSheet.vue` (~531)
-      Extraé lógica a **composables** (`composables/`) y sub-componentes presentacionales.
-- [ ] **Composables para lógica reutilizable/con estado**, no copiar-pegar `watch`/`ref`
-      entre componentes. Ya hay un buen patrón en `composables/` (useFileSystem,
-      useResizablePanel, etc.) — que las cosas nuevas lo respeten.
-- [ ] **Container vs. presentational.** Los componentes que tocan stores/IO deberían
-      orquestar; los que solo pintan deberían recibir props y emitir eventos. Un widget
-      de campo no debería importar un store directamente.
-- [ ] **Registry de widgets.** `shared/widgets/registry.ts` centraliza el mapeo tipo→widget.
-      Todo widget nuevo se registra ahí; que no haya `if (type === ...)` sueltos en otro lado.
-- [ ] **Sin código muerto.** Los packages `format-core`/`format-mcp` (solo `dist/`, sin
-      fuentes, no importados por código vivo) deberían eliminarse o archivarse. Peso muerto
+      ExtraÃ© lÃ³gica a **composables** (`composables/`) y sub-componentes presentacionales.
+- [ ] **Composables para lÃ³gica reutilizable/con estado**, no copiar-pegar `watch`/`ref`
+      entre componentes. Ya hay un buen patrÃ³n en `composables/` (useFileSystem,
+      useResizablePanel, etc.) â€” que las cosas nuevas lo respeten.
+- [ ] **Container vs. presentational.** Los componentes que tocan stores/IO deberÃ­an
+      orquestar; los que solo pintan deberÃ­an recibir props y emitir eventos. Un widget
+      de campo no deberÃ­a importar un store directamente.
+- [ ] **Registry de widgets.** `shared/widgets/registry.ts` centraliza el mapeo tipoâ†’widget.
+      Todo widget nuevo se registra ahÃ­; que no haya `if (type === ...)` sueltos en otro lado.
+- [ ] **Sin cÃ³digo muerto.** Los packages `format-core`/`format-mcp` (solo `dist/`, sin
+      fuentes, no importados por cÃ³digo vivo) deberÃ­an eliminarse o archivarse. Peso muerto
       que confunde a cualquiera que abra el repo.
 
-### 3.3 Mejores prácticas
+### 3.3 Mejores prÃ¡cticas
 
 **TypeScript**
-- [ ] `strict: true` ya está activo (bien). Protegé esa inversión: **minimizá `any`**.
+- [ ] `strict: true` ya estÃ¡ activo (bien). ProtegÃ© esa inversiÃ³n: **minimizÃ¡ `any`**.
       Hay ~57 usos de `any`/`as any` en ~11 archivos del app. Cada uno es un agujero en
-      el sistema de tipos. Reemplazá por tipos concretos, genéricos o `unknown` + narrowing.
-- [ ] Preferí `type`/`interface` explícitos sobre inferencia opaca en las fronteras
-      públicas (exports de `innfo-core`, props de componentes, payloads de acciones).
-- [ ] Nada de `@ts-ignore` sin comentario que justifique el porqué.
+      el sistema de tipos. ReemplazÃ¡ por tipos concretos, genÃ©ricos o `unknown` + narrowing.
+- [ ] PreferÃ­ `type`/`interface` explÃ­citos sobre inferencia opaca en las fronteras
+      pÃºblicas (exports de `innfo-core`, props de componentes, payloads de acciones).
+- [ ] Nada de `@ts-ignore` sin comentario que justifique el porquÃ©.
 
 **Vue 3**
 - [ ] `<script setup lang="ts">` en todos los SFC nuevos (consistencia).
 - [ ] Props tipadas con `defineProps<T>()`, emits con `defineEmits<T>()`.
 - [ ] No mutar props; no mutar estado de un store fuera de sus `actions`.
 - [ ] `computed` para derivados, no recalcular en el template.
-- [ ] Keys estables en `v-for` (no el índice cuando la lista se reordena — ojo con
-      árboles y matrices que sí se reordenan aquí).
+- [ ] Keys estables en `v-for` (no el Ã­ndice cuando la lista se reordena â€” ojo con
+      Ã¡rboles y matrices que sÃ­ se reordenan aquÃ­).
 - [ ] Limpiar `watch`/listeners/observers en `onUnmounted` (d3, mermaid, ResizeObserver).
 
 **Pinia**
 - [ ] El estado se muta **solo** dentro de `actions`. Getters puros, sin efectos.
 - [ ] Un store = una responsabilidad (model, metamodel, ui, history, workspace).
-      Si un store empieza a tocar responsabilidades de otro, revisá el límite.
+      Si un store empieza a tocar responsabilidades de otro, revisÃ¡ el lÃ­mite.
 
 **Seguridad**
 - [ ] Todo HTML/Markdown renderizado pasa por `dompurify`/`utils/sanitize.ts`.
-      Buscá `v-html` sin sanitizar: `rg "v-html" apps/innfo-editor/src`. Cada `v-html`
+      BuscÃ¡ `v-html` sin sanitizar: `rg "v-html" apps/innfo-editor/src`. Cada `v-html`
       debe consumir contenido ya saneado.
-- [ ] Nada de `eval`, `new Function`, ni interpolación de input de usuario en selectores/URLs.
+- [ ] Nada de `eval`, `new Function`, ni interpolaciÃ³n de input de usuario en selectores/URLs.
 
 **Accesibilidad / UX**
 - [ ] Modales (radix-vue) con foco atrapado, `Esc` para cerrar y roles ARIA correctos.
@@ -131,61 +131,61 @@ Lo que hace que el código parezca escrito por **una sola cabeza**, no por diez.
 
 ### 3.4 Calidad general y tooling
 
-Aquí está el **mayor déficit del repo hoy**:
+AquÃ­ estÃ¡ el **mayor dÃ©ficit del repo hoy**:
 
-- [ ] ⚠️ **No hay linter.** No existe ESLint/Biome en ningún workspace. Sin esto, las
-      convenciones de arriba no se pueden **garantizar**, solo esperar. Recomendación:
-      añadir **ESLint 9 (flat config) + `eslint-plugin-vue` + `typescript-eslint`**, o
-      **Biome** si se prioriza velocidad. Un script `lint` en la raíz y en cada workspace.
-- [ ] ⚠️ **No hay formateador.** Sin Prettier/Biome-format, el estilo depende de la
-      disciplina de cada uno. Añadir formateador con config compartida en la raíz.
-- [ ] ⚠️ **No hay CI.** No existe `.github/workflows/`. Todo (typecheck, tests, build)
-      corre solo en local y por buena voluntad. Añadir un workflow que en cada PR corra:
+- [ ] âš ï¸ **No hay linter.** No existe ESLint/Biome en ningÃºn workspace. Sin esto, las
+      convenciones de arriba no se pueden **garantizar**, solo esperar. RecomendaciÃ³n:
+      aÃ±adir **ESLint 9 (flat config) + `eslint-plugin-vue` + `typescript-eslint`**, o
+      **Biome** si se prioriza velocidad. Un script `lint` en la raÃ­z y en cada workspace.
+- [ ] âš ï¸ **No hay formateador.** Sin Prettier/Biome-format, el estilo depende de la
+      disciplina de cada uno. AÃ±adir formateador con config compartida en la raÃ­z.
+- [ ] âš ï¸ **No hay CI.** No existe `.github/workflows/`. Todo (typecheck, tests, build)
+      corre solo en local y por buena voluntad. AÃ±adir un workflow que en cada PR corra:
       `vue-tsc --noEmit`, `vitest run`, build de packages, y (cuando exista) `lint`.
       Los e2e de Playwright, al menos en un job nightly o manual.
-- [ ] **Typecheck real.** El build del app ya hace `vue-tsc --noEmit` (bien). Asegurá que
-      los packages también typecheckean en CI, no solo compilan.
+- [ ] **Typecheck real.** El build del app ya hace `vue-tsc --noEmit` (bien). AsegurÃ¡ que
+      los packages tambiÃ©n typecheckean en CI, no solo compilan.
 - [ ] **Tests.** Hay buena base: ~49 specs, golden tests (`tests/golden/`) y e2e Playwright.
-      Verificá que el código nuevo llegue con tests y que los golden se actualicen
-      **conscientemente**, no a ciegas (`--update` sin leer el diff es un anti-patrón).
+      VerificÃ¡ que el cÃ³digo nuevo llegue con tests y que los golden se actualicen
+      **conscientemente**, no a ciegas (`--update` sin leer el diff es un anti-patrÃ³n).
       Ojo con CRLF en Windows en los golden (ya hubo fixes por `autocrlf`).
-- [ ] **`console.*` fuera de producción.** Hay ~5 llamadas `console` en el app. Definí una
-      política: logger centralizado o eliminarlas antes de mergear.
-- [ ] **Dependencias sin fijar / duplicadas.** `@innv0/innfo-core` está referenciado como
-      `"*"` en el app y `"^0.1.0"` en el mcp. Unificá el criterio de versionado interno.
+- [ ] **`console.*` fuera de producciÃ³n.** Hay ~5 llamadas `console` en el app. DefinÃ­ una
+      polÃ­tica: logger centralizado o eliminarlas antes de mergear.
+- [ ] **Dependencias sin fijar / duplicadas.** `@innv0/innfo-core` estÃ¡ referenciado como
+      `"*"` en el app y `"^0.1.0"` en el mcp. UnificÃ¡ el criterio de versionado interno.
 
 ---
 
 ## 4. Hallazgos concretos ya detectados (para arrancar con ventaja)
 
-| # | Severidad | Hallazgo | Dónde |
+| # | Severidad | Hallazgo | DÃ³nde |
 |---|---|---|---|
-| 1 | ALTO | Sin ESLint/Prettier/Biome en todo el monorepo | raíz + todos los workspaces |
-| 2 | ALTO | Sin CI (`.github/workflows` inexistente) | raíz |
+| 1 | ALTO | Sin ESLint/Prettier/Biome en todo el monorepo | raÃ­z + todos los workspaces |
+| 2 | ALTO | Sin CI (`.github/workflows` inexistente) | raÃ­z |
 | 3 | MEDIO | Packages muertos `format-core`/`format-mcp` (solo `dist/`) | `packages/format-*` |
 | 4 | MEDIO | Tres estilos de import para el dominio (`@innv0/...`, `../model/*`, alias `@/` sin uso) | `apps/innfo-editor/src` |
 | 5 | MEDIO | ~57 usos de `any`/`as any` erosionan `strict: true` | ~11 archivos del app |
-| 6 | MEDIO | SFCs > 500 líneas difíciles de mantener/testear | `DirectoryPickerModal`, `GraphViewer`, `MatricesGrid`, `BlockSheet` |
+| 6 | MEDIO | SFCs > 500 lÃ­neas difÃ­ciles de mantener/testear | `DirectoryPickerModal`, `GraphViewer`, `MatricesGrid`, `BlockSheet` |
 | 7 | BAJO | Versionado interno inconsistente (`"*"` vs `"^0.1.0"`) | `package.json` del app y del mcp |
 
-**Lo que está BIEN y hay que preservar** (no romper al refactorizar):
+**Lo que estÃ¡ BIEN y hay que preservar** (no romper al refactorizar):
 - `tsconfig` con `strict: true`.
 - `src/model/*` como shims finos de re-export (fachada correcta que preserva rutas).
-- Stores Pinia consistentes y con JSDoc explicando decisiones de diseño.
-- Separación de dominio (`innfo-core`) sin dependencias de UI.
+- Stores Pinia consistentes y con JSDoc explicando decisiones de diseÃ±o.
+- SeparaciÃ³n de dominio (`innfo-core`) sin dependencias de UI.
 - Infraestructura de test completa: unit + golden + e2e.
 
 ---
 
-## 5. Checklist rápido antes de mergear
+## 5. Checklist rÃ¡pido antes de mergear
 
 ```
 [ ] vue-tsc --noEmit pasa sin errores
 [ ] vitest run verde (unit + golden)
 [ ] No hay v-html sin sanitizar nuevos
-[ ] No hay any nuevos en dominio (innfo-core) ni en fronteras públicas
-[ ] Ningún SFC nuevo supera ~300 líneas sin justificación
-[ ] Imports siguen la convención de su capa
-[ ] No quedan console.* ni código comentado
+[ ] No hay any nuevos en dominio (innfo-core) ni en fronteras pÃºblicas
+[ ] NingÃºn SFC nuevo supera ~300 lÃ­neas sin justificaciÃ³n
+[ ] Imports siguen la convenciÃ³n de su capa
+[ ] No quedan console.* ni cÃ³digo comentado
 [ ] Si toca el modelo, los golden se actualizaron leyendo el diff
 ```

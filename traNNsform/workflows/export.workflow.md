@@ -1,23 +1,23 @@
 ---
 spec_version: "V_0-2-0"
-spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.2.0/specs/level1/iNNfo_V_0-2-0_NN.md"
+spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.2.0/specs/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "workflow_V_1-0-0"
   url: ""
-type: "innv0-workflow"
+type: "nn-workflow"
 model_version: "V_1-0-0"
-title: "Export Visualizer — 7-stage pipeline"
+title: "Export Visualizer â€” 7-stage pipeline"
 description: "Scan iNNfo models, generate HTML visualizers with charts and matrices, and save to output/"
 ---
 
 # _F Workflow: traNNsform Export Pipeline
 
-Generate an HTML visualizer from an iNNfo model file. Follow stages sequentially — each stage depends on the previous.
+Generate an HTML visualizer from an iNNfo model file. Follow stages sequentially â€” each stage depends on the previous.
 
-**⚠️ PRE-FLIGHT**: Before starting, ensure innfo-mcp tools are available (run MCP Activation Protocol via innv0-innfo skill). Reference: `docs/mcp-setup.md`.
+**âš ï¸ PRE-FLIGHT**: Before starting, ensure innfo-mcp tools are available (run MCP Activation Protocol via nn-innfo skill). Reference: `docs/mcp-setup.md`.
 
-**Rule**: Do NOT invent data not in the source model. Every claim must reference its source section. Do NOT offer unrelated output formats (Mustache, JSON, etc.) — only HTML visualizers.
+**Rule**: Do NOT invent data not in the source model. Every claim must reference its source section. Do NOT offer unrelated output formats (Mustache, JSON, etc.) â€” only HTML visualizers.
 
 ---
 
@@ -45,18 +45,18 @@ Generate an HTML visualizer from an iNNfo model file. Follow stages sequentially
 **Steps**:
 1. Detect template type from filename (e.g., `_business_NN.md`, `_procedures_NN.md`) or from `parent_spec.name` in the model's frontmatter YAML
 2. Map to the matching file in `templates/`:
-   - `business` → `templates/business.md`
-   - `procedures` → `templates/procedures.md`
-   - `catalog` → `templates/catalog.md`
-   - `organization` → `templates/organization.md`
-   - No match → `templates/_generic.md`
+   - `business` â†’ `templates/business.md`
+   - `procedures` â†’ `templates/procedures.md`
+   - `catalog` â†’ `templates/catalog.md`
+   - `organization` â†’ `templates/organization.md`
+   - No match â†’ `templates/_generic.md`
 3. Read `README.md` for the full transformation protocol (HTML base structure, CSS patterns)
 4. Read `snippets/chart-patterns.md` for reusable Chart.js configurations
 
 **Expected output**: Template content loaded + protocol understood
 
 ```yaml
-skill: "innv0-trannsform"
+skill: "nn-trannsform"
 template: "<detected-template>"
 input: "<model-file-path>"
 output: "traNNsform/output/"
@@ -71,7 +71,7 @@ output: "traNNsform/output/"
 **Goal**: Produce a complete HTML file following the template structure.
 
 **Steps**:
-1. Parse the model's `_NN` sections — extract concepts, elements, fields, matrices
+1. Parse the model's `_NN` sections â€” extract concepts, elements, fields, matrices
 2. Apply the matching template structure:
    - Header with gradient (`--primary`), title, source-badge linking to the model file
    - Sticky nav tabs for section navigation
@@ -103,7 +103,7 @@ output: "traNNsform/output/"
    ```
 5. Name the file exactly: `<ModelBaseName>_V<version>_<templateName>_visualizer.html`
    - Example: `Ghostbusters_V0-1-2_business_visualizer.html`
-   - **This naming is required** — the Export Navigator depends on it
+   - **This naming is required** â€” the Export Navigator depends on it
 
 **Expected output**: Raw HTML string with all model data rendered
 
@@ -123,14 +123,14 @@ output: "traNNsform/output/"
    - Add metric cards using `.metrics` grid (`repeat(auto-fill, minmax(160px, 1fr))`)
 3. Use Chart.js 4.4.7 from CDN with configurations from `snippets/chart-patterns.md`
 4. Layout rules:
-   - Charts row: `grid-template-columns: 1fr 1fr` → `1fr` on mobile
+   - Charts row: `grid-template-columns: 1fr 1fr` â†’ `1fr` on mobile
    - Cards grid: `grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))`
    - Tables: wrap in `overflow-x: auto` for horizontal scroll
 
 **Expected output**: HTML with rendered charts, matrices, and metric cards
 
 ```yaml
-skill: "innv0-trannsform"
+skill: "nn-trannsform"
 template: "snippets/chart-patterns.md"
 input: "<model-file-path>"
 output: "<in-memory HTML>"
@@ -152,7 +152,7 @@ output: "<in-memory HTML>"
 **Expected output**: File saved at `traNNsform/output/<ModelBaseName>_V<version>_<templateName>_visualizer.html`
 
 ```yaml
-skill: "innv0-trannsform"
+skill: "nn-trannsform"
 template: ""
 input: "<in-memory HTML>"
 output: "traNNsform/output/<filename>.html"
@@ -183,8 +183,8 @@ output: "traNNsform/output/<filename>.html"
 **Goal**: Confirm the result to the user and offer the post-generation cycle.
 
 **Steps**:
-1. Report the saved file path: ✅ `traNNsform/output/<filename>.html`
-2. Ask: "Open the Navigator view in cogNNitive to see your export."
+1. Report the saved file path: âœ… `traNNsform/output/<filename>.html`
+2. Ask: "Open the Navigator view in iNNfo to see your export."
 3. Ask: "Would you like to modify anything? (layout, charts, sections, colors...)"
 4. **If user requests changes**:
    a. Apply modifications to the HTML
@@ -205,24 +205,24 @@ output: "confirmed"
 
 ## Stage-Skill Matrix
 
-| Stage \ Skill | innv0-trannsform |
+| Stage \ Skill | nn-trannsform |
 | :--- | :---: |
-| 1 — Scan Workspace | X |
-| 2 — Read Template | X |
-| 3 — Generate HTML | X |
-| 4 — Charts & Matrices | X |
-| 5 — Write Output | X |
-| 6 — Embed Assets | X |
-| 7 — Confirm | |
+| 1 â€” Scan Workspace | X |
+| 2 â€” Read Template | X |
+| 3 â€” Generate HTML | X |
+| 4 â€” Charts & Matrices | X |
+| 5 â€” Write Output | X |
+| 6 â€” Embed Assets | X |
+| 7 â€” Confirm | |
 
 ## Stage-Artifact Matrix
 
 | Stage \ Artifact | Model File | Template | HTML String | Saved File |
 | :--- | :---: | :---: | :---: | :---: |
-| 1 — Scan Workspace | input | | | |
-| 2 — Read Template | | input | | |
-| 3 — Generate HTML | input | input | output | |
-| 4 — Charts & Matrices | | input | output | |
-| 5 — Write Output | | | input | output |
-| 6 — Embed Assets | | | output | output |
-| 7 — Confirm | | | | verified |
+| 1 â€” Scan Workspace | input | | | |
+| 2 â€” Read Template | | input | | |
+| 3 â€” Generate HTML | input | input | output | |
+| 4 â€” Charts & Matrices | | input | output | |
+| 5 â€” Write Output | | | input | output |
+| 6 â€” Embed Assets | | | output | output |
+| 7 â€” Confirm | | | | verified |

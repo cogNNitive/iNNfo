@@ -1,10 +1,10 @@
 ---
 spec_version: "V_0-1-1"
-spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/models/starter/Business_V_1-0-0_starter_NN.md"
+spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/models/starter/Business_V_1-0-0_starter_NN.md"
 level: 3
 parent_spec:
   name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
 model_version: "V_1-0-0"
 title: "Business Model Starter"
 mode: "FILE"

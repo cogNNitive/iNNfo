@@ -11,12 +11,12 @@ export class ModelerPage {
   readonly modelHeading: Locator
   readonly viewSwitcherEditor: Locator
   readonly viewSwitcherGraph: Locator
-  readonly viewSwitcherNavigator: Locator
+  readonly viewSwitcherExports: Locator
   readonly wizardSampleCards: Locator
 
   constructor(page: Page) {
     this.page = page
-    this.heading = page.getByRole('heading', { name: /cogNNitive|iNNfo modeler/i })
+    this.heading = page.getByRole('heading', { name: /iNNfo|iNNfo modeler/i })
     this.openFolderButton = page.locator('button', { hasText: /Open folder/i }).first()
     this.sampleModelsSection = page.getByText('Explore example models').first()
     this.sampleCards = page.locator('button.sample-card')
@@ -25,7 +25,7 @@ export class ModelerPage {
     this.modelHeading = page.getByText('BTTFKB').first()
     this.viewSwitcherEditor = page.getByTestId('view-switcher-editor')
     this.viewSwitcherGraph = page.getByTestId('view-switcher-graph')
-    this.viewSwitcherNavigator = page.getByTestId('view-switcher-navigator')
+    this.viewSwitcherExports = page.getByTestId('view-switcher-exports')
     this.wizardSampleCards = page.locator('.wizard__sample-card')
   }
 

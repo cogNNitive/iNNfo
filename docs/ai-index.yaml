@@ -1,21 +1,21 @@
-# AI Content Index — https://skills.innv0.com/innv0-web-design-guide
+# AI Content Index â€” https://skills.innv0.com/innv0-web-design-guide
 site:
-  name: 'cogNNitive'
-  url: 'https://innv0.github.io/cogNNitive/'
+  name: 'iNNfo'
+  url: 'https://innv0.github.io/iNNfo/'
   description: 'The hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.'
   generator: 'https://skills.innv0.com/innv0-web-design-guide'
   language: 'en'
   updated: '2026-07-11'
 pages:
   - path: '/'
-    title: 'cogNNitive — the iNNfo modeling hub'
-    description: 'cogNNitive is the hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.'
+    title: 'iNNfo â€” the iNNfo modeling hub'
+    description: 'iNNfo is the hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.'
     last_modified: '2026-07-11'
     format: markdown
-    url: 'https://innv0.github.io/cogNNitive/index.md'
+    url: 'https://innv0.github.io/iNNfo/index.md'
   - path: '/about'
-    title: 'About — cogNNitive'
-    description: 'Learn about cogNNitive, the hub for the iNNfo ecosystem — the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain.'
+    title: 'About â€” iNNfo'
+    description: 'Learn about iNNfo, the hub for the iNNfo ecosystem â€” the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain.'
     last_modified: '2026-07-11'
     format: markdown
-    url: 'https://innv0.github.io/cogNNitive/about.md'
+    url: 'https://innv0.github.io/iNNfo/about.md'

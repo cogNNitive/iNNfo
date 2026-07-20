@@ -1,16 +1,16 @@
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "business_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 model_version: "V_0-1-2"
 title: "Ghostbusters"
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory.
+> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/innV0/iNNfo).
 
 # _NN index
 
@@ -103,7 +103,7 @@ title: "Ghostbusters"
 
 # _NN Business summary
 
-Ghostbusters is a professional paranormal investigation and elimination service based in New York City. The company provides rapid-response containment of supernatural entities — ghosts, demons, and other spectral phenomena — for residential, commercial, and governmental clients. Founded by three scientists with complementary expertise in psychology, engineering, and theoretical physics, Ghostbusters operates out of a converted firehouse in Tribeca. Revenue is generated through per-incident fees, long-term containment contracts, and government consulting.
+Ghostbusters is a professional paranormal investigation and elimination service based in New York City. The company provides rapid-response containment of supernatural entities â€” ghosts, demons, and other spectral phenomena â€” for residential, commercial, and governmental clients. Founded by three scientists with complementary expertise in psychology, engineering, and theoretical physics, Ghostbusters operates out of a converted firehouse in Tribeca. Revenue is generated through per-incident fees, long-term containment contracts, and government consulting.
 
 # _NN Stakeholders
 
@@ -120,7 +120,7 @@ Ghostbusters is a professional paranormal investigation and elimination service 
 * _NN Stakeholders: EPA (Walter Peck)
   Regulatory antagonist. Represents the risk of government interference with untested technology.
 * _NN Stakeholders: Gozer the Gozerian
-  Existential threat — the entity whose invasion validated the Ghostbusters' technology at the highest possible stakes.
+  Existential threat â€” the entity whose invasion validated the Ghostbusters' technology at the highest possible stakes.
 
 # _NN Segments
 
@@ -154,7 +154,7 @@ Ghostbusters is a professional paranormal investigation and elimination service 
 * _NN Segmentation: Geography
   Primary: NYC five boroughs. Secondary: Tri-state area (within 2-hour response radius). Future: national expansion via franchise model.
 * _NN Segmentation: Urgency Level
-  Critical (active threat — response within 15 min), High (disturbance reported — within 1 hr), Standard (investigation only — scheduled within 72 hrs).
+  Critical (active threat â€” response within 15 min), High (disturbance reported â€” within 1 hr), Standard (investigation only â€” scheduled within 72 hrs).
 * _NN Segmentation: Entity Class
   Class I (residual energy, minor poltergeist), Class II (full apparition, interactive entity), Class III (ancient/demonic, reality-warping), Class IV (god-like entity, interdimensional).
 
@@ -235,12 +235,12 @@ The paranormal services market in NYC is estimated at $12M annually, growing at 
 
 # _NN Relationships
 
-Ghostbusters builds relationships through a combination of emergency responsiveness and follow-up care. First contact is typically panicked and urgent — the relationship begins with reassurance and rapid deployment. Post-service, clients receive an incident report, insurance documentation, and a satisfaction follow-up. Commercial clients get quarterly maintenance check-ins and priority dispatch.
+Ghostbusters builds relationships through a combination of emergency responsiveness and follow-up care. First contact is typically panicked and urgent â€” the relationship begins with reassurance and rapid deployment. Post-service, clients receive an incident report, insurance documentation, and a satisfaction follow-up. Commercial clients get quarterly maintenance check-ins and priority dispatch.
 
 # _NN Perceptions
 
 * _NN Perceptions: Eccentric but Effective
-  The public sees Ghostbusters as unconventional outsiders — but they get results where nobody else can.
+  The public sees Ghostbusters as unconventional outsiders â€” but they get results where nobody else can.
 * _NN Perceptions: Nuisance / Public Threat
   Regulators and skeptics view unlicensed nuclear accelerators as a public safety hazard.
 * _NN Perceptions: Pop Culture Heroes
@@ -251,14 +251,14 @@ Ghostbusters builds relationships through a combination of emergency responsiven
 * _NN Emotions: Relief
   Clients describe overwhelming relief when the team arrives and the entity is contained.
 * _NN Emotions: Fear
-  Pre-service anxiety — clients are terrified of the unknown and uncertain about the outcome.
+  Pre-service anxiety â€” clients are terrified of the unknown and uncertain about the outcome.
 * _NN Emotions: Gratitude
   Post-service thankfulness often leads to referrals and repeat business for commercial clients.
 
 # _NN Behaviors
 
 * _NN Behaviors: Late-Night Crisis Calls
-  60% of residential calls come between 10 PM and 4 AM — peak paranormal activity hours.
+  60% of residential calls come between 10 PM and 4 AM â€” peak paranormal activity hours.
 * _NN Behaviors: Research Before Calling
   Clients typically spend 2-3 days researching symptoms online before making the first call.
 * _NN Behaviors: Referral-Driven Hiring
@@ -325,13 +325,13 @@ Ghostbusters offers a tiered service portfolio: Residential (single-visit contai
 
 # _NN Roadmap
 
-* _NN Roadmap: Phase 1 — NYC Metro Dominance
+* _NN Roadmap: Phase 1 â€” NYC Metro Dominance
   Establish coverage across all five boroughs and major commuter rail corridors.
-* _NN Roadmap: Phase 2 — Regional Expansion
+* _NN Roadmap: Phase 2 â€” Regional Expansion
   Open satellite operations in Boston, Philadelphia, and Washington DC.
-* _NN Roadmap: Phase 3 — National Franchise
+* _NN Roadmap: Phase 3 â€” National Franchise
   License the Ghostbusters brand and technology to trained operators in major US cities.
-* _NN Roadmap: Phase 4 — International
+* _NN Roadmap: Phase 4 â€” International
   Partner with European and Asian paranormal response agencies for cross-border containment.
 
 # _NN Pricing
@@ -360,7 +360,7 @@ Ghostbusters: When there's something strange in your neighborhood. Professional 
 
 # _NN Naming
 
-"Ghostbusters" — a portmanteau of ghost and busters, implying active termination of paranormal threats. Memorable, action-oriented, and instantly communicates the value proposition.
+"Ghostbusters" â€” a portmanteau of ghost and busters, implying active termination of paranormal threats. Memorable, action-oriented, and instantly communicates the value proposition.
 
 # _NN Branding
 
@@ -390,7 +390,7 @@ The Ghostbusters logo is one of the most recognized in the world. A white ghost 
 
 # _NN Pitch
 
-"Ghostbusters is the only professional paranormal containment service in the United States. We combine proprietary nuclear technology with trained field operators to remove supernatural threats from any property — residential, commercial, or government. Our four founders bring 50+ years of combined expertise in parapsychology, engineering, and theoretical physics. We guarantee results or you don't pay."
+"Ghostbusters is the only professional paranormal containment service in the United States. We combine proprietary nuclear technology with trained field operators to remove supernatural threats from any property â€” residential, commercial, or government. Our four founders bring 50+ years of combined expertise in parapsychology, engineering, and theoretical physics. We guarantee results or you don't pay."
 
 # _NN Web
 
@@ -406,7 +406,7 @@ The standard Ghostbusters pitch deck: 12 slides covering team background, market
 
 # _NN Organization
 
-Ghostbusters operates as a flat partnership with four partners, one office manager, and an expanding roster of field technicians. Organizational structure is minimal by design — agility is the priority.
+Ghostbusters operates as a flat partnership with four partners, one office manager, and an expanding roster of field technicians. Organizational structure is minimal by design â€” agility is the priority.
 
 # _NN Business idea
 
@@ -425,7 +425,7 @@ The complete absence of professional paranormal services creates a blue ocean ma
 
 # _NN Business status
 
-Operational and growing. Ghostbusters is post-revenue with a proven business model validated by the Gozer incident. Currently serving the NYC metro area with plans for regional expansion. The primary constraint is talent — trained field operators are scarce.
+Operational and growing. Ghostbusters is post-revenue with a proven business model validated by the Gozer incident. Currently serving the NYC metro area with plans for regional expansion. The primary constraint is talent â€” trained field operators are scarce.
 
 # _NN Challenges
 
@@ -443,7 +443,7 @@ Operational and growing. Ghostbusters is post-revenue with a proven business mod
 
 # _NN Mission
 
-To protect the people of New York City — and eventually the world — from supernatural threats through professional, science-based paranormal investigation and containment services.
+To protect the people of New York City â€” and eventually the world â€” from supernatural threats through professional, science-based paranormal investigation and containment services.
 
 # _NN Vision
 
@@ -456,7 +456,7 @@ A world where no one has to fear the unknown because professional paranormal res
 * _NN Organizational values: No Entity Left Behind
   Every call is answered. No situation is too small or too strange.
 * _NN Organizational values: Courage with Caution
-  We run toward danger — but we do it with safety protocols, redundant systems, and a containment plan.
+  We run toward danger â€” but we do it with safety protocols, redundant systems, and a containment plan.
 
 # _NN Organizational goals
 
@@ -558,11 +558,11 @@ A world where no one has to fear the unknown because professional paranormal res
 
 # _NN Phases
 
-* _NN Phases: Phase 1 — Brooklyn Coverage
+* _NN Phases: Phase 1 â€” Brooklyn Coverage
   Establish satellite dispatch in Brooklyn. Hire and train 2 new teams. Target: Q2.
-* _NN Phases: Phase 2 — Queens & Bronx
+* _NN Phases: Phase 2 â€” Queens & Bronx
   Mirror Brooklyn model. Target: Q3.
-* _NN Phases: Phase 3 — Staten Island & Long Island
+* _NN Phases: Phase 3 â€” Staten Island & Long Island
   Lower-density coverage with on-call teams. Target: Q4.
 
 # _NN Milestones
@@ -658,7 +658,7 @@ Per-incident unit economics: Average revenue $5,000. Average direct cost $1,800 
 # _NN Legal
 
 * _NN Legal: Regulatory Framework
-  Operating under a novel legal classification — no existing statutes cover paranormal containment services.
+  Operating under a novel legal classification â€” no existing statutes cover paranormal containment services.
 
 # _NN Legal issues
 
@@ -734,11 +734,11 @@ Strengths: Proprietary technology, proven track record, brand recognition, 100% 
 
 # _NN Coherence
 
-* _NN Coherence: Problems ↔ Value Propositions
+* _NN Coherence: Problems â†” Value Propositions
   Direct mapping between all identified problems and our service value props. No orphaned problems.
-* _NN Coherence: Segments ↔ Channels
+* _NN Coherence: Segments â†” Channels
   Residential segment reached via phone/digital. Commercial via direct sales. Government via RFP response.
-* _NN Coherence: Revenue ↔ Cost Structure
+* _NN Coherence: Revenue â†” Cost Structure
   High-margin incident revenue supports fixed cost base. Commercial contracts provide cash flow stability.
 
 # _NN Experiments

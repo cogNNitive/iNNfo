@@ -1,11 +1,11 @@
 ---
 spec_version: "V_0-2-0"
-spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
 model_version: "V_1-0-0"
 level: 3
 parent:
   name: "organization_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
 mode: "FILE"
 template:
   name: "organization"
@@ -70,7 +70,7 @@ title: "Engineering Team"
 last_saved: "2026-07-11T12:00:00.000Z"
 ---
 > [!NOTE]
-> This is a **FORMAT document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
+> This is a **FORMAT document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
 
 # <!-- block: concepts --> index
 * [[roles]]

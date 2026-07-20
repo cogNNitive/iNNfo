@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 1
 parent_spec:
   name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 title: "iNNfo Specification"
 description: "Concrete specification for semantic modeling with concepts, elements, fields, markers, and relationships."
 author: "innV0 Team"
@@ -15,7 +15,7 @@ relationship_types:
     representation: "index block with WikiLinks"
   - name: "evaluable_matrix"
     description: "N-to-M relationship evaluated on a value set between elements of two concepts"
-    representation: "Markdown source→target table with a declared value set"
+    representation: "Markdown sourceâ†’target table with a declared value set"
   - name: "graph_edge"
     description: "Graph edge with optional label, weight, and arbitrary properties"
     representation: "frontmatter graph_edges array"
@@ -25,7 +25,7 @@ relationship_types:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter.
+> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/innV0/iNNfo).
 
 # iNNfo Specification
 
@@ -35,9 +35,9 @@ relationship_types:
 
 iNNfo is designed around five principles:
 
-1. **Rich specs, lean models**: Specification documents (levels 0–2) are semantically rich. Models (level 3) carry only data and a parent pointer. The application resolves and caches the parent chain.
+1. **Rich specs, lean models**: Specification documents (levels 0â€“2) are semantically rich. Models (level 3) carry only data and a parent pointer. The application resolves and caches the parent chain.
 2. **Self-describing**: Every iNNfo document is valid Markdown with YAML frontmatter. No proprietary tooling required to read it.
-3. **Relationship polymorphism**: Relationships between concepts and elements are expressed through a typed system — hierarchy, evaluable matrices, graph edges, and sequences.
+3. **Relationship polymorphism**: Relationships between concepts and elements are expressed through a typed system â€” hierarchy, evaluable matrices, graph edges, and sequences.
 4. **Template-driven**: Every model conforms to a template that defines its valid concepts, markers, and relationship types.
 5. **One name, one identity**: An entity is identified by its name. The name is the single source of truth; there is no separate persisted identifier.
 
@@ -58,7 +58,7 @@ The word "node" is an implementation term (a runtime graph representation) and M
 NOT appear in normative text. The words block, section, instance, item, property, and
 attribute MUST NOT be used as substitutes for the entities below.
 
-**Containment spine (generic → specific):**
+**Containment spine (generic â†’ specific):**
 
 | Entity | Definition |
 |---|---|
@@ -88,9 +88,9 @@ attribute MUST NOT be used as substitutes for the entities below.
 The names `Concepts`, `Elements`, and `Markers` are RESERVED. A Template MUST NOT
 declare a Concept with any of these names. They denote cross-cutting sets:
 
-- `Concepts` — the set of all Concepts in the Model.
-- `Elements` — the set of all Elements across every Concept in the Model.
-- `Markers` — the set of all declared Markers.
+- `Concepts` â€” the set of all Concepts in the Model.
+- `Elements` â€” the set of all Elements across every Concept in the Model.
+- `Markers` â€” the set of all declared Markers.
 
 They are used as the `source`/`target` of cross-cutting matrices (for example, the
 reserved `item-markers matrix` targets `Markers`).
@@ -102,7 +102,7 @@ persisted in a model file.
 
 **Uniqueness:**
 
-- An Element name MUST be unique within the whole Model — across all Concepts.
+- An Element name MUST be unique within the whole Model â€” across all Concepts.
 - A Concept name MUST be unique within the Model.
 - A Model's logical name is its frontmatter `title`, which MUST be unique within the
   Workspace.
@@ -119,8 +119,8 @@ application at load time for the Workspace in which the Model is opened; it is N
 persisted in the model file, so a Model stays portable across Workspaces.
 
 **Rename** is an application operation. It MUST rewrite every reference to the renamed
-entity — the declaring marker, index entries, matrix row/column labels,
-reference-typed field values, graph edges, and cross-model references — in a single
+entity â€” the declaring marker, index entries, matrix row/column labels,
+reference-typed field values, graph edges, and cross-model references â€” in a single
 transaction, then re-validate. References that are broken by out-of-application edits
 MUST be reported by the application as dangling references.
 
@@ -131,7 +131,7 @@ iNNfo is a level 1 specification. Its `parent_spec` points to defiNNe:
 ```yaml
 parent_spec:
   name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 ```
 
 All templates (level 2) MUST declare `parent_spec` pointing to iNNfo. All models
@@ -195,9 +195,9 @@ scores are assigned to Elements or Concepts via the reserved `item-markers matri
 
 A Field is either **inline** or **file-backed**:
 
-- **Inline field** — the value lives in the Element's YAML (`string`, `select`,
+- **Inline field** â€” the value lives in the Element's YAML (`string`, `select`,
   `reference`) or, for prose, as `markdown_inline` content.
-- **File-backed field** — the value is a filename; the content lives in a sidecar file.
+- **File-backed field** â€” the value is a filename; the content lives in a sidecar file.
   The file-backed types are `markdown_file`, `image`, `file`, `video`, and `audio`.
 
 **Storage convention (single, canonical).** Every file-backed field's file MUST be
@@ -315,7 +315,7 @@ All multi-instance types use the same bullet-list Element syntax:
 **Matrix Block.** iNNfo supports two matrix kinds, distinguished by the section name in
 `# _NN matrices:`:
 
-*Relational Matrix* — cross-tabulates Elements of a source Concept (rows) against
+*Relational Matrix* â€” cross-tabulates Elements of a source Concept (rows) against
 Elements of a target Concept (columns). Cells contain a value from the matrix's
 declared `values`:
 
@@ -326,7 +326,7 @@ declared `values`:
 | Problem name | High |
 ```
 
-*Item-Markers Matrix* — the reserved section name `item-markers matrix` assigns Marker
+*Item-Markers Matrix* â€” the reserved section name `item-markers matrix` assigns Marker
 scores to Elements or Concepts. Rows are Element or Concept names; columns are Marker
 names defined in the template:
 
@@ -343,7 +343,7 @@ A iNNfo Workspace is a directory containing one or more Models. The entry point 
 `index.md` file at the Workspace root.
 
 **index.md (Required).** Every Workspace MUST have an `index.md` at its root. The
-application reads `index.md` as the single entry point — no filesystem scanning. It uses
+application reads `index.md` as the single entry point â€” no filesystem scanning. It uses
 `# _NN index` with standard Markdown links to list all Workspace Models:
 
 ```markdown
@@ -380,9 +380,9 @@ does not define; these are additive.
 
 The following are NOT part of iNNfo:
 
-- **FOLDER mode / `_F` markers** — models are single files using `_NN` markers only.
-- **Hierarchy matrices** — hierarchy is expressed only through the index block.
-- **`_FORMAT.md` filenames** — the canonical suffix is `_NN.md`.
+- **FOLDER mode / `_F` markers** â€” models are single files using `_NN` markers only.
+- **Hierarchy matrices** â€” hierarchy is expressed only through the index block.
+- **`_FORMAT.md` filenames** â€” the canonical suffix is `_NN.md`.
 
 ### Self-Description
 
@@ -401,7 +401,7 @@ specification_url: "<immutable-url>"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "<Template Name>"
 concepts: [...]
 markers: [...]
@@ -456,5 +456,5 @@ title: "..."
 ```yaml
 parent_spec:
   name: "business_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 ```

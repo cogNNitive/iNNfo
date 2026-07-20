@@ -4,7 +4,7 @@ Copy and paste this entire prompt into a **new** conversation to run the impleme
 
 ---
 
-## System: SDD Apply — iNNfo Ecosystem Consolidation
+## System: SDD Apply â€” iNNfo Ecosystem Consolidation
 
 ### 0. Load the skill
 
@@ -13,27 +13,27 @@ Load the `sdd-apply` skill now.
 ### 1. Change Overview
 
 **Name**: `innfo-ecosystem-consolidation`
-**Project**: cogNNitive (`D:\Users\lucas\Documents\GitHub\innV0\cogNNitive`)
+**Project**: iNNfo (`D:\Users\lucas\Documents\GitHub\innV0\iNNfo`)
 **Goal**: Unify the iNNfo skill ecosystem so everything triggers from the single keyword "innfo". Three layers:
 
-1. **Prompt prefix** — all generated prompts start with `innfo:` to activate the `innv0-router`
-2. **Workflow files** — split `traNNsform/AGENT.md` into structured pipeline workflow files in a new `workflows/` subdirectory
-3. **Unified modal** — replace 3 full-page panel views (Guide, Import, Export) + 3 header buttons with a single "Use AI" button and a tabbed modal
+1. **Prompt prefix** â€” all generated prompts start with `innfo:` to activate the `nn-router`
+2. **Workflow files** â€” split `traNNsform/AGENT.md` into structured pipeline workflow files in a new `workflows/` subdirectory
+3. **Unified modal** â€” replace 3 full-page panel views (Guide, Import, Export) + 3 header buttons with a single "Use AI" button and a tabbed modal
 
 ### 2. Read All Artifacts
 
 Read these files for full context before starting implementation:
 
-- `openspec/changes/innfo-ecosystem-consolidation/proposal.md` — intent, scope, affected areas
-- `openspec/changes/innfo-ecosystem-consolidation/design.md` — architecture decisions, file changes, data flow
-- `openspec/changes/innfo-ecosystem-consolidation/tasks.md` — full task breakdown across 6 phases
+- `openspec/changes/innfo-ecosystem-consolidation/proposal.md` â€” intent, scope, affected areas
+- `openspec/changes/innfo-ecosystem-consolidation/design.md` â€” architecture decisions, file changes, data flow
+- `openspec/changes/innfo-ecosystem-consolidation/tasks.md` â€” full task breakdown across 6 phases
 
 **Spec/delta files** (detailed requirements per component):
 
 | File | What it specifies |
 |------|------------------|
-| `openspec/specs/ai-workflow-modal/spec.md` | Modal requirements — tabs, state, close behaviour, focus trap, copy |
-| `openspec/specs/workflow-definitions/spec.md` | Both workflow pipeline files — stages, scenarios, frontmatter |
+| `openspec/specs/ai-workflow-modal/spec.md` | Modal requirements â€” tabs, state, close behaviour, focus trap, copy |
+| `openspec/specs/workflow-definitions/spec.md` | Both workflow pipeline files â€” stages, scenarios, frontmatter |
 | `openspec/changes/innfo-ecosystem-consolidation/specs/export-prompt-delta.md` | ExportPanel + ExportNavigator prompt changes (exact prompt text) |
 | `openspec/changes/innfo-ecosystem-consolidation/specs/import-prompt-delta.md` | ImportPanel prompt changes (exact prompt text) |
 | `openspec/changes/innfo-ecosystem-consolidation/specs/guide-prompts-delta.md` | guide.ts + procedure_NN.md prefix changes (exact old/new text) |
@@ -45,7 +45,7 @@ Execute tasks **in phase order** following `tasks.md`. Dependencies:
 
 - **Phase 1** (prompt.ts utility) must come before Phases 3 and 5
 - **Phase 2** (workflow files) must come before Phase 6 (SetupWizard)
-- **Phases 4** (skills) and **2** (workflow files) are independent — can run in parallel with 3 and 5
+- **Phases 4** (skills) and **2** (workflow files) are independent â€” can run in parallel with 3 and 5
 - **Phase 6** (SetupWizard) depends on Phase 2
 
 ### 4. Key Technical Details
@@ -54,8 +54,8 @@ Execute tasks **in phase order** following `tasks.md`. Dependencies:
 
 | Repo | Path | Files |
 |------|------|-------|
-| cogNNitive | `D:\Users\lucas\Documents\GitHub\innV0\cogNNitive` | Everything in `apps/innfo-editor/` and `traNNsform/` |
-| iNNv0_skills | `D:\Users\lucas\Documents\GitHub\innV0\iNNv0_skills` | `skills/innv0-router/SKILL.md`, `skills/innv0-workflow-orchestrator/SKILL.md` |
+| iNNfo | `D:\Users\lucas\Documents\GitHub\innV0\iNNfo` | Everything in `apps/innfo-editor/` and `traNNsform/` |
+| actioNN | `D:\Users\lucas\Documents\GitHub\innV0\actioNN` | `skills/nn-router/SKILL.md`, `skills/nn-workflow-orchestrator/SKILL.md` |
 
 **Shared utility** (`apps/innfo-editor/src/ai-guide/prompt.ts`):
 ```typescript
@@ -64,11 +64,11 @@ export function innfoPrompt(content: string): string {
 }
 ```
 
-**Router change** (`iNNv0_skills/skills/innv0-router/SKILL.md`):
+**Router change** (`actioNN/skills/nn-router/SKILL.md`):
 - Remove `disable-model-invocation: true` from frontmatter
-- Add `innfo` as a model-invoked trigger (it already has a model-invoked section — add the trigger text there)
+- Add `innfo` as a model-invoked trigger (it already has a model-invoked section â€” add the trigger text there)
 
-**Orchestrator change** (`iNNv0_skills/skills/innv0-workflow-orchestrator/SKILL.md`):
+**Orchestrator change** (`actioNN/skills/nn-workflow-orchestrator/SKILL.md`):
 - Add a "direct-execution" branch: loads a workflow file and runs stages sequentially without interactive prompts
 
 **`uiStore.ts` additions**:
@@ -80,17 +80,17 @@ activeAiTab: 'guide' | 'import' | 'export'
 ### 5. Verification
 
 After each phase, run:
-- `npm run lint` — linter check
-- `npm run typecheck` — TypeScript type checking
+- `npm run lint` â€” linter check
+- `npm run typecheck` â€” TypeScript type checking
 - Tests relevant to the changed files
 
 After Phase 6 (all done):
-- `npm run test -- --coverage` — full test suite with coverage
-- `npm run format` — formatting pass
+- `npm run test -- --coverage` â€” full test suite with coverage
+- `npm run format` â€” formatting pass
 
 ### 6. Chained PR Strategy
 
-The change is estimated at ~650-700 lines — it exceeds the 400-line review budget.
+The change is estimated at ~650-700 lines â€” it exceeds the 400-line review budget.
 
 **Split into 3 stacked PRs to main:**
 
@@ -100,28 +100,28 @@ The change is estimated at ~650-700 lines — it exceeds the 400-line review bud
 | PR 2 | Phase 2 + 4 + 6 | ~250 | workflow files, AGENT.md pointer, router + orchestrator, SetupWizard |
 | PR 3 | Phase 5 | ~260 | AiWorkflowModal, uiStore, Header, WorkspaceView, Playwright tests |
 
-Each PR merges to `main`. Create them sequentially — PR 1 first, then PR 2, then PR 3 after PR 1 and 2 are merged.
+Each PR merges to `main`. Create them sequentially â€” PR 1 first, then PR 2, then PR 3 after PR 1 and 2 are merged.
 
 ### 7. Files Summary
 
 | File | Action | Repo |
 |------|--------|------|
-| `apps/innfo-editor/src/ai-guide/prompt.ts` | **Create** | cogNNitive |
-| `apps/innfo-editor/src/ai-guide/guide.ts` | Modify | cogNNitive |
-| `apps/innfo-editor/src/ai-guide/procedure_NN.md` | Modify | cogNNitive |
-| `apps/innfo-editor/src/components/editor/ExportPanel.vue` | Modify | cogNNitive |
-| `apps/innfo-editor/src/components/editor/ImportPanel.vue` | Modify | cogNNitive |
-| `apps/innfo-editor/src/components/editor/ExportNavigator.vue` | Modify | cogNNitive |
-| `apps/innfo-editor/src/components/editor/AiWorkflowModal.vue` | **Create** | cogNNitive |
-| `apps/innfo-editor/src/components/layout/Header.vue` | Modify | cogNNitive |
-| `apps/innfo-editor/src/views/WorkspaceView.vue` | Modify | cogNNitive |
-| `apps/innfo-editor/src/stores/uiStore.ts` | Modify | cogNNitive |
-| `apps/innfo-editor/src/components/layout/SetupWizard.vue` | Modify | cogNNitive |
-| `traNNsform/AGENT.md` | Modify | cogNNitive |
-| `traNNsform/workflows/export.workflow.md` | **Create** | cogNNitive |
-| `traNNsform/workflows/import.workflow.md` | **Create** | cogNNitive |
-| `skills/innv0-router/SKILL.md` | Modify | iNNv0_skills |
-| `skills/innv0-workflow-orchestrator/SKILL.md` | Modify | iNNv0_skills |
+| `apps/innfo-editor/src/ai-guide/prompt.ts` | **Create** | iNNfo |
+| `apps/innfo-editor/src/ai-guide/guide.ts` | Modify | iNNfo |
+| `apps/innfo-editor/src/ai-guide/procedure_NN.md` | Modify | iNNfo |
+| `apps/innfo-editor/src/components/editor/ExportPanel.vue` | Modify | iNNfo |
+| `apps/innfo-editor/src/components/editor/ImportPanel.vue` | Modify | iNNfo |
+| `apps/innfo-editor/src/components/editor/ExportNavigator.vue` | Modify | iNNfo |
+| `apps/innfo-editor/src/components/editor/AiWorkflowModal.vue` | **Create** | iNNfo |
+| `apps/innfo-editor/src/components/layout/Header.vue` | Modify | iNNfo |
+| `apps/innfo-editor/src/views/WorkspaceView.vue` | Modify | iNNfo |
+| `apps/innfo-editor/src/stores/uiStore.ts` | Modify | iNNfo |
+| `apps/innfo-editor/src/components/layout/SetupWizard.vue` | Modify | iNNfo |
+| `traNNsform/AGENT.md` | Modify | iNNfo |
+| `traNNsform/workflows/export.workflow.md` | **Create** | iNNfo |
+| `traNNsform/workflows/import.workflow.md` | **Create** | iNNfo |
+| `skills/nn-router/SKILL.md` | Modify | actioNN |
+| `skills/nn-workflow-orchestrator/SKILL.md` | Modify | actioNN |
 
 ---
 

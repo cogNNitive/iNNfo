@@ -8,7 +8,7 @@ test.describe('Flujo de Creación de Nuevos Modelos', () => {
 
   test('R-NW-01: Home page loads with wizard and template options', async ({ page }) => {
     await loadHomePage(page)
-    await expect(page.getByText(/Before you start|cogNNitive/i).first()).toBeVisible()
+    await expect(page.getByText(/Before you start|iNNfo/i).first()).toBeVisible()
     await expect(page.locator('.wizard__sample-card').first()).toBeVisible()
   })
 

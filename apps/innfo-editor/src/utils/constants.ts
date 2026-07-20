@@ -33,7 +33,7 @@ export const MARKER_CYCLE_COUNT = MAX_MARKER_SCORE + 1
 export function buildSpecificationUrl(version: string = DEFAULT_INNFO_VERSION): string {
   // Tag-pinned URL first (e.g. v0.1.2), falls back to main when tag doesn't exist
   const tag = 'v' + version.slice(2).replace(/-/g, '.')
-  return `https://raw.githubusercontent.com/innV0/cogNNitive/${tag}/specs/iNNfo_${version}_NN.md`
+  return `https://raw.githubusercontent.com/innV0/iNNfo/${tag}/specs/iNNfo_${version}_NN.md`
 }
 
 /**
@@ -41,7 +41,7 @@ export function buildSpecificationUrl(version: string = DEFAULT_INNFO_VERSION): 
  * Use this when the spec version may not have a published tag yet (e.g. starters, sandbox).
  */
 export function buildSpecificationUrlFromMain(version: string = DEFAULT_INNFO_VERSION): string {
-  return `https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/iNNfo_${version}_NN.md`
+  return `https://raw.githubusercontent.com/innV0/iNNfo/main/specs/iNNfo_${version}_NN.md`
 }
 
 /**

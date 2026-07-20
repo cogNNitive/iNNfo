@@ -105,6 +105,11 @@ export const useWorkspaceStore = defineStore('workspace', {
         this.hasParsed = true
         this.parseCount += 1
 
+        // Reset UI state so the dashboard shows after loading
+        const uiStore = useUiStore()
+        uiStore.setActiveView('editor')
+        uiStore.selectNode(null)
+
         // Persist session state after successful parse
         const rootId = modelStore.rootIds[0]
         if (rootId) {
@@ -153,6 +158,12 @@ export const useWorkspaceStore = defineStore('workspace', {
 
         this.hasParsed = true
         this.parseCount += 1
+
+        // Reset UI state so the dashboard shows after loading
+        const uiStore = useUiStore()
+        uiStore.setActiveView('editor')
+        uiStore.selectNode(null)
+
         if (templateName) {
           this.isSampleSession = true
           this.sampleTemplateName = templateName
@@ -333,7 +344,7 @@ export const useWorkspaceStore = defineStore('workspace', {
         // URL patterns ordered by correctness for the current repo structure
         const urls = [
           // Model-published path (main branch)
-          `https://raw.githubusercontent.com/innV0/cogNNitive/main/models/specs/iNNfo_${specVersion}_NN.md`,
+          `https://raw.githubusercontent.com/innV0/iNNfo/main/models/specs/iNNfo_${specVersion}_NN.md`,
           // Tag-pinned URL (may not exist for unreleased versions)
           buildSpecificationUrl(specVersion),
           // Main branch fallback (legacy path)

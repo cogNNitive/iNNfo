@@ -1,4 +1,4 @@
-# cogNNitive
+# iNNfo
 
 > The hub for the iNNfo ecosystem.
 
@@ -8,13 +8,13 @@ Built with the [iNNv0 Web Design Guide](https://skills.innv0.com/innv0-web-desig
 
 ## About this site
 
-This is the public website for the **cogNNitive** monorepo, published via GitHub Pages from a GitHub Actions workflow that builds and deploys the `docs/` folder.
+This is the public website for the **iNNfo** monorepo, published via GitHub Pages from a GitHub Actions workflow that builds and deploys the `docs/` folder.
 
 ### What's inside the monorepo
 
 | Component | Description |
 |-----------|-------------|
-| `apps/innfo-editor` | Vue 3 workspace editor — the iNNfo Modeler |
+| `apps/innfo-editor` | Vue 3 workspace editor â€” the iNNfo Modeler |
 | `packages/innfo-core` | Shared TypeScript parser, resolver, and validator |
 | `packages/innfo-mcp` | MCP server exposing iNNfo as semantic tools for AI agents |
 | `packages/pipeline-gates` | Validation & integration gates for iNNfo model pipelines |
@@ -36,7 +36,7 @@ The injector uses the website ID `63f444a0-59f9-4d8d-a09d-641a402839ae` register
 
 ## Contact
 
-The contact section links to https://innv0.com/contact with a `?ref=cogNNitive` source tracking parameter.
+The contact section links to https://innv0.com/contact with a `?ref=iNNfo` source tracking parameter.
 
 ## Updating
 
@@ -50,19 +50,19 @@ The **iNNfo Modeler** app is built from `apps/innfo-editor` and deployed at `/ap
 
 | URL | What's there |
 |-----|-------------|
-| [`https://innv0.github.io/cogNNitive/`](https://innv0.github.io/cogNNitive/) | Landing page |
-| [`https://innv0.github.io/cogNNitive/app/`](https://innv0.github.io/cogNNitive/app/) | iNNfo Modeler (the app) |
-| [`https://innv0.github.io/cogNNitive/documentation`](https://innv0.github.io/cogNNitive/documentation) | Docsify documentation site |
+| [`https://innv0.github.io/iNNfo/`](https://innv0.github.io/iNNfo/) | Landing page |
+| [`https://innv0.github.io/iNNfo/app/`](https://innv0.github.io/iNNfo/app/) | iNNfo Modeler (the app) |
+| [`https://innv0.github.io/iNNfo/documentation`](https://innv0.github.io/iNNfo/documentation) | Docsify documentation site |
 
 ### Testing the production app
 
-1. Open [`https://innv0.github.io/cogNNitive/app/`](https://innv0.github.io/cogNNitive/app/) in a browser that supports the File System Access API (Chrome, Edge, Opera).
+1. Open [`https://innv0.github.io/iNNfo/app/`](https://innv0.github.io/iNNfo/app/) in a browser that supports the File System Access API (Chrome, Edge, Opera).
 2. Click **Open Workspace** and select a folder containing `_NN.md` files (samples are in `specs/latest/level2/`).
 3. The app parses the folder into a tree, previews it, and validates against the spec chain.
 4. Switch between views: Editor, Graph, Matrices, Info, Exports, and the AI Guide.
 
 **Things to check after a deploy:**
-- Open the browser dev tools console — there should be no 404 errors for JS/CSS assets
+- Open the browser dev tools console â€” there should be no 404 errors for JS/CSS assets
 - Test all navigation views load without errors
 - Test that the File System Access picker opens when clicking "Open Workspace"
 - Verify the starter templates load from the `/starter/` folder inside the app

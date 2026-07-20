@@ -1,14 +1,15 @@
 ---
+name: nn-dev-spec-version-propagator
 description: >
   Detect and propagate specification version bumps across the entire repo.
   When the iNNfo spec (or any spec) changes version, this skill identifies
-  every file that needs updating — frontmatter, file names, URLs, constants,
+  every file that needs updating â€” frontmatter, file names, URLs, constants,
   documentation, and test fixtures.
 trigger: >
   spec version bump, propagate version, version propagation, update spec version,
-  actualizar versión especificación, version bump, bump spec, check spec version,
+  actualizar versiÃ³n especificaciÃ³n, version bump, bump spec, check spec version,
   stale version references, update format version, rebase specs
-source: cogNNitive
+source: iNNfo
 version: "1.0.0"
 ---
 
@@ -16,7 +17,7 @@ version: "1.0.0"
 
 ## Purpose
 
-The iNNfo ecosystem has a strict parent-chain dependency graph. When a specification version changes (`V_0-2-N` → `V_0-2-M`), the change **ripples** through every file that references that version — directly or transitively.
+The iNNfo ecosystem has a strict parent-chain dependency graph. When a specification version changes (`V_0-2-N` â†’ `V_0-2-M`), the change **ripples** through every file that references that version â€” directly or transitively.
 
 This skill maps the **complete propagation graph** and provides a companion script to detect every stale file.
 
@@ -24,14 +25,14 @@ This skill maps the **complete propagation graph** and provides a companion scri
 
 ```
 Level 0: defiNNe (meta-spec, rarely bumped)
-  │  parent of
-  ▼
+  â”‚  parent of
+  â–¼
 Level 1: iNNfo (the concrete spec)
-  │  parent of
-  ▼
-Level 2: Templates (business, procedures, kb)
-  │  parent of
-  ▼
+  â”‚  parent of
+  â–¼
+Level 2: Templates (business, procedures, organization)
+  â”‚  parent of
+  â–¼
 Level 3: Models, fixtures, samples
 ```
 
@@ -39,8 +40,8 @@ Level 3: Models, fixtures, samples
 
 | Artifact | What to Update | Example |
 |---|---|---|
-| **Spec file itself** | File name rename; `spec_version`; `spec_url` | `FORMAT_V_0-1-2_FORMAT.md` → `FORMAT_V_0-1-3_FORMAT.md` |
-| **Level 2 Templates** | `parent.name` (e.g. `FORMAT_V_0-1-2` → `FORMAT_V_0-1-3`); `parent.url`; optionally `spec_version` | `business_V_0-1-1_FORMAT.md` |
+| **Spec file itself** | File name rename; `spec_version`; `spec_url` | `FORMAT_V_0-1-2_FORMAT.md` â†’ `FORMAT_V_0-1-3_FORMAT.md` |
+| **Level 2 Templates** | `parent.name` (e.g. `FORMAT_V_0-1-2` â†’ `FORMAT_V_0-1-3`); `parent.url`; optionally `spec_version` | `business_V_0-1-1_FORMAT.md` |
 | **Level 3 Models & Samples** | `spec_version`; `spec_url` (if it references the spec); `parent.url` (if it references a template) | `Ghostbusters_V_0-1-2_business_FORMAT.md` |
 | **Test fixtures** | Same as Level 3 models | `tests/fixtures/*_F.md` |
 | **Test inline frontmatter** | Hardcoded version strings in `.test.ts` files | `.test.ts` with `spec_version: "V_0-1-2"` |
@@ -79,7 +80,7 @@ node scripts/check-spec-version.mjs --version V_0-1-1 --check
 
 When bumping a spec version, follow this order:
 
-### Step 1 — Bump the spec itself
+### Step 1 â€” Bump the spec itself
 
 ```bash
 # 1a. Copy the spec file to the new version name
@@ -87,13 +88,13 @@ cp specs/FORMAT_V_0-1-2_FORMAT.md specs/FORMAT_V_0-1-3_FORMAT.md
 
 # 1b. Update frontmatter in the new file:
 #   - spec_version: "V_0-1-3"
-#   - spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.2/specs/FORMAT_V_0-1-3_FORMAT.md"
+#   - spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.2/specs/FORMAT_V_0-1-3_FORMAT.md"
 #   (use the tag that matches the repo release, not necessarily the spec version)
 
 # 1c. If the content changed, update the spec body accordingly
 ```
 
-### Step 2 — Update source-code single source of truth
+### Step 2 â€” Update source-code single source of truth
 
 Edit `apps/format-editor/src/utils/constants.ts`:
 
@@ -101,7 +102,7 @@ Edit `apps/format-editor/src/utils/constants.ts`:
 export const DEFAULT_INNFO_VERSION = 'V_0-2-0';
 ```
 
-### Step 3 — Run the checker
+### Step 3 â€” Run the checker
 
 ```bash
 node scripts/check-spec-version.mjs --version V_0-1-2 --by-type
@@ -109,15 +110,15 @@ node scripts/check-spec-version.mjs --version V_0-1-2 --by-type
 
 This lists every file still referencing the OLD version.
 
-### Step 4 — Propagate to templates (Level 2)
+### Step 4 â€” Propagate to templates (Level 2)
 
-For each template spec (`business_V_0-1-1_NN.md`, `procedures_V_0-1-1_NN.md`, `kb_V_0-1-1_NN.md`):
+For each template spec (`business_V_0-1-1_NN.md`, `procedures_V_0-1-1_NN.md`, `organization_V_0-1-1_NN.md`):
 
 - Update `parent.name` to point to the new FORMAT version
 - Update `parent.url` to point to the new FORMAT file URL
 - Optionally bump the template's own version in `spec_version`
 
-### Step 5 — Propagate to models, samples, and fixtures (Level 3)
+### Step 5 â€” Propagate to models, samples, and fixtures (Level 3)
 
 For every model/fixture/sample that references the old version:
 
@@ -125,31 +126,30 @@ For every model/fixture/sample that references the old version:
 - Update `spec_url` if it references the spec directly
 - Update `parent.url` if it references a template whose file path changed
 
-### Step 6 — Update test inline frontmatter
+### Step 6 â€” Update test inline frontmatter
 
 Test files like `*.test.ts` often embed version strings. The checker script finds these.
 
-### Step 7 — Update documentation
+### Step 7 â€” Update documentation
 
 Search and replace version references in `docs/`:
 
 - `docs/spec_consolidation.md`
 - `docs/documentation/specifications.md`
 - `docs/documentation/usage.md`
-- `docs/cogNNitive/_F.md`
-- `docs/SESSION_HANDOFF.md` (if still relevant)
+- `docs/SESSION_HANDOFF.md` (historical only)
 - `docs/changesets/*.md`
 
-### Step 8 — Update CHANGELOGs
+### Step 8 â€” Update CHANGELOGs
 
 - Add new version entry to `specs/CHANGELOG.md` (spec changelog)
 - Add new version entry to `CHANGELOG.md` (repo changelog)
 
-### Step 9 — Final verification
+### Step 9 â€” Final verification
 
 ```bash
 node scripts/check-spec-version.mjs --version V_0-1-1 --check
-# Should exit 0 — no remaining old references
+# Should exit 0 â€” no remaining old references
 ```
 
 ## File Pattern Reference
@@ -160,7 +160,7 @@ The script scans these glob patterns:
 |---|---|---|---|
 | `specs/*_F.md` (and `_FORMAT.md` for frozen) | Specs & Templates | `spec_version`, `parent.name`, `parent.url` |
 | `specs/*/samples/*_F.md` | Samples | `spec_version`, `spec_url`, `parent.url` |
-| `tests/fixtures/*_F.md` | Test Fixtures | `spec_version`, `spec_url`, `parent.url` |
+| `tests/fixtures/*_F.md` | Test Fixtures (historic, `kb`/`FOLDER` models removed in V_0-2-0) | `spec_version`, `spec_url`, `parent.url` |
 | `tests/fixtures/*.md` | Workspace index | `spec_version` |
 | `apps/**/tests/fixtures/models/*_F.md` | App Fixtures | `spec_version`, `spec_url`, `parent.url` |
 | `apps/**/tests/**/*.test.ts` | Test code | Inline frontmatter strings |
@@ -177,7 +177,7 @@ The script scans these glob patterns:
 When updating URLs, note the two-part version scheme:
 
 ```
-spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-2_FORMAT.md"
+spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/FORMAT_V_0-1-2_FORMAT.md"
                                          ^^^^^^^ ^^^^^^^
                                     repo-tag       spec-file-version
 ```

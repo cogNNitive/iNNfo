@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "Organization Template"
 concepts:
   - name: "Organization"
@@ -61,7 +61,7 @@ matrices:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory.
+> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/innV0/iNNfo).
 
 # Organization Template
 
@@ -97,19 +97,19 @@ The Organization Template is designed to model the human resource structure of a
 
 ### Matrices
 
-| Matrix | Source → Target | Purpose |
+| Matrix | Source â†’ Target | Purpose |
 |---|---|---|
-| Positions-Roles | Position → Roles | Which positions assume which roles |
-| Persons-Positions | Person → Position | Who occupies which position |
+| Positions-Roles | Position â†’ Roles | Which positions assume which roles |
+| Persons-Positions | Person â†’ Position | Who occupies which position |
 
 ### Relationship Types
 
 | Type | Enabled | Representation |
 |---|---|---|
-| Hierarchy | ✅ | index block (wikilinks) |
-| Evaluable matrix | ✅ | Source→target tables |
-| Graph edge | ❌ | Not applicable |
-| Sequence | ❌ | Not applicable |
+| Hierarchy | âœ… | index block (wikilinks) |
+| Evaluable matrix | âœ… | Sourceâ†’target tables |
+| Graph edge | âŒ | Not applicable |
+| Sequence | âŒ | Not applicable |
 
 ## Template
 
@@ -120,11 +120,11 @@ To create an organization model, create a level 3 FILE mode document with:
 ```yaml
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "organization_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Organization Name>"
 ---

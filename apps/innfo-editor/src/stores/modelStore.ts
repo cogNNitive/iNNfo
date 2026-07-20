@@ -224,6 +224,25 @@ export const useModelStore = defineStore('model', {
 
         try {
           const tplFm = parseFrontmatter(text)
+          if (!tplFm?.concepts?.length && !tplFm?.matrices?.length) continue
+
+          // Propagate template matrix declarations to the model root node
+          const tplMatrices = tplFm.matrices
+          if (Array.isArray(tplMatrices) && tplMatrices.length > 0) {
+            if (!root.fields['__matrix_defs']) {
+              root.fields['__matrix_defs'] = {
+                value: tplMatrices.map((m: any) => ({
+                  name: m.name,
+                  source: m.source,
+                  target: m.target,
+                  widgetType: m.widgetType || 'text',
+                  params: m.params || '',
+                })),
+                provenance: { author: { kind: 'system', id: 'parser' }, timestamp: new Date().toISOString() },
+              }
+            }
+          }
+
           if (!tplFm?.concepts?.length) continue
 
           const templateId = `spec:${parentName}`

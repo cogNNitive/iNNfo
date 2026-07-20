@@ -183,7 +183,7 @@ describe('ImportPanel.vue', () => {
     await new Promise((r) => setTimeout(r, 50))
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.text()).not.toContain('innv0-trannsform')
+    expect(wrapper.text()).not.toContain('nn-trannsform')
   })
 
   it('agent prompt does not contain "Files to import:" when input/ is empty', async () => {

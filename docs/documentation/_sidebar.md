@@ -1,5 +1,6 @@
 - [Home](README)
-- [iNNfo Agent (OpenCode)](opencode-innfo-agent)
+- [Using AI with iNNfo](/USE_AI)
+- [iNNfo Agent (OpenCode)](opencode-innfo-agent) — *legacy*
 - [innfo-editor](innfo-editor)
 - [innfo-core](innfo-core)
 - [innfo-mcp](innfo-mcp)

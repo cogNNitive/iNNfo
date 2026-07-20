@@ -1,6 +1,6 @@
 ---
 spec_version: "V_0-1-1"
-spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs/procedures_V_0-1-1_NN.md"
+spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/procedures_V_0-1-1_NN.md"
 model_version: "V_1-0-0"
 level: 3
 parent:
@@ -9,7 +9,7 @@ parent:
 mode: "FILE"
 template: "procedures"
 ---
-> [!NOTE]> This is a **FORMAT document** G�� a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
+> [!NOTE]> This is a **FORMAT document** Gï¿½ï¿½ a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
 # _NN index
 * [[procedure]]
 * [[roles]]

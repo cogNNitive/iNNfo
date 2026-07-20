@@ -82,7 +82,7 @@ see `README.md` in this directory.
 
 ### R-TRF-D02: workflows/ Directory Added
 
-A new `workflows/` subdirectory is created under `traNNsform/` containing two pipeline definition files. These follow the `_NN` format as defined in `innv0-workflow-orchestrator/reference/workflow-format.md`.
+A new `workflows/` subdirectory is created under `traNNsform/` containing two pipeline definition files. These follow the `_NN` format as defined in `nn-workflow-orchestrator/reference/workflow-format.md`.
 
 ### R-TRF-D03: New Workspaces Get workflow/ Directory
 

@@ -1,17 +1,17 @@
 ---
 spec_version: "V_0-1-3"
-spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.2/specs/FORMAT_V_0-1-3_FORMAT.md"
+spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.2/specs/FORMAT_V_0-1-3_FORMAT.md"
 level: 3
 parent:
   name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs/business_V_0-1-1_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/business_V_0-1-1_NN.md"
 model_version: "V_0-0-1"
 title: "Vinyl Records Inc."
 asset_mode: "centralized"
 ---
 
 > [!NOTE]
-> This is a **FORMAT document** — business model for an independent record label using FILE mode.
+> This is a **FORMAT document** â€” business model for an independent record label using FILE mode.
 
 # _F index
 
@@ -67,7 +67,7 @@ Vinyl Records Inc. is an independent record label founded in 2015, specializing 
   impact: high
   owner: curation
   ```
-  Expertly curated reissues spanning jazz, soul, rock, and electronic — each release contextualized with historical essays.
+  Expertly curated reissues spanning jazz, soul, rock, and electronic â€” each release contextualized with historical essays.
 
 * _F Value propositions: Direct-to-fan
   ```yaml

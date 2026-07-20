@@ -1,18 +1,18 @@
 @echo off
 setlocal
 set ROOT=%~dp0
-title cogNNitive Dev Environment
+title iNNfo Dev Environment
 
 echo.
 echo +----------------------------------------------------+
-echo ^|       cogNNitive — Dev Environment                ^|
+echo ^|       iNNfo — Dev Environment                ^|
 echo +----------------------------------------------------+
 echo.
 
 REM ── Kill any previous dev windows (targeted, not all node.exe!) ──
 echo   Cleaning up previous dev servers...
 taskkill /fi "WINDOWTITLE eq innfo-editor*" /f >nul 2>&1
-taskkill /fi "WINDOWTITLE eq cogNNitive - docs*" /f >nul 2>&1
+taskkill /fi "WINDOWTITLE eq iNNfo - docs*" /f >nul 2>&1
 timeout /t 1 /nobreak >nul
 echo   Done.
 echo.
@@ -46,13 +46,13 @@ echo   [innfo-editor] http://localhost:5174
 start "innfo-editor" cmd /c "title innfo-editor && cd /d "%ROOT%" && npm run dev -w @innv0/innfo-editor -- --port 5174 --host"
 
 echo   [docs]          http://localhost:8080
-start "cogNNitive - docs" cmd /c "title cogNNitive - docs && cd /d "%ROOT%" && npx http-server docs/ -p 8080 -c-1 --silent"
+start "iNNfo - docs" cmd /c "title iNNfo - docs && cd /d "%ROOT%" && npx http-server docs/ -p 8080 -c-1 --silent"
 
 echo.
 echo +----------------------------------------------------+
 echo ^|  Server            Window Title               URL  ^|
 echo ^|  innfo-editor    - innfo-editor     - http://localhost:5174 ^|
-echo ^|  docs            - cogNNitive - docs - http://localhost:8080 ^|
+echo ^|  docs            - iNNfo - docs - http://localhost:8080 ^|
 echo +----------------------------------------------------+
 echo.
 echo Each server runs in its own window. Close the windows
@@ -63,7 +63,7 @@ pause >nul
 echo.
 echo Stopping all servers...
 taskkill /fi "WINDOWTITLE eq innfo-editor" /f >nul 2>&1
-taskkill /fi "WINDOWTITLE eq cogNNitive - docs" /f >nul 2>&1
+taskkill /fi "WINDOWTITLE eq iNNfo - docs" /f >nul 2>&1
 echo Done.
 echo.
 

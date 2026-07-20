@@ -5,7 +5,7 @@ import pluginVue from 'eslint-plugin-vue'
 import configPrettier from 'eslint-config-prettier'
 
 /**
- * Flat ESLint config for the cogNNitive monorepo.
+ * Flat ESLint config for the iNNfo monorepo.
  *
  * Scope: TypeScript across all workspaces + Vue SFCs in apps/innfo-editor.
  * Formatting is delegated to Prettier (configPrettier disables stylistic rules),

@@ -11,7 +11,7 @@ The current `exportPrompt` computed property in `ExportPanel.vue` returns:
 ```
 I need to generate an HTML visualizer for the model "{{modelFilename}}".
 
-Load the **innv0-innfo** skill — it handles iNNfo model operations, MCP server activation (innfo-mcp), and visualizer generation. Follow traNNsform/AGENT.md for the export procedure.
+Load the **nn-innfo** skill — it handles iNNfo model operations, MCP server activation (innfo-mcp), and visualizer generation. Follow traNNsform/AGENT.md for the export procedure.
 
 After the skill loads, verify the innfo-mcp MCP server is active (the skill includes this check), then generate the visualizer and save it to traNNsform/output/.
 ```
@@ -40,9 +40,9 @@ Where `{{source.path}}` is the full relative path of the selected model (from `s
 
 | Change | From | To | Why |
 |--------|------|----|-----|
-| **Prefix** | (none — bare prompt) | `innfo:` | Single trigger keyword activates `innv0-router` |
+| **Prefix** | (none — bare prompt) | `innfo:` | Single trigger keyword activates `nn-router` |
 | **Model reference** | Display name (filename only) | `source.path` (full path) | Agent needs the exact file path to read the model — display name is ambiguous |
-| **Skill reference** | `Load the **innv0-innfo** skill` | (removed — implicit) | Router auto-loads on `innfo:` — explicit skill loading is redundant |
+| **Skill reference** | `Load the **nn-innfo** skill` | (removed — implicit) | Router auto-loads on `innfo:` — explicit skill loading is redundant |
 | **Procedure reference** | `Follow traNNsform/AGENT.md` | `Open traNNsform/workflows/export.workflow.md` | Procedure is now a structured workflow file, not monolithic AGENT.md |
 | **MCP verification** | Explicit sentence about innfo-mcp check | (removed — implicit) | Router + workflow-orchestrator handle MCP readiness; not a user concern |
 | **Output path** | `traNNsform/output/` | (implicit via workflow) | Workflow file defines the output path — don't repeat it in the trigger prompt |
@@ -51,13 +51,13 @@ Where `{{source.path}}` is the full relative path of the selected model (from `s
 
 ### R-EXP-D01: Prompt Starts with "innfo:"
 
-The export prompt MUST begin with the literal string `innfo: ` followed by a space, then the instruction. This triggers the `innv0-router` skill.
+The export prompt MUST begin with the literal string `innfo: ` followed by a space, then the instruction. This triggers the `nn-router` skill.
 
 #### Scenario: Copied prompt starts with innfo:
 - GIVEN a model is selected in ExportPanel
 - WHEN the user copies the export prompt
 - THEN the clipboard content starts with `innfo:`
-- AND pasting it into the agent activates the innv0-router
+- AND pasting it into the agent activates the nn-router
 
 ### R-EXP-D02: Prompt Uses source.path
 
@@ -105,7 +105,7 @@ export function innfoPrompt(content: string): string {
 - [ ] Copied prompt starts with `innfo:`
 - [ ] Prompt includes `source.path` (not just filename)
 - [ ] Prompt references `workflows/export.workflow.md`
-- [ ] Explicit skill name (`innv0-innfo`) removed from prompt
+- [ ] Explicit skill name (`nn-innfo`) removed from prompt
 - [ ] Explicit MCP verification sentence removed from prompt
 - [ ] Fallback to old display name when `source.path` is undefined
 - [ ] `ExportNavigator.vue` step 2 prompt also uses `innfoPrompt()`

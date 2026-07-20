@@ -19,7 +19,7 @@ describe('guide.ts prompts (via innfoPrompt)', () => {
     expect(editPrompts.length).toBeGreaterThanOrEqual(1)
     for (const p of editPrompts) {
       expect(p).toMatch(/^innfo: /)
-      expect(p).toContain('innv0-innfo')
+      expect(p).toContain('nn-innfo')
     }
   })
 

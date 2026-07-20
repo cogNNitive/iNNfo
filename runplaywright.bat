@@ -1,11 +1,11 @@
 @echo off
 setlocal
 set ROOT=%~dp0
-title Playwright E2E Runner - cogNNitive
+title Playwright E2E Runner - iNNfo
 
 echo.
 echo +----------------------------------------------------+
-echo ^|   cogNNitive — Playwright E2E Visual Runner        ^|
+echo ^|   iNNfo â€” Playwright E2E Visual Runner        ^|
 echo +----------------------------------------------------+
 echo.
 

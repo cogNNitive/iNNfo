@@ -46,10 +46,10 @@ Chain strategy: pending
 - [x] 3.6 Write Vitest unit test: each panel's prompt starts with `"innfo:"`
 - [x] 3.7 Run `npm run lint` + `npm run typecheck` + `npm run test` on `apps/innfo-editor`
 
-## Phase 4: Skills (iNNv0_skills repo)
+## Phase 4: Skills (actioNN repo)
 
-- [x] 4.1 Update `skills/innv0-router/SKILL.md` — remove `disable-model-invocation: true`, add model-invoked trigger for "innfo"
-- [x] 4.2 Update `skills/innv0-workflow-orchestrator/SKILL.md` — add direct-execution mode branch (load workflow file → run stages sequentially without asking user for each step)
+- [x] 4.1 Update `skills/nn-router/SKILL.md` — remove `disable-model-invocation: true`, add model-invoked trigger for "innfo"
+- [x] 4.2 Update `skills/nn-workflow-orchestrator/SKILL.md` — add direct-execution mode branch (load workflow file → run stages sequentially without asking user for each step)
 
 ## Phase 5: Unified Modal
 

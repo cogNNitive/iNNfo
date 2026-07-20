@@ -131,10 +131,10 @@ export function validateModel(
     }
 
     const conceptType = conceptDef.type
-    if (conceptType === 'text' && elements.length > 1) {
+    if (conceptType === 'text' && elements.length > 0) {
       warnings.push({
         path: `elements.${conceptName}`,
-        message: `Text-type concept "${conceptName}" should have at most 1 element, got ${elements.length}`,
+        message: `Text-type concept "${conceptName}" should use plain Markdown content, not element markers (* _NN ${conceptName}:). Found ${elements.length} element(s).`,
         severity: 'warning',
       })
     }

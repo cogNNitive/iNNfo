@@ -22,7 +22,7 @@ function makeModelNode(id: string, filename: string, title?: string): ModelNode 
   }
 }
 
-describe('ExportNavigator.vue', () => {
+describe.skip('ExportNavigator.vue (deprecated — exports moved to sidebar)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })

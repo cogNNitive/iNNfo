@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-1-1"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
+specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
 title: "Business Template"
 concepts:
   - name: "Business summary"
@@ -537,7 +537,7 @@ matrices:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter.
+> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/innV0/iNNfo).
 
 # Business Template
 
@@ -545,12 +545,12 @@ matrices:
 
 ## Philosophy
 
-The Business Template is designed for modeling complete business strategies in a structured, interconnected way. It follows the belief that a business model is best understood as a network of relationships — between problems and solutions, stakeholders and channels, assumptions and risks — rather than as a linear document.
+The Business Template is designed for modeling complete business strategies in a structured, interconnected way. It follows the belief that a business model is best understood as a network of relationships â€” between problems and solutions, stakeholders and channels, assumptions and risks â€” rather than as a linear document.
 
 ## Objectives
 
 1. Provide a comprehensive set of concepts covering all major business domains: market, strategy, operations, finance, team, legal, and validation.
-2. Enable relationship mapping between concepts via evaluable matrices (Problems↔Value Propositions, Assumptions↔Risks, etc.).
+2. Enable relationship mapping between concepts via evaluable matrices (Problemsâ†”Value Propositions, Assumptionsâ†”Risks, etc.).
 3. Support both narrative (text-type) and scored (weight-type) concepts for mixed qualitative/quantitative modeling.
 4. Serve as the default template for business model authoring in the iNNfo ecosystem.
 
@@ -590,9 +590,9 @@ Each concept has a `type` that determines its representation:
 
 | Marker | Symbol | Purpose |
 |---|---|---|
-| `weight` | `*` | Core importance score (1–10) |
+| `weight` | `*` | Core importance score (1â€“10) |
 | `completion` | `>` | Progress indicator |
-| `certainty` | `?` | Confidence level (1–5) |
+| `certainty` | `?` | Confidence level (1â€“5) |
 | `priority` | `!` | Urgency flag |
 | `rating` | `+` | Quality rating |
 
@@ -600,14 +600,14 @@ Each concept has a `type` that determines its representation:
 
 The template declares the following evaluable matrices:
 
-| Matrix | Source → Target | Purpose |
+| Matrix | Source â†’ Target | Purpose |
 |---|---|---|
-| Journey Map | Journey → Emotions | Customer experience mapping |
-| Problems-Value Propositions | Problems → Value propositions | Solution fit |
-| Value propositions-Messages | Value propositions → Messages | Message alignment |
-| Messages-Channels | Messages → Channels | Channel strategy |
-| Assumptions-Risks | Assumptions → Risks | Risk assessment |
-| Features-Milestones | Features → Milestones | Release planning |
+| Journey Map | Journey â†’ Emotions | Customer experience mapping |
+| Problems-Value Propositions | Problems â†’ Value propositions | Solution fit |
+| Value propositions-Messages | Value propositions â†’ Messages | Message alignment |
+| Messages-Channels | Messages â†’ Channels | Channel strategy |
+| Assumptions-Risks | Assumptions â†’ Risks | Risk assessment |
+| Features-Milestones | Features â†’ Milestones | Release planning |
 
 All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min`.
 
@@ -615,22 +615,22 @@ All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Ne
 
 | Type | Enabled | Representation |
 |---|---|---|
-| Hierarchy | ✅ | index block (wikilinks) |
-| Evaluable matrix | ✅ | Source→target tables |
-| Graph edge | ❌ | Not applicable |
-| Sequence | ✅ | concept type `steps` / `sequence` |
+| Hierarchy | âœ… | index block (wikilinks) |
+| Evaluable matrix | âœ… | Sourceâ†’target tables |
+| Graph edge | âŒ | Not applicable |
+| Sequence | âœ… | concept type `steps` / `sequence` |
 
 ### 6. Taxonomy Index
 
 Concepts are organized in a multi-level hierarchy. The root categories are:
 
 ```
-Market → Segments → Profiles → Persona ...
-Solutions → Products and services → Features ...
-Organization → Team → Goals, Skills, Positions ...
-Finance → Revenue, Costs, Funding sources ...
-Analysis → Assumptions, Risks, SWOT, Keys ...
-Validation → Coherence, Experiments ...
+Market â†’ Segments â†’ Profiles â†’ Persona ...
+Solutions â†’ Products and services â†’ Features ...
+Organization â†’ Team â†’ Goals, Skills, Positions ...
+Finance â†’ Revenue, Costs, Funding sources ...
+Analysis â†’ Assumptions, Risks, SWOT, Keys ...
+Validation â†’ Coherence, Experiments ...
 ```
 
 ## Template
@@ -642,11 +642,11 @@ To create a business model, create a level 3 FILE mode document with:
 ```yaml
 ---
 specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
 level: 3
 parent_spec:
   name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
 model_version: "V_x-y-z"
 title: "<Your Business Name>"
 ---
@@ -688,12 +688,12 @@ The official sample for this template is `specs/v0.1.0/level2/business/samples/G
 When the sample is loaded for the first time:
 
 ```
-📁 Ghostbusters_V_0-1-2_business/
-  📄 Ghostbusters_V_0-1-2_business_NN.md
-  📁 specs/
-    📄 business_V_0-1-1_NN.md         ← this file (downloaded from parent_spec.url)
-    📄 iNNfo_V_0-1-0_NN.md             ← downloaded from this file's parent_spec.url
-    📄 defiNNe_V_0-1-0_NN.md           ← downloaded from iNNfo's parent_spec.url
+ðŸ“ Ghostbusters_V_0-1-2_business/
+  ðŸ“„ Ghostbusters_V_0-1-2_business_NN.md
+  ðŸ“ specs/
+    ðŸ“„ business_V_0-1-1_NN.md         â† this file (downloaded from parent_spec.url)
+    ðŸ“„ iNNfo_V_0-1-0_NN.md             â† downloaded from this file's parent_spec.url
+    ðŸ“„ defiNNe_V_0-1-0_NN.md           â† downloaded from iNNfo's parent_spec.url
 ```
 
 ### Parent Chain
@@ -702,10 +702,10 @@ When the sample is loaded for the first time:
 # From the Ghostbusters sample:
 parent_spec:
   name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
 
 # This template's parent:
 parent_spec:
   name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
 ```

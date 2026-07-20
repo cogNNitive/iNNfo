@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "procedures_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
 model_version: "V_1-0-0"
 title: "Procedures Model Starter"
 mode: "FILE"
@@ -20,7 +20,7 @@ mode: "FILE"
 
 # _NN Procedure
 * _NN Procedure: My Procedure
-  Describe the overall procedure — its purpose, scope, and expected outcomes.
+  Describe the overall procedure â€” its purpose, scope, and expected outcomes.
 
 # _NN Work
 * _NN Work: Step 1
@@ -36,4 +36,4 @@ mode: "FILE"
 
 # _NN Roles
 * _NN Roles: Responsible Role
-  Define who performs this work — their scope, responsibilities, and access level.
+  Define who performs this work â€” their scope, responsibilities, and access level.

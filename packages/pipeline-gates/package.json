@@ -25,6 +25,6 @@
     "vitest": "^1.6.0"
   },
   "dependencies": {
-    "@innv0/cognnitive": "file:../.."
+    "@innv0/innfo": "file:../.."
   }
 }

@@ -1,6 +1,6 @@
-# iNNfo Specification — latest
+# iNNfo Specification â€” latest
 
-> **⚠️ This is a convenience alias.** Files here use stable names (no version numbers). Contents mirror the current active version (`specs/v0.2.0/`).
+> **âš ï¸ This is a convenience alias.** Files here use stable names (no version numbers). Contents mirror the current active version (`specs/v0.2.0/`).
 >
 > When a new spec version is published, this directory is manually synced to point to the latest. For immutable references, pin to the specific version directory (e.g. `specs/v0.2.0/`).
 >
@@ -8,7 +8,7 @@
 
 ## Active Version
 
-**v0.2.0** — Published 2026-07-11
+**v0.2.0** â€” Published 2026-07-11
 
 | File | Canonical Source |
 |---|---|
@@ -20,23 +20,23 @@
 
 ## Stable URLs
 
-These URLs **never change** — they always point to the latest version:
+These URLs **never change** â€” they always point to the latest version:
 
 ```yaml
 # Always the latest defiNNe:
-https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level0/defiNNe_NN.md
+https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level0/defiNNe_NN.md
 
 # Always the latest iNNfo:
-https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level1/iNNfo_NN.md
+https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level1/iNNfo_NN.md
 
 # Always the latest business template:
-https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/business/business_NN.md
+https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/business/business_NN.md
 
 # Always the latest organization template:
-https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/organization/organization_NN.md
+https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/organization/organization_NN.md
 
 # Always the latest procedures template:
-https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level2/procedures/procedures_NN.md
+https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/procedures/procedures_NN.md
 
 ```
 

@@ -1,13 +1,13 @@
-# cogNNitive
+# iNNfo
 
 > The hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.
 
 # Generator: https://skills.innv0.com/innv0-web-design-guide
 
 Pages:
-- [Home](https://innv0.github.io/cogNNitive/index.md): cogNNitive landing page
-- [About](https://innv0.github.io/cogNNitive/about.md): Architecture, app, packages, and specs
-- [iNNfo Modeler](https://innv0.github.io/cogNNitive/documentation/innfo-editor): Workspace editor docs
-- [innfo-core](https://innv0.github.io/cogNNitive/documentation/innfo-core): Parser, resolver, validator library
-- [innfo-mcp](https://innv0.github.io/cogNNitive/documentation/innfo-mcp): MCP server for AI agents
-- [traNNsform](https://innv0.github.io/cogNNitive/documentation/trannsform): Import/export pipeline
+- [Home](https://innv0.github.io/iNNfo/index.md): iNNfo landing page
+- [About](https://innv0.github.io/iNNfo/about.md): Architecture, app, packages, and specs
+- [iNNfo Modeler](https://innv0.github.io/iNNfo/documentation/innfo-editor): Workspace editor docs
+- [innfo-core](https://innv0.github.io/iNNfo/documentation/innfo-core): Parser, resolver, validator library
+- [innfo-mcp](https://innv0.github.io/iNNfo/documentation/innfo-mcp): MCP server for AI agents
+- [traNNsform](https://innv0.github.io/iNNfo/documentation/trannsform): Import/export pipeline

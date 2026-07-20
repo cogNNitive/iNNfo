@@ -32,7 +32,7 @@ import { validateModel, validateModelUrl, applyChange } from './tools/mutate.js'
 /** Root directory for model scanning (defaults to `models/` under CWD) */
 const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd()
 
-const server = new Server({ name: 'innfo-mcp', version: '0.2.0' }, { capabilities: { tools: {} } })
+const server = new Server({ name: 'innfo-mcp', version: '0.2.1' }, { capabilities: { tools: {} } })
 
 /* ── Tool definitions ───────────────────────────────────────── */
 
@@ -56,6 +56,10 @@ const toolDefinitions: Tool[] = [
         id: {
           type: 'string',
           description: 'Model id (filename stem, e.g. Ghostbusters_V_0-1-2_business)',
+        },
+        root: {
+          type: 'string',
+          description: 'Optional models root directory override',
         },
       },
       required: ['id'],
@@ -107,6 +111,10 @@ const toolDefinitions: Tool[] = [
       properties: {
         id: { type: 'string', description: 'Model id (reads from disk)' },
         content: { type: 'string', description: 'Raw model content string (inline)' },
+        root: {
+          type: 'string',
+          description: 'Optional models root directory override (used only with id mode)',
+        },
         template_url: {
           type: 'string',
           description:
@@ -203,7 +211,8 @@ async function handleListModels(args: Record<string, unknown>): Promise<CallTool
 async function handleReadModel(args: Record<string, unknown>): Promise<CallToolResult> {
   const id = args.id as string
   if (!id) return errorResult('Missing required argument: id')
-  const model = await readModel(ROOT_DIR, id)
+  const root = (args.root as string) || ROOT_DIR
+  const model = await readModel(root, id)
   if (!model) return errorResult(`Model not found: ${id}`)
   return textResult(JSON.stringify(model, null, 2))
 }
@@ -240,7 +249,8 @@ async function handleValidateModel(args: Record<string, unknown>): Promise<CallT
   const content = args.content as string | undefined
   const templateUrl = args.template_url as string | undefined
   if (!id && !content) return errorResult('Provide either id or content')
-  const result = await validateModel(ROOT_DIR, id, content, templateUrl)
+  const root = (args.root as string) || ROOT_DIR
+  const result = await validateModel(root, id, content, templateUrl)
   return textResult(JSON.stringify(result, null, 2))
 }
 

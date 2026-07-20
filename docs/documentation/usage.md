@@ -32,21 +32,21 @@ _NN Metrics
 
 Level 2 templates declare the concepts, markers, and relationship types available to a model:
 
-- **business** — business strategy modeling
-- **procedures** — workflows, SOPs, processes
-- **organization** — organizational structure modeling
+- **business** â€” business strategy modeling
+- **procedures** â€” workflows, SOPs, processes
+- **organization** â€” organizational structure modeling
 
 ## Working with the ecosystem
 
 1. Open [innfo-editor](innfo-editor) and start from a starter template, a sample model, or an existing workspace folder.
 2. Edit concepts, elements, and fields through the editor's per-node views.
-3. Validation runs automatically on every parse — check the header badge or open the full validation report.
+3. Validation runs automatically on every parse â€” check the header badge or open the full validation report.
 4. Use the Export/Import panels to generate an agent prompt for the [traNNsform](trannsform) pipeline, or connect an AI agent directly via [innfo-mcp](innfo-mcp).
 
 ## Running the editor
 
 ```bash
-# From the cogNNitive repo root
+# From the iNNfo repo root
 npm install
 npm run build -w @innv0/innfo-core
 npm run dev -w @innv0/innfo-editor

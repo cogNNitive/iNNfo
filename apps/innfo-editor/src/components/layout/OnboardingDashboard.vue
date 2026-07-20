@@ -40,7 +40,7 @@ function selectConcept(conceptName: string): void {
 
 function selectAIGuide(): void {
   uiStore.setActiveAiTab('guide')
-  uiStore.setShowAiModal(true)
+  uiStore.setActiveView('ai-guide')
 }
 </script>
 
@@ -95,7 +95,7 @@ function selectAIGuide(): void {
           </div>
           <div class="space-y-2">
             <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 font-sans">
-              Option B: cogNNitive Visual Editor
+              Option B: iNNfo Visual Editor
             </h2>
             <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
               Explore and visually edit the concepts, matrices, and relationships of your model from this very screen. You can click any node in the left sidebar to access its structured editing view in real-time.

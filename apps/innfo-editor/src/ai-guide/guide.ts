@@ -30,13 +30,13 @@ function unquote(s: string): string {
 function extractPrompt(title: string, yamlLines: string[]): string | null {
   const all = `${title} ${yamlLines.join(' ')}`.toLowerCase()
   if (all.includes('edit model') || all.includes('configure mcp')) {
-    return innfoPrompt('Load the innv0-innfo skill — I need to edit a model')
+    return innfoPrompt('Load the nn-innfo skill — I need to edit a model')
   }
   if (all.includes('import')) {
-    return innfoPrompt('Load the innv0-trannsform skill — I need to import documents from traNNsform/input/ and convert them to iNNfo models')
+    return innfoPrompt('Load the nn-trannsform skill — I need to import documents from traNNsform/input/ and convert them to iNNfo models')
   }
   if (all.includes('export') || all.includes('visualizer') || all.includes('visual')) {
-    return innfoPrompt('Load the innv0-innfo skill — I need to generate an HTML visualizer following traNNsform/AGENT.md')
+    return innfoPrompt('Load the nn-innfo skill — I need to generate an HTML visualizer following traNNsform/AGENT.md')
   }
   return null
 }
@@ -48,7 +48,7 @@ export function parseGuide(content: string): GuideData {
   const steps: WorkStep[] = []
   let matrixHeaders: string[] = []
   const matrixRows: string[][] = []
-  let title = 'Use cogNNitive with AI'
+  let title = 'Use iNNfo with AI'
   const subtitle = 'Edit your iNNfo models using OpenCode'
 
   let currentStep: Partial<WorkStep> | null = null

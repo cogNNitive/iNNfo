@@ -1,4 +1,4 @@
-# MCP Setup — innfo-mcp
+# MCP Setup â€” innfo-mcp
 
 > Investigated: 2026-07-12
 
@@ -14,7 +14,7 @@ No need to clone the repo. Use the bootstrap script, which downloads and caches 
 
 Pick your platform and create the file:
 
-**Windows** — copy `scripts/innfo-mcp.cmd` and `scripts/innfo-mcp.ps1` to a location in your PATH (or use the script below as `%USERPROFILE%\.cache\innfo-mcp\innfo-mcp.cmd`):
+**Windows** â€” copy `scripts/innfo-mcp.cmd` and `scripts/innfo-mcp.ps1` to a location in your PATH (or use the script below as `%USERPROFILE%\.cache\innfo-mcp\innfo-mcp.cmd`):
 
 ```batch
 @echo off
@@ -23,7 +23,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0innfo-mcp.ps1" %*
 
 The `.ps1` script handles all the logic (download, cache, version check):
 
-**macOS / Linux** — save as `~/.cache/innfo-mcp/bootstrap.sh` and `chmod +x`:
+**macOS / Linux** â€” save as `~/.cache/innfo-mcp/bootstrap.sh` and `chmod +x`:
 
 ```sh
 #!/bin/sh
@@ -165,7 +165,7 @@ All clients use the same JSON structure:
   "mcpServers": {
     "innfo-mcp": {
       "command": "node",
-      "args": ["path/to/cogNNitive/packages/innfo-mcp/dist/server.js"]
+      "args": ["path/to/iNNfo/packages/innfo-mcp/dist/server.js"]
     }
   }
 }
@@ -221,8 +221,8 @@ Before editing a model, the agent should verify MCP is available:
 
 1. Check if innfo-mcp tools are listed in the current session's tool list
 2. If not, check the config files above exist
-3. If configured but not loading → the client may need a reload
-4. If not configured → create the workspace-level config file, then ask the user to reload
+3. If configured but not loading â†’ the client may need a reload
+4. If not configured â†’ create the workspace-level config file, then ask the user to reload
 
 ## Updating the bundle
 
@@ -237,7 +237,7 @@ This rebuilds the bundle and copies it to `docs/cdn/innfo-mcp-<version>.bundle.j
 
 ## Related
 
-- `packages/innfo-mcp/` — server source code
-- `docs/cdn/innfo-mcp-v0.2.0.bundle.js` — current published bundle
-- `scripts/innfo-mcp.cmd` — Windows bootstrap script (in repo)
-- `scripts/innfo-mcp.sh` — Unix bootstrap script (in repo)
+- `packages/innfo-mcp/` â€” server source code
+- `docs/cdn/innfo-mcp-v0.2.0.bundle.js` â€” current published bundle
+- `scripts/innfo-mcp.cmd` â€” Windows bootstrap script (in repo)
+- `scripts/innfo-mcp.sh` â€” Unix bootstrap script (in repo)

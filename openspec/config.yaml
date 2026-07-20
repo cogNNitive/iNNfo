@@ -1,7 +1,7 @@
 schema: spec-driven
 strict_tdd: true
 context: |
-  Project: cogNNitive
+  Project: iNNfo
   Type: Monorepo with npm workspaces (packages/*, apps/*)
   Stack: Vue 3, Vite, Tailwind CSS, TypeScript, ESM.
   Components:

@@ -1,8 +1,8 @@
-# Delta: Dev Tooling — Lint, Format, and CI Quality Gate
+# Delta: Dev Tooling â€” Lint, Format, and CI Quality Gate
 
 ## Purpose
 
-Establish an automated code-quality gate for the cogNNitive monorepo so that
+Establish an automated code-quality gate for the iNNfo monorepo so that
 correctness, typing, formatting, and tests are enforced on every change instead of
 depending on author discipline. Adopted in **ratchet** mode: the gate passes on the
 existing codebase and tightens over time.

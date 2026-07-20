@@ -29,5 +29,5 @@ El matcher fue diseñado para ser un dispatch determinístico cross-runtime (Ope
 
 ## Riesgos
 
-- **Perder dispatch determinístico**: ya no hay garantía de que "modelo" → innv0-innfo. El modelo decide según `description`. Aceptable: los skills tienen descripciones claras, y el Post-Mortem cubre los fallos.
+- **Perder dispatch determinístico**: ya no hay garantía de que "modelo" → nn-innfo. El modelo decide según `description`. Aceptable: los skills tienen descripciones claras, y el Post-Mortem cubre los fallos.
 - **Scripts o docs que referencien el matcher**: el explore encontró que NO hay referencias externas a estos archivos (no aparecen en package.json, ningún script los llama, ningún doc los menciona fuera de AGENTS.md).

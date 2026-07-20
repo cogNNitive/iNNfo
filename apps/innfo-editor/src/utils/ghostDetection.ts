@@ -31,6 +31,10 @@ export function isConceptPresent(
       const sectionKeys = Object.keys(root.rawSections)
       if (sectionKeys.some((k) => k.toLowerCase() === lowerName)) return true
     }
+    // Fallback: also check element nodes (in case of incorrect * _NN marker usage)
+    for (const node of Object.values(nodes)) {
+      if (node.type?.toLowerCase() === lowerName) return true
+    }
     return false
   }
 

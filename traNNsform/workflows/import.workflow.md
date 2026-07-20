@@ -1,13 +1,13 @@
 ---
 spec_version: "V_0-2-0"
-spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.2.0/specs/level1/iNNfo_V_0-2-0_NN.md"
+spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.2.0/specs/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "workflow_V_1-0-0"
   url: ""
-type: "innv0-workflow"
+type: "nn-workflow"
 model_version: "V_1-0-0"
-title: "Import Documents — 7-stage pipeline"
+title: "Import Documents â€” 7-stage pipeline"
 description: "Scan source documents, normalize to Markdown, detect template match, and generate iNNfo models"
 ---
 
@@ -15,7 +15,7 @@ description: "Scan source documents, normalize to Markdown, detect template matc
 
 Import external documents and transform them into structured iNNfo models. Follow stages sequentially.
 
-**⚠️ PRE-FLIGHT**: Before starting, ensure innfo-mcp tools are available (run MCP Activation Protocol via innv0-innfo skill). Reference: `docs/mcp-setup.md`.
+**âš ï¸ PRE-FLIGHT**: Before starting, ensure innfo-mcp tools are available (run MCP Activation Protocol via nn-innfo skill). Reference: `docs/mcp-setup.md`.
 
 **Rule**: Do NOT guess or invent data not present in the source document. Every concept and element must trace back to the source.
 
@@ -36,7 +36,7 @@ Import external documents and transform them into structured iNNfo models. Follo
 **Expected output**: List of source file paths, copied to `traNNsform/input/raw/`
 
 ```yaml
-skill: "innv0-trannsform"
+skill: "nn-trannsform"
 template: ""
 input: "traNNsform/input/"
 output: "traNNsform/input/raw/"
@@ -52,9 +52,9 @@ output: "traNNsform/input/raw/"
 
 **Steps**:
 1. Check file extension for each source:
-   - `.txt` / `.md` — plain text, minimal processing needed
-   - `.csv` / `.json` — structured data, parse and extract fields
-   - `.docx` / `.pdf` / `.xlsx` — requires conversion; check if conversion tools are available
+   - `.txt` / `.md` â€” plain text, minimal processing needed
+   - `.csv` / `.json` â€” structured data, parse and extract fields
+   - `.docx` / `.pdf` / `.xlsx` â€” requires conversion; check if conversion tools are available
 2. If a format requires tools not available (e.g., pandoc, python libs), inform the user and offer alternatives
 3. Group files by type for batch processing where possible
 
@@ -78,7 +78,7 @@ output: "traNNsform/input/raw/"
 **Expected output**: Clean Markdown files in `traNNsform/input/md/`
 
 ```yaml
-skill: "innv0-trannsform"
+skill: "nn-trannsform"
 template: ""
 input: "traNNsform/input/raw/"
 output: "traNNsform/input/md/"
@@ -94,18 +94,18 @@ output: "traNNsform/input/md/"
 
 **Steps**:
 1. Analyze the normalized Markdown for domain indicators:
-   - Business concepts (revenue, customers, products, market, team, metrics) → `business`
-   - Procedures (steps, workflow, process, validation, checklist) → `procedures`
-   - Catalog items (entries, categories, attributes, inventory) → `catalog`
-   - Organization structure (roles, hierarchy, departments, reporting) → `organization`
-   - No clear match → `_generic`
+   - Business concepts (revenue, customers, products, market, team, metrics) â†’ `business`
+   - Procedures (steps, workflow, process, validation, checklist) â†’ `procedures`
+   - Catalog items (entries, categories, attributes, inventory) â†’ `catalog`
+   - Organization structure (roles, hierarchy, departments, reporting) â†’ `organization`
+   - No clear match â†’ `_generic`
 2. Present the detected template type to the user for confirmation
 3. Allow the user to override if the detected type is incorrect
 
 **Expected output**: Confirmed template type for model generation
 
 ```yaml
-skill: "innv0-trannsform"
+skill: "nn-trannsform"
 template: "templates/<detected>.md"
 input: "traNNsform/input/md/<normalized>.md"
 output: "<template-type>"
@@ -124,9 +124,9 @@ output: "<template-type>"
    - Extract top-level concepts as `# _NN <ConceptName>` sections
    - Extract fields and attributes as `* _NN <FieldName>: <value>` entries
    - Extract relationships and matrices as `# _NN matrices:` tables
-2. Follow the naming convention from defiNNe (§6 — File Naming Convention):
+2. Follow the naming convention from defiNNe (Â§6 â€” File Naming Convention):
    `<Model>_V_x-y-z_<Template>_NN.md`
-   → https://raw.githubusercontent.com/innV0/cogNNitive/main/specs/latest/level0/defiNNe_NN.md
+   â†’ https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level0/defiNNe_NN.md
 3. Apply standard version `V_1-0-0` for new models
 4. Generate appropriate frontmatter YAML with:
    - `parent_spec` referencing the matching template spec URL
@@ -136,7 +136,7 @@ output: "<template-type>"
 **Expected output**: Saved `_NN.md` model file
 
 ```yaml
-skill: "innv0-trannsform"
+skill: "nn-trannsform"
 template: "templates/<detected>.md"
 input: "traNNsform/input/md/<normalized>.md"
 output: "<Model>_V_1-0-0_<Template>_NN.md"
@@ -180,11 +180,11 @@ output: "validation-status"
 **Goal**: Confirm the import result and suggest follow-up actions.
 
 **Steps**:
-1. Report the saved model path: ✅ `<Model>_V_1-0-0_<Template>_NN.md`
+1. Report the saved model path: âœ… `<Model>_V_1-0-0_<Template>_NN.md`
 2. If validation passed: "The model is valid and ready to use."
 3. If validation had warnings: "The model was created with warnings (see above). You may want to review specific sections."
 4. Ask: "Would you like to add more source documents, or start working with the model in the editor?"
-5. Suggest exporting a visualizer: "You can generate an HTML visualizer from this model — open the export workflow in `workflows/export.workflow.md`."
+5. Suggest exporting a visualizer: "You can generate an HTML visualizer from this model â€” open the export workflow in `workflows/export.workflow.md`."
 
 **Expected output**: Confirmed completion
 
@@ -199,24 +199,24 @@ output: "confirmed"
 
 ## Stage-Skill Matrix
 
-| Stage \ Skill | innv0-trannsform | innfo-mcp |
+| Stage \ Skill | nn-trannsform | innfo-mcp |
 | :--- | :---: | :---: |
-| 1 — Scan Input | X | |
-| 2 — Classify | X | |
-| 3 — Normalize | X | |
-| 4 — Detect Template | X | |
-| 5 — Generate Model | X | |
-| 6 — Validate | | X |
-| 7 — Confirm | | |
+| 1 â€” Scan Input | X | |
+| 2 â€” Classify | X | |
+| 3 â€” Normalize | X | |
+| 4 â€” Detect Template | X | |
+| 5 â€” Generate Model | X | |
+| 6 â€” Validate | | X |
+| 7 â€” Confirm | | |
 
 ## Stage-Artifact Matrix
 
 | Stage \ Artifact | Source File | Raw Copy | Normalized MD | Template Type | Model File | Validation |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| 1 — Scan Input | input | output | | | | |
-| 2 — Classify | input | | | output | | |
-| 3 — Normalize | | input | output | | | |
-| 4 — Detect Domain | | | input | output | | |
-| 5 — Generate Model | | | input | input | output | |
-| 6 — Validate | | | | input | input | output |
-| 7 — Confirm | | | | | verified | verified |
+| 1 â€” Scan Input | input | output | | | | |
+| 2 â€” Classify | input | | | output | | |
+| 3 â€” Normalize | | input | output | | | |
+| 4 â€” Detect Domain | | | input | output | | |
+| 5 â€” Generate Model | | | input | input | output | |
+| 6 â€” Validate | | | | input | input | output |
+| 7 â€” Confirm | | | | | verified | verified |

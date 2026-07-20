@@ -1,11 +1,11 @@
 ---
 spec_version: "V_0-1-1"
 model_version: "V_0-1-1"
-spec_url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md"
+spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md"
 level: 3
 parent:
   name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/cogNNitive/v0.1.1/specs/business_V_0-1-1_NN.md"
+  url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/business_V_0-1-1_NN.md"
 mode: "FILE"
 title: "FORMAT"
 last_saved: "2026-06-26T20:53:24.782Z"
@@ -13,17 +13,17 @@ last_saved: "2026-06-26T20:53:24.782Z"
 ---
 
 > [!NOTE]
-> This is a **FORMAT document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
+> This is a **FORMAT document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
 
 # <!-- _NN --> Business summary
 
-innV0 es una compañía que desarrolla y comercializa **plantillas estructuradas** basadas en el formato abierto FORMAT. Cada plantilla es un producto independiente con su propio público objetivo, propuesta de valor y lógica de monetización. Comparten un backend común: el **engine FORMAT** (especificación open-source + editor de navegador), que se distribuye gratuitamente como habilitador del ecosistema.
+innV0 es una compaÃ±Ã­a que desarrolla y comercializa **plantillas estructuradas** basadas en el formato abierto FORMAT. Cada plantilla es un producto independiente con su propio pÃºblico objetivo, propuesta de valor y lÃ³gica de monetizaciÃ³n. Comparten un backend comÃºn: el **engine FORMAT** (especificaciÃ³n open-source + editor de navegador), que se distribuye gratuitamente como habilitador del ecosistema.
 
-Actualmente hay dos líneas de producto:
+Actualmente hay dos lÃ­neas de producto:
 
-1. **Business Template** — Modelado de estrategia de negocio en un solo archivo Markdown. Para founders, consultores, PMs e inversores. Resuelve el problema de contexto fragmentado para IA y validación de coherencia estratégica.
+1. **Business Template** â€” Modelado de estrategia de negocio en un solo archivo Markdown. Para founders, consultores, PMs e inversores. Resuelve el problema de contexto fragmentado para IA y validaciÃ³n de coherencia estratÃ©gica.
 
-2. **Procedures Template** — Documentación de procesos, workflows y SOPs. Para equipos de ops, engineering leads y compliance. Resuelve el problema de conocimiento tribal no documentado y procedimientos no auditables.
+2. **Procedures Template** â€” DocumentaciÃ³n de procesos, workflows y SOPs. Para equipos de ops, engineering leads y compliance. Resuelve el problema de conocimiento tribal no documentado y procedimientos no auditables.
 
 Cada plantilla se puede consumir gratis (engine local), en la nube (SaaS colaborativo) o en enterprise (on-premise). El modelo de ingresos combina suscripciones SaaS por producto, licencias enterprise y servicios profesionales.
 
@@ -40,7 +40,7 @@ Cada plantilla se puede consumir gratis (engine local), en la nube (SaaS colabor
   ```yaml
   scope: external
   weight: 80
-  interest: "Gestionar múltiples modelos de cliente. Formato portable para análisis con IA."
+  interest: "Gestionar mÃºltiples modelos de cliente. Formato portable para anÃ¡lisis con IA."
   influence: high
   ```
 * <!-- _NN Stakeholders: --> Product Managers (Business Template)
@@ -68,7 +68,7 @@ Cada plantilla se puede consumir gratis (engine local), en la nube (SaaS colabor
   ```yaml
   scope: external
   weight: 90
-  interest: "On-premise, SSO, audit trails, custom templates. Una plataforma para toda la organización."
+  interest: "On-premise, SSO, audit trails, custom templates. Una plataforma para toda la organizaciÃ³n."
   influence: very high
   ```
 * <!-- _NN Stakeholders: --> Open Source Community
@@ -92,8 +92,8 @@ Cada plantilla se puede consumir gratis (engine local), en la nube (SaaS colabor
   ```yaml
   weight: 80
   size: "50K+ firmas"
-  need: "Multi-cliente, informes profesionales, análisis IA"
-  revenue_potential: "Alto — $99–$299/mes por firma"
+  need: "Multi-cliente, informes profesionales, anÃ¡lisis IA"
+  revenue_potential: "Alto â€” $99â€“$299/mes por firma"
   ```
 
 * <!-- _NN Segments: --> Enterprise (ambas templates)
@@ -101,31 +101,31 @@ Cada plantilla se puede consumir gratis (engine local), en la nube (SaaS colabor
   weight: 95
   size: "20K+ empresas 200+ empleados"
   need: "On-premise, SSO, compliance, templates custom, toda la org"
-  revenue_potential: "Muy alto — $10K–$100K/año"
+  revenue_potential: "Muy alto â€” $10Kâ€“$100K/aÃ±o"
   ```
 
 * <!-- _NN Segments: --> Founders & Solopreneurs (Business)
   ```yaml
   weight: 80
   size: "Millones globalmente"
-  need: "Contexto IA gratuito para fundraising y validación"
-  revenue_potential: "Bajo directo (gratis) — alto indirecto (adopción)"
+  need: "Contexto IA gratuito para fundraising y validaciÃ³n"
+  revenue_potential: "Bajo directo (gratis) â€” alto indirecto (adopciÃ³n)"
   ```
 
 * <!-- _NN Segments: --> SMB Strategy Teams (Business)
   ```yaml
   weight: 85
   size: "Cientos de miles"
-  need: "Edición colaborativa, Git integration, AI audits"
-  revenue_potential: "Medio — $29–$99/mes por equipo"
+  need: "EdiciÃ³n colaborativa, Git integration, AI audits"
+  revenue_potential: "Medio â€” $29â€“$99/mes por equipo"
   ```
 
 * <!-- _NN Segments: --> Engineering Teams (Procedures)
   ```yaml
   weight: 75
   size: "Millones de desarrolladores"
-  need: "SOPs de deploy, incident response, code review como código"
-  revenue_potential: "Medio — $19–$79/mes por equipo"
+  need: "SOPs de deploy, incident response, code review como cÃ³digo"
+  revenue_potential: "Medio â€” $19â€“$79/mes por equipo"
   ```
 
 * <!-- _NN Segments: --> Ops & Compliance (Procedures)
@@ -133,7 +133,7 @@ Cada plantilla se puede consumir gratis (engine local), en la nube (SaaS colabor
   weight: 85
   size: "200K+ equipos en industrias reguladas"
   need: "Procedimientos auditables, roles, pasos secuenciados, trazabilidad"
-  revenue_potential: "Alto — $49–$149/mes por equipo"
+  revenue_potential: "Alto â€” $49â€“$149/mes por equipo"
   ```
 
 * <!-- _NN Segments: --> Template Creators (ecosistema futuro)
@@ -141,96 +141,96 @@ Cada plantilla se puede consumir gratis (engine local), en la nube (SaaS colabor
   weight: 50
   size: "Nichos por industria"
   need: "Marketplace para vender templates especializadas"
-  revenue_potential: "Comisión 20-30% por venta"
+  revenue_potential: "ComisiÃ³n 20-30% por venta"
   ```
 
 # <!-- _NN --> Profiles
 
-* <!-- _NN Profiles: --> Solo técnico, pre-seed, 25-40 años, $0-$50/mes
+* <!-- _NN Profiles: --> Solo tÃ©cnico, pre-seed, 25-40 aÃ±os, $0-$50/mes
   ```yaml
   weight: 80
-  demographics: "25-40 años, background técnico, etapa pre-seed o bootstrapped"
-  need: "Documentar modelo de negocio rápido, usar con ChatGPT/Claude para advice estratégico"
-  budget: "$0–$50/mes en herramientas"
+  demographics: "25-40 aÃ±os, background tÃ©cnico, etapa pre-seed o bootstrapped"
+  need: "Documentar modelo de negocio rÃ¡pido, usar con ChatGPT/Claude para advice estratÃ©gico"
+  budget: "$0â€“$50/mes en herramientas"
   behavior: "Descubre tools por Product Hunt, GitHub, Hacker News. Adopta gratis, paga cuando escala."
   template: Business
   ```
-* <!-- _NN Profiles: --> Consultor estratégico, MBA, 30-55 años, $100-$500/mes
+* <!-- _NN Profiles: --> Consultor estratÃ©gico, MBA, 30-55 aÃ±os, $100-$500/mes
   ```yaml
   weight: 85
-  demographics: "30-55 años, MBA, trabaja en boutique o Big4 consulting"
-  need: "Gestionar 5-15 modelos de cliente, producir informes de coherencia, apalancar IA para análisis"
-  budget: "$100–$500/mes en herramientas"
-  behavior: "Evalúa herramientas rigurosamente. Necesita exportación a PPT/PDF para entrega a cliente."
+  demographics: "30-55 aÃ±os, MBA, trabaja en boutique o Big4 consulting"
+  need: "Gestionar 5-15 modelos de cliente, producir informes de coherencia, apalancar IA para anÃ¡lisis"
+  budget: "$100â€“$500/mes en herramientas"
+  behavior: "EvalÃºa herramientas rigurosamente. Necesita exportaciÃ³n a PPT/PDF para entrega a cliente."
   template: Business
   ```
-* <!-- _NN Profiles: --> Líder de ops, 30-50 años, industria regulada, $50-$200/mes
+* <!-- _NN Profiles: --> LÃ­der de ops, 30-50 aÃ±os, industria regulada, $50-$200/mes
   ```yaml
   weight: 80
-  demographics: "30-50 años, industria regulada (fintech, salud, manufactura), rol de ops/compliance"
-  need: "Estandarizar procesos, auditoría, roles claros, trazabilidad regulatoria"
-  budget: "$50–$200/mes en herramientas"
+  demographics: "30-50 aÃ±os, industria regulada (fintech, salud, manufactura), rol de ops/compliance"
+  need: "Estandarizar procesos, auditorÃ­a, roles claros, trazabilidad regulatoria"
+  budget: "$50â€“$200/mes en herramientas"
   behavior: "Adopta por necesidad regulatoria. Valora trazabilidad y compliance por encima de UX."
   template: Procedures
   ```
-* <!-- _NN Profiles: --> Engineering manager, 28-45 años, técnico, $20-$100/mes
+* <!-- _NN Profiles: --> Engineering manager, 28-45 aÃ±os, tÃ©cnico, $20-$100/mes
   ```yaml
   weight: 75
-  demographics: "28-45 años, lidera equipo de ingeniería, background developer"
+  demographics: "28-45 aÃ±os, lidera equipo de ingenierÃ­a, background developer"
   need: "SOPs de deploy, runbooks, incident response documentados y versionados"
-  budget: "$20–$100/mes en herramientas"
-  behavior: "Valora integración con Git, PRs para cambios de proceso, diffs de procedimientos."
+  budget: "$20â€“$100/mes en herramientas"
+  behavior: "Valora integraciÃ³n con Git, PRs para cambios de proceso, diffs de procedimientos."
   template: Procedures
   ```
-* <!-- _NN Profiles: --> Enterprise architect, 40-60 años, C-level/VP, $10K-$100K/año
+* <!-- _NN Profiles: --> Enterprise architect, 40-60 aÃ±os, C-level/VP, $10K-$100K/aÃ±o
   ```yaml
   weight: 90
-  demographics: "40-60 años, director/VP, industria regulada (finance, healthcare, defense)"
+  demographics: "40-60 aÃ±os, director/VP, industria regulada (finance, healthcare, defense)"
   need: "On-premise, SSO, audit trail, templates custom, compliance"
-  budget: "$10K–$100K/año para herramientas estratégicas"
-  behavior: "Requiere procurement process, security review, vendor assessment. Ciclo de decisión largo."
+  budget: "$10Kâ€“$100K/aÃ±o para herramientas estratÃ©gicas"
+  behavior: "Requiere procurement process, security review, vendor assessment. Ciclo de decisiÃ³n largo."
   template: "Ambos"
   ```
 
 # <!-- _NN --> Persona
 
-**Alex Moreno** — Fundador solitario, 32, Barcelona. Construyó un MVP SaaS B2B y prepara ronda pre-seed.
+**Alex Moreno** â€” Fundador solitario, 32, Barcelona. ConstruyÃ³ un MVP SaaS B2B y prepara ronda pre-seed.
 
-Cada mañana abre ChatGPT para trabajar en estrategia — pero gasta 10 minutos reexplicando el negocio. Las respuestas son genéricas porque la IA no tiene contexto completo.
+Cada maÃ±ana abre ChatGPT para trabajar en estrategia â€” pero gasta 10 minutos reexplicando el negocio. Las respuestas son genÃ©ricas porque la IA no tiene contexto completo.
 
-Alex encontró FORMAT + Business Template en GitHub. Ahora tiene un `startup.md`. Lo pega en cualquier conversación con IA. Contexto completo al instante.
+Alex encontrÃ³ FORMAT + Business Template en GitHub. Ahora tiene un `startup.md`. Lo pega en cualquier conversaciÃ³n con IA. Contexto completo al instante.
 
-*Usa el engine gratis. Pagaría cuando el equipo crezca a 3+. No le interesa Procedures Template.*
+*Usa el engine gratis. PagarÃ­a cuando el equipo crezca a 3+. No le interesa Procedures Template.*
 
-**María López** — Ops Lead, 38, fintech regulada en Madrid.
+**MarÃ­a LÃ³pez** â€” Ops Lead, 38, fintech regulada en Madrid.
 
-Necesita documentar 15 procedimientos críticos para auditoría SOC2. Cada procedimiento tiene roles, pasos exactos, y necesita firma de aprobación. Hoy vive en Google Docs sin control de versiones.
+Necesita documentar 15 procedimientos crÃ­ticos para auditorÃ­a SOC2. Cada procedimiento tiene roles, pasos exactos, y necesita firma de aprobaciÃ³n. Hoy vive en Google Docs sin control de versiones.
 
-María usa Procedures Template. Cada procedimiento es un archivo Markdown versionado en Git. Los auditors pueden ver el historial de cambios. El compliance se vuelve trazable.
+MarÃ­a usa Procedures Template. Cada procedimiento es un archivo Markdown versionado en Git. Los auditors pueden ver el historial de cambios. El compliance se vuelve trazable.
 
-*Usa el engine gratis con Procedures Template. Su empresa pagaría por Enterprise para SSO y audit trail.*
+*Usa el engine gratis con Procedures Template. Su empresa pagarÃ­a por Enterprise para SSO y audit trail.*
 
 # <!-- _NN --> Segmentation
 
-* <!-- _NN Segmentation: --> Por Plantilla (línea de negocio)
+* <!-- _NN Segmentation: --> Por Plantilla (lÃ­nea de negocio)
   ```yaml
   weight: 95
-  criteria: "Business (estrategia) vs Procedures (procesos) — audiencias mutuamente excluyentes"
+  criteria: "Business (estrategia) vs Procedures (procesos) â€” audiencias mutuamente excluyentes"
   ```
-* <!-- _NN Segmentation: --> Por Tamaño de Organización
+* <!-- _NN Segmentation: --> Por TamaÃ±o de OrganizaciÃ³n
   ```yaml
   weight: 85
   criteria: "Solo (1), SMB (2-20), Mid-market (20-200), Enterprise (200+)"
   ```
-* <!-- _NN Segmentation: --> Por Madurez Técnica
+* <!-- _NN Segmentation: --> Por Madurez TÃ©cnica
   ```yaml
   weight: 70
-  criteria: "Bajo-código (editor UI), Developer (Git + IA), Enterprise (compliance)"
+  criteria: "Bajo-cÃ³digo (editor UI), Developer (Git + IA), Enterprise (compliance)"
   ```
 * <!-- _NN Segmentation: --> Por Industria
   ```yaml
   weight: 60
-  criteria: "Tech (40%), Consultoría (25%), Fintech/Salud (20%), Otros (15%)"
+  criteria: "Tech (40%), ConsultorÃ­a (25%), Fintech/Salud (20%), Otros (15%)"
   ```
 
 # <!-- _NN --> Market trends
@@ -243,19 +243,19 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
 * <!-- _NN Market trends: --> Knowledge management se fusiona con IA
   ```yaml
   weight: 85
-  description: "Herramientas de documentación (Notion, Confluence) compiten con herramientas de IA. Las templates de FORMAT cubren ambos."
+  description: "Herramientas de documentaciÃ³n (Notion, Confluence) compiten con herramientas de IA. Las templates de FORMAT cubren ambos."
   ```
 * <!-- _NN Market trends: --> Open-source / local-first como ventaja
   ```yaml
   weight: 80
-  description: "Empresas no quieren subir datos estratégicos a servidores de terceros. FORMAT engine corre 100% local."
+  description: "Empresas no quieren subir datos estratÃ©gicos a servidores de terceros. FORMAT engine corre 100% local."
   ```
-* <!-- _NN Market trends: --> Procesos como código
+* <!-- _NN Market trends: --> Procesos como cÃ³digo
   ```yaml
   weight: 75
   description: "SOPs versionados en Git, PRs para cambios de proceso, diff de procedimientos. Procedures template capitaliza esto."
   ```
-* <!-- _NN Market trends: --> Fragmentación de herramientas
+* <!-- _NN Market trends: --> FragmentaciÃ³n de herramientas
   ```yaml
   weight: 70
   description: "Cada equipo usa herramientas distintas. FORMAT unifica el backend. Templates especializan el frontend."
@@ -263,12 +263,12 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
 
 # <!-- _NN --> Market size
 
-**Business Template SAM:** $1.8B (modelado de negocio + contexto IA + planning estratégico)
-**Procedures Template SAM:** $1.2B (documentación de procesos + SOPs + compliance ops)
+**Business Template SAM:** $1.8B (modelado de negocio + contexto IA + planning estratÃ©gico)
+**Procedures Template SAM:** $1.2B (documentaciÃ³n de procesos + SOPs + compliance ops)
 
 **SOM combinado Year 3:** $15M (0.5% de ambos mercados combinados)
 
-| Métrica | Year 1 | Year 2 | Year 3 |
+| MÃ©trica | Year 1 | Year 2 | Year 3 |
 | :--- | ---: | ---: | ---: |
 | Usuarios engine (gratis) | 5,000 | 25,000 | 100,000 |
 | Equipos Business Cloud | 35 | 200 | 900 |
@@ -281,7 +281,7 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
   ```yaml
   weight: 70
   threat: medium
-  diff: "Canvases estáticos, no IA-ready, sin matrices relacionales ni versionado"
+  diff: "Canvases estÃ¡ticos, no IA-ready, sin matrices relacionales ni versionado"
   ```
 * <!-- _NN Competition: --> Notion / Confluence (ambas)
   ```yaml
@@ -305,7 +305,7 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
   ```yaml
   weight: 60
   threat: low
-  diff: "Propietario, sin formato portable, sin especificación abierta"
+  diff: "Propietario, sin formato portable, sin especificaciÃ³n abierta"
   ```
 
 # <!-- _NN --> Problems
@@ -313,29 +313,29 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
 * <!-- _NN Problems: --> IA no tiene contexto de negocio
   ```yaml
   weight: 90
-  description: "Cada conversación con IA arranca de cero. El usuario gasta 10 min reexplicando su negocio antes de obtener respuestas útiles."
+  description: "Cada conversaciÃ³n con IA arranca de cero. El usuario gasta 10 min reexplicando su negocio antes de obtener respuestas Ãºtiles."
   ```
-* <!-- _NN Problems: --> Fragmentación de información estratégica
+* <!-- _NN Problems: --> FragmentaciÃ³n de informaciÃ³n estratÃ©gica
   ```yaml
   weight: 85
-  description: "Slides, Notion, Google Docs, spreadsheets — no hay una fuente única de verdad. La IA no puede leerlas coherentemente."
+  description: "Slides, Notion, Google Docs, spreadsheets â€” no hay una fuente Ãºnica de verdad. La IA no puede leerlas coherentemente."
   ```
 * <!-- _NN Problems: --> Procedimientos no documentados (conocimiento tribal)
   ```yaml
   weight: 80
   description: "El conocimiento de procesos vive en cabezas. Cuando alguien se va, el conocimiento se pierde. Sin procedimientos auditables."
   ```
-* <!-- _NN Problems: --> Modelos de negocio estáticos
+* <!-- _NN Problems: --> Modelos de negocio estÃ¡ticos
   ```yaml
   weight: 75
   description: "Se crean una vez y nunca se actualizan. Obsoletos al guardarlos. Sin versionado ni historia."
   ```
-* <!-- _NN Problems: --> Sin validación de coherencia
+* <!-- _NN Problems: --> Sin validaciÃ³n de coherencia
   ```yaml
   weight: 70
-  description: "No hay forma automática de saber si la estrategia es consistente. Problems pueden no alinearse con features. Métricas sin conectar a goals."
+  description: "No hay forma automÃ¡tica de saber si la estrategia es consistente. Problems pueden no alinearse con features. MÃ©tricas sin conectar a goals."
   ```
-* <!-- _NN Problems: --> Compliance y auditoría sin trazabilidad
+* <!-- _NN Problems: --> Compliance y auditorÃ­a sin trazabilidad
   ```yaml
   weight: 75
   description: "Procedimientos en documentos sueltos. Sin historial de cambios. Los auditores no pueden verificar versiones anteriores."
@@ -346,17 +346,17 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
 * <!-- _NN Value propositions: --> Engine FORMAT gratis + open-source
   ```yaml
   weight: 95
-  description: "El engine es gratuito. Corre 100% en el navegador. Sin servidor, sin cuenta, sin upload. La especificación es abierta."
+  description: "El engine es gratuito. Corre 100% en el navegador. Sin servidor, sin cuenta, sin upload. La especificaciÃ³n es abierta."
   ```
 * <!-- _NN Value propositions: --> Business Template: Un archivo = contexto IA completo
   ```yaml
   weight: 90
   description: "Pega tu archivo .md en ChatGPT/Claude/Gemini. La IA entende tu negocio entero al instante: segmentos, problemas, soluciones, finanzas."
   ```
-* <!-- _NN Value propositions: --> Procedures Template: Procesos como código
+* <!-- _NN Value propositions: --> Procedures Template: Procesos como cÃ³digo
   ```yaml
   weight: 85
-  description: "Cada procedimiento es un archivo Markdown versionado en Git. PRs para cambios de proceso. Diff de procedimientos. Historial de auditoría."
+  description: "Cada procedimiento es un archivo Markdown versionado en Git. PRs para cambios de proceso. Diff de procedimientos. Historial de auditorÃ­a."
   ```
 * <!-- _NN Value propositions: --> Estrategia versionada (Business)
   ```yaml
@@ -376,12 +376,12 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
 * <!-- _NN Value propositions: --> Trazabilidad regulatoria (Procedures)
   ```yaml
   weight: 80
-  description: "Cada cambio en un procedimiento queda registrado. Versiones inmutables. Ideal para SOC2, ISO27001, auditorías."
+  description: "Cada cambio en un procedimiento queda registrado. Versiones inmutables. Ideal para SOC2, ISO27001, auditorÃ­as."
   ```
 * <!-- _NN Value propositions: --> Multi-cliente para consultoras (Business)
   ```yaml
   weight: 65
-  description: "Gestioná 5-15 modelos de cliente simultáneamente. Cada uno es un archivo independiente. IA con contexto completo por cliente."
+  description: "GestionÃ¡ 5-15 modelos de cliente simultÃ¡neamente. Cada uno es un archivo independiente. IA con contexto completo por cliente."
   ```
 
 # <!-- _NN --> Offerings
@@ -389,22 +389,22 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
 * <!-- _NN Offerings: --> FORMAT Engine (Open Source)
   ```yaml
   weight: 100
-  revenue_model: "Gratis — habilita el ecosistema"
-  description: "Especificación abierta + editor de navegador. Parseo, renderizado, matrices, marcadores, graph visualization. MIT license. Corre offline."
+  revenue_model: "Gratis â€” habilita el ecosistema"
+  description: "EspecificaciÃ³n abierta + editor de navegador. Parseo, renderizado, matrices, marcadores, graph visualization. MIT license. Corre offline."
   status: "shipping"
   ```
 * <!-- _NN Offerings: --> Business Template Cloud
   ```yaml
   weight: 95
-  revenue_model: "Suscripción SaaS — línea de negocio 1"
-  description: "Edición colaborativa de modelos de negocio, AI audits, exportación PDF/PPT, Git integration, librerías compartidas."
+  revenue_model: "SuscripciÃ³n SaaS â€” lÃ­nea de negocio 1"
+  description: "EdiciÃ³n colaborativa de modelos de negocio, AI audits, exportaciÃ³n PDF/PPT, Git integration, librerÃ­as compartidas."
   status: "en desarrollo"
   ```
 * <!-- _NN Offerings: --> Procedures Template Cloud
   ```yaml
   weight: 90
-  revenue_model: "Suscripción SaaS — línea de negocio 2"
-  description: "Editor colaborativo de procedimientos, secuencia de pasos, roles, aprobaciones, historial de auditoría, exportación."
+  revenue_model: "SuscripciÃ³n SaaS â€” lÃ­nea de negocio 2"
+  description: "Editor colaborativo de procedimientos, secuencia de pasos, roles, aprobaciones, historial de auditorÃ­a, exportaciÃ³n."
   status: "en desarrollo"
   ```
 * <!-- _NN Offerings: --> Enterprise Suite
@@ -417,14 +417,14 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
 * <!-- _NN Offerings: --> Professional Services
   ```yaml
   weight: 65
-  revenue_model: "Consultoría por hora/proyecto"
-  description: "Workshops de modelado, templates custom, integración con agentes IA, training y onboarding."
+  revenue_model: "ConsultorÃ­a por hora/proyecto"
+  description: "Workshops de modelado, templates custom, integraciÃ³n con agentes IA, training y onboarding."
   status: "planeado"
   ```
 * <!-- _NN Offerings: --> Template Marketplace (futuro)
   ```yaml
   weight: 50
-  revenue_model: "Comisión 20-30%"
+  revenue_model: "ComisiÃ³n 20-30%"
   description: "Marketplace de templates de terceros: industria-specific (healthcare, fintech), methodology-specific (Lean Canvas, Blue Ocean)."
   status: "futuro"
   ```
@@ -435,48 +435,48 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
   ```yaml
   weight: 100
   price: "$0"
-  target: "Todos — adopción sin fricción"
-  constraints: "Solo archivos locales, sin colaboración, sin cloud"
+  target: "Todos â€” adopciÃ³n sin fricciÃ³n"
+  constraints: "Solo archivos locales, sin colaboraciÃ³n, sin cloud"
   ```
 * <!-- _NN Pricing: --> Business Starter
   ```yaml
   weight: 80
   price: "$29/mes (hasta 3 usuarios)"
   target: "Founders, startups early-stage"
-  constraints: "5 modelos activos, AI audits básicos, Git integration"
+  constraints: "5 modelos activos, AI audits bÃ¡sicos, Git integration"
   ```
 * <!-- _NN Pricing: --> Business Professional
   ```yaml
   weight: 85
   price: "$99/mes (hasta 10 usuarios)"
   target: "Consultoras, equipos de estrategia"
-  constraints: "Modelos ilimitados, AI audits avanzados, exportación PDF/PPT"
+  constraints: "Modelos ilimitados, AI audits avanzados, exportaciÃ³n PDF/PPT"
   ```
 * <!-- _NN Pricing: --> Procedures Standard
   ```yaml
   weight: 80
   price: "$49/mes (hasta 10 usuarios)"
   target: "Equipos de ops, engineering"
-  constraints: "Procedimientos ilimitados, historial de auditoría, roles"
+  constraints: "Procedimientos ilimitados, historial de auditorÃ­a, roles"
   ```
 * <!-- _NN Pricing: --> Procedures Professional
   ```yaml
   weight: 75
   price: "$149/mes (usuarios ilimitados)"
   target: "Compliance, industrias reguladas"
-  constraints: "Aprobaciones, reportes de compliance, exportación regulatoria"
+  constraints: "Aprobaciones, reportes de compliance, exportaciÃ³n regulatoria"
   ```
 * <!-- _NN Pricing: --> Enterprise Suite
   ```yaml
   weight: 90
-  price: "$10K–$100K/año (self-hosted)"
+  price: "$10Kâ€“$100K/aÃ±o (self-hosted)"
   target: "Enterprise, gobierno, industria regulada"
   constraints: "Ambas templates, on-premise, SSO, audit, custom, soporte dedicado"
   ```
 * <!-- _NN Pricing: --> Consulting
   ```yaml
   weight: 60
-  price: "$200–$500/hora"
+  price: "$200â€“$500/hora"
   target: "Enterprise onboarding, templates custom"
   ```
 
@@ -486,36 +486,36 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
   ```yaml
   weight: 100
   type: "recurring"
-  projection: "Year 1: $35K · Year 2: $400K · Year 3: $1.6M"
-  description: "Línea de negocio principal. Target 55% de ingresos totales Year 3."
+  projection: "Year 1: $35K Â· Year 2: $400K Â· Year 3: $1.6M"
+  description: "LÃ­nea de negocio principal. Target 55% de ingresos totales Year 3."
   ```
 * <!-- _NN Revenue: --> Procedures Template Cloud
   ```yaml
   weight: 85
   type: "recurring"
-  projection: "Year 1: $12K · Year 2: $150K · Year 3: $700K"
-  description: "Segunda línea de negocio. Target 25% de ingresos totales Year 3."
+  projection: "Year 1: $12K Â· Year 2: $150K Â· Year 3: $700K"
+  description: "Segunda lÃ­nea de negocio. Target 25% de ingresos totales Year 3."
   ```
 * <!-- _NN Revenue: --> Enterprise Licenses
   ```yaml
   weight: 85
   type: "annual contract"
-  projection: "Year 1: $0 · Year 2: $200K · Year 3: $1.2M"
+  projection: "Year 1: $0 Â· Year 2: $200K Â· Year 3: $1.2M"
   description: "Contratos anuales de alto valor. Ambas templates. Target 20% de ingresos Year 3."
   ```
 * <!-- _NN Revenue: --> Professional Services
   ```yaml
   weight: 60
   type: "variable"
-  projection: "Year 1: $10K · Year 2: $80K · Year 3: $250K"
-  description: "Consultoría, training, templates custom. Target 5% de ingresos Year 3."
+  projection: "Year 1: $10K Â· Year 2: $80K Â· Year 3: $250K"
+  description: "ConsultorÃ­a, training, templates custom. Target 5% de ingresos Year 3."
   ```
 * <!-- _NN Revenue: --> Marketplace Commissions
   ```yaml
   weight: 35
   type: "variable"
-  projection: "Year 1: $0 · Year 2: $0 · Year 3: $40K"
-  description: "Futuro. Comisión sobre templates de terceros."
+  projection: "Year 1: $0 Â· Year 2: $0 Â· Year 3: $40K"
+  description: "Futuro. ComisiÃ³n sobre templates de terceros."
   ```
 
 **Revenue Mix Projection (Year 3):**
@@ -534,35 +534,35 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
   ```yaml
   weight: 95
   type: "fixed"
-  estimate: "$200K–$350K/año (2-4 FTEs)"
+  estimate: "$200Kâ€“$350K/aÃ±o (2-4 FTEs)"
   description: "Desarrollo del engine, templates Business y Procedures, infraestructura"
   ```
 * <!-- _NN Costs: --> Cloud Infrastructure
   ```yaml
   weight: 80
   type: "variable"
-  estimate: "$15K–$80K/año (escala con usuarios)"
+  estimate: "$15Kâ€“$80K/aÃ±o (escala con usuarios)"
   description: "Servidores para cloud SaaS de ambas templates, APIs de IA, storage"
   ```
 * <!-- _NN Costs: --> Marketing & Growth
   ```yaml
   weight: 75
   type: "variable"
-  estimate: "$30K–$80K/año"
+  estimate: "$30Kâ€“$80K/aÃ±o"
   description: "Content marketing segmentado por template, SEO, developer relations, comunidad"
   ```
 * <!-- _NN Costs: --> Design & UX
   ```yaml
   weight: 60
   type: "variable"
-  estimate: "$30K–$60K/año"
-  description: "UI/UX de ambas templates, dashboard renderers, documentación visual"
+  estimate: "$30Kâ€“$60K/aÃ±o"
+  description: "UI/UX de ambas templates, dashboard renderers, documentaciÃ³n visual"
   ```
 * <!-- _NN Costs: --> Operations
   ```yaml
   weight: 50
   type: "fixed"
-  estimate: "$15K–$30K/año"
+  estimate: "$15Kâ€“$30K/aÃ±o"
   description: "Herramientas, suscripciones, contabilidad, legal"
   ```
 
@@ -578,13 +578,13 @@ María usa Procedures Template. Cada procedimiento es un archivo Markdown versio
 
 # <!-- _NN --> Funding sources
 
-Bootstrapped. El engine open-source y el contenido orgánico (GitHub, blogs, Product Hunt) mantienen el CAC bajo. Las suscripciones Cloud de ambas templates deben financiar el crecimiento antes de necesitar ronda externa.
+Bootstrapped. El engine open-source y el contenido orgÃ¡nico (GitHub, blogs, Product Hunt) mantienen el CAC bajo. Las suscripciones Cloud de ambas templates deben financiar el crecimiento antes de necesitar ronda externa.
 
-Si Enterprise traction valida el modelo antes de lo esperado, una ronda seed de $500K-$1M podría acelerar el equipo de ventas enterprise.
+Si Enterprise traction valida el modelo antes de lo esperado, una ronda seed de $500K-$1M podrÃ­a acelerar el equipo de ventas enterprise.
 
 # <!-- _NN --> Projections
 
-| Métrica | Year 1 | Year 2 | Year 3 |
+| MÃ©trica | Year 1 | Year 2 | Year 3 |
 | :--- | ---: | ---: | ---: |
 | Usuarios engine (gratis) | 5,000 | 25,000 | 100,000 |
 | Equipos Business Cloud | 35 | 200 | 900 |
@@ -596,37 +596,37 @@ Si Enterprise traction valida el modelo antes de lo esperado, una ronda seed de 
 | Gross Margin | -$233,000 | $305,000 | $3,190,000 |
 | **Runway** | Bootstrapped (pre-ingresos) | Rentable | Auto-sustentable |
 
-Break-even proyectado en Month 22-26, cuando las suscripciones combinadas de ambas templates cruzan la línea de costos.
+Break-even proyectado en Month 22-26, cuando las suscripciones combinadas de ambas templates cruzan la lÃ­nea de costos.
 
 # <!-- _NN --> Unit economics
 
 **Business Starter ($29/mes):**
-- CAC estimado: $120 (adquisición orgánica)
-- LTV estimado: $870 (30 meses retención)
+- CAC estimado: $120 (adquisiciÃ³n orgÃ¡nica)
+- LTV estimado: $870 (30 meses retenciÃ³n)
 - LTV/CAC: 7.3x
 
 **Business Professional ($99/mes):**
-- CAC estimado: $250 (ciclo de evaluación más largo)
-- LTV estimado: $3,960 (40 meses retención)
+- CAC estimado: $250 (ciclo de evaluaciÃ³n mÃ¡s largo)
+- LTV estimado: $3,960 (40 meses retenciÃ³n)
 - LTV/CAC: 15.8x
 
 **Procedures Standard ($49/mes):**
-- CAC estimado: $100 (necesidad inmediata, menor fricción)
-- LTV estimado: $1,470 (30 meses retención)
+- CAC estimado: $100 (necesidad inmediata, menor fricciÃ³n)
+- LTV estimado: $1,470 (30 meses retenciÃ³n)
 - LTV/CAC: 14.7x
 
-**Enterprise ($20K/año promedio):**
+**Enterprise ($20K/aÃ±o promedio):**
 - CAC estimado: $4,000 (ventas asistidas, ciclo largo)
-- LTV estimado: $80,000 (4 años retención)
+- LTV estimado: $80,000 (4 aÃ±os retenciÃ³n)
 - LTV/CAC: 20x
 
-**Clave:** El engine gratuito es el driver de tráfico más eficiente. Conversión estimada free → paid: 2-3% para Business, 4-5% para Procedures (necesidad más inmediata).
+**Clave:** El engine gratuito es el driver de trÃ¡fico mÃ¡s eficiente. ConversiÃ³n estimada free â†’ paid: 2-3% para Business, 4-5% para Procedures (necesidad mÃ¡s inmediata).
 
 # <!-- _NN --> Customer Aquisition Cost
 
 | Canal | Business CAC | Procedures CAC | Volumen |
 | :--- | ---: | ---: | ---: |
-| GitHub / Orgánico | $20 | $20 | Primario |
+| GitHub / OrgÃ¡nico | $20 | $20 | Primario |
 | Content Marketing (SEO) | $80 | $50 | Alto |
 | Developer Relations | $120 | $80 | Medio |
 | Paid Acquisition (Cloud) | $250 | $150 | Medio |
@@ -646,34 +646,34 @@ Break-even proyectado en Month 22-26, cuando las suscripciones combinadas de amb
 
 # <!-- _NN --> Inspiration
 
-El problema es personal: cada vez que abríamos ChatGPT para preguntar algo estratégico, gastábamos 10 min reexplicando el negocio. Las respuestas eran genéricas porque la IA carecía de contexto. Nos dimos cuenta que el problema no era la IA — era cómo empaquetamos el conocimiento.
+El problema es personal: cada vez que abrÃ­amos ChatGPT para preguntar algo estratÃ©gico, gastÃ¡bamos 10 min reexplicando el negocio. Las respuestas eran genÃ©ricas porque la IA carecÃ­a de contexto. Nos dimos cuenta que el problema no era la IA â€” era cÃ³mo empaquetamos el conocimiento.
 
-FORMAT nació de esa convicción: un archivo, machine-readable, versionado, y usable instantáneamente como contexto de IA. Las templates nacieron de ver que diferentes audiencias necesitaban diferentes estructuras.
+FORMAT naciÃ³ de esa convicciÃ³n: un archivo, machine-readable, versionado, y usable instantÃ¡neamente como contexto de IA. Las templates nacieron de ver que diferentes audiencias necesitaban diferentes estructuras.
 
 # <!-- _NN --> Opportunity
 
-Dos mercados grandes convergen con una misma solución de backend:
-1. **Business**: IA necesita contexto estratégico estructurado
+Dos mercados grandes convergen con una misma soluciÃ³n de backend:
+1. **Business**: IA necesita contexto estratÃ©gico estructurado
 2. **Procedures**: Compliance y ops necesitan procesos versionados y auditables
 
-Ambos comparten el mismo engine. Ambos tienen disposición a pagar. Ambos se refuerzan mutuamente: un enterprise que adopta Business Template puede extender a Procedures Template (y viceversa).
+Ambos comparten el mismo engine. Ambos tienen disposiciÃ³n a pagar. Ambos se refuerzan mutuamente: un enterprise que adopta Business Template puede extender a Procedures Template (y viceversa).
 
 # <!-- _NN --> Challenges
 
-* <!-- _NN Challenges: --> Dos productos que dividen atención
+* <!-- _NN Challenges: --> Dos productos que dividen atenciÃ³n
   ```yaml
   weight: 85
-  mitigation: "Engine común minimiza esfuerzo duplicado. Priorizar Business (mayor mercado) sobre Procedures."
+  mitigation: "Engine comÃºn minimiza esfuerzo duplicado. Priorizar Business (mayor mercado) sobre Procedures."
   ```
-* <!-- _NN Challenges: --> Adoption requiere cambio de hábito
+* <!-- _NN Challenges: --> Adoption requiere cambio de hÃ¡bito
   ```yaml
   weight: 80
-  mitigation: "Editor visual baja la barrera. Templates gratuitas eliminan riesgo. Samples (Ghostbusters, FORMAT) muestran el patrón."
+  mitigation: "Editor visual baja la barrera. Templates gratuitas eliminan riesgo. Samples (Ghostbusters, FORMAT) muestran el patrÃ³n."
   ```
 * <!-- _NN Challenges: --> Enterprise sales cycle largo
   ```yaml
   weight: 75
-  mitigation: "Comenzar con Cloud self-serve. Enterprise después de validar product-market fit."
+  mitigation: "Comenzar con Cloud self-serve. Enterprise despuÃ©s de validar product-market fit."
   ```
 * <!-- _NN Challenges: --> Single founder risk
   ```yaml
@@ -683,36 +683,36 @@ Ambos comparten el mismo engine. Ambos tienen disposición a pagar. Ambos se ref
 * <!-- _NN Challenges: --> Competencia indirecta de Notion/Confluence
   ```yaml
   weight: 65
-  mitigation: "Diferenciarse por IA-readiness, open-source, versionado Git. No competir por features — competir por paradigma."
+  mitigation: "Diferenciarse por IA-readiness, open-source, versionado Git. No competir por features â€” competir por paradigma."
   ```
 
 # <!-- _NN --> Business status
 
 FORMAT engine: **shipping** (V_0-1-4 spec). Business y Procedures templates: **en uso** como templates open-source. Cloud tiers: **en desarrollo**. Enterprise: **planeado**.
 
-Revenue actual: $0 (pre-monetización, construyendo adopción).
+Revenue actual: $0 (pre-monetizaciÃ³n, construyendo adopciÃ³n).
 
 # <!-- _NN --> Vision
 
-Un mundo donde cada equipo — sea de estrategia, ops, engineering, o compliance — tenga sus conocimientos estructurados en archivos FORMAT. Donde los agentes de IA no necesiten presentaciones. Donde la coherencia estratégica y la trazabilidad regulatoria se verifiquen automáticamente.
+Un mundo donde cada equipo â€” sea de estrategia, ops, engineering, o compliance â€” tenga sus conocimientos estructurados en archivos FORMAT. Donde los agentes de IA no necesiten presentaciones. Donde la coherencia estratÃ©gica y la trazabilidad regulatoria se verifiquen automÃ¡ticamente.
 
-innV0 es la compañía que hace esto posible: un engine abierto y gratuito, y templates especializadas que diferentes audiencias pagan por usar.
+innV0 es la compaÃ±Ã­a que hace esto posible: un engine abierto y gratuito, y templates especializadas que diferentes audiencias pagan por usar.
 
 # <!-- _NN --> Mission
 
-Dar a cada equipo un formato estándar para estructurar su conocimiento de forma que sea instantáneamente usable por cualquier modelo de IA — eliminando la fragmentación de contexto, habilitando validación automatizada, y haciendo el conocimiento versionable y portable.
+Dar a cada equipo un formato estÃ¡ndar para estructurar su conocimiento de forma que sea instantÃ¡neamente usable por cualquier modelo de IA â€” eliminando la fragmentaciÃ³n de contexto, habilitando validaciÃ³n automatizada, y haciendo el conocimiento versionable y portable.
 
 # <!-- _NN --> Organizational values
 
 * <!-- _NN Organizational values: --> Open by default
   ```yaml
   weight: 95
-  description: "Engine open-source. Especificación abierta. Sin lock-in. Confianza por transparencia."
+  description: "Engine open-source. EspecificaciÃ³n abierta. Sin lock-in. Confianza por transparencia."
   ```
 * <!-- _NN Organizational values: --> Templates as products
   ```yaml
   weight: 90
-  description: "Cada template es un producto. Público propio. Monetización propia. El engine es infraestructura."
+  description: "Cada template es un producto. PÃºblico propio. MonetizaciÃ³n propia. El engine es infraestructura."
   ```
 * <!-- _NN Organizational values: --> Dogfood todo
   ```yaml
@@ -722,7 +722,7 @@ Dar a cada equipo un formato estándar para estructurar su conocimiento de forma
 * <!-- _NN Organizational values: --> Privacidad es feature
   ```yaml
   weight: 85
-  description: "Local-first. Sin telemetría sin permiso. Controles enterprise para gobierno de datos."
+  description: "Local-first. Sin telemetrÃ­a sin permiso. Controles enterprise para gobierno de datos."
   ```
 
 # <!-- _NN --> Organizational goals
@@ -763,22 +763,22 @@ Dar a cada equipo un formato estándar para estructurar su conocimiento de forma
 * <!-- _NN Metrics: --> MAU engine (gratis)
   ```yaml
   weight: 80
-  target: "Y1: 5K · Y2: 25K · Y3: 100K"
+  target: "Y1: 5K Â· Y2: 25K Â· Y3: 100K"
   ```
-* <!-- _NN Metrics: --> Free → Paid conversion (por template)
+* <!-- _NN Metrics: --> Free â†’ Paid conversion (por template)
   ```yaml
   weight: 90
-  target: "Business 2-3% · Procedures 4-5%"
+  target: "Business 2-3% Â· Procedures 4-5%"
   ```
 * <!-- _NN Metrics: --> MRR combinado
   ```yaml
   weight: 100
-  target: "Y1: $4.8K · Y2: $62K · Y3: $290K"
+  target: "Y1: $4.8K Â· Y2: $62K Â· Y3: $290K"
   ```
 * <!-- _NN Metrics: --> Churn mensual
   ```yaml
   weight: 85
-  target: "< 5% Business · < 4% Procedures"
+  target: "< 5% Business Â· < 4% Procedures"
   ```
 * <!-- _NN Metrics: --> NPS por template
   ```yaml
@@ -788,37 +788,37 @@ Dar a cada equipo un formato estándar para estructurar su conocimiento de forma
 
 # <!-- _NN --> Milestones
 
-* <!-- _NN Milestones: --> V_0-2-0 — Engine polish + graph view
+* <!-- _NN Milestones: --> V_0-2-0 â€” Engine polish + graph view
   ```yaml
   weight: 80
   timeframe: "Shipping"
   ```
-* <!-- _NN Milestones: --> V_0-3-0 — AI agent skills
+* <!-- _NN Milestones: --> V_0-3-0 â€” AI agent skills
   ```yaml
   weight: 75
   timeframe: "Shipping"
   ```
-* <!-- _NN Milestones: --> V_0-4-0 — Business Cloud alpha
+* <!-- _NN Milestones: --> V_0-4-0 â€” Business Cloud alpha
   ```yaml
   weight: 95
   timeframe: "Q3 2026"
   ```
-* <!-- _NN Milestones: --> V_0-5-0 — Business Cloud beta + billing
+* <!-- _NN Milestones: --> V_0-5-0 â€” Business Cloud beta + billing
   ```yaml
   weight: 90
   timeframe: "Q4 2026"
   ```
-* <!-- _NN Milestones: --> V_1-1-0 — Procedures Cloud alpha
+* <!-- _NN Milestones: --> V_1-1-0 â€” Procedures Cloud alpha
   ```yaml
   weight: 85
   timeframe: "Q1 2027"
   ```
-* <!-- _NN Milestones: --> V_2-0-0 — Enterprise Suite
+* <!-- _NN Milestones: --> V_2-0-0 â€” Enterprise Suite
   ```yaml
   weight: 80
   timeframe: "Q2 2027"
   ```
-* <!-- _NN Milestones: --> V_3-0-0 — Template Marketplace
+* <!-- _NN Milestones: --> V_3-0-0 â€” Template Marketplace
   ```yaml
   weight: 50
   timeframe: "Q4 2027"
@@ -854,50 +854,50 @@ Dar a cada equipo un formato estándar para estructurar su conocimiento de forma
 * <!-- _NN Features: --> Real-time Collaboration (Cloud)
   ```yaml
   weight: 90
-  status: "planned — ambas templates"
+  status: "planned â€” ambas templates"
   ```
-* <!-- _NN Features: --> AI Coherence Audits (Cloud — Business)
+* <!-- _NN Features: --> AI Coherence Audits (Cloud â€” Business)
   ```yaml
   weight: 85
-  status: "planned — Business template"
+  status: "planned â€” Business template"
   ```
-* <!-- _NN Features: --> Procedure Approval Flow (Cloud — Procedures)
+* <!-- _NN Features: --> Procedure Approval Flow (Cloud â€” Procedures)
   ```yaml
   weight: 80
-  status: "planned — Procedures template"
+  status: "planned â€” Procedures template"
   ```
 * <!-- _NN Features: --> PDF/PPT Export (Cloud)
   ```yaml
   weight: 70
-  status: "planned — ambas templates"
+  status: "planned â€” ambas templates"
   ```
 * <!-- _NN Features: --> SSO / LDAP (Enterprise)
   ```yaml
   weight: 80
-  status: "planned — Enterprise"
+  status: "planned â€” Enterprise"
   ```
 * <!-- _NN Features: --> Custom Metamodel Builder (Enterprise)
   ```yaml
   weight: 75
-  status: "planned — Enterprise"
+  status: "planned â€” Enterprise"
   ```
 
 # <!-- _NN --> Roadmap
 
-**Fase 1 — Engine + Comunidad (Actual):**
-Consolidar el engine open-source. Crecimiento orgánico. Samples y documentación. Las templates Business y Procedures existen como archivos, el valor está en el engine.
+**Fase 1 â€” Engine + Comunidad (Actual):**
+Consolidar el engine open-source. Crecimiento orgÃ¡nico. Samples y documentaciÃ³n. Las templates Business y Procedures existen como archivos, el valor estÃ¡ en el engine.
 
-**Fase 2 — Business Cloud (Q3 2026–Q1 2027):**
-Primera línea de pago. Colaboración en tiempo real, AI audits, exportación. Monetizar la template con mayor mercado.
+**Fase 2 â€” Business Cloud (Q3 2026â€“Q1 2027):**
+Primera lÃ­nea de pago. ColaboraciÃ³n en tiempo real, AI audits, exportaciÃ³n. Monetizar la template con mayor mercado.
 
-**Fase 3 — Procedures Cloud (Q1–Q2 2027):**
-Segunda línea de pago. Aprovechar el engine existente. Público diferente, misma infraestructura cloud. Cross-sell desde Business.
+**Fase 3 â€” Procedures Cloud (Q1â€“Q2 2027):**
+Segunda lÃ­nea de pago. Aprovechar el engine existente. PÃºblico diferente, misma infraestructura cloud. Cross-sell desde Business.
 
-**Fase 4 — Enterprise (Q2 2027+):**
+**Fase 4 â€” Enterprise (Q2 2027+):**
 Self-hosted, SSO, audit. Ambas templates como suite. Contratos anuales de alto valor.
 
-**Fase 5 — Marketplace (Q4 2027+):**
-Templates de terceros. Efectos de red. Comisión por venta.
+**Fase 5 â€” Marketplace (Q4 2027+):**
+Templates de terceros. Efectos de red. ComisiÃ³n por venta.
 
 # <!-- _NN --> Activities
 
@@ -939,12 +939,12 @@ Templates de terceros. Efectos de red. Comisión por venta.
   weight: 100
   type: "intelectual"
   ```
-* <!-- _NN Resources: --> Business Template (especificación + docs)
+* <!-- _NN Resources: --> Business Template (especificaciÃ³n + docs)
   ```yaml
   weight: 90
   type: "intelectual"
   ```
-* <!-- _NN Resources: --> Procedures Template (especificación + docs)
+* <!-- _NN Resources: --> Procedures Template (especificaciÃ³n + docs)
   ```yaml
   weight: 85
   type: "intelectual"
@@ -1003,25 +1003,25 @@ Templates de terceros. Efectos de red. Comisión por venta.
 
 # <!-- _NN --> Assumptions
 
-* <!-- _NN Assumptions: --> Engine gratuito genera adopción orgánica suficiente
+* <!-- _NN Assumptions: --> Engine gratuito genera adopciÃ³n orgÃ¡nica suficiente
   ```yaml
   weight: 90
   certainty: 70
-  validation: "Traction actual en GitHub y crecimiento orgánico lo respaldan"
+  validation: "Traction actual en GitHub y crecimiento orgÃ¡nico lo respaldan"
   ```
 * <!-- _NN Assumptions: --> 2-3% de usuarios Business se convierten a Cloud
   ```yaml
   weight: 80
   certainty: 40
-  validation: "Benchmark de freemium SaaS. Business tiene ciclo de evaluación más largo."
+  validation: "Benchmark de freemium SaaS. Business tiene ciclo de evaluaciÃ³n mÃ¡s largo."
   ```
 * <!-- _NN Assumptions: --> 4-5% de usuarios Procedures se convierten a Cloud
   ```yaml
   weight: 75
   certainty: 45
-  validation: "Necesidad más inmediata (compliance, auditoría) debería dar mejor conversión."
+  validation: "Necesidad mÃ¡s inmediata (compliance, auditorÃ­a) deberÃ­a dar mejor conversiÃ³n."
   ```
-* <!-- _NN Assumptions: --> Enterprise paga $10K-$100K/año por suite
+* <!-- _NN Assumptions: --> Enterprise paga $10K-$100K/aÃ±o por suite
   ```yaml
   weight: 75
   certainty: 30
@@ -1030,18 +1030,18 @@ Templates de terceros. Efectos de red. Comisión por venta.
 
 # <!-- _NN --> Risks
 
-* <!-- _NN Risks: --> Cloud no gana tracción
+* <!-- _NN Risks: --> Cloud no gana tracciÃ³n
   ```yaml
   weight: 80
   severity: high
   mitigation: "Beta con usuarios antes de build completo. Engine free como fallback."
-  contingency: "Pivot a consultoría usando el engine como diferenciador."
+  contingency: "Pivot a consultorÃ­a usando el engine como diferenciador."
   ```
 * <!-- _NN Risks: --> Dos templates diluyen foco
   ```yaml
   weight: 75
   severity: medium
-  mitigation: "Priorizar Business Cloud. Procedures Cloud después de validar Business."
+  mitigation: "Priorizar Business Cloud. Procedures Cloud despuÃ©s de validar Business."
   ```
 * <!-- _NN Risks: --> Enterprise sales cycle muy largo para bootstrapped
   ```yaml
@@ -1050,7 +1050,7 @@ Templates de terceros. Efectos de red. Comisión por venta.
   mitigation: "Cloud self-serve primero. Enterprise desde Year 2."
   contingency: "Seed round para equipo de ventas enterprise."
   ```
-* <!-- _NN Risks: --> Competidor grande copia el patrón
+* <!-- _NN Risks: --> Competidor grande copia el patrÃ³n
   ```yaml
   weight: 60
   severity: medium
@@ -1062,18 +1062,18 @@ Templates de terceros. Efectos de red. Comisión por venta.
 **Strengths:**
 - Engine open-source, local-first (trust advantage)
 - Dos templates cubren mercados distintos con mismo backend
-- Dogfooded — usamos FORMAT para modelar FORMAT
-- AI agent skills para creación asistida de modelos
+- Dogfooded â€” usamos FORMAT para modelar FORMAT
+- AI agent skills para creaciÃ³n asistida de modelos
 - Estructura de costos baja (bootstrapped)
 
 **Weaknesses:**
 - Single founder (key-person risk)
-- Sin revenue todavía (pre-monetización)
+- Sin revenue todavÃ­a (pre-monetizaciÃ³n)
 - Cloud tiers sin construir
 - Dos productos para una sola persona
 
 **Opportunities:**
-- Adopción masiva de IA creando demanda de contexto estructurado
+- AdopciÃ³n masiva de IA creando demanda de contexto estructurado
 - Compliance y regulaciones impulsando necesidad de trazabilidad
 - Consulting firms necesitando multi-cliente
 - Template marketplace como efecto de red futuro
@@ -1085,11 +1085,11 @@ Templates de terceros. Efectos de red. Comisión por venta.
 
 # <!-- _NN --> Unfair advantage
 
-**El moat no es el engine — es el ecosistema de templates.**
+**El moat no es el engine â€” es el ecosistema de templates.**
 
-Cada template que creamos (Business, Procedures, futuras) es un producto independiente con su propio mercado. Pero comparten un engine común, una especificación abierta, y una comunidad. Esto crea un efecto de red en la capa de formato, no en la capa de plataforma.
+Cada template que creamos (Business, Procedures, futuras) es un producto independiente con su propio mercado. Pero comparten un engine comÃºn, una especificaciÃ³n abierta, y una comunidad. Esto crea un efecto de red en la capa de formato, no en la capa de plataforma.
 
-Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, procesos, compliance), más valioso se vuelve el ecosistema. Y como la especificación es abierta, cualquiera puede crear templates — pero nosotros somos quienes definimos las oficiales y construimos el Cloud alrededor de ellas.
+Cuanto mÃ¡s adopta la gente FORMAT para distintas necesidades (estrategia, procesos, compliance), mÃ¡s valioso se vuelve el ecosistema. Y como la especificaciÃ³n es abierta, cualquiera puede crear templates â€” pero nosotros somos quienes definimos las oficiales y construimos el Cloud alrededor de ellas.
 
 # <!-- _NN matrices: --> item-markers matrix
 
@@ -1110,34 +1110,34 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 | Ops & Compliance (Procedures) | - | - | - | - | - |
 | Enterprise (ambas templates) | - | - | - | - | - |
 | Template Creators (ecosistema futuro) | - | - | - | - | - |
-| Solo técnico, pre-seed, 25-40 años, $0-$50/mes | - | - | - | - | - |
-| Consultor estratégico, MBA, 30-55 años, $100-$500/mes | - | - | - | - | - |
-| Líder de ops, 30-50 años, industria regulada, $50-$200/mes | - | - | - | - | - |
-| Engineering manager, 28-45 años, técnico, $20-$100/mes | - | - | - | - | - |
-| Enterprise architect, 40-60 años, C-level/VP, $10K-$100K/año | - | - | - | - | - |
-| Por Plantilla (línea de negocio) | - | - | - | - | - |
-| Por Tamaño de Organización | - | - | - | - | - |
-| Por Madurez Técnica | - | - | - | - | - |
+| Solo tÃ©cnico, pre-seed, 25-40 aÃ±os, $0-$50/mes | - | - | - | - | - |
+| Consultor estratÃ©gico, MBA, 30-55 aÃ±os, $100-$500/mes | - | - | - | - | - |
+| LÃ­der de ops, 30-50 aÃ±os, industria regulada, $50-$200/mes | - | - | - | - | - |
+| Engineering manager, 28-45 aÃ±os, tÃ©cnico, $20-$100/mes | - | - | - | - | - |
+| Enterprise architect, 40-60 aÃ±os, C-level/VP, $10K-$100K/aÃ±o | - | - | - | - | - |
+| Por Plantilla (lÃ­nea de negocio) | - | - | - | - | - |
+| Por TamaÃ±o de OrganizaciÃ³n | - | - | - | - | - |
+| Por Madurez TÃ©cnica | - | - | - | - | - |
 | Por Industria | - | - | - | - | - |
 | IA necesita contexto estructurado | - | - | - | - | - |
 | Knowledge management se fusiona con IA | - | - | - | - | - |
 | Open-source / local-first como ventaja | - | - | - | - | - |
-| Procesos como código | - | - | - | - | - |
-| Fragmentación de herramientas | - | - | - | - | - |
+| Procesos como cÃ³digo | - | - | - | - | - |
+| FragmentaciÃ³n de herramientas | - | - | - | - | - |
 | Strategyzer / Canvanizer (Business) | - | - | - | - | - |
 | Notion / Confluence (ambas) | - | - | - | - | - |
 | Miro / Mural (Business) | - | - | - | - | - |
 | Process.st / SweetProcess (Procedures) | - | - | - | - | - |
 | Confluence Whiteboards (Procedures) | - | - | - | - | - |
 | IA no tiene contexto de negocio | - | - | - | - | - |
-| Fragmentación de información estratégica | - | - | - | - | - |
+| FragmentaciÃ³n de informaciÃ³n estratÃ©gica | - | - | - | - | - |
 | Procedimientos no documentados (conocimiento tribal) | - | - | - | - | - |
-| Modelos de negocio estáticos | - | - | - | - | - |
-| Sin validación de coherencia | - | - | - | - | - |
-| Compliance y auditoría sin trazabilidad | - | - | - | - | - |
+| Modelos de negocio estÃ¡ticos | - | - | - | - | - |
+| Sin validaciÃ³n de coherencia | - | - | - | - | - |
+| Compliance y auditorÃ­a sin trazabilidad | - | - | - | - | - |
 | Engine FORMAT gratis + open-source | - | - | - | - | - |
 | Business Template: Un archivo = contexto IA completo | - | - | - | - | - |
-| Procedures Template: Procesos como código | - | - | - | - | - |
+| Procedures Template: Procesos como cÃ³digo | - | - | - | - | - |
 | Estrategia versionada (Business) | - | - | - | - | - |
 | Coherencia automatizada (Business) | - | - | - | - | - |
 | Matrices relacionales (Business) | - | - | - | - | - |
@@ -1162,8 +1162,8 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 | Marketing & Growth | - | - | - | - | - |
 | Design & UX | - | - | - | - | - |
 | Operations | - | - | - | - | - |
-| Dos productos que dividen atención | - | - | - | - | - |
-| Adoption requiere cambio de hábito | - | - | - | - | - |
+| Dos productos que dividen atenciÃ³n | - | - | - | - | - |
+| Adoption requiere cambio de hÃ¡bito | - | - | - | - | - |
 | Enterprise sales cycle largo | - | - | - | - | - |
 | Single founder risk | - | - | - | - | - |
 | Competencia indirecta de Notion/Confluence | - | - | - | - | - |
@@ -1178,25 +1178,25 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 | Enterprise GA Year 2 | - | - | - | - | - |
 | Break-even Year 2 | - | - | - | - | - |
 | MAU engine (gratis) | - | - | - | - | - |
-| Free → Paid conversion (por template) | - | - | - | - | - |
+| Free â†’ Paid conversion (por template) | - | - | - | - | - |
 | MRR combinado | - | - | - | - | - |
 | Churn mensual | - | - | - | - | - |
 | NPS por template | - | - | - | - | - |
-| V_0-2-0 — Engine polish + graph view | - | - | - | - | - |
-| V_0-3-0 — AI agent skills | - | - | - | - | - |
-| V_0-4-0 — Business Cloud alpha | - | - | - | - | - |
-| V_0-5-0 — Business Cloud beta + billing | - | - | - | - | - |
-| V_1-1-0 — Procedures Cloud alpha | - | - | - | - | - |
-| V_2-0-0 — Enterprise Suite | - | - | - | - | - |
-| V_3-0-0 — Template Marketplace | - | - | - | - | - |
+| V_0-2-0 â€” Engine polish + graph view | - | - | - | - | - |
+| V_0-3-0 â€” AI agent skills | - | - | - | - | - |
+| V_0-4-0 â€” Business Cloud alpha | - | - | - | - | - |
+| V_0-5-0 â€” Business Cloud beta + billing | - | - | - | - | - |
+| V_1-1-0 â€” Procedures Cloud alpha | - | - | - | - | - |
+| V_2-0-0 â€” Enterprise Suite | - | - | - | - | - |
+| V_3-0-0 â€” Template Marketplace | - | - | - | - | - |
 | Markdown Editor (engine) | - | - | - | - | - |
 | Graph Visualization (engine) | - | - | - | - | - |
 | Relational Matrix Grid (engine) | - | - | - | - | - |
 | Marker Scoring (engine) | - | - | - | - | - |
 | Version Bump (engine) | - | - | - | - | - |
 | Real-time Collaboration (Cloud) | - | - | - | - | - |
-| AI Coherence Audits (Cloud — Business) | - | - | - | - | - |
-| Procedure Approval Flow (Cloud — Procedures) | - | - | - | - | - |
+| AI Coherence Audits (Cloud â€” Business) | - | - | - | - | - |
+| Procedure Approval Flow (Cloud â€” Procedures) | - | - | - | - | - |
 | PDF/PPT Export (Cloud) | - | - | - | - | - |
 | SSO / LDAP (Enterprise) | - | - | - | - | - |
 | Custom Metamodel Builder (Enterprise) | - | - | - | - | - |
@@ -1206,8 +1206,8 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 | Content Marketing (dual: Business + Procedures) | - | - | - | - | - |
 | Community Management | - | - | - | - | - |
 | Enterprise Sales | - | - | - | - | - |
-| Business Template (especificación + docs) | - | - | - | - | - |
-| Procedures Template (especificación + docs) | - | - | - | - | - |
+| Business Template (especificaciÃ³n + docs) | - | - | - | - | - |
+| Procedures Template (especificaciÃ³n + docs) | - | - | - | - | - |
 | AI Agent Skills | - | - | - | - | - |
 | GitHub Community | - | - | - | - | - |
 | Product Engineering (engine + templates) | - | - | - | - | - |
@@ -1218,14 +1218,14 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 | Cloud Backend Engineer | - | - | - | - | - |
 | Marketing & Community | - | - | - | - | - |
 | Lucas Cervera | - | - | - | - | - |
-| Engine gratuito genera adopción orgánica suficiente | - | - | - | - | - |
+| Engine gratuito genera adopciÃ³n orgÃ¡nica suficiente | - | - | - | - | - |
 | 2-3% de usuarios Business se convierten a Cloud | - | - | - | - | - |
 | 4-5% de usuarios Procedures se convierten a Cloud | - | - | - | - | - |
-| Enterprise paga $10K-$100K/año por suite | - | - | - | - | - |
-| Cloud no gana tracción | - | - | - | - | - |
+| Enterprise paga $10K-$100K/aÃ±o por suite | - | - | - | - | - |
+| Cloud no gana tracciÃ³n | - | - | - | - | - |
 | Dos templates diluyen foco | - | - | - | - | - |
 | Enterprise sales cycle muy largo para bootstrapped | - | - | - | - | - |
-| Competidor grande copia el patrón | - | - | - | - | - |
+| Competidor grande copia el patrÃ³n | - | - | - | - | - |
 
 # <!-- _NN matrices: --> metamatrix
 
@@ -1247,23 +1247,23 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 
 # <!-- _NN matrices: --> segmentation-profiles matrix
 
-| Segmentation \ Profiles | Solo técnico, pre-seed, 25-40 años, $0-$50/mes | Consultor estratégico, MBA, 30-55 años, $100-$500/mes | Líder de ops, 30-50 años, industria regulada, $50-$200/mes | Engineering manager, 28-45 años, técnico, $20-$100/mes | Enterprise architect, 40-60 años, C-level/VP, $10K-$100K/año |
+| Segmentation \ Profiles | Solo tÃ©cnico, pre-seed, 25-40 aÃ±os, $0-$50/mes | Consultor estratÃ©gico, MBA, 30-55 aÃ±os, $100-$500/mes | LÃ­der de ops, 30-50 aÃ±os, industria regulada, $50-$200/mes | Engineering manager, 28-45 aÃ±os, tÃ©cnico, $20-$100/mes | Enterprise architect, 40-60 aÃ±os, C-level/VP, $10K-$100K/aÃ±o |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| Por Plantilla (línea de negocio) | - | - | - | - | - |
-| Por Tamaño de Organización | - | - | - | - | - |
-| Por Madurez Técnica | - | - | - | - | - |
+| Por Plantilla (lÃ­nea de negocio) | - | - | - | - | - |
+| Por TamaÃ±o de OrganizaciÃ³n | - | - | - | - | - |
+| Por Madurez TÃ©cnica | - | - | - | - | - |
 | Por Industria | - | - | - | - | - |
 
 # <!-- _NN matrices: --> problems-value propositions matrix
 
-| Problems \ Value propositions | Engine FORMAT gratis + open-source | Business Template: Un archivo = contexto IA completo | Procedures Template: Procesos como código | Estrategia versionada (Business) | Coherencia automatizada (Business) | Matrices relacionales (Business) | Trazabilidad regulatoria (Procedures) | Multi-cliente para consultoras (Business) |
+| Problems \ Value propositions | Engine FORMAT gratis + open-source | Business Template: Un archivo = contexto IA completo | Procedures Template: Procesos como cÃ³digo | Estrategia versionada (Business) | Coherencia automatizada (Business) | Matrices relacionales (Business) | Trazabilidad regulatoria (Procedures) | Multi-cliente para consultoras (Business) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | IA no tiene contexto de negocio | - | - | - | - | - | - | - | - |
-| Fragmentación de información estratégica | - | - | - | - | - | - | - | - |
+| FragmentaciÃ³n de informaciÃ³n estratÃ©gica | - | - | - | - | - | - | - | - |
 | Procedimientos no documentados (conocimiento tribal) | - | - | - | - | - | - | - | - |
-| Modelos de negocio estáticos | - | - | - | - | - | - | - | - |
-| Sin validación de coherencia | - | - | - | - | - | - | - | - |
-| Compliance y auditoría sin trazabilidad | - | - | - | - | - | - | - | - |
+| Modelos de negocio estÃ¡ticos | - | - | - | - | - | - | - | - |
+| Sin validaciÃ³n de coherencia | - | - | - | - | - | - | - | - |
+| Compliance y auditorÃ­a sin trazabilidad | - | - | - | - | - | - | - | - |
 
 # <!-- _NN matrices: --> value propositions-messages matrix
 
@@ -1271,7 +1271,7 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 | :--- |  |
 | Engine FORMAT gratis + open-source |  |
 | Business Template: Un archivo = contexto IA completo |  |
-| Procedures Template: Procesos como código |  |
+| Procedures Template: Procesos como cÃ³digo |  |
 | Estrategia versionada (Business) |  |
 | Coherencia automatizada (Business) |  |
 | Matrices relacionales (Business) |  |
@@ -1285,7 +1285,7 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 
 # <!-- _NN matrices: --> features-milestones matrix
 
-| Features \ Milestones | V_0-2-0 — Engine polish + graph view | V_0-3-0 — AI agent skills | V_0-4-0 — Business Cloud alpha | V_0-5-0 — Business Cloud beta + billing | V_1-1-0 — Procedures Cloud alpha | V_2-0-0 — Enterprise Suite | V_3-0-0 — Template Marketplace |
+| Features \ Milestones | V_0-2-0 â€” Engine polish + graph view | V_0-3-0 â€” AI agent skills | V_0-4-0 â€” Business Cloud alpha | V_0-5-0 â€” Business Cloud beta + billing | V_1-1-0 â€” Procedures Cloud alpha | V_2-0-0 â€” Enterprise Suite | V_3-0-0 â€” Template Marketplace |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | Markdown Editor (engine) | - | - | - | - | - | - | - |
 | Graph Visualization (engine) | - | - | - | - | - | - | - |
@@ -1293,15 +1293,15 @@ Cuanto más adopta la gente FORMAT para distintas necesidades (estrategia, proce
 | Marker Scoring (engine) | - | - | - | - | - | - | - |
 | Version Bump (engine) | - | - | - | - | - | - | - |
 | Real-time Collaboration (Cloud) | - | - | - | - | - | - | - |
-| AI Coherence Audits (Cloud — Business) | - | - | - | - | - | - | - |
-| Procedure Approval Flow (Cloud — Procedures) | - | - | - | - | - | - | - |
+| AI Coherence Audits (Cloud â€” Business) | - | - | - | - | - | - | - |
+| Procedure Approval Flow (Cloud â€” Procedures) | - | - | - | - | - | - | - |
 | PDF/PPT Export (Cloud) | - | - | - | - | - | - | - |
 | SSO / LDAP (Enterprise) | - | - | - | - | - | - | - |
 | Custom Metamodel Builder (Enterprise) | - | - | - | - | - | - | - |
 
 # <!-- _NN matrices: --> activities-resources matrix
 
-| Activities \ Resources | FORMAT Engine (open source) | Business Template (especificación + docs) | Procedures Template (especificación + docs) | AI Agent Skills | GitHub Community |
+| Activities \ Resources | FORMAT Engine (open source) | Business Template (especificaciÃ³n + docs) | Procedures Template (especificaciÃ³n + docs) | AI Agent Skills | GitHub Community |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | Engine Development | - | - | - | Very High | Very High |
 | Business Template Cloud Development | - | - | - | - | - |

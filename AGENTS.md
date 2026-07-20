@@ -1,4 +1,4 @@
-# cogNNitive Agent Instructions
+# iNNfo Agent Instructions
 
 ## SDD Default Preferences
 
@@ -9,11 +9,22 @@ Estas preferencias se aplican a todos los cambios SDD en este proyecto a menos q
 - **PR Strategy**: `single-pr-default` (un solo PR, a menos que la estimación exceda el presupuesto)
 - **Review Budget**: `800` líneas máximas antes de parar y preguntar
 
-## Skill Loading
+## AI Agent Setup
 
-cogNNitive usa el mecanismo nativo de OpenCode para descubrir y cargar skills. Los skills están definidos en `available_skills` del system prompt y se cargan via la tool `skill`.
+For AI-assisted work with iNNfo models (create, edit, validate, transform), install the **actioNN suite**:
 
-### Skills del proyecto
+```bash
+# Clone or junction actioNN into your OpenCode agents directory
+git clone https://github.com/cogNNitive/actioNN.git ~/.agents/skills/actioNN
+
+# Ensure the MCP server bundle is available
+cd ~/.agents/skills/actioNN
+node scripts/update-mcp.js
+```
+
+See [USE_AI.md](USE_AI.md) for full details.
+
+### Project Skills
 
 Los skills definidos en `.agents/skills/` se cargan automáticamente según la descripción de cada uno. Si un skill no se carga cuando corresponde, invocá `/skill-name` o pedí "cargá el skill X" para cargarlo manualmente.
 

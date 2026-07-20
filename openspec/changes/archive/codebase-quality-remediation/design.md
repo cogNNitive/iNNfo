@@ -1,13 +1,13 @@
 # Design: Codebase Quality Remediation
 
-Fix 29 issues across the cogNNitive monorepo. Pure remediation — no new features, no architectural rewrites.
+Fix 29 issues across the iNNfo monorepo. Pure remediation â€” no new features, no architectural rewrites.
 
 ## Quick path
 
-1. **Critical (FORMAT)** — Fix the level-3 model frontmatter: remove inline `template:` block, fix closing delimiter, update `specification_url` (1 file)
-2. **High (Build + UX)** — Fix Vite config for browser builds, fix `collectDirectoryEntries` async, fix RecentFolders argument passing
-3. **Medium (Quality + Types)** — Add matrix serialization, replace `any` types, extract shared composable, add tests
-4. **Low (Cleanup)** — Cancel setTimeout on dismiss, computed filter, dead code removal, minor fixes
+1. **Critical (FORMAT)** â€” Fix the level-3 model frontmatter: remove inline `template:` block, fix closing delimiter, update `specification_url` (1 file)
+2. **High (Build + UX)** â€” Fix Vite config for browser builds, fix `collectDirectoryEntries` async, fix RecentFolders argument passing
+3. **Medium (Quality + Types)** â€” Add matrix serialization, replace `any` types, extract shared composable, add tests
+4. **Low (Cleanup)** â€” Cancel setTimeout on dismiss, computed filter, dead code removal, minor fixes
 
 ## Priority Order & Dependencies
 
@@ -25,17 +25,17 @@ Fix 29 issues across the cogNNitive monorepo. Pure remediation — no new featur
 | 10 | G10: Dead Code Cleanup | None |
 | 11 | G11: Minor Fixes | None |
 
-All groups are independent — no ordering constraints between them. Can be implemented and tested in any order.
+All groups are independent â€” no ordering constraints between them. Can be implemented and tested in any order.
 
 ---
 
-## G1 — FORMAT Spec Fixes
+## G1 â€” FORMAT Spec Fixes
 
 ### Approach
 
-Edit the level-3 business model to conform to FORMAT §3 for models:
+Edit the level-3 business model to conform to FORMAT Â§3 for models:
 
-1. **Remove inline `template:` block**: Lines 10–314 of `models/FORMAT_V_0-1-1_business_FORMAT.md` contain a full `template:` block with concepts, markers, and matrices — this is level-2 data that belongs in the template spec (`specs/business_V_0-1-1_FORMAT.md`), not in the model. The model's parent template reference is already correct via `parent.name`/`parent.url`.
+1. **Remove inline `template:` block**: Lines 10â€“314 of `models/FORMAT_V_0-1-1_business_FORMAT.md` contain a full `template:` block with concepts, markers, and matrices â€” this is level-2 data that belongs in the template spec (`specs/business_V_0-1-1_FORMAT.md`), not in the model. The model's parent template reference is already correct via `parent.name`/`parent.url`.
 
 2. **Fix frontmatter closing delimiter**: Line 317 uses `---> [!NOTE]` as the closing delimiter, but YAML frontmatter must close with a bare `---` on its own line. The `> [!NOTE]` blockquote must be in the body, separated from the frontmatter.
 
@@ -47,10 +47,10 @@ Edit the level-3 business model to conform to FORMAT §3 for models:
 
 | File | Lines | Change |
 |------|-------|--------|
-| `models/FORMAT_V_0-1-1_business_FORMAT.md` | 1–9 | Keep spec_version, model_version, level, parent, mode, title; remove `specification_url` value (update to FORMAT level-1 URL) |
-| `models/FORMAT_V_0-1-1_business_FORMAT.md` | 10–314 | **Delete** entire `template:` block (inline concept/marker/matrix schema) |
-| `models/FORMAT_V_0-1-1_business_FORMAT.md` | 315–317 | Replace `---\n\n---> [!NOTE]` with `---\n\n> [!NOTE]` |
-| `models/FORMAT_V_0-1-1_business_FORMAT.md` | 320–1618 | Migrate all section markers and element markers |
+| `models/FORMAT_V_0-1-1_business_FORMAT.md` | 1â€“9 | Keep spec_version, model_version, level, parent, mode, title; remove `specification_url` value (update to FORMAT level-1 URL) |
+| `models/FORMAT_V_0-1-1_business_FORMAT.md` | 10â€“314 | **Delete** entire `template:` block (inline concept/marker/matrix schema) |
+| `models/FORMAT_V_0-1-1_business_FORMAT.md` | 315â€“317 | Replace `---\n\n---> [!NOTE]` with `---\n\n> [!NOTE]` |
+| `models/FORMAT_V_0-1-1_business_FORMAT.md` | 320â€“1618 | Migrate all section markers and element markers |
 
 ### Syntax Migration Map
 
@@ -62,18 +62,18 @@ Edit the level-3 business model to conform to FORMAT §3 for models:
 
 ### Dependencies
 
-None. This file is consumed by `format-core` parsing — tests should be run after changes to verify.
+None. This file is consumed by `format-core` parsing â€” tests should be run after changes to verify.
 
 ### Test Strategy
 
-- Run existing format-core tests: `npx vitest run` — the Ghostbusters model test still parses correctly
+- Run existing format-core tests: `npx vitest run` â€” the Ghostbusters model test still parses correctly
 - Manually parse the fixed file: run `parseModel()` and verify `frontmatter.template` is undefined
 
 ### Risks
 
 | Risk | Mitigation |
 |------|-----------|
-| Removing `template:` breaks some downstream consumer | Check all consumers — the template data is level-2 info accessible via `resolveParentChain`, not from the model itself |
+| Removing `template:` breaks some downstream consumer | Check all consumers â€” the template data is level-2 info accessible via `resolveParentChain`, not from the model itself |
 | Syntax migration misses some markers | Do a regex scan: count `<!-- block:` occurrences before/after and ensure zero remain |
 
 ### Acceptance
@@ -87,7 +87,7 @@ None. This file is consumed by `format-core` parsing — tests should be run aft
 
 ---
 
-## G2 — Vite Build Fix
+## G2 â€” Vite Build Fix
 
 ### Approach
 
@@ -101,7 +101,7 @@ The Vite config for the launcher app has two issues that prevent browser builds:
 
 | File | Lines | Change |
 |------|-------|--------|
-| `apps/launcher/vite.config.ts` | 7–10 | Add `conditions: ['browser']` and fix alias path |
+| `apps/launcher/vite.config.ts` | 7â€“10 | Add `conditions: ['browser']` and fix alias path |
 
 ### Code Change
 
@@ -138,7 +138,7 @@ None. This is a build configuration change only.
 
 | Risk | Mitigation |
 |------|-----------|
-| `resolve.conditions: ['browser']` breaks Node-mode builds | Vite uses conditions per target — only affects browser builds. Node mode uses `['node']` by default |
+| `resolve.conditions: ['browser']` breaks Node-mode builds | Vite uses conditions per target â€” only affects browser builds. Node mode uses `['node']` by default |
 
 ### Acceptance
 
@@ -148,11 +148,11 @@ None. This is a build configuration change only.
 
 ---
 
-## G3 — `collectDirectoryEntries` Async Fix
+## G3 â€” `collectDirectoryEntries` Async Fix
 
 ### Approach
 
-`collectDirectoryEntries` in `detector.ts` is a synchronous function that wraps an asynchronous callback API (`FileSystemEntry.createReader().readEntries()`). The recursive call for subdirectories is made without awaiting — `files.push(...collectDirectoryEntries(e))` fires the sub-reader but does NOT wait for its results.
+`collectDirectoryEntries` in `detector.ts` is a synchronous function that wraps an asynchronous callback API (`FileSystemEntry.createReader().readEntries()`). The recursive call for subdirectories is made without awaiting â€” `files.push(...collectDirectoryEntries(e))` fires the sub-reader but does NOT wait for its results.
 
 Fix:
 1. Make `collectDirectoryEntries` `async` and return `Promise<File[]>`
@@ -168,10 +168,10 @@ The key fix is that the reader must be called repeatedly until `entries.length =
 
 | File | Lines | Change |
 |------|-------|--------|
-| `apps/launcher/src/utils/detector.ts` | 14–31 | Make `collectFiles` async, await `collectDirectoryEntries` |
-| `apps/launcher/src/utils/detector.ts` | 34–59 | Make `collectDirectoryEntries` async, add promise loop for readEntries, await recursive calls |
+| `apps/launcher/src/utils/detector.ts` | 14â€“31 | Make `collectFiles` async, await `collectDirectoryEntries` |
+| `apps/launcher/src/utils/detector.ts` | 34â€“59 | Make `collectDirectoryEntries` async, add promise loop for readEntries, await recursive calls |
 | `apps/launcher/src/utils/detector.ts` | 34 | Change parameter type from `entry: any` to `entry: FileSystemDirectoryEntry` |
-| `apps/launcher/src/App.vue` | 51–57 | Update `onFilesDropped` to await `collectFiles` |
+| `apps/launcher/src/App.vue` | 51â€“57 | Update `onFilesDropped` to await `collectFiles` |
 
 ### Code Change (core logic)
 
@@ -205,7 +205,7 @@ async function collectDirectoryEntries(entry: FileSystemDirectoryEntry): Promise
 
 ### Dependencies
 
-G2 must be implemented first or in parallel — Vite needs `resolve.conditions: ['browser']` for `detector.ts` to compile in browser context.
+G2 must be implemented first or in parallel â€” Vite needs `resolve.conditions: ['browser']` for `detector.ts` to compile in browser context.
 
 ### Test Strategy
 
@@ -218,7 +218,7 @@ G2 must be implemented first or in parallel — Vite needs `resolve.conditions: 
 | Risk | Mitigation |
 |------|-----------|
 | Infinite loop if `readEntries` never returns empty | Add a max-iteration guard (e.g., 100 iterations) |
-| Drag-and-drop uses different API (`DataTransferItem`) vs file input (`FileList`) | Both paths now properly async — test both |
+| Drag-and-drop uses different API (`DataTransferItem`) vs file input (`FileList`) | Both paths now properly async â€” test both |
 
 ### Acceptance
 
@@ -226,15 +226,15 @@ G2 must be implemented first or in parallel — Vite needs `resolve.conditions: 
 - [ ] Subdirectory files are properly collected (not missed)
 - [ ] Multiple `readEntries` calls are handled (batch processing)
 - [ ] `collectFiles` is `async` and awaits `collectDirectoryEntries`
-- [ ] No `any` type for the directory entry parameter — uses `FileSystemDirectoryEntry`
+- [ ] No `any` type for the directory entry parameter â€” uses `FileSystemDirectoryEntry`
 
 ---
 
-## G4 — `serializeModel` Round-trip Fix
+## G4 â€” `serializeModel` Round-trip Fix
 
 ### Approach
 
-`serializeModel` (`parser.ts` lines 460–532) serializes frontmatter + elements + taxonomy + matrix tables (body), but does NOT serialize matrix **declarations** (the `matrices:` array in frontmatter). This breaks round-trip: after `parse → serialize → re-parse`, the matrix declarations are lost, so matrix source/target metadata is missing and the validator can't match cells to declarations.
+`serializeModel` (`parser.ts` lines 460â€“532) serializes frontmatter + elements + taxonomy + matrix tables (body), but does NOT serialize matrix **declarations** (the `matrices:` array in frontmatter). This breaks round-trip: after `parse â†’ serialize â†’ re-parse`, the matrix declarations are lost, so matrix source/target metadata is missing and the validator can't match cells to declarations.
 
 Fix: Add serialization of `fm.matrices` (and other missing metadata fields like `concepts`, `markers`) to the frontmatter output in `serializeModel`.
 
@@ -249,7 +249,7 @@ The frontmatter section should include:
 
 | File | Lines | Change |
 |------|-------|--------|
-| `packages/format-core/src/parser.ts` | 460–532 | Add matrix declaration serialization in the frontmatter block |
+| `packages/format-core/src/parser.ts` | 460â€“532 | Add matrix declaration serialization in the frontmatter block |
 
 ### Code Change (in `serializeModel`)
 
@@ -283,15 +283,15 @@ None. Works independently.
 
 ### Test Strategy
 
-- Add a round-trip test: `parseModel → serializeModel → parseModel` and assert deep equality of frontmatter, elements, taxonomy, matrices, and nodeMarkers
+- Add a round-trip test: `parseModel â†’ serializeModel â†’ parseModel` and assert deep equality of frontmatter, elements, taxonomy, matrices, and nodeMarkers
 - Specifically test that matrix declarations survive the round-trip
 
 ### Risks
 
 | Risk | Mitigation |
 |------|-----------|
-| YAML serialization uses custom parser, may produce invalid YAML for edge cases | Use simple string serialization that matches the custom parser's expectations — avoid `JSON.stringify` for objects |
-| Very large concept arrays inflate the file | These only apply to templates (level 2), not models (level 3) — acceptable size |
+| YAML serialization uses custom parser, may produce invalid YAML for edge cases | Use simple string serialization that matches the custom parser's expectations â€” avoid `JSON.stringify` for objects |
+| Very large concept arrays inflate the file | These only apply to templates (level 2), not models (level 3) â€” acceptable size |
 
 ### Acceptance
 
@@ -303,34 +303,34 @@ None. Works independently.
 
 ---
 
-## G5 — Type Safety Improvements
+## G5 â€” Type Safety Improvements
 
 ### Approach
 
 Three areas of type unsafety:
 
-**1. `parser.ts` — Replace `any` returns**
+**1. `parser.ts` â€” Replace `any` returns**
 
 | Location | Current | Fix |
 |----------|---------|-----|
 | `parseYaml(line 57)` | returns `any` | Return `Record<string, unknown>` |
 | `parseYamlValue(line 245)` | returns `any` | Return `string \| number \| boolean \| null` (union type) |
-| `parseFrontmatter(line 263)` | casts with `as SpecFrontmatter` | Already typed — just ensure `parseYaml` returns compatible type |
+| `parseFrontmatter(line 263)` | casts with `as SpecFrontmatter` | Already typed â€” just ensure `parseYaml` returns compatible type |
 | `parseFencedYaml(line 309)` | returns `Record<string, unknown>` | Already correct |
 | Internal stack in `parseYaml` | Uses `any` for `data` | Use `Record<string, unknown> \| unknown[]` |
 
-**2. `resolver.ts` — Remove `(fm.parent as any)`**
+**2. `resolver.ts` â€” Remove `(fm.parent as any)`**
 
-Lines 63–64:
+Lines 63â€“64:
 ```ts
 parentName: (fm.parent as any)?.name,
 parentUrl: (fm.parent as any)?.url,
 ```
-`fm.parent` is already typed as `ParentRef | undefined` by `SpecFrontmatter`. The `as any` cast is unnecessary and hides type errors. Remove the cast — TypeScript will correctly narrow the type.
+`fm.parent` is already typed as `ParentRef | undefined` by `SpecFrontmatter`. The `as any` cast is unnecessary and hides type errors. Remove the cast â€” TypeScript will correctly narrow the type.
 
-**3. `driver-folder.ts` — Type-safe access to fm properties**
+**3. `driver-folder.ts` â€” Type-safe access to fm properties**
 
-Lines 59–62:
+Lines 59â€“62:
 ```ts
 type: (fm as any).type || '',
 fields: (fm as any).fields || {},
@@ -342,7 +342,7 @@ graphEdges: (fm as any).graph_edges || [],
 type: fm?.type || '',
 fields: fm?.fields || {},
 ```
-But `type`, `fields`, `markers`, `graph_edges` are not typed on `SpecFrontmatter` — the `folderDriver` model uses a different schema than the standard FORMAT frontmatter. These should be added to the `SpecFrontmatter` interface or accessed via index signature. Since `SpecFrontmatter` already has `[key: string]: unknown`, the fix is:
+But `type`, `fields`, `markers`, `graph_edges` are not typed on `SpecFrontmatter` â€” the `folderDriver` model uses a different schema than the standard FORMAT frontmatter. These should be added to the `SpecFrontmatter` interface or accessed via index signature. Since `SpecFrontmatter` already has `[key: string]: unknown`, the fix is:
 ```ts
 type: (fm?.type as string) || '',
 ```
@@ -351,11 +351,11 @@ type: (fm?.type as string) || '',
 
 | File | Lines | Change |
 |------|-------|--------|
-| `packages/format-core/src/parser.ts` | 57–128 | Type `parseYaml` return to `Record<string, unknown>` |
-| `packages/format-core/src/parser.ts` | 245–258 | Type `parseYamlValue` return to union type |
-| `packages/format-core/src/parser.ts` | 306–309 | Already typed, verify |
-| `packages/format-core/src/resolver.ts` | 63–64 | Remove `as any` casts on `fm.parent` |
-| `packages/format-core/src/driver-folder.ts` | 59–62 | Replace `as any` with typed access |
+| `packages/format-core/src/parser.ts` | 57â€“128 | Type `parseYaml` return to `Record<string, unknown>` |
+| `packages/format-core/src/parser.ts` | 245â€“258 | Type `parseYamlValue` return to union type |
+| `packages/format-core/src/parser.ts` | 306â€“309 | Already typed, verify |
+| `packages/format-core/src/resolver.ts` | 63â€“64 | Remove `as any` casts on `fm.parent` |
+| `packages/format-core/src/driver-folder.ts` | 59â€“62 | Replace `as any` with typed access |
 
 ### Dependencies
 
@@ -365,7 +365,7 @@ None. Independent type changes.
 
 - TypeScript compilation must pass with no new errors (`npx tsc --noEmit`)
 - Existing tests must pass (no behavioral changes)
-- The `as any` removals may expose genuine type mismatches — fix them rather than adding casts
+- The `as any` removals may expose genuine type mismatches â€” fix them rather than adding casts
 
 ### Risks
 
@@ -384,23 +384,23 @@ None. Independent type changes.
 
 ---
 
-## G6 — RecentFolders/History UX Fix
+## G6 â€” RecentFolders/History UX Fix
 
 ### Approach
 
 **1. `App.vue` handlers ignore their arguments**
 
-`handleReopen(name)` and `handleOpenExample(sample)` both just click the hidden file input, ignoring the path data. This means clicking a recent folder or sample never opens that specific folder — it just re-opens the file picker.
+`handleReopen(name)` and `handleOpenExample(sample)` both just click the hidden file input, ignoring the path data. This means clicking a recent folder or sample never opens that specific folder â€” it just re-opens the file picker.
 
 Fix: The handlers should pass the `name`/`sample` data through to the folder-opening flow. Since the current architecture uses a file input (`webkitdirectory`), the simplest fix is to use the `path` from history/samples to programmatically open the folder. However, browsers don't allow setting `input.files` programmatically. The real fix requires:
 - Storing the path and using it to display info
 - Or, for RecentFolders, re-opening from a cached path using the File System Access API (out of scope)
 
-**Minimal fix** for this remediation: Change the handlers to emit events that pass the actual argument, and use it for UI feedback (even if the actual file picking still goes through the input). At minimum, don't ignore the argument — log it or use it to update state.
+**Minimal fix** for this remediation: Change the handlers to emit events that pass the actual argument, and use it for UI feedback (even if the actual file picking still goes through the input). At minimum, don't ignore the argument â€” log it or use it to update state.
 
 **2. `RecentFolders.vue` `defineExpose`**
 
-`defineExpose({ refresh })` (line 28) exposes `refresh` to the parent. The parent accesses it via `recentFoldersRef.value?.refresh()`. This is a valid pattern but the `defineExpose` call is unnecessary if the `refresh` function is called internally (on mount). The exposed `refresh` is only used after `addToHistory` in `App.vue` — this could be refactored to emit an event instead, or keep `defineExpose` but document it.
+`defineExpose({ refresh })` (line 28) exposes `refresh` to the parent. The parent accesses it via `recentFoldersRef.value?.refresh()`. This is a valid pattern but the `defineExpose` call is unnecessary if the `refresh` function is called internally (on mount). The exposed `refresh` is only used after `addToHistory` in `App.vue` â€” this could be refactored to emit an event instead, or keep `defineExpose` but document it.
 
 **Minimal fix**: Remove `defineExpose` and have `App.vue` re-mount the component or use a `key` to force refresh. OR keep it but document why.
 
@@ -408,7 +408,7 @@ Actually, the better approach: Remove the `recentFoldersRef` and `defineExpose` 
 
 Even simpler: make `onMounted` observe an event or use a `watch` on a prop.
 
-**3. `history.ts` — Deduplicate by path**
+**3. `history.ts` â€” Deduplicate by path**
 
 ```ts
 const filtered = history.filter(e => e.name !== name)
@@ -423,7 +423,7 @@ const filtered = history.filter(e => e.path !== path)
 | File | Lines | Change |
 |------|-------|--------|
 | `apps/launcher/src/utils/history.ts` | 17 | Change `e.name !== name` to `e.path !== path` |
-| `apps/launcher/src/App.vue` | 63–69 | Fix handler signatures to pass actual argument, remove `recentFoldersRef` |
+| `apps/launcher/src/App.vue` | 63â€“69 | Fix handler signatures to pass actual argument, remove `recentFoldersRef` |
 | `apps/launcher/src/App.vue` | 15 | Remove `recentFoldersRef` ref |
 | `apps/launcher/src/App.vue` | 26 | Remove `recentFoldersRef.value?.refresh()` call |
 | `apps/launcher/src/components/RecentFolders.vue` | 28 | Remove `defineExpose({ refresh })` |
@@ -440,7 +440,7 @@ None. Independent.
 
 ### Risks
 
-None — small, well-scoped changes.
+None â€” small, well-scoped changes.
 
 ### Acceptance
 
@@ -451,7 +451,7 @@ None — small, well-scoped changes.
 
 ---
 
-## G7 — `useAppUrls` Composable
+## G7 â€” `useAppUrls` Composable
 
 ### Approach
 
@@ -491,8 +491,8 @@ export function useAppUrls() {
 | File | Lines | Change |
 |------|-------|--------|
 | `apps/launcher/src/composables/useAppUrls.ts` | New | Create composable with `fileUrl` and `folderUrl` functions |
-| `apps/launcher/src/components/FolderExplorer.vue` | 10–11, 17–25 | Remove hardcoded URLs, use `useAppUrls()` |
-| `apps/launcher/src/components/ResultCard.vue` | 10–11, 13–23 | Remove hardcoded URLs, use `useAppUrls()` |
+| `apps/launcher/src/components/FolderExplorer.vue` | 10â€“11, 17â€“25 | Remove hardcoded URLs, use `useAppUrls()` |
+| `apps/launcher/src/components/ResultCard.vue` | 10â€“11, 13â€“23 | Remove hardcoded URLs, use `useAppUrls()` |
 
 ### Dependencies
 
@@ -517,7 +517,7 @@ Low. Pure extraction, no logic change.
 
 ---
 
-## G8 — Toast Cleanup
+## G8 â€” Toast Cleanup
 
 ### Approach
 
@@ -529,8 +529,8 @@ Fix: Store timeout IDs in a `Map<number, ReturnType<typeof setTimeout>>` and cle
 
 | File | Lines | Change |
 |------|-------|--------|
-| `apps/launcher/src/composables/useToast.ts` | 14–17 | Store timeout ID in map |
-| `apps/launcher/src/composables/useToast.ts` | 20–22 | Clear timeout on manual dismiss |
+| `apps/launcher/src/composables/useToast.ts` | 14â€“17 | Store timeout ID in map |
+| `apps/launcher/src/composables/useToast.ts` | 20â€“22 | Clear timeout on manual dismiss |
 
 ### Code Change
 
@@ -560,8 +560,8 @@ None.
 
 ### Test Strategy
 
-- Create a toast, manually dismiss before timeout — verify the timeout doesn't fire
-- Create a toast, let it auto-dismiss — verify timeout fires once
+- Create a toast, manually dismiss before timeout â€” verify the timeout doesn't fire
+- Create a toast, let it auto-dismiss â€” verify timeout fires once
 - No memory leaks in timeouts Map
 
 ### Risks
@@ -576,7 +576,7 @@ None.
 
 ---
 
-## G9 — ValidationReport Performance
+## G9 â€” ValidationReport Performance
 
 ### Approach
 
@@ -588,7 +588,7 @@ Fix: Extract `checksByCategory` as a computed property that groups checks by cat
 
 | File | Lines | Change |
 |------|-------|--------|
-| `apps/launcher/src/components/ValidationReport.vue` | 57–75 | Replace inline `.filter()` calls with computed property |
+| `apps/launcher/src/components/ValidationReport.vue` | 57â€“75 | Replace inline `.filter()` calls with computed property |
 
 ### Code Change
 
@@ -626,7 +626,7 @@ None.
 
 ### Risks
 
-None — pure optimization, no behavioral change.
+None â€” pure optimization, no behavioral change.
 
 ### Acceptance
 
@@ -637,17 +637,17 @@ None — pure optimization, no behavioral change.
 
 ---
 
-## G10 — Dead Code Cleanup
+## G10 â€” Dead Code Cleanup
 
 ### Approach
 
-**1. `validator.ts` — `el.markers` dead code**
+**1. `validator.ts` â€” `el.markers` dead code**
 
-In `parseConceptSection` (parser.ts), element nodes are created with `markers: {}` (empty). Markers are populated separately via the `nodeMarkers` mechanism (item-markers matrix) in `parseModel`. The loop at validator.ts lines 74–82 that checks `el.markers` against template markers iterates over an always-empty object — this is dead code.
+In `parseConceptSection` (parser.ts), element nodes are created with `markers: {}` (empty). Markers are populated separately via the `nodeMarkers` mechanism (item-markers matrix) in `parseModel`. The loop at validator.ts lines 74â€“82 that checks `el.markers` against template markers iterates over an always-empty object â€” this is dead code.
 
-Fix: Remove the `el.markers` validation loop (lines 74–82). The `nodeMarkers` validation at lines 97–107 already handles marker validation for item-markers matrix entries.
+Fix: Remove the `el.markers` validation loop (lines 74â€“82). The `nodeMarkers` validation at lines 97â€“107 already handles marker validation for item-markers matrix entries.
 
-**2. `types.ts` — `LauncherConfig` unused**
+**2. `types.ts` â€” `LauncherConfig` unused**
 
 `LauncherConfig` is exported but never imported anywhere in the codebase. Either remove it (if truly unused) or add a `@todo` comment documenting its intended use.
 
@@ -655,9 +655,9 @@ Fix: Remove the `el.markers` validation loop (lines 74–82). The `nodeMarkers` 
 
 | File | Lines | Change |
 |------|-------|--------|
-| `packages/format-core/src/validator.ts` | 74–82 | Remove `el.markers` validation loop |
-| `packages/format-core/src/validator.ts` | 1–4 | Remove unused `Marker` import |
-| `apps/launcher/src/types.ts` | 51–54 | Remove `LauncherConfig` or add doc comment |
+| `packages/format-core/src/validator.ts` | 74â€“82 | Remove `el.markers` validation loop |
+| `packages/format-core/src/validator.ts` | 1â€“4 | Remove unused `Marker` import |
+| `apps/launcher/src/types.ts` | 51â€“54 | Remove `LauncherConfig` or add doc comment |
 
 ### Dependencies
 
@@ -672,7 +672,7 @@ None.
 
 | Risk | Mitigation |
 |------|-----------|
-| If `el.markers` is populated in the future, removal would miss validation | The `nodeMarkers` check at lines 97–107 already covers markers set via the item-markers matrix. If element-level markers are added later, the validation should be added back |
+| If `el.markers` is populated in the future, removal would miss validation | The `nodeMarkers` check at lines 97â€“107 already covers markers set via the item-markers matrix. If element-level markers are added later, the validation should be added back |
 
 ### Acceptance
 
@@ -682,19 +682,19 @@ None.
 
 ---
 
-## G11 — Minor Fixes
+## G11 â€” Minor Fixes
 
-### 11a — DropZone locale inconsistency
+### 11a â€” DropZone locale inconsistency
 
 `DropZone.vue` line 59: button label is "Abrir carpeta" (Spanish) while the rest of the UI is in English. Change to "Open folder".
 
 **File**: `apps/launcher/src/components/DropZone.vue`, line 59
 
-### 11b — Move dynamic `import('node:fs/promises')` to static import
+### 11b â€” Move dynamic `import('node:fs/promises')` to static import
 
 `driver-folder.ts` lines 13 and 24 use `await import('node:fs/promises')` dynamically, but `node:fs/promises` is already imported statically at line 1. Replace the dynamic import with the already-imported top-level `readFile` and `access` functions.
 
-Wait — the dynamic import is used for `fs.readdir`, `fs.readFile`, `fs.access` — but line 1 only imports `readFile`. The dynamic import gets all exports. Fix: expand the static import to include `readdir`, `access`, `readFile` and remove the dynamic imports.
+Wait â€” the dynamic import is used for `fs.readdir`, `fs.readFile`, `fs.access` â€” but line 1 only imports `readFile`. The dynamic import gets all exports. Fix: expand the static import to include `readdir`, `access`, `readFile` and remove the dynamic imports.
 
 **File**: `packages/format-core/src/driver-folder.ts`, lines 1, 13, 24
 
@@ -711,13 +711,13 @@ import { readFile, readdir, access } from 'node:fs/promises';
 const rootContent = await readFile(formatMdPath, 'utf-8');
 ```
 
-### 11c — Weak test assertions in `index.test.ts`
+### 11c â€” Weak test assertions in `index.test.ts`
 
-The serialize/parse test at lines 108–115 checks string containment but doesn't perform a full round-trip parse. Strengthen by:
+The serialize/parse test at lines 108â€“115 checks string containment but doesn't perform a full round-trip parse. Strengthen by:
 1. Re-parsing the serialized output and comparing with the original model
 2. Deep-equality check on key structures: elements, matrices, taxonomy
 
-**File**: `packages/format-core/tests/index.test.ts`, lines 108–115
+**File**: `packages/format-core/tests/index.test.ts`, lines 108â€“115
 
 ```ts
 it('serializes and re-parses correctly', () => {
@@ -748,9 +748,9 @@ it('serializes and re-parses correctly', () => {
 
 | File | Lines | Change |
 |------|-------|--------|
-| `apps/launcher/src/components/DropZone.vue` | 59 | `"Abrir carpeta"` → `"Open folder"` |
+| `apps/launcher/src/components/DropZone.vue` | 59 | `"Abrir carpeta"` â†’ `"Open folder"` |
 | `packages/format-core/src/driver-folder.ts` | 1, 13, 24 | Static import, remove dynamic imports |
-| `packages/format-core/tests/index.test.ts` | 108–115 | Strengthen round-trip assertion |
+| `packages/format-core/tests/index.test.ts` | 108â€“115 | Strengthen round-trip assertion |
 
 ### Dependencies
 
@@ -773,16 +773,16 @@ None.
 
 ## Rollout Plan
 
-### Phase 1 — FORMAT + Build (Groups 1–2)
+### Phase 1 â€” FORMAT + Build (Groups 1â€“2)
 Critical: must-do before any app changes. Validates that the core format and build tooling are correct.
 
-### Phase 2 — Async + Types + Tests (Groups 3–5)
+### Phase 2 â€” Async + Types + Tests (Groups 3â€“5)
 High impact: fixes broken browser UX and adds safety.
 
-### Phase 3 — UX + Composables (Groups 6–9)
+### Phase 3 â€” UX + Composables (Groups 6â€“9)
 Medium impact: user-facing fixes and code quality improvements.
 
-### Phase 4 — Cleanup (Groups 10–11)
+### Phase 4 â€” Cleanup (Groups 10â€“11)
 Low impact: dead code, minor fixes, test hardening.
 
 Implementation can be in any order due to zero cross-group dependencies.
@@ -791,15 +791,15 @@ Implementation can be in any order due to zero cross-group dependencies.
 
 | Group | Estimated Changes (files) | Estimated Effort |
 |-------|--------------------------|-----------------|
-| G1 | 1 file, ~1600 lines edited | 20–30 min |
+| G1 | 1 file, ~1600 lines edited | 20â€“30 min |
 | G2 | 1 file, ~5 lines changed | 5 min |
-| G3 | 2 files, ~40 lines changed | 15–20 min |
-| G4 | 1 file, ~20 lines added | 10–15 min |
-| G5 | 3 files, ~20 lines changed | 10–15 min |
+| G3 | 2 files, ~40 lines changed | 15â€“20 min |
+| G4 | 1 file, ~20 lines added | 10â€“15 min |
+| G5 | 3 files, ~20 lines changed | 10â€“15 min |
 | G6 | 3 files, ~15 lines changed | 10 min |
-| G7 | 3 files (1 new), ~40 lines | 10–15 min |
+| G7 | 3 files (1 new), ~40 lines | 10â€“15 min |
 | G8 | 1 file, ~10 lines changed | 5 min |
-| G9 | 1 file, ~15 lines changed | 5–10 min |
+| G9 | 1 file, ~15 lines changed | 5â€“10 min |
 | G10 | 2 files, ~15 lines changed | 5 min |
 | G11 | 3 files, ~20 lines changed | 10 min |
 | **Total** | **~15 files** | **~2 hours** |

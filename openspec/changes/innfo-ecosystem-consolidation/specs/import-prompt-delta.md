@@ -11,7 +11,7 @@ The current `agentPrompt` computed property in `ImportPanel.vue` returns:
 ```
 I need to import the documents listed below and transform them into iNNfo models.
 
-Load the **innv0-trannsform** skill — it handles document ingestion, normalization, and conversion. Follow traNNsform/AGENT.md for the exact procedure.
+Load the **nn-trannsform** skill — it handles document ingestion, normalization, and conversion. Follow traNNsform/AGENT.md for the exact procedure.
 
 After the skill loads, verify the innfo-mcp MCP server is active (the skill includes this check). Then process each file from traNNsform/input/ and write the resulting iNNfo models into the appropriate location.
 ```
@@ -43,8 +43,8 @@ Files to import:
 
 | Change | From | To | Why |
 |--------|------|----|-----|
-| **Prefix** | (none — bare prompt) | `innfo:` | Single trigger keyword activates `innv0-router` |
-| **Skill reference** | `Load the **innv0-trannsform** skill` | (removed — implicit) | Router + orchestrator dispatch to the correct skill based on context |
+| **Prefix** | (none — bare prompt) | `innfo:` | Single trigger keyword activates `nn-router` |
+| **Skill reference** | `Load the **nn-trannsform** skill` | (removed — implicit) | Router + orchestrator dispatch to the correct skill based on context |
 | **Procedure reference** | `Follow traNNsform/AGENT.md` | `Open traNNsform/workflows/import.workflow.md` | Procedure is now a structured workflow file |
 | **MCP verification** | Explicit sentence about innfo-mcp check | (removed — implicit) | Handled by router/orchestrator infrastructure |
 | **Destination model path** | `write the resulting iNNfo models into the appropriate location` | (removed — implicit via workflow) | Workflow file defines where models go — don't duplicate in trigger prompt |
@@ -59,7 +59,7 @@ The import prompt MUST begin with `innfo: ` followed by a space, then the instru
 - GIVEN files are detected in `traNNsform/input/`
 - WHEN the user copies the import prompt
 - THEN the clipboard content starts with `innfo:`
-- AND pasting it into the agent activates the innv0-router
+- AND pasting it into the agent activates the nn-router
 
 ### R-IMP-D02: Prompt References import.workflow.md
 
@@ -103,7 +103,7 @@ The prompt MUST NOT contain any explicit "Load the ... skill" instruction. The `
 - [ ] `ImportPanel.vue` `agentPrompt` computed uses `innfoPrompt()` from `prompt.ts`
 - [ ] Copied prompt starts with `innfo:`
 - [ ] Prompt references `workflows/import.workflow.md`
-- [ ] Explicit skill name (`innv0-trannsform`) removed from prompt
+- [ ] Explicit skill name (`nn-trannsform`) removed from prompt
 - [ ] Explicit MCP verification sentence removed from prompt
 - [ ] File list section format is unchanged
 - [ ] No file list shown when directory is empty
