@@ -239,7 +239,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { ModelNode } from '../../model/types'
-import { parseModel } from '@innv0/innfo-core'
+import { parseModel } from '@cogNNitive/cogNNitive-core'
 import {
   ChevronsDown,
   ChevronsUp,

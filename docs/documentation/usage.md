@@ -48,8 +48,8 @@ Level 2 templates declare the concepts, markers, and relationship types availabl
 ```bash
 # From the iNNfo repo root
 npm install
-npm run build -w @innv0/innfo-core
-npm run dev -w @innv0/innfo-editor
+npm run build -w @cogNNitive/cogNNitive-core
+npm run dev -w @cogNNitive/cogNNitive-editor
 ```
 
 Open the local dev server URL printed in the terminal.

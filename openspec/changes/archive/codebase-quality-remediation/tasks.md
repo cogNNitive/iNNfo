@@ -50,7 +50,7 @@ Four sub-fixes on the level-3 business model file:
 
 2. **Fix frontmatter closing delimiter** (line 317). Currently `---> [!NOTE]` â€” the YAML frontmatter must close with a bare `---` on its own line. The `> [!NOTE]` callout must be in the Markdown body after the closing delimiter. Change `---\n\n---> [!NOTE]` to `---\n\n> [!NOTE]`.
 
-3. **Fix `specification_url`** (line 4). Currently points to `business_V_0-1-1_FORMAT.md` (level 2 template spec). For a level-3 model, it should point to the FORMAT level-1 spec: `https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md`.
+3. **Fix `specification_url`** (line 4). Currently points to `business_V_0-1-1_FORMAT.md` (level 2 template spec). For a level-3 model, it should point to the FORMAT level-1 spec: `https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md`.
 
 4. **Migrate `<!-- block: -->` to `_F` hidden form** (186 occurrences). Replace all legacy block markers with the new `_F` hidden syntax:
    - `# <!-- block: concepts --> Name` â†’ `# <!-- _F --> Name` (50 heading-level)

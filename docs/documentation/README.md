@@ -1,6 +1,6 @@
 # iNNfo Documentation
 
-Welcome to the iNNfo documentation. iNNfo is the monorepo (`@innv0/iNNfo`) that powers the iNNv0 **iNNfo** ecosystem.
+Welcome to the iNNfo documentation. iNNfo is the monorepo (`@cogNNitive/cogNNitive`) that powers the iNNv0 **iNNfo** ecosystem.
 
 ## Quick Start
 
@@ -9,10 +9,10 @@ Welcome to the iNNfo documentation. iNNfo is the monorepo (`@innv0/iNNfo`) that 
 npm install
 
 # Build innfo-core first (required by the editor)
-npm run build -w @innv0/innfo-core
+npm run build -w @cogNNitive/cogNNitive-core
 
 # Start the innfo-editor dev server
-npm run dev -w @innv0/innfo-editor
+npm run dev -w @cogNNitive/cogNNitive-editor
 ```
 
 ## Sections
@@ -21,10 +21,10 @@ npm run dev -w @innv0/innfo-editor
 **iNNfo Modeler** â€” the unified Vue 3 workspace editor. Opens any folder via the File System Access API, runs a single recursive parse into one normalized node graph, validates automatically, and lets you edit, export, and import iNNfo models.
 
 ### [innfo-core](innfo-core)
-`@innv0/innfo-core` is the framework-agnostic TypeScript library shared across the ecosystem: parser, model types, validator, IO drivers, and the spec-chain resolver.
+`@cogNNitive/cogNNitive-core` is the framework-agnostic TypeScript library shared across the ecosystem: parser, model types, validator, IO drivers, and the spec-chain resolver.
 
 ### [innfo-mcp](innfo-mcp)
-`@innv0/innfo-mcp` is an MCP server that exposes iNNfo models and operations to AI coding agents (Claude Code, OpenCode, and others) over stdio.
+`@cogNNitive/cogNNitive-mcp` is an MCP server that exposes iNNfo models and operations to AI coding agents (Claude Code, OpenCode, and others) over stdio.
 
 ### [traNNsform](trannsform)
 The export/import pipeline that turns iNNfo models into self-contained HTML visualizers, and turns source documents back into iNNfo models â€” driven by an external AI agent following the protocol in `traNNsform/AGENT.md`.

@@ -28,7 +28,7 @@ iNNfo/
 
 ## App
 
-**iNNfo Modeler** (`@innv0/innfo-editor`) â€” a Vue 3 workspace editor:
+**iNNfo Modeler** (`@cogNNitive/cogNNitive-editor`) â€” a Vue 3 workspace editor:
 - File System Access API to open a workspace folder
 - Single recursive parse pass into one normalized model graph
 - Block sheets, a table view, and metamodel-driven forms for editing
@@ -38,14 +38,14 @@ iNNfo/
 
 ## Packages
 
-**@innv0/innfo-core** â€” framework-agnostic TypeScript library with:
+**@cogNNitive/cogNNitive-core** â€” framework-agnostic TypeScript library with:
 - The iNNfo parser
 - Model types (Concept, Element, Field, Marker, Matrix, Relationship)
 - IO drivers for the browser and Node
 - Validator against template schemas
 - Parent-spec-chain resolver
 
-**@innv0/innfo-mcp** â€” a Model Context Protocol server (stdio) wrapping innfo-core. Exposes seven semantic tools â€” `list_models`, `read_model`, `get_spec`, `get_template`, `validate_model`, `apply_change`, `validate_model_url` â€” so any MCP-capable AI agent can read, validate, and safely mutate iNNfo models.
+**@cogNNitive/cogNNitive-mcp** â€” a Model Context Protocol server (stdio) wrapping innfo-core. Exposes seven semantic tools â€” `list_models`, `read_model`, `get_spec`, `get_template`, `validate_model`, `apply_change`, `validate_model_url` â€” so any MCP-capable AI agent can read, validate, and safely mutate iNNfo models.
 
 **@innv0/pipeline-gates** â€” validation and integration gates for iNNfo model pipelines; the dev-tooling layer that validates, integrates, and versions models in CI.
 

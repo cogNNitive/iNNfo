@@ -5,7 +5,7 @@
 ### BREAKING: Renamed FORMAT → iNNfo
 - **Structural marker**: `_F` → `_NN` across all source code, tests, and documentation
 - **File suffix**: `_F.md` → `_NN.md` for all current-version files
-- **Packages**: `@innv0/format-core` → `@innv0/innfo-core`, `@innv0/format-mcp` → `@innv0/innfo-mcp`, `@innv0/format-editor` → `@innv0/innfo-editor`
+- **Packages**: `@innv0/format-core` → `@cogNNitive/cogNNitive-core`, `@innv0/format-mcp` → `@cogNNitive/cogNNitive-mcp`, `@innv0/format-editor` → `@cogNNitive/cogNNitive-editor`
 - **Version bump**: V_0-1-5 → V_0-2-0 (MAJOR, breaking)
 - Legacy `_F.md` files are no longer parsed by the V_0-2-0 parser
 

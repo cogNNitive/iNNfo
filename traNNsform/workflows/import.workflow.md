@@ -1,6 +1,6 @@
 ---
 spec_version: "V_0-2-0"
-spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.2.0/specs/level1/iNNfo_V_0-2-0_NN.md"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.2.0/specs/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "workflow_V_1-0-0"
@@ -126,7 +126,7 @@ output: "<template-type>"
    - Extract relationships and matrices as `# _NN matrices:` tables
 2. Follow the naming convention from defiNNe (Â§6 â€” File Naming Convention):
    `<Model>_V_x-y-z_<Template>_NN.md`
-   â†’ https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level0/defiNNe_NN.md
+   â†’ https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level0/defiNNe_NN.md
 3. Apply standard version `V_1-0-0` for new models
 4. Generate appropriate frontmatter YAML with:
    - `parent_spec` referencing the matching template spec URL

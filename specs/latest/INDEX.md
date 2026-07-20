@@ -24,19 +24,19 @@ These URLs **never change** â€” they always point to the latest version:
 
 ```yaml
 # Always the latest defiNNe:
-https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level0/defiNNe_NN.md
+https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level0/defiNNe_NN.md
 
 # Always the latest iNNfo:
-https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level1/iNNfo_NN.md
+https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level1/iNNfo_NN.md
 
 # Always the latest business template:
-https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/business/business_NN.md
+https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level2/business/business_NN.md
 
 # Always the latest organization template:
-https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/organization/organization_NN.md
+https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level2/organization/organization_NN.md
 
 # Always the latest procedures template:
-https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/procedures/procedures_NN.md
+https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level2/procedures/procedures_NN.md
 
 ```
 

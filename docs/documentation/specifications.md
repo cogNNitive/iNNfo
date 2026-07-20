@@ -1,4 +1,4 @@
-# Specifications
+﻿# Specifications
 
 The iNNv0 ecosystem defines four specification levels. Each level builds on the one below it.
 
@@ -8,8 +8,8 @@ The root of the chain. Defines structure, versioning (SemVer), and RFC 2119 key 
 
 | Spec | Source |
 |------|--------|
-| **defiNNe** (latest) | [`specs/latest/level0/defiNNe_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/latest/level0/defiNNe_NN.md) |
-| **defiNNe** V 0.2.0 | [`specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md) |
+| **defiNNe** (latest) | [`specs/latest/level0/defiNNe_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/latest/level0/defiNNe_NN.md) |
+| **defiNNe** V 0.2.0 | [`specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md) |
 
 ## Level 1 â€” Central specification
 
@@ -17,8 +17,8 @@ The **iNNfo** specification. Every model is a single `_NN.md` document with opti
 
 | Spec | Source |
 |------|--------|
-| **iNNfo** (latest) | [`specs/latest/level1/iNNfo_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/latest/level1/iNNfo_NN.md) |
-| **iNNfo** V 0.2.0 | [`specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md) |
+| **iNNfo** (latest) | [`specs/latest/level1/iNNfo_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/latest/level1/iNNfo_NN.md) |
+| **iNNfo** V 0.2.0 | [`specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md) |
 
 ## Level 2 â€” Templates
 
@@ -26,9 +26,9 @@ Domain-specific templates. Each declares concepts, markers, matrices, and relati
 
 | Template | Source |
 |----------|--------|
-| **Business** (latest) | [`specs/latest/level2/business/business_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/latest/level2/business/business_NN.md) |
-| **Procedures** (latest) | [`specs/latest/level2/procedures/procedures_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/latest/level2/procedures/procedures_NN.md) |
-| **Organization** (latest) | [`specs/latest/level2/organization/organization_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/latest/level2/organization/organization_NN.md) |
+| **Business** (latest) | [`specs/latest/level2/business/business_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/latest/level2/business/business_NN.md) |
+| **Procedures** (latest) | [`specs/latest/level2/procedures/procedures_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/latest/level2/procedures/procedures_NN.md) |
+| **Organization** (latest) | [`specs/latest/level2/organization/organization_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/latest/level2/organization/organization_NN.md) |
 
 ## Level 3 â€” Sample models
 
@@ -36,9 +36,9 @@ Concrete data instances. Lightweight â€” just data and a parent pointer to 
 
 | Model | Template | Source |
 |-------|----------|--------|
-| **Ghostbusters** | business | [`specs/latest/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/latest/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md) |
-| **Code Review Process** | procedures | [`specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md) |
-| **Engineering Team** | organization | [`specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`](https://github.com/cogNNitive/iNNfo/blob/main/specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md) |
+| **Ghostbusters** | business | [`specs/latest/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/latest/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md) |
+| **Code Review Process** | procedures | [`specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md) |
+| **Engineering Team** | organization | [`specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md) |
 
 ## Related Standards
 

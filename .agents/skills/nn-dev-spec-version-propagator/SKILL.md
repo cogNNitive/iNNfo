@@ -88,7 +88,7 @@ cp specs/FORMAT_V_0-1-2_FORMAT.md specs/FORMAT_V_0-1-3_FORMAT.md
 
 # 1b. Update frontmatter in the new file:
 #   - spec_version: "V_0-1-3"
-#   - spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.2/specs/FORMAT_V_0-1-3_FORMAT.md"
+#   - spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.2/specs/FORMAT_V_0-1-3_FORMAT.md"
 #   (use the tag that matches the repo release, not necessarily the spec version)
 
 # 1c. If the content changed, update the spec body accordingly
@@ -177,7 +177,7 @@ The script scans these glob patterns:
 When updating URLs, note the two-part version scheme:
 
 ```
-spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/FORMAT_V_0-1-2_FORMAT.md"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-2_FORMAT.md"
                                          ^^^^^^^ ^^^^^^^
                                     repo-tag       spec-file-version
 ```

@@ -318,7 +318,7 @@ P7. **`specification_url` is overloaded.** For L0-L2 it points to the document i
     Same field, two meanings.
 
 P8. **Mutation invariants are NOT in the shared core — UI and MCP will drift.**
-    Both the app and the MCP share `@innv0/innfo-core` for `parseModel` /
+    Both the app and the MCP share `@cogNNitive/cogNNitive-core` for `parseModel` /
     `serializeModel` / `validateModel` — good foundation. But the *mutation* engine
     (`applyChange` in `packages/innfo-mcp/src/tools/mutate.ts`) lives in the MCP, and
     the Vue app edits through its own store/component logic (it does NOT import

@@ -53,9 +53,9 @@ Severidades:
 Lo que hace que el cÃ³digo parezca escrito por **una sola cabeza**, no por diez.
 
 - [ ] **Rutas de import unificadas.** Hoy conviven TRES formas de importar lo mismo:
-      `@innv0/innfo-core`, `../model/types` (shims de re-export) y el alias `@/*`
+      `@cogNNitive/cogNNitive-core`, `../model/types` (shims de re-export) y el alias `@/*`
       declarado en `tsconfig` pero casi sin uso. DecidÃ­ UNA convenciÃ³n por capa y aplicala:
-  - Tipos/lÃ³gica de dominio â†’ siempre desde `@innv0/innfo-core` (o el shim `@/model/*`),
+  - Tipos/lÃ³gica de dominio â†’ siempre desde `@cogNNitive/cogNNitive-core` (o el shim `@/model/*`),
     pero no ambos indistintamente.
   - Dentro del app â†’ alias `@/` en vez de `../../..`.
 - [ ] **PatrÃ³n de stores consistente.** Todos los stores usan Pinia Options API
@@ -151,7 +151,7 @@ AquÃ­ estÃ¡ el **mayor dÃ©ficit del repo hoy**:
       Ojo con CRLF en Windows en los golden (ya hubo fixes por `autocrlf`).
 - [ ] **`console.*` fuera de producciÃ³n.** Hay ~5 llamadas `console` en el app. DefinÃ­ una
       polÃ­tica: logger centralizado o eliminarlas antes de mergear.
-- [ ] **Dependencias sin fijar / duplicadas.** `@innv0/innfo-core` estÃ¡ referenciado como
+- [ ] **Dependencias sin fijar / duplicadas.** `@cogNNitive/cogNNitive-core` estÃ¡ referenciado como
       `"*"` en el app y `"^0.1.0"` en el mcp. UnificÃ¡ el criterio de versionado interno.
 
 ---

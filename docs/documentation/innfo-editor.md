@@ -7,7 +7,7 @@
 1. **Open a workspace** — pick a folder via the File System Access API (`showDirectoryPicker`), resume a recent workspace from IndexedDB history, load a starter template (Business, Procedures, or Organization) or its sample model, or load a model directly from a URL.
 2. **Single recursive parse** — the workspace is parsed once into a normalized node graph shared by every view.
 3. **Edit** — each node opens the editing sub-view that fits its kind.
-4. **Auto-validate** — every parse runs the `@innv0/innfo-core` validator (`validateFormatContent` / `validateModel`); results surface as a status badge in the header.
+4. **Auto-validate** — every parse runs the `@cogNNitive/cogNNitive-core` validator (`validateFormatContent` / `validateModel`); results surface as a status badge in the header.
 5. **Use AI** — click the "Use AI" button in the header to open the `AiWorkflowModal`, a tabbed modal with Guide, Import, and Export tabs that generate copiable agent prompts prefixed with `innfo:` to trigger the `innv0-router` skill. Prompts reference structured workflow files under `traNNsform/workflows/`.
 6. **Save** — writes back to disk with automatic backups and a version bump.
 
@@ -32,7 +32,7 @@ The editor selects the editing surface per node kind:
 
 ## Validation
 
-Validation runs automatically on every parse via `@innv0/innfo-core`. A pass/warn/error badge in the `Header` opens the full `ValidationReport` overlay (backed by `ValidationService`), showing every diagnostic against the resolved template.
+Validation runs automatically on every parse via `@cogNNitive/cogNNitive-core`. A pass/warn/error badge in the `Header` opens the full `ValidationReport` overlay (backed by `ValidationService`), showing every diagnostic against the resolved template.
 
 ## Visualization and inspection
 
@@ -54,9 +54,9 @@ Each tab has an independent copy button. The `innfo:` prefix activates the `innv
 
 ```bash
 # From repo root
-npm run build -w @innv0/innfo-core   # Build dependency first
-npm run dev -w @innv0/innfo-editor   # Start dev server
+npm run build -w @cogNNitive/cogNNitive-core   # Build dependency first
+npm run dev -w @cogNNitive/cogNNitive-editor   # Start dev server
 
 # Run tests
-npm run test -w @innv0/innfo-editor
+npm run test -w @cogNNitive/cogNNitive-editor
 ```

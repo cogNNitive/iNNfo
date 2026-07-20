@@ -9,7 +9,7 @@
  *
  * The scanner tries per-element first, then falls back to centralized.
  */
-import type { DirectoryHandleLike } from '@innv0/innfo-core'
+import type { DirectoryHandleLike } from '@cogNNitive/cogNNitive-core'
 
 export interface ScannedAsset {
   filename: string

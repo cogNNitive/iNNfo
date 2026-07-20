@@ -1,5 +1,5 @@
 {
-  "name": "@innv0/innfo-editor",
+  "name": "@cogNNitive/cogNNitive-editor",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,7 +18,7 @@
     "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
-    "@innv0/innfo-core": "*",
+    "@cogNNitive/cogNNitive-core": "*",
     "@tanstack/vue-virtual": "^3.13.31",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",

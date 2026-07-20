@@ -2,7 +2,7 @@
 
 ## Context
 
-The `innfo-mcp` server wraps `@innv0/innfo-core` and MUST be agnostic of any spec publisher. An iNNfo model is self-describing: its frontmatter declares `spec_url` and `parent_spec.url`, which are the single source of truth for resolution. The server stores no spec/template URLs or template names as constants. A spec or template is resolved only from a URL supplied by the caller or derived from a loaded model's `parent_spec.url`.
+The `innfo-mcp` server wraps `@cogNNitive/cogNNitive-core` and MUST be agnostic of any spec publisher. An iNNfo model is self-describing: its frontmatter declares `spec_url` and `parent_spec.url`, which are the single source of truth for resolution. The server stores no spec/template URLs or template names as constants. A spec or template is resolved only from a URL supplied by the caller or derived from a loaded model's `parent_spec.url`.
 
 Resolution runs through `resolveParentChain` (innfo-core), which walks the self-describing parent chain up to level 0, resolving each document from a local `specs/` directory, then a local cache, then the network.
 

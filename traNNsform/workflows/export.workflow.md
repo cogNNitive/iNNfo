@@ -1,6 +1,6 @@
 ---
 spec_version: "V_0-2-0"
-spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.2.0/specs/level1/iNNfo_V_0-2-0_NN.md"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.2.0/specs/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "workflow_V_1-0-0"

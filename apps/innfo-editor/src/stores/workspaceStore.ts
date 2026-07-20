@@ -11,11 +11,11 @@ import {
 import { buildSpecificationUrl, buildSpecificationUrlFromMain } from '../utils/constants'
 import { IndexedDbWorkspaceRepository } from '../repositories/IndexedDbWorkspaceRepository'
 import type { IWorkspaceRepository } from '../repositories/IWorkspaceRepository'
-import { parseFrontmatter } from '@innv0/innfo-core'
+import { parseFrontmatter } from '@cogNNitive/cogNNitive-core'
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
 import type { DirectoryHandleLike } from '../model/fs-types'
 import type { BumpLevel } from '../utils/version'
-import type { ModelDriver } from '@innv0/innfo-core'
+import type { ModelDriver } from '@cogNNitive/cogNNitive-core'
 import type { ActiveView } from './uiStore'
 
 export type { DirectoryHandleLike }
@@ -344,7 +344,7 @@ export const useWorkspaceStore = defineStore('workspace', {
         // URL patterns ordered by correctness for the current repo structure
         const urls = [
           // Model-published path (main branch)
-          `https://raw.githubusercontent.com/innV0/iNNfo/main/models/specs/iNNfo_${specVersion}_NN.md`,
+          `https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/models/specs/iNNfo_${specVersion}_NN.md`,
           // Tag-pinned URL (may not exist for unreleased versions)
           buildSpecificationUrl(specVersion),
           // Main branch fallback (legacy path)

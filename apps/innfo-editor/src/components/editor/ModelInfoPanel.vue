@@ -144,12 +144,12 @@
 
               <span class="font-sans font-medium text-slate-400">Remote URL:</span>
               <a
-                :href="`https://raw.githubusercontent.com/innV0/iNNfo/main/specs/iNNfo_${formatVersion}_NN.md`"
+                :href="`https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/iNNfo_${formatVersion}_NN.md`"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="text-primary hover:underline break-all select-all font-semibold"
               >
-                https://raw.githubusercontent.com/innV0/iNNfo/main/specs/iNNfo_{{ formatVersion }}_NN.md
+                https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/iNNfo_{{ formatVersion }}_NN.md
               </a>
               
               <span class="font-sans font-medium text-slate-400">Local Path:</span>

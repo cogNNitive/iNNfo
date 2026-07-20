@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 1
 parent_spec:
   name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 title: "iNNfo Specification"
 description: "Concrete specification for semantic modeling with concepts, elements, fields, markers, and relationships."
 author: "innV0 Team"
@@ -25,7 +25,7 @@ relationship_types:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/innV0/iNNfo).
+> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # iNNfo Specification
 
@@ -131,7 +131,7 @@ iNNfo is a level 1 specification. Its `parent_spec` points to defiNNe:
 ```yaml
 parent_spec:
   name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 ```
 
 All templates (level 2) MUST declare `parent_spec` pointing to iNNfo. All models
@@ -401,7 +401,7 @@ specification_url: "<immutable-url>"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "<Template Name>"
 concepts: [...]
 markers: [...]
@@ -456,5 +456,5 @@ title: "..."
 ```yaml
 parent_spec:
   name: "business_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 ```

@@ -9,7 +9,7 @@ export default defineConfig([
     clean: true,
     outDir: 'dist',
     dts: false,
-    noExternal: ['@innv0/innfo-core'],
+    noExternal: ['@cogNNitive/cogNNitive-core'],
     external: ['yaml'],
   },
   {

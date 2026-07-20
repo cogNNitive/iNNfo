@@ -1,6 +1,6 @@
 ---
 spec_version: "V_0-1-1"
-spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/procedures_V_0-1-1_NN.md"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/procedures_V_0-1-1_NN.md"
 model_version: "V_1-0-0"
 level: 3
 parent:

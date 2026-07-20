@@ -1,4 +1,4 @@
-# Session Handoff â€” innfo-rename (FORMAT â†’ iNNfo)
+﻿# Session Handoff â€” innfo-rename (FORMAT â†’ iNNfo)
 
 **Date**: 2026-07-03
 **Branch**: `innfo/code-rename` (PR #7)
@@ -12,12 +12,12 @@ Renombrar **FORMAT** â†’ **iNNfo** como nombre del ecosistema, y el structu
 
 ## Lo que se hizo (2 PRs)
 
-### PR #1: `innfo/preparatory-spec` â†’ `dev` ([#6](https://github.com/cogNNitive/iNNfo/pull/6))
+### PR #1: `innfo/preparatory-spec` â†’ `dev` ([#6](https://github.com/iNNfo/iNNfo/pull/6))
 - CreÃ³ `specs/iNNfo_V_0-2-0_NN.md` â€” spec nueva con naming iNNfo (411 lÃ­neas)
 - Copia de `FORMAT_V_0-1-5_F.md` con transformaciones: `_F` â†’ `_NN`, `FORMAT` â†’ `iNNfo`, `V_0-1-5` â†’ `V_0-2-0`
 - NO toca el cÃ³digo â€” el parser sigue esperando `_F.md`
 
-### PR #2: `innfo/code-rename` â†’ `dev` ([#7](https://github.com/cogNNitive/iNNfo/pull/7))
+### PR #2: `innfo/code-rename` â†’ `dev` ([#7](https://github.com/iNNfo/iNNfo/pull/7))
 - **RenombrÃ³ directorios**: `packages/format-core` â†’ `packages/innfo-core`, `apps/format-editor` â†’ `apps/innfo-editor`, `packages/format-mcp` â†’ `packages/innfo-mcp`
 - **MigrÃ³ parser**: `parser.ts`, `validator.ts`, `helpers.ts`, `recursiveParser.ts`, `resolver.ts`, `types.ts`, `metamodel.ts` â€” todos los regex y constantes de `_F` a `_NN`
 - **MigrÃ³ MCP server**: imports, URLs, comentarios

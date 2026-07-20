@@ -1,17 +1,17 @@
 ---
 spec_version: "V_0-1-1"
-spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/models/starter/Business_V_1-0-0_starter_NN.md"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/models/starter/Business_V_1-0-0_starter_NN.md"
 level: 3
 parent_spec:
   name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 model_version: "V_1-0-0"
 title: "Business Model Starter"
 mode: "FILE"
 ---
 
 > [!NOTE]
-> This is a starter model for the **Business** template. Replace the placeholder elements below with your own business data. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/innV0/iNNfo).
+> This is a starter model for the **Business** template. Replace the placeholder elements below with your own business data. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # _NN index
 * [[Business summary]]

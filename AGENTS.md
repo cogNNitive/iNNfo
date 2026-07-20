@@ -1,4 +1,4 @@
-# iNNfo Agent Instructions
+﻿# iNNfo Agent Instructions
 
 ## SDD Default Preferences
 
@@ -15,7 +15,7 @@ For AI-assisted work with iNNfo models (create, edit, validate, transform), inst
 
 ```bash
 # Clone or junction actioNN into your OpenCode agents directory
-git clone https://github.com/cogNNitive/actioNN.git ~/.agents/skills/actioNN
+git clone https://github.com/iNNfo/actioNN.git ~/.agents/skills/actioNN
 
 # Ensure the MCP server bundle is available
 cd ~/.agents/skills/actioNN

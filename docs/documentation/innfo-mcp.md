@@ -1,6 +1,6 @@
 # innfo-mcp
 
-`@innv0/innfo-mcp` is an MCP (Model Context Protocol) server that wraps `@innv0/innfo-core` and exposes iNNfo models over the stdio transport, so AI coding agents — Claude Code, OpenCode, and others — can read, validate, and edit iNNfo models through structured tool calls instead of freeform file edits.
+`@cogNNitive/cogNNitive-mcp` is an MCP (Model Context Protocol) server that wraps `@cogNNitive/cogNNitive-core` and exposes iNNfo models over the stdio transport, so AI coding agents — Claude Code, OpenCode, and others — can read, validate, and edit iNNfo models through structured tool calls instead of freeform file edits.
 
 ## Why an MCP server
 
@@ -37,7 +37,7 @@ Each call re-validates the model and returns either the updated model or the val
 ## Architecture
 
 ```
-AI coding agent (Claude Code, OpenCode, ...) → innfo-mcp (MCP server, stdio) → @innv0/innfo-core
+AI coding agent (Claude Code, OpenCode, ...) → innfo-mcp (MCP server, stdio) → @cogNNitive/cogNNitive-core
                                                         ↓
                                     Public iNNfo spec/template URLs (single source of truth)
 ```
@@ -46,7 +46,7 @@ AI coding agent (Claude Code, OpenCode, ...) → innfo-mcp (MCP server, stdio) �
 
 ```bash
 # Build the server
-npm run build -w @innv0/innfo-mcp
+npm run build -w @cogNNitive/cogNNitive-mcp
 
 # The server communicates over stdio — register it with your MCP-compatible agent/client
 ```

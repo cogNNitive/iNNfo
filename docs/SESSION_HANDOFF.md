@@ -99,7 +99,7 @@ iNNfo/                       â† tag v0.1.0
 
 **URL canÃ³nica**:
 ```
-https://raw.githubusercontent.com/innV0/iNNfo/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md
+https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.0/specs/defiNNe_V_0-1-0_FORMAT.md
 ```
 
 ### Siguientes fases (despuÃ©s de estructura)

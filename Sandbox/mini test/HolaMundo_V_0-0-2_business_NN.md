@@ -1,10 +1,10 @@
 ---
 spec_version: "V_0-2-0"
-spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.5/specs/iNNfo_V_0-2-0_NN.md"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.5/specs/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "business_V_0-1-1"
-  url: "https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/business_V_0-1-1_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/business_V_0-1-1_NN.md"
 model_version: "V_0-0-1"
 title: "Hola Mundo â€” iNNfo Test"
 ---

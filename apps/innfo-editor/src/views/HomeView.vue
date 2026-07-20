@@ -36,7 +36,7 @@ interface ExampleModel {
   url: string
 }
 
-const SAMPLE_BASE = 'https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2'
+const SAMPLE_BASE = 'https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level2'
 
 const samples: ExampleModel[] = [
   {
@@ -87,7 +87,7 @@ const starters: StarterTemplate[] = [
     url: `${starterBase}Business_V_1-0-0_starter_NN.md`,
     templateName: 'business',
     sampleUrl:
-      'https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
+      'https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
     sampleName: 'Ghostbusters',
   },
   {
@@ -98,7 +98,7 @@ const starters: StarterTemplate[] = [
     url: `${starterBase}Procedures_V_1-0-0_starter_NN.md`,
     templateName: 'procedures',
     sampleUrl:
-      'https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
+      'https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
     sampleName: 'Code Review Process',
   },
   {
@@ -109,7 +109,7 @@ const starters: StarterTemplate[] = [
     url: `${starterBase}Organization_V_1-0-0_starter_NN.md`,
     templateName: 'organization',
     sampleUrl:
-      'https://raw.githubusercontent.com/innV0/iNNfo/main/specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
+      'https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
     sampleName: 'Engineering Team',
   },
 ]

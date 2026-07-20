@@ -8,7 +8,7 @@ the UI and the MCP obey the same contract.
 ### R-IE-01: Single Enforcement Engine in innfo-core
 
 Identity, uniqueness, and rename invariants MUST be implemented once in
-`@innv0/innfo-core`. The editor UI and the MCP MUST call this engine rather than
+`@cogNNitive/cogNNitive-core`. The editor UI and the MCP MUST call this engine rather than
 implement their own mutation logic. No mutation path may bypass the shared invariants.
 
 #### Scenario: UI and MCP reject the same duplicate identically

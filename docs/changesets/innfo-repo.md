@@ -5,12 +5,12 @@
 > **Executed**: 2026-07-01
 > **Supersedes**: Original iNNfo repo changeset
 
-The old `innV0/iNNfo` repo is archived. A new clean repo `innV0/folder-format` was created as the canonical home for the FOLDER mode platform.
+The old `cogNNitive/cogNNitive` repo is archived. A new clean repo `innV0/folder-format` was created as the canonical home for the FOLDER mode platform.
 
 ## What happened
 
 1. **Created** `https://github.com/innV0/folder-format` as a fresh repo
-2. **Copied** source code from `innV0/iNNfo`, stripped of legacy files
+2. **Copied** source code from `cogNNitive/cogNNitive`, stripped of legacy files
 3. **Added** `@innv0/format-core: "file:../iNNfo/packages/format-core"` dependency
 4. **Added** `scripts/bootstrap-specs.mjs` for CI setup
 5. **Pushed** as single initial commit `ecc1bd1`

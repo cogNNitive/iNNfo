@@ -1,7 +1,7 @@
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join, basename } from 'node:path'
-import { parseFrontmatter } from '@innv0/innfo-core'
-import type { SpecCache, SpecDocument, SpecFrontmatter, ResolverOptions } from '@innv0/innfo-core'
+import { parseFrontmatter } from '@cogNNitive/cogNNitive-core'
+import type { SpecCache, SpecDocument, SpecFrontmatter, ResolverOptions } from '@cogNNitive/cogNNitive-core'
 
 const MAX_DEPTH_DEFAULT = 10
 

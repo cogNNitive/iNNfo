@@ -1,13 +1,13 @@
 # Using AI with iNNfo Models in iNNfo
 
-To work with iNNfo models from your AI agent (OpenCode, Claude Code, etc.), you need the **actioNN suite** â€” a collection of agent skills that teach the AI how to create, edit, validate, and transform iNNfo documents.
+To work with iNNfo models from your AI agent (OpenCode, Claude Code, etc.), you need the **actioNN suite** — a collection of agent skills that teach the AI how to create, edit, validate, and transform iNNfo documents.
 
 ## Quick Start
 
 1. **Install the actioNN bundle** in your OpenCode workspace:
 
    ```bash
-   git clone https://github.com/cogNNitive/actioNN.git ~/.agents/skills/actioNN
+   git clone https://github.com/iNNfo/actioNN.git ~/.agents/skills/actioNN
    ```
 
    Or via junction/symlink for live updates:
@@ -17,22 +17,22 @@ To work with iNNfo models from your AI agent (OpenCode, Claude Code, etc.), you 
    mklink /J "%USERPROFILE%\.agents\skills\actioNN" "path\to\actioNN"
    ```
 
-2. **Ensure the MCP server is available** â€” the skills need `innfo-mcp` to resolve specs and validate models:
+2. **Ensure the MCP server is available** — the skills need `innfo-mcp` to resolve specs and validate models:
 
    ```bash
    cd ~/.agents/skills/actioNN
    node scripts/update-mcp.js
    ```
 
-3. **Open the project** in OpenCode â€” the skills auto-load based on file context (e.g., editing a `_NN.md` triggers `nn-innfo`).
+3. **Open the project** in OpenCode — the skills auto-load based on file context (e.g., editing a `_NN.md` triggers `nn-innfo`).
 
 ## What you get
 
 | Skill | Trigger | What it does |
 |-------|---------|-------------|
-| `nn-router` | `/nn-router` or mentioning "innfo" | Entry point â€” routes to the right skill |
+| `nn-router` | `/nn-router` or mentioning "innfo" | Entry point — routes to the right skill |
 | `nn-innfo` | Editing `*_NN.md` files | Create, edit, validate iNNfo models |
-| `nn-trannsform` | `/nn-trannsform` | Import/export pipeline (PDFâ†’MD, etc.) |
+| `nn-trannsform` | `/nn-trannsform` | Import/export pipeline (PDF?MD, etc.) |
 | `nn-workflow-orchestrator` | `/nn-workflow-orchestrator` | Multi-skill workflows |
 | `nn-skills-lifecycle` | `/nn-skills-lifecycle` | Install, audit, maintain skills |
 | `nn-site-generator` | `/nn-site-generator` | Generate docs sites |
@@ -41,14 +41,14 @@ To work with iNNfo models from your AI agent (OpenCode, Claude Code, etc.), you 
 ## How it works
 
 ```
-AI Agent â†’ actioNN (instructions) â†’ innfo-mcp (MCP server) â†’ @innv0/innfo-core (engine)
-                                                                      â†“
+AI Agent ? actioNN (instructions) ? innfo-mcp (MCP server) ? @cogNNitive/cogNNitive-core (engine)
+                                                                      ?
                                                           Public iNNfo Specs on GitHub
 ```
 
-- The MCP server (`innfo-mcp`) wraps `@innv0/innfo-core` from this repo
-- The agent delegates all resolution, validation, and mutation to the MCP â€” never hand-rolls
-- Specs are fetched at runtime from `iNNfo/specs/latest/` â€” no duplication
+- The MCP server (`innfo-mcp`) wraps `@cogNNitive/cogNNitive-core` from this repo
+- The agent delegates all resolution, validation, and mutation to the MCP — never hand-rolls
+- Specs are fetched at runtime from `iNNfo/specs/latest/` — no duplication
 
 ## Developing iNNfo
 
@@ -60,4 +60,4 @@ npm run build --workspace=packages/innfo-mcp
 
 This builds `packages/innfo-mcp/bin/innfo-mcp.bundle.js` which the local `opencode.json` registers.
 
-For agent interaction with iNNfo models, still install actioNN â€” the skills contain the interaction patterns that the local MCP registration does not replace.
+For agent interaction with iNNfo models, still install actioNN — the skills contain the interaction patterns that the local MCP registration does not replace.

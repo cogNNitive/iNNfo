@@ -1,10 +1,10 @@
 # EvaluaciÃ³n CrÃ­tica y Estructural del Ecosistema iNNv0
 
 Este documento contiene la evaluaciÃ³n crÃ­tica y estructural de los cuatro archivos de especificaciÃ³n que forman la cadena jerÃ¡rquica de niveles 0â†’1â†’2â†’3 del ecosistema iNNv0:
-1. [defiNNe_V_0-2-0_F.md](file:///d:/Users/lucas/Documents/GitHub/innV0/iNNfo/verification/defiNNe_V_0-2-0_F.md) (Level 0)
-2. [FORMAT_V_0-2-0_F.md](file:///d:/Users/lucas/Documents/GitHub/innV0/iNNfo/verification/FORMAT_V_0-2-0_F.md) (Level 1)
-3. [business_V_1-0-0_F.md](file:///d:/Users/lucas/Documents/GitHub/innV0/iNNfo/verification/business_V_1-0-0_F.md) (Level 2)
-4. [Ghostbusters_V_0-3-0_business_F.md](file:///d:/Users/lucas/Documents/GitHub/innV0/iNNfo/verification/Ghostbusters_V_0-3-0_business_F.md) (Level 3)
+1. [defiNNe_V_0-2-0_F.md](file:///d:/Users/lucas/Documents/GitHub/cogNNitive/cogNNitive/verification/defiNNe_V_0-2-0_F.md) (Level 0)
+2. [FORMAT_V_0-2-0_F.md](file:///d:/Users/lucas/Documents/GitHub/cogNNitive/cogNNitive/verification/FORMAT_V_0-2-0_F.md) (Level 1)
+3. [business_V_1-0-0_F.md](file:///d:/Users/lucas/Documents/GitHub/cogNNitive/cogNNitive/verification/business_V_1-0-0_F.md) (Level 2)
+4. [Ghostbusters_V_0-3-0_business_F.md](file:///d:/Users/lucas/Documents/GitHub/cogNNitive/cogNNitive/verification/Ghostbusters_V_0-3-0_business_F.md) (Level 3)
 
 ---
 

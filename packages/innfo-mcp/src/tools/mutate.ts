@@ -7,8 +7,8 @@
  */
 
 import { readFile, writeFile } from 'node:fs/promises'
-import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation } from '@innv0/innfo-core'
-import type { SpecDocument, ValidationError } from '@innv0/innfo-core'
+import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation } from '@cogNNitive/cogNNitive-core'
+import type { SpecDocument, ValidationError } from '@cogNNitive/cogNNitive-core'
 
 import { getTemplateFromUrl, findModelFile, deriveNameFromUrl } from './spec.js'
 

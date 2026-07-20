@@ -30,7 +30,7 @@ if not exist "%ROOT%node_modules" (
 )
 
 REM ── Pre-build innfo-core (required by innfo-editor) ──
-echo   Building @innv0/innfo-core...
+echo   Building @cogNNitive/cogNNitive-core...
 cd /d "%ROOT%packages\innfo-core" && call npx tsc
 if %ERRORLEVEL% NEQ 0 (
     echo   ERROR: innfo-core build failed!
@@ -43,7 +43,7 @@ echo Starting development servers...
 echo.
 
 echo   [innfo-editor] http://localhost:5174
-start "innfo-editor" cmd /c "title innfo-editor && cd /d "%ROOT%" && npm run dev -w @innv0/innfo-editor -- --port 5174 --host"
+start "innfo-editor" cmd /c "title innfo-editor && cd /d "%ROOT%" && npm run dev -w @cogNNitive/cogNNitive-editor -- --port 5174 --host"
 
 echo   [docs]          http://localhost:8080
 start "iNNfo - docs" cmd /c "title iNNfo - docs && cd /d "%ROOT%" && npx http-server docs/ -p 8080 -c-1 --silent"

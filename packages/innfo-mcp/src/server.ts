@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * innfo-mcp — MCP server wrapping @innv0/innfo-core.
+ * innfo-mcp — MCP server wrapping @cogNNitive/cogNNitive-core.
  *
  * Exposes semantic iNNfo tools over stdio transport for consumption by
  * MCP clients such as OpenCode Desktop.

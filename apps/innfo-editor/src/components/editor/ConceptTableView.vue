@@ -159,7 +159,7 @@ import WidgetField from '../../shared/widgets/WidgetField.vue'
 
 const isEditMode = ref(false)
 import BlockPill from './BlockPill.vue'
-import type { FieldValue } from '@innv0/innfo-core'
+import type { FieldValue } from '@cogNNitive/cogNNitive-core'
 
 const props = defineProps<{
   nodeId: string

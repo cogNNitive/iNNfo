@@ -14,8 +14,8 @@ Model, edit, and validate iNNfo knowledge models. iNNfo is the hub for the iNNfo
 A monorepo that ties the iNNfo ecosystem together:
 
 - **iNNfo Modeler** (`innfo-editor`) â€” a Vue 3 workspace editor. Open any folder, parse it into one normalized model tree, edit nodes, and validate in the browser.
-- **@innv0/innfo-core** â€” the shared TypeScript parser, spec-chain resolver, and validator.
-- **@innv0/innfo-mcp** â€” an MCP server exposing iNNfo as semantic tools for AI agents.
+- **@cogNNitive/cogNNitive-core** â€” the shared TypeScript parser, spec-chain resolver, and validator.
+- **@cogNNitive/cogNNitive-mcp** â€” an MCP server exposing iNNfo as semantic tools for AI agents.
 - **Spec Chain** â€” defiNNe &rarr; iNNfo &rarr; Templates &rarr; Models.
 
 ## How the iNNfo Modeler works

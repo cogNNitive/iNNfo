@@ -466,7 +466,7 @@ import BlockRelationships from './BlockRelationships.vue'
 import BlockMatrixSummary from './BlockMatrixSummary.vue'
 import NodeMedia from './NodeMedia.vue'
 import ConceptTableView from './ConceptTableView.vue'
-import { parseFrontmatter } from '@innv0/innfo-core'
+import { parseFrontmatter } from '@cogNNitive/cogNNitive-core'
 
 const props = withDefaults(
   defineProps<{

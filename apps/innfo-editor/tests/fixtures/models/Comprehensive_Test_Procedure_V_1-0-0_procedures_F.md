@@ -1,11 +1,11 @@
 ---
 spec_version: "V_0-2-0"
-spec_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
 model_version: "V_1-0-0"
 level: 3
 parent:
   name: "procedures_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
 mode: "FILE"
 template:
   name: "procedures"

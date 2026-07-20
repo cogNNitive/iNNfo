@@ -17,7 +17,7 @@
  * Color utility: `getHexColor(name)` mirrors GraphViewer.vue's palette.
  */
 
-import { parseFrontmatter } from '@innv0/innfo-core'
+import { parseFrontmatter } from '@cogNNitive/cogNNitive-core'
 import { resolveEffectiveMetamodel } from '../model/metamodel'
 import { useModelStore } from '../stores/modelStore'
 import type { MetamodelConcept, ModelNode } from '../model/types'

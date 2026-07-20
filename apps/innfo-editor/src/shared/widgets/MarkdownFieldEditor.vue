@@ -4,7 +4,7 @@ import { marked } from 'marked'
 import { FileText, Pencil, Save, X, ArrowLeftFromLine } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
-import type { FileHandleLike } from '@innv0/innfo-core'
+import type { FileHandleLike } from '@cogNNitive/cogNNitive-core'
 
 const props = withDefaults(
   defineProps<{

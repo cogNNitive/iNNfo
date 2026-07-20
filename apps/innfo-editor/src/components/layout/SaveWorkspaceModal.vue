@@ -8,7 +8,7 @@ import { recursiveSerialize } from '../../model/recursiveSerializer'
 import { parseFormatFilename } from '../../utils/version'
 import { addToHistory } from '../../stores/historyStore'
 import { useToast } from '../../shared/useToast'
-import { serializeModel } from '@innv0/innfo-core'
+import { serializeModel } from '@cogNNitive/cogNNitive-core'
 import type { DirectoryHandleLike } from '../../model/fs-types'
 
 const workspaceStore = useWorkspaceStore()

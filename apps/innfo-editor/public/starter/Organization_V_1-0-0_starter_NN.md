@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "organization_V_0-2-0"
-  url: "https://raw.githubusercontent.com/innV0/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
 model_version: "V_1-0-0"
 title: "Organization Model Starter"
 mode: "FILE"

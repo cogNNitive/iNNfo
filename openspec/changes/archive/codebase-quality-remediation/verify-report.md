@@ -84,7 +84,7 @@ All 3 failures are in Ghostbusters model tests and relate to the `* _F index: Na
 |-------|--------|--------|
 | `template:` block removed from frontmatter | âœ… | No frontmatter `template:` block. `template:` occurrences are element-level YAML fields (valid). |
 | Frontmatter closes with bare `---` | âœ… | Line 13: bare `---` |
-| `specification_url` points to FORMAT level-1 | âœ… | `https://raw.githubusercontent.com/innV0/iNNfo/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md` |
+| `specification_url` points to FORMAT level-1 | âœ… | `https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-1_FORMAT.md` |
 | Zero `<!-- block:` occurrences | âœ… | `Select-String` found zero matches. All markers use `<!-- _F -->` hidden form. |
 | Hidden `_F` syntax used | âœ… | e.g. `# <!-- _F --> Business summary`, `* <!-- _F Segments: --> Ops & Compliance` |
 

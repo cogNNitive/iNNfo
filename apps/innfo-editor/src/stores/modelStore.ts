@@ -2,8 +2,8 @@ import { defineStore } from 'pinia'
 import type { ModelNode } from '../model/types'
 import type { DirectoryHandleLike, FileHandleLike } from '../model/fs-types'
 import { recursiveParse } from '../model/recursiveParser'
-import { validateFormatContent, parseFrontmatter } from '@innv0/innfo-core'
-import type { ModelDriver, ParseIssue, ValidationReport, LocalMetamodel } from '@innv0/innfo-core'
+import { validateFormatContent, parseFrontmatter } from '@cogNNitive/cogNNitive-core'
+import type { ModelDriver, ParseIssue, ValidationReport, LocalMetamodel } from '@cogNNitive/cogNNitive-core'
 
 export interface ModelState {
   nodes: Record<string, ModelNode>
