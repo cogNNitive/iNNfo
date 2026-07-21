@@ -8,12 +8,14 @@ parent_spec:
 type: "nn-workflow"
 model_version: "V_1-0-0"
 title: "Meeting Notes to Executive Summary"
-description: "Transform raw meeting notes or transcripts into a structured executive summary with decisions, action items, and blockers"
+description: "Transform a YouTube video transcript into a structured executive summary with decisions, action items, and blockers — using the 'Better Off Ted — Let's Do It' scene as sample input"
 ---
 
 # _NN Sample Workflow: Meeting Notes to Executive Summary
 
-Turn messy meeting notes (or a transcript) into a clean, actionable executive summary. The agent structures the content so stakeholders can scan it in 30 seconds.
+Turn a YouTube video transcript into a clean, actionable executive summary. The agent structures the content so stakeholders can scan it in 30 seconds.
+
+This sample uses the transcript of the **"Better Off Ted — Let's Do It"** scene ([YouTube](https://www.youtube.com/watch?v=NeFafCEqeh0)) — a meeting where Phil presents the Viridian solar-powered oven project with increasingly absurd problems.
 
 ---
 
@@ -30,11 +32,13 @@ Turn messy meeting notes (or a transcript) into a clean, actionable executive su
 
 ## How to run it
 
-1. Place your raw notes or transcript in `traNNsform/input/`
+1. The sample transcript is already in `traNNsform/input/better-off-ted-lets-do-it_source_NN.md`
 2. Open the repo in your AI agent (OpenCode, Claude Code, etc.)
 3. Say — or paste — this prompt:
 
-> Run the sample workflow `workflows/samples/meeting-to-summary.workflow.md` on the file in `traNNsform/input/`. Read the meeting notes, extract decisions, action items, and blockers, and produce an executive summary in `traNNsform/output/`. Name the output `<MeetingTopic>_executive_summary.md`.
+> Run the sample workflow `workflows/samples/meeting-to-summary.workflow.md` on `traNNsform/input/better-off-ted-lets-do-it_source_NN.md`. Read the meeting transcript, extract decisions, action items, and blockers, and produce an executive summary in `traNNsform/output/`. Name the output `BetterOffTed_executive_summary.md`.
+
+> **Replace with your own**: Drop any other transcript (meeting, talk, podcast) into `traNNsform/input/` and update the filename in the prompt.
 
 ---
 
@@ -42,19 +46,19 @@ Turn messy meeting notes (or a transcript) into a clean, actionable executive su
 
 ### Stage 1: Ingest source
 
-* _NN Ingest: Read the raw notes or transcript
+* _NN Ingest: Read the YouTube transcript
 
-**Goal**: Load the source document and parse its structure.
+**Goal**: Load the transcript and parse its structure.
 
 **Steps**:
-1. Read the file from `traNNsform/input/` (supports `.txt`, `.md`, `.docx`, `.pdf`)
-2. Detect if it's a transcript (speaker turns) or raw notes (bullet points, free text)
-3. Extract any metadata present: date, attendees, topic, duration
+1. Read the file from `traNNsform/input/` (the sample is `better-off-ted-lets-do-it_source_NN.md`)
+2. Detect it as a transcript with speaker turns, timestamps, and dialogue
+3. Extract metadata: source URL (`https://www.youtube.com/watch?v=NeFafCEqeh0`), duration (`0:56`), show (`Better Off Ted`)
 
 **Expected output**: Parsed content with detected structure type
 
 ```yaml
-input: "traNNsform/input/<source>"
+input: "traNNsform/input/better-off-ted-lets-do-it_source_NN.md"
 output: "structured text (in-memory)"
 ```
 
@@ -83,16 +87,16 @@ output: "structured text (in-memory)"
 **Goal**: Produce a clean, stakeholder-ready Markdown file.
 
 **Steps**:
-1. Build the header with extracted metadata (or `[Unknown]` placeholders)
-2. Write a 2-3 sentence executive brief
+1. Build the header with extracted metadata (source YouTube URL, duration, show name)
+2. Write a 2-3 sentence executive brief capturing the absurd situation
 3. Render decisions as a bullet list with context
 4. Render action items as a table:
 
    | Owner | Task | Deadline | Status |
    |-------|------|----------|--------|
-   | @alice | Ship v2.1 migration plan | 2026-08-01 | Pending |
+   | @phil | Fix plastic toxicity in solar ovens | TBD | Investigating |
 
-5. Render blockers as a list with dependency notes
+5. Render blockers as a list with dependency notes (e.g. blocked by physics — sunlight triggers both the oven function AND the toxin release)
 6. Optional: list remaining discussion topics for reference
 7. Add a "Next Meeting" section with suggested agenda items based on open items
 
@@ -101,7 +105,7 @@ output: "structured text (in-memory)"
 ```yaml
 skill: "nn-trannsform"
 input: "extracted lists"
-output: "traNNsform/output/<MeetingTopic>_executive_summary.md"
+output: "traNNsform/output/BetterOffTed_executive_summary.md"
 ```
 
 ---
@@ -113,8 +117,8 @@ output: "traNNsform/output/<MeetingTopic>_executive_summary.md"
 **Goal**: Persist the file and confirm with the user.
 
 **Steps**:
-1. Write the summary to `traNNsform/output/<MeetingTopic>_executive_summary.md`
-2. Confirm: ✅ `traNNsform/output/<MeetingTopic>_executive_summary.md`
+1. Write the summary to `traNNsform/output/BetterOffTed_executive_summary.md`
+2. Confirm: ✅ `traNNsform/output/BetterOffTed_executive_summary.md`
 3. Offer edits: "Want me to adjust the level of detail, reformat for email, or add a timeline?"
 
 **Expected output**: Saved Markdown file
