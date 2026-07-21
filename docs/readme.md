@@ -50,13 +50,13 @@ The **iNNfo Modeler** app is built from `apps/innfo-editor` and deployed at `/ap
 
 | URL | What's there |
 |-----|-------------|
-| [`https://innfo.cognitive.com/`](https://innfo.cognitive.com/) | Landing page |
-| [`https://innfo.cognitive.com/app/`](https://innfo.cognitive.com/app/) | iNNfo Modeler (the app) |
-| [`https://innfo.cognitive.com/documentation`](https://innfo.cognitive.com/documentation) | Docsify documentation site |
+| [`https://innfo.cognnitive.com/`](https://innfo.cognnitive.com/) | Landing page |
+| [`https://innfo.cognnitive.com/app/`](https://innfo.cognnitive.com/app/) | iNNfo Modeler (the app) |
+| [`https://innfo.cognnitive.com/documentation`](https://innfo.cognnitive.com/documentation) | Docsify documentation site |
 
 ### Testing the production app
 
-1. Open [`https://innfo.cognitive.com/app/`](https://innfo.cognitive.com/app/) in a browser that supports the File System Access API (Chrome, Edge, Opera).
+1. Open [`https://innfo.cognnitive.com/app/`](https://innfo.cognnitive.com/app/) in a browser that supports the File System Access API (Chrome, Edge, Opera).
 2. Click **Open Workspace** and select a folder containing `_NN.md` files (samples are in `specs/latest/level2/`).
 3. The app parses the folder into a tree, previews it, and validates against the spec chain.
 4. Switch between views: Editor, Graph, Matrices, Info, Exports, and the AI Guide.

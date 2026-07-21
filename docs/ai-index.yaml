@@ -1,7 +1,7 @@
 ﻿# AI Content Index Ã¢â‚¬â€ https://skills.innv0.com/innv0-web-design-guide
 site:
   name: 'iNNfo'
-  url: 'https://innfo.cognitive.com/'
+  url: 'https://innfo.cognnitive.com/'
   description: 'The hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.'
   generator: 'https://skills.innv0.com/innv0-web-design-guide'
   language: 'en'
@@ -12,10 +12,10 @@ pages:
     description: 'iNNfo is the hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.'
     last_modified: '2026-07-11'
     format: markdown
-    url: 'https://innfo.cognitive.com/index.md'
+    url: 'https://innfo.cognnitive.com/index.md'
   - path: '/about'
     title: 'About Ã¢â‚¬â€ iNNfo'
     description: 'Learn about iNNfo, the hub for the iNNfo ecosystem Ã¢â‚¬â€ the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain.'
     last_modified: '2026-07-11'
     format: markdown
-    url: 'https://innfo.cognitive.com/about.md'
+    url: 'https://innfo.cognnitive.com/about.md'

@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>About â€” iNNfo</title>
+    <title>About — iNNfo</title>
     <meta
       name="description"
-      content="Learn about iNNfo, the hub for the iNNfo ecosystem â€” the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain."
+      content="Learn about iNNfo, the hub for the iNNfo ecosystem — the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain."
     />
     <base href="/" />
     <meta name="generator" content="https://skills.innv0.com/innv0-web-design-guide" />
-    <link rel="canonical" href="https://innfo.cognitive.com/about" />
+    <link rel="canonical" href="https://innfo.cognnitive.com/about" />
     <link rel="alternate" type="text/markdown" href="about.md" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
@@ -22,7 +22,7 @@
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "iNNfo",
-        "url": "https://innfo.cognitive.com/",
+        "url": "https://innfo.cognnitive.com/",
         "description": "The hub for the iNNfo ecosystem. iNNfo Modeler, innfo-core, innfo-mcp, and the spec chain.",
         "author": { "@type": "Organization", "name": "iNNv0" },
         "inLanguage": "en",
@@ -62,7 +62,7 @@
           <div style="max-width: 720px; margin: 0 auto">
             <h2 style="font-size: 22px; margin-bottom: var(--space-md)">Architecture</h2>
             <p style="margin-bottom: var(--space-lg)">
-              iNNfo is organized as an npm workspaces monorepo â€” one editor app, three shared
+              iNNfo is organized as an npm workspaces monorepo — one editor app, three shared
               packages, the spec chain, and an agent-driven pipeline:
             </p>
 
@@ -79,33 +79,33 @@
               "
             >
               iNNfo/<br />
-              â”œâ”€â”€ apps/<br />
-              â”‚&nbsp;&nbsp; â””â”€â”€ innfo-editor/ &nbsp;<span
+              ├── apps/<br />
+              │&nbsp;&nbsp; └── innfo-editor/ &nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
-                >// Vue 3 workspace editor â€” the iNNfo Modeler</span
+                >// Vue 3 workspace editor — the iNNfo Modeler</span
               ><br />
-              â”œâ”€â”€ packages/<br />
-              â”‚&nbsp;&nbsp; â”œâ”€â”€ innfo-core/ &nbsp;&nbsp;&nbsp;<span
+              ├── packages/<br />
+              │&nbsp;&nbsp; ├── innfo-core/ &nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// TS parser, resolver, validator</span
               ><br />
-              â”‚&nbsp;&nbsp; â”œâ”€â”€ innfo-mcp/ &nbsp;&nbsp;&nbsp;&nbsp;<span
+              │&nbsp;&nbsp; ├── innfo-mcp/ &nbsp;&nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// MCP server for AI agents</span
               ><br />
-              â”‚&nbsp;&nbsp; â””â”€â”€ pipeline-gates/ <span
+              │&nbsp;&nbsp; └── pipeline-gates/ <span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// Validation &amp; integration gates</span
               ><br />
-              â”œâ”€â”€ specs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+              ├── specs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// defiNNe, iNNfo, templates, samples</span
               ><br />
-              â”œâ”€â”€ traNNsform/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+              ├── traNNsform/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// Agent-driven import/export pipeline</span
               ><br />
-              â””â”€â”€ docs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+              └── docs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// This website</span
               >
@@ -148,9 +148,9 @@
               <h3 style="margin-top: var(--space-sm)">innfo-mcp</h3>
               <p>
                 A Model Context Protocol server (stdio) wrapping innfo-core. It exposes seven semantic
-                tools â€” <code>list_models</code>, <code>read_model</code>, <code>get_spec</code>,
+                tools — <code>list_models</code>, <code>read_model</code>, <code>get_spec</code>,
                 <code>get_template</code>, <code>validate_model</code>, <code>apply_change</code>, and
-                <code>validate_model_url</code> â€” so any MCP-capable AI agent can read, validate, and
+                <code>validate_model_url</code> — so any MCP-capable AI agent can read, validate, and
                 safely mutate iNNfo models. Spec and template resolution follow the model's parent
                 chain, with no hardcoded URLs.
               </p>
@@ -160,7 +160,7 @@
               <span class="card-tag">@cognnitive/pipeline-gates</span>
               <h3 style="margin-top: var(--space-sm)">pipeline-gates</h3>
               <p>
-                Validation and integration gates for iNNfo model pipelines â€” the dev-tooling layer
+                Validation and integration gates for iNNfo model pipelines — the dev-tooling layer
                 that validates, integrates, and versions models in CI so a broken model never ships.
               </p>
             </div>
@@ -192,7 +192,7 @@
                 <span class="card-tag">Level 2</span>
                 <h3 style="margin-top: var(--space-sm); font-size: 18px">Templates</h3>
                 <p>
-                  business, procedures, organization â€” each declares concepts, markers, and
+                  business, procedures, organization — each declares concepts, markers, and
                   relationship types on top of iNNfo.
                 </p>
               </div>
@@ -200,7 +200,7 @@
                 <span class="card-tag">Level 3</span>
                 <h3 style="margin-top: var(--space-sm); font-size: 18px">Models</h3>
                 <p>
-                  Concrete instances like Ghostbusters or Engineering Team. Lightweight â€” just data
+                  Concrete instances like Ghostbusters or Engineering Team. Lightweight — just data
                   and a parent pointer.
                 </p>
               </div>
@@ -226,7 +226,7 @@
                 <h3 style="margin-top: var(--space-sm); font-size: 18px">Shared substrate</h3>
                 <p>
                   Both formats use Markdown files with YAML frontmatter as their core representation.
-                  No proprietary tooling, no centralized schema registry â€” just text files in version
+                  No proprietary tooling, no centralized schema registry — just text files in version
                   control. OKF's "if you can <code>cat</code> a file, you can read OKF" applies equally
                   to iNNfo.
                 </p>
@@ -234,7 +234,7 @@
               <div class="card">
                 <h3 style="margin-top: var(--space-sm); font-size: 18px">Conformance met</h3>
                 <p>
-                  OKF v0.1 conformance (Â§9) requires: (1) parseable YAML frontmatter on every
+                  OKF v0.1 conformance (§9) requires: (1) parseable YAML frontmatter on every
                   non-reserved <code>.md</code> file, (2) a non-empty <code>type</code> field, (3)
                   reserved filenames follow OKF conventions. iNNfo satisfies all three: every
                   <code>_NN.md</code> has frontmatter, the <code>level</code>+template system provides
@@ -247,9 +247,9 @@
                 <p>
                   OKF explicitly states consumers MUST NOT reject bundles because of unknown
                   additional frontmatter keys, unknown <code>type</code> values, or missing optional
-                  fields. iNNfo's richer frontmatter â€” <code>spec_version</code>, <code>level</code>,
+                  fields. iNNfo's richer frontmatter — <code>spec_version</code>, <code>level</code>,
                   <code>parent</code>, <code>concepts</code>, <code>markers</code>,
-                  <code>matrices</code> â€” is fully tolerated by OKF consumers.
+                  <code>matrices</code> — is fully tolerated by OKF consumers.
                 </p>
               </div>
               <div class="card">
@@ -258,9 +258,9 @@
                 </h3>
                 <p>
                   An iNNfo workspace produces exactly the directory-of-Markdown-files structure that
-                  OKF defines as a <em>knowledge bundle</em> (Â§3). Each <code>_NN.md</code> maps to an
-                  OKF <em>concept document</em> (Â§4) with <code>index.md</code> as the directory
-                  listing (Â§6). Wikilinks and standard Markdown links coexist for cross-linking.
+                  OKF defines as a <em>knowledge bundle</em> (§3). Each <code>_NN.md</code> maps to an
+                  OKF <em>concept document</em> (§4) with <code>index.md</code> as the directory
+                  listing (§6). Wikilinks and standard Markdown links coexist for cross-linking.
                 </p>
               </div>
             </div>
@@ -272,7 +272,7 @@
         <div class="container">
           <div class="section-header">
             <h2>Get in <span class="serif-accent">Touch</span></h2>
-            <p>Contributions, questions, ideas â€” we're always open.</p>
+            <p>Contributions, questions, ideas — we're always open.</p>
           </div>
           <div
             class="contact-links"

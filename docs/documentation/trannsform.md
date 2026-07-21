@@ -41,3 +41,50 @@ traNNsform/
 - After editing a model, the agent suggests bumping the model's version so the Export Navigator can detect stale exports.
 
 See `traNNsform/AGENT.md` for the authoritative, up-to-date protocol.
+
+## Sample Workflows
+
+`traNNsform/workflows/samples/` includes ready-to-run transformation recipes. Each sample describes a specific input-to-output transformation, with stages the agent follows automatically.
+
+### How to run a sample workflow
+
+1. **Place your source file** in `traNNsform/input/` (PDF, text, Markdown, meeting notes, etc.)
+2. **Open the repo** in your AI agent (OpenCode, Claude Code, or any MCP-capable agent)
+3. **Say the prompt** listed in the workflow file — the agent reads the workflow and executes it stage by stage
+4. **Get your result** in `traNNsform/output/`
+
+### Available samples
+
+| Workflow | Source → Result | What it does |
+|----------|----------------|--------------|
+| [Paper → YouTube Script](https://github.com/cogNNitive/cogNNitive/tree/main/iNNfo/traNNsform/workflows/samples/paper-to-youtube.workflow.md) | Scientific PDF → video script | Extracts findings, structures a YouTube script with hook, explanation, limitations, and CTA |
+| [Meeting → Summary](https://github.com/cogNNitive/cogNNitive/tree/main/iNNfo/traNNsform/workflows/samples/meeting-to-summary.workflow.md) | Raw notes → executive summary | Extracts decisions, action items, blockers, and produces a stakeholder-ready summary |
+
+### Example: Paper to YouTube Script
+
+Using the paper [*What makes a video go viral?*](https://pdodds.w3.uvm.edu/files/papers/others/2009/munz2009a.pdf) (Munz et al., 2009):
+
+```bash
+# 1. Download the paper into the input directory
+curl -o traNNsform/input/munz2009a.pdf \
+  https://pdodds.w3.uvm.edu/files/papers/others/2009/munz2009a.pdf
+
+# 2. In your AI agent, say:
+#    "Run the sample workflow paper-to-youtube on traNNsform/input/munz2009a.pdf"
+```
+
+The agent reads the PDF, extracts the core narrative, and generates a complete YouTube script with timestamps and visual cues saved to `traNNsform/output/munz2009a_youtube_script.md`.
+
+### Example: Meeting Notes to Executive Summary
+
+```bash
+# 1. Place your meeting notes in the input directory
+cp ~/notes/sprint-review.md traNNsform/input/
+
+# 2. In your AI agent, say:
+#    "Run the sample workflow meeting-to-summary on traNNsform/input/sprint-review.md"
+```
+
+The agent extracts decisions, action items, blockers, and writes a structured summary to `traNNsform/output/sprint-review_executive_summary.md`.
+
+> **Tip**: You can run these workflows on any input file, not just the examples shown. The agent adapts the stages to whatever content it finds.

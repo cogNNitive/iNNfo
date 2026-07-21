@@ -1,7 +1,7 @@
 ﻿---
 title: iNNfo â€” the iNNfo modeling hub
 description: iNNfo is the hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, the innfo-core library, and an MCP server for AI agents.
-html_url: https://innfo.cognitive.com/
+html_url: https://innfo.cognnitive.com/
 generator: https://skills.innv0.com/innv0-web-design-guide
 ---
 
@@ -61,6 +61,6 @@ iNNfo/
 â””â”€â”€ docs/                 â† This website
 ```
 
-[Launch App](https://innfo.cognitive.com/app/)
-[About the project](https://innfo.cognitive.com/about)
-[Documentation](https://innfo.cognitive.com/documentation)
+[Launch App](https://innfo.cognnitive.com/app/)
+[About the project](https://innfo.cognnitive.com/about)
+[Documentation](https://innfo.cognnitive.com/documentation)

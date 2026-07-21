@@ -1,7 +1,7 @@
 ﻿---
 title: About â€” iNNfo
 description: Learn about iNNfo, the hub for the iNNfo ecosystem â€” the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain.
-html_url: https://innfo.cognitive.com/about
+html_url: https://innfo.cognnitive.com/about
 generator: https://skills.innv0.com/innv0-web-design-guide
 ---
 
@@ -65,4 +65,4 @@ iNNfo is **100% compatible** with [OKF v0.1](https://github.com/GoogleCloudPlatf
 - **Tolerant extensions**: OKF explicitly tolerates unknown frontmatter keys and unknown `type` values â€” iNNfo's richer metadata (`spec_version`, `level`, `parent`, `concepts`, `markers`, `matrices`) is fully compatible.
 - **A workspace = an OKF Bundle**: an iNNfo workspace produces exactly the directory tree OKF defines as a knowledge bundle. Each `_NN.md` is an OKF concept document.
 
-[Home](https://innfo.cognitive.com/)
+[Home](https://innfo.cognnitive.com/)
