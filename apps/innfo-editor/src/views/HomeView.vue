@@ -15,6 +15,8 @@ import {
   formatTimestamp,
 } from '../stores/historyStore'
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
+import { normalizeSingleModel } from '@cognnitive/innfo-core'
+import { useModelStore } from '../stores/modelStore'
 import { useToast } from '../shared/useToast'
 import SetupWizard from '../components/layout/SetupWizard.vue'
 
@@ -144,6 +146,7 @@ const sandboxBusy = ref(false)
 const showSandbox = ref(!localStorage.getItem('nn_hide_sandbox'))
 const showWizard = ref(false)
 const folderBusy = ref(false)
+const folderInputRef = ref<HTMLInputElement | null>(null)
 
 function closeSandbox(): void {
   localStorage.setItem('nn_hide_sandbox', 'true')
@@ -153,9 +156,13 @@ function closeSandbox(): void {
 const docsUrl = 'https://format.innv0.com/documentation/'
 
 /**
- * Entry point: prompts the user for a workspace directory via the File System
- * Access API, runs the single parse pass through workspaceStore.open(), and
- * navigates to the workspace view.
+ * Entry point: prompts the user for a workspace directory.
+ *
+ * Primary: File System Access API (showDirectoryPicker) — Chromium browsers
+ * on secure contexts. Provides full read/write with handle persistence.
+ *
+ * Fallback: <input type="file" webkitdirectory> — works in Chrome, Edge,
+ * and Firefox (92+). Read-only virtual workspace (no save).
  */
 async function openWorkspace(): Promise<void> {
   error.value = null
@@ -164,23 +171,75 @@ async function openWorkspace(): Promise<void> {
       showDirectoryPicker?: (opts?: { id?: string }) => Promise<DirectoryHandleLike>
     }
   ).showDirectoryPicker
-  if (!picker) {
-    error.value = 'This browser does not support the File System Access API. Use Chrome or Edge.'
-    return
+  if (picker) {
+    try {
+      folderBusy.value = true
+      const handle = await picker.call(window, { id: 'innfo-workspace' })
+      await workspace.open(handle)
+      await addToHistory(handle.name, handle)
+      history.value = await loadHistory()
+      router.push('/workspace')
+      return
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
+      error.value = err instanceof Error ? err.message : String(err)
+      folderBusy.value = false
+      return
+    }
   }
+  // Fallback: trigger the hidden file input
+  showToast('File System API not available in this browser. Using fallback folder picker (read-only).', 'info')
+  folderInputRef.value?.click()
+}
+
+/**
+ * Processes files from the fallback <input type="file" webkitdirectory>
+ * picker. Reads _NN.md files, parses them, and sets up a virtual workspace
+ * (read-only, no file system handle).
+ */
+async function onFolderInputChange(event: Event): Promise<void> {
+  error.value = null
+  const input = event.target as HTMLInputElement
+  const files = input.files
+  if (!files || files.length === 0) return
+
+  folderBusy.value = true
   try {
-    folderBusy.value = true
-    const handle = await picker.call(window, { id: 'innfo-workspace' })
-    await workspace.open(handle)
-    // Persist to recent-folders history
-    await addToHistory(handle.name, handle)
+    const nnFiles = Array.from(files).filter((f) => f.name.endsWith('_NN.md'))
+    if (nnFiles.length === 0) {
+      error.value = 'No iNNfo model files (_NN.md) found in this folder.'
+      showToast('No iNNfo models found in this folder. Try the examples below.', 'warning')
+      return
+    }
+
+    const modelStore = useModelStore()
+    const allNodes: Record<string, import('../model/types').ModelNode> = {}
+    const rootIds: string[] = []
+
+    for (const file of nnFiles) {
+      const content = await file.text()
+      const rootId = file.name.replace(/\.md$/i, '')
+      const result = normalizeSingleModel(content, file.webkitRelativePath || file.name, rootId)
+      Object.assign(allNodes, result.nodes)
+      rootIds.push(rootId)
+    }
+
+    await modelStore._resolveParentSpecs(allNodes, rootIds)
+    modelStore.setGraph(allNodes, rootIds)
+
+    workspace.hasParsed = true
+    workspace.parseCount += 1
+    workspace.emptyFolderError = false
+
+    const dirName = nnFiles[0].webkitRelativePath.split('/')[0] || 'workspace'
+    await addToHistory(dirName, null as unknown as any)
     history.value = await loadHistory()
     router.push('/workspace')
   } catch (err) {
-    if (err instanceof DOMException && err.name === 'AbortError') return
     error.value = err instanceof Error ? err.message : String(err)
   } finally {
     folderBusy.value = false
+    input.value = ''
   }
 }
 
@@ -444,14 +503,23 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z" />
           </svg>
-          <span>{{ folderBusy ? 'Opening\u2026' : 'Open Folder' }}</span>
+          <span>{{ folderBusy ? 'Opening\u2026' : 'Open Existing Work Space' }}</span>
         </button>
 
         <p v-if="error" class="hero__error" role="alert">{{ error }}</p>
 
-        <button class="hero__guide" @click="showWizard = true">
+        <button class="hero__btn hero__btn--secondary" @click="showWizard = true">
           New to iNNfo? Start with guided setup &rarr;
         </button>
+
+        <input
+          ref="folderInputRef"
+          type="file"
+          webkitdirectory
+          multiple
+          class="home__hidden-input"
+          @change="onFolderInputChange"
+        />
       </div>
     </section>
 
@@ -697,6 +765,21 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
   cursor: default;
 }
 
+.hero__btn--secondary {
+  background: #fff;
+  color: #4d0e4e;
+  border: 2px solid #4d0e4e;
+  box-shadow: none;
+  font-size: 0.95rem;
+  padding: 0.75rem 1.8rem;
+}
+
+.hero__btn--secondary:hover:not(:disabled) {
+  background: #f8f0f8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(77, 14, 78, 0.12);
+}
+
 .hero__error {
   margin: 0;
   font-size: 13px;
@@ -706,6 +789,15 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
   background: #fff0f0;
   border-radius: 8px;
   border: 1px solid #ffcdd2;
+}
+
+.home__hidden-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .hero__guide {
