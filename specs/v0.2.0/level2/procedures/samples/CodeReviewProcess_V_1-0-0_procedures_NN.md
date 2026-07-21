@@ -10,7 +10,7 @@ title: "Code Review Process"
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # _NN index
 
@@ -99,7 +99,7 @@ title: "Code Review Process"
   output: "Hotfix Branch"
   tool: "GitHub"
   ```
-  Branch from main with a `hotfix/` prefix. Keep changes minimal â€” one commit per fix. Attach the incident ticket to the PR description and tag the on-call engineer.
+  Branch from main with a `hotfix/` prefix. Keep changes minimal — one commit per fix. Attach the incident ticket to the PR description and tag the on-call engineer.
 
 * _NN Work: Request Expedited Review
   ```yaml

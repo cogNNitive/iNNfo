@@ -11,7 +11,7 @@ asset_mode: "centralized"
 ---
 
 > [!NOTE]
-> This is a **FORMAT document** â€” business model for an independent record label using FILE mode.
+> This is a **FORMAT document** — business model for an independent record label using FILE mode.
 
 # _F index
 
@@ -67,7 +67,7 @@ Vinyl Records Inc. is an independent record label founded in 2015, specializing 
   impact: high
   owner: curation
   ```
-  Expertly curated reissues spanning jazz, soul, rock, and electronic â€” each release contextualized with historical essays.
+  Expertly curated reissues spanning jazz, soul, rock, and electronic — each release contextualized with historical essays.
 
 * _F Value propositions: Direct-to-fan
   ```yaml

@@ -1,6 +1,6 @@
 ﻿# iNNfo Documentation
 
-Welcome to the iNNfo documentation. iNNfo is the monorepo (`@cognnitive/innfo`) that powers the iNNv0 **iNNfo** ecosystem.
+Welcome to the iNNfo documentation. iNNfo is the monorepo (`@cognnitive/innfo`) that powers the cogNNitive **iNNfo** ecosystem.
 
 ## Quick Start
 
@@ -18,7 +18,7 @@ npm run dev -w @cognnitive/innfo-editor
 ## Sections
 
 ### [innfo-editor](innfo-editor)
-**iNNfo Modeler** â€” the unified Vue 3 workspace editor. Opens any folder via the File System Access API, runs a single recursive parse into one normalized node graph, validates automatically, and lets you edit, export, and import iNNfo models.
+**iNNfo Modeler** — the unified Vue 3 workspace editor. Opens any folder via the File System Access API, runs a single recursive parse into one normalized node graph, validates automatically, and lets you edit, export, and import iNNfo models.
 
 ### [innfo-core](innfo-core)
 `@cognnitive/innfo-core` is the framework-agnostic TypeScript library shared across the ecosystem: parser, model types, validator, IO drivers, and the spec-chain resolver.
@@ -27,7 +27,7 @@ npm run dev -w @cognnitive/innfo-editor
 `@cognnitive/innfo-mcp` is an MCP server that exposes iNNfo models and operations to AI coding agents (Claude Code, OpenCode, and others) over stdio.
 
 ### [traNNsform](trannsform)
-The export/import pipeline that turns iNNfo models into self-contained HTML visualizers, and turns source documents back into iNNfo models â€” driven by an external AI agent following the protocol in `traNNsform/AGENT.md`.
+The export/import pipeline that turns iNNfo models into self-contained HTML visualizers, and turns source documents back into iNNfo models — driven by an external AI agent following the protocol in `traNNsform/AGENT.md`.
 
 ### [Ecosystem](ecosystem)
 The four-level specification chain:
@@ -35,7 +35,7 @@ The four-level specification chain:
 | Level | Name | Description |
 |-------|------|-------------|
 | 0 | **defiNNe** | Meta-specification: structure, SemVer, RFC 2119 |
-| 1 | **iNNfo** | Central spec â€” single-file `_NN.md` documents |
+| 1 | **iNNfo** | Central spec — single-file `_NN.md` documents |
 | 2 | **Templates** | business, procedures, organization |
 | 3 | **Models** | Concrete instances (Ghostbusters, Code Review Process, Engineering Team) |
 

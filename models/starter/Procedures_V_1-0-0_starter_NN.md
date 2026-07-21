@@ -20,7 +20,7 @@ mode: "FILE"
 
 # _NN Procedure
 * _NN Procedure: My Procedure
-  Describe the overall procedure â€” its purpose, scope, and expected outcomes.
+  Describe the overall procedure — its purpose, scope, and expected outcomes.
 
 # _NN Work
 * _NN Work: Step 1
@@ -36,4 +36,4 @@ mode: "FILE"
 
 # _NN Roles
 * _NN Roles: Responsible Role
-  Define who performs this work â€” their scope, responsibilities, and access level.
+  Define who performs this work — their scope, responsibilities, and access level.

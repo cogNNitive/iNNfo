@@ -11,7 +11,7 @@ asset_mode: "centralized"
 ---
 
 > [!NOTE]
-> This is a **FORMAT document** â€” procedures model for a complete song recording workflow from demo to mastered track.
+> This is a **FORMAT document** — procedures model for a complete song recording workflow from demo to mastered track.
 
 # _F index
 
@@ -142,31 +142,31 @@ A complete workflow for recording, producing, and releasing a song from initial 
 
 | Work \ Roles | Producer | Recording Engineer | Mixing Engineer | Mastering Engineer |
 | :--- | :---: | :---: | :---: | :---: |
-| Songwriting | Responsible | â€” | â€” | â€” |
-| Pre-production | Accountable | Consulted | â€” | â€” |
-| Tracking | Accountable | Responsible | â€” | â€” |
-| Editing | Consulted | Responsible | â€” | â€” |
-| Mixing | Consulted | â€” | Responsible | â€” |
-| Mastering | â€” | â€” | Consulted | Responsible |
+| Songwriting | Responsible | — | — | — |
+| Pre-production | Accountable | Consulted | — | — |
+| Tracking | Accountable | Responsible | — | — |
+| Editing | Consulted | Responsible | — | — |
+| Mixing | Consulted | — | Responsible | — |
+| Mastering | — | — | Consulted | Responsible |
 
 # _F matrices: work-tools matrix
 
 | Work \ Tools | DAW | Microphone | Audio interface | Monitoring headphones |
 | :--- | :---: | :---: | :---: | :---: |
-| Songwriting | Uses | â€” | â€” | â€” |
-| Pre-production | Uses | â€” | â€” | â€” |
+| Songwriting | Uses | — | — | — |
+| Pre-production | Uses | — | — | — |
 | Tracking | Uses | Uses | Uses | Uses |
-| Editing | Uses | â€” | â€” | Uses |
-| Mixing | Uses | â€” | Uses | Uses |
-| Mastering | Uses | â€” | Uses | Uses |
+| Editing | Uses | — | — | Uses |
+| Mixing | Uses | — | Uses | Uses |
+| Mastering | Uses | — | Uses | Uses |
 
 # _F matrices: work-artifacts matrix
 
 | Work \ Artifact | Demo recording | Multitrack session | Stereo mix | Mastered track |
 | :--- | :---: | :---: | :---: | :---: |
-| Songwriting | Creates | â€” | â€” | â€” |
-| Pre-production | Modifies | â€” | â€” | â€” |
-| Tracking | â€” | Creates | â€” | â€” |
-| Editing | â€” | Modifies | â€” | â€” |
-| Mixing | â€” | â€” | Creates | â€” |
-| Mastering | â€” | â€” | Modifies | Creates |
+| Songwriting | Creates | — | — | — |
+| Pre-production | Modifies | — | — | — |
+| Tracking | — | Creates | — | — |
+| Editing | — | Modifies | — | — |
+| Mixing | — | — | Creates | — |
+| Mastering | — | — | Modifies | Creates |

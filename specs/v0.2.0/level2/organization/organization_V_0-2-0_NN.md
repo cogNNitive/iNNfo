@@ -61,7 +61,7 @@ matrices:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # Organization Template
 
@@ -97,17 +97,17 @@ The Organization Template is designed to model the human resource structure of a
 
 ### Matrices
 
-| Matrix | Source â†’ Target | Purpose |
+| Matrix | Source → Target | Purpose |
 |---|---|---|
-| Positions-Roles | Position â†’ Roles | Which positions assume which roles |
-| Persons-Positions | Person â†’ Position | Who occupies which position |
+| Positions-Roles | Position → Roles | Which positions assume which roles |
+| Persons-Positions | Person → Position | Who occupies which position |
 
 ### Relationship Types
 
 | Type | Enabled | Representation |
 |---|---|---|
 | Hierarchy | âœ… | index block (wikilinks) |
-| Evaluable matrix | âœ… | Sourceâ†’target tables |
+| Evaluable matrix | âœ… | Source→target tables |
 | Graph edge | âŒ | Not applicable |
 | Sequence | âŒ | Not applicable |
 

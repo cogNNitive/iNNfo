@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
@@ -189,7 +189,7 @@ async function initWorkspaceStructure(
   const snippetsDir = await traNNsformDir.getDirectoryHandle('snippets', { create: true })
   const workflowsDir = await traNNsformDir.getDirectoryHandle('workflows', { create: true })
 
-  // Download traNNsform files from GitHub (non-blocking � log on failure)
+  // Download traNNsform files from GitHub (non-blocking — log on failure)
   const TRANSFORM_BASE_URL = 'https://raw.githubusercontent.com/iNNfo/iNNfo/main/traNNsform'
   const transformFiles = [
     { path: '', name: 'AGENT.md' },
@@ -228,7 +228,7 @@ async function initWorkspaceStructure(
   // Create README
   const readmeContent = `# ${modelName}
 
-This workspace was created by iNNfo � a structured knowledge model editor for the iNNfo format.
+This workspace was created by iNNfo — a structured knowledge model editor for the iNNfo format.
 
 ## Workspace contents
 
@@ -237,7 +237,7 @@ This workspace was created by iNNfo � a structured knowledge model editor for 
 | \`index.md\` | Entry point that maps your model structure |
 | \`${modelName}_V_1-0-0_${chosenTemplate}_NN.md\` | Your model file |
 | \`iNNfo.html\` | Open this to launch the editor |
-| \`AGENTS.md\` | AI agent entry point � skill and MCP setup instructions |
+| \`AGENTS.md\` | AI agent entry point — skill and MCP setup instructions |
 | \`.specs/\` | Template specifications (auto-managed) |
 | \`.backups/\` | Auto-save history (auto-managed) |
 | \`traNNsform/\` | AI-powered transformation tools for import and export |
@@ -255,7 +255,7 @@ This workspace was created by iNNfo � a structured knowledge model editor for 
     await w.close()
   }
 
-  // Create AGENTS.md � AI agent entry point with skill and MCP instructions
+  // Create AGENTS.md — AI agent entry point with skill and MCP instructions
   const agentsContent = `# AGENT Instructions
 
 Read this file FIRST when entering this workspace. It tells you how to configure yourself to work with iNNfo models.
@@ -293,14 +293,14 @@ git clone https://github.com/iNNfo/actioNN.git
 
 The \`innfo-mcp\` server wraps \`@cognnitive/innfo-core\` and provides deterministic model validation, spec resolution, and semantic mutation tools. The agent MUST NOT hand-validate or hand-resolve spec chains when the MCP is available.
 
-**Recommended � zero-clone (CDN bootstrap).** You do NOT need to clone this repo. \`innfo-mcp\` is published as a single auto-updating bundle on the CDN (\`https://format.innv0.com/cdn/\`). Install the bootstrap script once � it downloads, caches, and auto-updates the bundle, with an offline fallback to the cached copy � then point your agent at it. Full per-platform steps and the script source: https://github.com/iNNfo/iNNfo/blob/main/docs/mcp-setup.md
+**Recommended — zero-clone (CDN bootstrap).** You do NOT need to clone this repo. \`innfo-mcp\` is published as a single auto-updating bundle on the CDN (\`https://format.innv0.com/cdn/\`). Install the bootstrap script once — it downloads, caches, and auto-updates the bundle, with an offline fallback to the cached copy — then point your agent at it. Full per-platform steps and the script source: https://github.com/iNNfo/iNNfo/blob/main/docs/mcp-setup.md
 
 - **macOS / Linux**: save \`bootstrap.sh\` into \`~/.cache/innfo-mcp/\` and run \`chmod +x\` on it.
 - **Windows**: save \`innfo-mcp.ps1\` and \`innfo-mcp.cmd\` into \`%USERPROFILE%\\.cache\\innfo-mcp\\\`.
 
 Then configure the MCP per your agent, pointing \`command\` at the bootstrap script:
 
-**OpenCode** � add to \`opencode.json\` or \`~/.config/opencode/opencode.jsonc\` (OpenCode uses the \`mcp\` key with a \`command\` array, NOT \`mcpServers\`):
+**OpenCode** — add to \`opencode.json\` or \`~/.config/opencode/opencode.jsonc\` (OpenCode uses the \`mcp\` key with a \`command\` array, NOT \`mcpServers\`):
 \`\`\`jsonc
 {
   "$schema": "https://opencode.ai/config.json",
@@ -314,7 +314,7 @@ Then configure the MCP per your agent, pointing \`command\` at the bootstrap scr
 }
 \`\`\`
 
-**Claude Code** � add to \`.mcp.json\` (uses the \`mcpServers\` key with a \`command\` + \`args\` split):
+**Claude Code** — add to \`.mcp.json\` (uses the \`mcpServers\` key with a \`command\` + \`args\` split):
 \`\`\`jsonc
 {
   "mcpServers": {
@@ -325,11 +325,11 @@ Then configure the MCP per your agent, pointing \`command\` at the bootstrap scr
 }
 \`\`\`
 
-**anti-gravity** � same \`mcpServers\` shape as Claude Code, with \`command\` pointing at your platform's bootstrap script.
+**anti-gravity** — same \`mcpServers\` shape as Claude Code, with \`command\` pointing at your platform's bootstrap script.
 
 On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`command\` instead of the \`bootstrap.sh\` path shown above (see \`docs/mcp-setup.md\` for the exact escaped JSON).
 
-**Alternative � clone-based (contributors).** If you already have \`iNNfo\` cloned, build once with \`npm run build --prefix packages/innfo-mcp\` and point \`command\` at \`node <repo>/packages/innfo-mcp/dist/server.js\` instead. See \`docs/mcp-setup.md\`.
+**Alternative — clone-based (contributors).** If you already have \`iNNfo\` cloned, build once with \`npm run build --prefix packages/innfo-mcp\` and point \`command\` at \`node <repo>/packages/innfo-mcp/dist/server.js\` instead. See \`docs/mcp-setup.md\`.
 
 ## Workspace structure
 
@@ -348,14 +348,14 @@ On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`com
     await w.close()
   }
 
-  // Create iNNfo.html � redirects to the deployed app URL
+  // Create iNNfo.html — redirects to the deployed app URL
   const appUrl = import.meta.env.BASE_URL || 'https://innfo.app'
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>iNNfo � ${modelName}</title>
+  <title>iNNfo — ${modelName}</title>
   <meta http-equiv="refresh" content="0; url=${appUrl}">
   <style>
     body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #fafafa; color: #333; text-align: center; }
@@ -363,7 +363,7 @@ On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`com
   </style>
 </head>
 <body>
-  <p>Redirecting to <a href="${appUrl}">iNNfo</a> � if you are not redirected, click the link.</p>
+  <p>Redirecting to <a href="${appUrl}">iNNfo</a> — if you are not redirected, click the link.</p>
 </body>
 </html>`
   const htmlFileHandle = await handle.getFileHandle('iNNfo.html', { create: true })
@@ -426,7 +426,7 @@ async function prepopulateSpecs(handle: DirectoryHandleLike, starterUrl: string)
       currentName = (fm as any)?.parent_spec?.name
       continue
     } catch {
-      // Not found � download
+      // Not found — download
     }
 
     if (!currentUrl) break
@@ -613,7 +613,7 @@ const stepTitles = [
         <h2 class="wizard__title">Before you start...</h2>
         <p class="wizard__desc">
           Do you know what an iNNfo model looks like? We recommend exploring a completed model first
-          � it takes 2 minutes and helps you understand how everything works.
+          — it takes 2 minutes and helps you understand how everything works.
         </p>
 
         <div class="wizard__samples">
@@ -634,7 +634,7 @@ const stepTitles = [
 
         <div class="wizard__actions">
           <button class="wizard__btn wizard__btn--prominent" @click="goToStep(1)">
-            I already know � create a model
+            I already know — create a model
           </button>
         </div>
       </div>
@@ -643,11 +643,11 @@ const stepTitles = [
       <!-- STEP 1: Welcome                         -->
       <!-- ---------------------------------------- -->
       <div v-if="currentStep === 1" class="wizard__step">
-        <div class="wizard__icon">??</div>
+        <div class="wizard__icon">🧠</div>
         <h2 class="wizard__title">Welcome to iNNfo</h2>
         <p class="wizard__desc">
-          iNNfo lets you create structured knowledge models � like a database for ideas,
-          processes, and data. Your models are plain Markdown files stored on YOUR computer �
+          iNNfo lets you create structured knowledge models — like a database for ideas,
+          processes, and data. Your models are plain Markdown files stored on YOUR computer —
           nothing is uploaded to the cloud.
         </p>
         <p class="wizard__desc">We'll guide you through the setup in just a few steps.</p>
@@ -661,7 +661,7 @@ const stepTitles = [
       <!-- STEP 2: Choose a folder                 -->
       <!-- ---------------------------------------- -->
       <div v-if="currentStep === 2" class="wizard__step">
-        <div class="wizard__icon">??</div>
+        <div class="wizard__icon">📁</div>
         <h2 class="wizard__title">Where to save your models</h2>
         <p class="wizard__desc">
           Your models are saved as plain Markdown files in a folder on your computer. We recommend
@@ -699,7 +699,7 @@ const stepTitles = [
       <!-- STEP 3: Workspace contents              -->
       <!-- ---------------------------------------- -->
       <div v-if="currentStep === 3" class="wizard__step">
-        <div class="wizard__icon">??</div>
+        <div class="wizard__icon">📄</div>
         <h2 class="wizard__title">Workspace contents</h2>
         <p class="wizard__desc">
           iNNfo will create these files and folders in your workspace:
@@ -708,7 +708,7 @@ const stepTitles = [
         <div class="wizard__file-list">
           <div class="wizard__file">
             <code>iNNfo.html</code>
-            <span>Bookmark to launch the application � redirects to the editor URL</span>
+            <span>Bookmark to launch the application — redirects to the editor URL</span>
           </div>
           <div class="wizard__file">
             <code>README.md</code>
@@ -745,7 +745,7 @@ const stepTitles = [
       <!-- STEP 4: Blank, template, or sandbox     -->
       <!-- ---------------------------------------- -->
       <div v-if="currentStep === 4" class="wizard__step">
-        <div class="wizard__icon">??</div>
+        <div class="wizard__icon">🎨</div>
         <h2 class="wizard__title">How would you like to start?</h2>
 
         <div class="wizard__template-grid">
@@ -757,11 +757,11 @@ const stepTitles = [
             @click="templateChoice = opt.id"
           >
             <div class="wizard__template-icon">
-              <span v-if="opt.icon === 'blank'">?</span>
-              <span v-else-if="opt.icon === 'business'">??</span>
-              <span v-else-if="opt.icon === 'procedures'">??</span>
-              <span v-else-if="opt.icon === 'organization'">??</span>
-              <span v-else-if="opt.icon === 'sandbox'">??</span>
+              <span v-if="opt.icon === 'blank'">⬜</span>
+              <span v-else-if="opt.icon === 'business'">🏢</span>
+              <span v-else-if="opt.icon === 'procedures'">📋</span>
+              <span v-else-if="opt.icon === 'organization'">👥</span>
+              <span v-else-if="opt.icon === 'sandbox'">🧪</span>
             </div>
             <div class="wizard__template-info">
               <strong>{{ opt.label }}</strong>
@@ -776,7 +776,7 @@ const stepTitles = [
             Next &#8594;
           </button>
           <button v-else class="wizard__btn" :disabled="busy" @click="finishWizard">
-            {{ busy ? 'Loading...' : 'Open sandbox ??' }}
+            {{ busy ? 'Loading...' : 'Open sandbox 🧪' }}
           </button>
         </div>
       </div>
@@ -785,7 +785,7 @@ const stepTitles = [
       <!-- STEP 5: Name your model                 -->
       <!-- ---------------------------------------- -->
       <div v-if="currentStep === 5" class="wizard__step">
-        <div class="wizard__icon">??</div>
+        <div class="wizard__icon">✏️</div>
         <h2 class="wizard__title">Name your model</h2>
 
         <label class="wizard__label">
@@ -816,7 +816,7 @@ const stepTitles = [
       <!-- STEP 6: You're all set                  -->
       <!-- ---------------------------------------- -->
       <div v-if="currentStep === 6" class="wizard__step">
-        <div class="wizard__icon">??</div>
+        <div class="wizard__icon">🎉</div>
         <h2 class="wizard__title">You're all set!</h2>
         <p class="wizard__desc">You can edit your model in two ways:</p>
 
@@ -838,7 +838,7 @@ const stepTitles = [
         </div>
 
         <p class="wizard__tip">
-          ?? You can switch between both � changes are reflected immediately.
+          💡 You can switch between both — changes are reflected immediately.
         </p>
 
         <div class="wizard__actions">

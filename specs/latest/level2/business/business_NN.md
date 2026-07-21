@@ -537,7 +537,7 @@ matrices:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # Business Template
 
@@ -545,7 +545,7 @@ matrices:
 
 ## Philosophy
 
-The Business Template is designed for modeling complete business strategies in a structured, interconnected way. It follows the belief that a business model is best understood as a network of relationships â€” between problems and solutions, stakeholders and channels, assumptions and risks â€” rather than as a linear document.
+The Business Template is designed for modeling complete business strategies in a structured, interconnected way. It follows the belief that a business model is best understood as a network of relationships — between problems and solutions, stakeholders and channels, assumptions and risks — rather than as a linear document.
 
 ## Objectives
 
@@ -586,9 +586,9 @@ Each concept has a `type` that determines its representation:
 
 | Marker | Symbol | Purpose |
 |---|---|---|
-| `weight` | `*` | Core importance score (1â€“10) |
+| `weight` | `*` | Core importance score (1–10) |
 | `completion` | `>` | Progress indicator |
-| `certainty` | `?` | Confidence level (1â€“5) |
+| `certainty` | `?` | Confidence level (1–5) |
 | `priority` | `!` | Urgency flag |
 | `rating` | `+` | Quality rating |
 
@@ -596,14 +596,14 @@ Each concept has a `type` that determines its representation:
 
 The template declares the following evaluable matrices:
 
-| Matrix | Source â†’ Target | Purpose |
+| Matrix | Source → Target | Purpose |
 |---|---|---|
-| Journey Map | Journey â†’ Emotions | Customer experience mapping |
-| Problems-Value Propositions | Problems â†’ Value propositions | Solution fit |
-| Value propositions-Messages | Value propositions â†’ Messages | Message alignment |
-| Messages-Channels | Messages â†’ Channels | Channel strategy |
-| Assumptions-Risks | Assumptions â†’ Risks | Risk assessment |
-| Features-Milestones | Features â†’ Milestones | Release planning |
+| Journey Map | Journey → Emotions | Customer experience mapping |
+| Problems-Value Propositions | Problems → Value propositions | Solution fit |
+| Value propositions-Messages | Value propositions → Messages | Message alignment |
+| Messages-Channels | Messages → Channels | Channel strategy |
+| Assumptions-Risks | Assumptions → Risks | Risk assessment |
+| Features-Milestones | Features → Milestones | Release planning |
 
 All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min`.
 
@@ -612,7 +612,7 @@ All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Ne
 | Type | Enabled | Representation |
 |---|---|---|
 | Hierarchy | âœ… | index block (wikilinks) |
-| Evaluable matrix | âœ… | Sourceâ†’target tables |
+| Evaluable matrix | âœ… | Source→target tables |
 | Graph edge | âŒ | Not applicable |
 | Sequence | âœ… | concept type `steps` / `sequence` |
 
@@ -621,12 +621,12 @@ All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Ne
 Concepts are organized in a multi-level hierarchy. The root categories are:
 
 ```
-Market â†’ Segments â†’ Profiles â†’ Persona ...
-Solutions â†’ Products and services â†’ Features ...
-Organization â†’ Team â†’ Goals, Skills, Positions ...
-Finance â†’ Revenue, Costs, Funding sources ...
-Analysis â†’ Assumptions, Risks, SWOT, Keys ...
-Validation â†’ Coherence, Experiments ...
+Market → Segments → Profiles → Persona ...
+Solutions → Products and services → Features ...
+Organization → Team → Goals, Skills, Positions ...
+Finance → Revenue, Costs, Funding sources ...
+Analysis → Assumptions, Risks, SWOT, Keys ...
+Validation → Coherence, Experiments ...
 ```
 
 ## Template
@@ -761,7 +761,7 @@ The PESTEL analysis can help a business understand the macro-environmental facto
 `Describe the overall market context for [your sector], including size, key segments, and growth drivers.`
 `What are the barriers to entry and regulatory factors affecting this market?`
 `Who are the key influencers, regulators, or associations shaping this market?`
-`How has this market grown historically over the past 5Ã¢â‚¬â€œ10 years, and what factors drove that growth?`
+`How has this market grown historically over the past 5Ã¢â‚¬“10 years, and what factors drove that growth?`
 `What emerging sub-segments or niches within this market present untapped opportunities?`
 
 ---
@@ -1219,7 +1219,7 @@ Means through which we interact with our clients throughout the customer journey
 ### Description
 Channels are the pathways through which a company communicates and delivers its value proposition to customers. They encompass everything from how customers first hear about a product to how it is delivered to them and supported afterward. Channels ensure that the value created by a business reaches its intended audience in a way that is efficient, effective, and aligned with customer expectations.
 
-Think of channels as the customer journey: first, they discover your product or service (awareness). This could happen through an engaging social media ad, word of mouth, or a well-placed banner on a website. Next comes evaluationÃ¢â‚¬â€customers need a way to understand whether your product meets their needs. This might involve offering free trials, showcasing customer reviews, or creating informative product videos.
+Think of channels as the customer journey: first, they discover your product or service (awareness). This could happen through an engaging social media ad, word of mouth, or a well-placed banner on a website. Next comes evaluationÃ¢â‚¬”customers need a way to understand whether your product meets their needs. This might involve offering free trials, showcasing customer reviews, or creating informative product videos.
 
 When the customer is ready to buy, the purchase phase is where your sales channels come into play. They might buy directly from your website, visit a physical store, or order through a third-party retailer. Once the purchase is made, delivery channels take over to ensure the product reaches the customer, whether through home delivery, digital downloads, or pickup options. Finally, post-sale support keeps the relationship alive, with loyalty programs, customer service, or satisfaction surveys helping to build trust and encourage repeat business.
 
@@ -1370,7 +1370,7 @@ NPS is a tool that measures customer loyalty and satisfaction. It can provide in
 ## Behaviors
 
 ### Summary
-Behaviors refers to what customers express (say) and their observable actions (do) during their experience with a product or service, both the verbal feedback provided by customersÃ¢â‚¬â€such as comments, quotes, and reviewsÃ¢â‚¬â€and their actual behaviors or interactions.
+Behaviors refers to what customers express (say) and their observable actions (do) during their experience with a product or service, both the verbal feedback provided by customersÃ¢â‚¬”such as comments, quotes, and reviewsÃ¢â‚¬”and their actual behaviors or interactions.
 
 ### Description
 "Emotions" in business modeling refers to the emotional aspects that influence the behaviors and decisions of customers, employees, and other stakeholders. This concept is crucial in a business model as it helps companies understand and manage these emotional aspects to enhance their relationships with these stakeholders, improve their experiences, and ultimately, drive their business success.
@@ -1441,7 +1441,7 @@ Personas are fictional characters created to represent the different user types 
 The Jobs to Be Done Framework is a tool for understanding customer needs, and helps businesses focus on what a customer is trying to achieve at each stage of their journey. It provides insight into customer motivations and can help businesses design their services or products to meet these needs.
 
 ### Prompts
-`Map the journey stages (awareness Ã¢â€ â€™ consideration Ã¢â€ â€™ purchase Ã¢â€ â€™ loyalty Ã¢â€ â€™ advocacy) for [persona], naming each phase.`
+`Map the journey stages (awareness Ã¢” ’ consideration Ã¢” ’ purchase Ã¢” ’ loyalty Ã¢” ’ advocacy) for [persona], naming each phase.`
 `What touchpoints and channels appear at each stage?`
 `What goals, questions, and pain points do they have in each phase?`
 `Which success metrics track performance at each point?`
@@ -1589,7 +1589,7 @@ This tool, also developed by Alexander Osterwalder, is a more detailed look at t
 **Lean Startup Methodology**
 The Lean Startup methodology, developed by Eric Ries, emphasizes the importance of getting a "Minimum Viable Product" (MVP) to market as quickly as possible. The MVP is a version of the product with just enough features to satisfy early customers and provide feedback for future product development.
 **Jobs to be Done Framework**
-This framework, developed by Clayton Christensen, focuses on understanding the customer's "job" Ã¢â‚¬â€œ the progress they are trying to make in a particular circumstance. The features of the solution are designed to help the customer get this job done more effectively or efficiently.
+This framework, developed by Clayton Christensen, focuses on understanding the customer's "job" Ã¢â‚¬“ the progress they are trying to make in a particular circumstance. The features of the solution are designed to help the customer get this job done more effectively or efficiently.
 **Feature Prioritization Matrix**
 This tool is used to prioritize the features to be included in a product or service. It involves plotting the features on a matrix based on their value to the customer and the effort required to implement them. This helps ensure that the most valuable and feasible features are included in the solution.
 **Kano Model**
@@ -2323,7 +2323,7 @@ SCAMPER is a creative thinking technique that can be used to improve products or
 The Innovation Ambition Matrix is a tool that can help companies identify new opportunities for growth. It involves plotting existing and potential products on a matrix based on the potential market and the level of innovation required. This can inspire new ideas for innovative products or services.
 
 ### Prompts
-`Identify 3Ã¢â‚¬â€œ5 sources of inspiration (companies, trends, technologies) that shaped our business concept.`
+`Identify 3Ã¢â‚¬“5 sources of inspiration (companies, trends, technologies) that shaped our business concept.`
 `How can we translate these inspirations into innovative features or services?`
 `What lessons can we learn from similar successful ventures?`
 `Which external case studies demonstrate best practices relevant to our model?`
@@ -2478,7 +2478,7 @@ PESTEL Analysis is a tool used to analyze the macro-environmental factors that a
 This tool helps businesses to understand their customers' needs and design products and services they want. It can help in setting business objectives by identifying customer needs and wants.
 
 ### Prompts
-`Define 3Ã¢â‚¬â€œ5 SMART objectives for the next 12 months aligned with our mission.`
+`Define 3Ã¢â‚¬“5 SMART objectives for the next 12 months aligned with our mission.`
 `What metrics will measure success against each objective?`
 `Which departments or teams are responsible for each objective?`
 `What resources and timelines are needed to achieve these objectives?`
@@ -2552,7 +2552,7 @@ The PESTEL analysis can be used to evaluate the alignment of the company's visio
 The Value Proposition Canvas is a tool that helps businesses to understand their customers' needs and to design products and services that meet these needs. The vision of the company can guide the design of the value proposition, ensuring that it aligns with the long-term aspirations and goals of the business model.
 
 ### Prompts
-`Craft a vision statement describing our desired future state in 5Ã¢â‚¬â€œ10 years.`
+`Craft a vision statement describing our desired future state in 5Ã¢â‚¬“10 years.`
 `What aspirational goals and values should the vision convey?`
 `How does this vision align with industry trends and societal needs?`
 `What milestones will indicate progress toward this vision?`
@@ -2744,7 +2744,7 @@ The SWOT analysis can be used to identify the strengths and weaknesses of a comp
 **Resource-Based View (RBV)**
 The Resource-Based View is a method of analyzing and identifying a firm's strategic advantages based on the examination of the combination of its resources. It emphasizes the importance of firm-specific resources that are valuable, rare, inimitable, and non-substitutable (VRIN) to gain and maintain competitive advantage.
 **Balanced Scorecard**
-The Balanced Scorecard is a strategic planning and management system that organizations use to align business activities with the vision and strategy of the organization, improve internal and external communications, and monitor organization performance against strategic goals. It includes financial measures that tell the results of actions already taken, and operational measures on customer satisfaction, internal processes, and the organization's innovation and improvement activitiesÃ¢â‚¬â€the drivers of future financial performance.
+The Balanced Scorecard is a strategic planning and management system that organizations use to align business activities with the vision and strategy of the organization, improve internal and external communications, and monitor organization performance against strategic goals. It includes financial measures that tell the results of actions already taken, and operational measures on customer satisfaction, internal processes, and the organization's innovation and improvement activitiesÃ¢â‚¬”the drivers of future financial performance.
 
 ### Prompts
 `Identify the critical resources (physical, human, intellectual, financial) required for each solution.`
@@ -2813,7 +2813,7 @@ Kanban is a visual system for managing work as it moves through a process. It vi
 *No methodologies provided.*
 
 ### Prompts
-`List 3Ã¢â‚¬â€œ5 departmental or individual goals that support the organizational objectives.`
+`List 3Ã¢â‚¬“5 departmental or individual goals that support the organizational objectives.`
 `Assign specific metrics and targets to each goal.`
 `Specify owners and deadlines for achieving each goal.`
 `Explain how progress on these goals will be reported.`
@@ -2876,7 +2876,7 @@ The multiple resources or inputs that an individual provides to the company, hig
 
 In a business model, "Contributions" are fundamental components as they enable the execution of key activities. They may involve carrying out specific tasks, providing necessary resources, or supporting critical functions. The performance or quality of these contributors directly influences the overall success of the business.
 
-The identification of "Contributions" varies depending on the nature of the business and its activities. It includes not only roles such as employees, suppliers, or partners but also tangible and intangible assets like equipment, technology, intellectual property, or data. Each contributorÃ¢â‚¬â€whether a person, resource, or assetÃ¢â‚¬â€fulfills a specific role and responsibility, requiring a coordinated effort to achieve business objectives.
+The identification of "Contributions" varies depending on the nature of the business and its activities. It includes not only roles such as employees, suppliers, or partners but also tangible and intangible assets like equipment, technology, intellectual property, or data. Each contributorÃ¢â‚¬”whether a person, resource, or assetÃ¢â‚¬”fulfills a specific role and responsibility, requiring a coordinated effort to achieve business objectives.
 
 For example, in a manufacturing business, "Contributions" might include roles like production managers, machine operators, and raw material suppliers, as well as resources like manufacturing equipment, logistics systems, and production facilities. Each of these elements is crucial for producing and delivering high-quality products to customers.
 
@@ -3296,7 +3296,7 @@ This tool can help businesses understand how external factors might affect their
 `Break down fixed versus variable costs and quantify each category.`
 `Identify top cost drivers and propose reduction strategies.`
 `Estimate breakeven point based on current cost structure.`
-`Forecast cost trends over the next 12Ã¢â‚¬â€œ24 months.`
+`Forecast cost trends over the next 12Ã¢â‚¬“24 months.`
 `Analyze cost implications of scaling operations or entering new markets.`
 
 ---
@@ -3771,7 +3771,7 @@ The Risk Breakdown Structure (RBS) is a hierarchical representation of risks acc
 **Failure Mode and Effects Analysis (FMEA)**
 Failure Mode and Effects Analysis (FMEA) is a step-by-step approach for identifying all possible failures in a design, a manufacturing or assembly process, or a product or service. It is a common tool for risk assessment and is used to identify potential failure modes, determine their effect on the operation of the product, and identify actions to mitigate the failures.
 **Monte Carlo Simulation**
-Monte Carlo Simulation is a computerized mathematical technique that allows people to account for risk in quantitative analysis and decision making. It provides a range of possible outcomes and the probabilities they will occur for any choice of action. It shows the extreme possibilitiesÃ¢â‚¬â€the outcomes of going for broke and for the most conservative decisionÃ¢â‚¬â€along with all possible consequences for middle-of-the-road decisions.
+Monte Carlo Simulation is a computerized mathematical technique that allows people to account for risk in quantitative analysis and decision making. It provides a range of possible outcomes and the probabilities they will occur for any choice of action. It shows the extreme possibilitiesÃ¢â‚¬”the outcomes of going for broke and for the most conservative decisionÃ¢â‚¬”along with all possible consequences for middle-of-the-road decisions.
 
 ### Prompts
 `Identify the top 5 risks associated with our business model and explain their potential impact.`

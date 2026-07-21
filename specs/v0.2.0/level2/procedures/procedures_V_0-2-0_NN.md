@@ -87,7 +87,7 @@ matrices:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # Procedures Template
 
@@ -95,7 +95,7 @@ matrices:
 
 ## Philosophy
 
-The Procedures Template is designed for modeling repeatable workflows with clear accountability. It follows the belief that any procedure can be understood as a hierarchical tree of procedures and steps, each producing or consuming artifacts, assigned to roles via a RACI matrix, and supported by tools. Work elements form a tree: root elements (no `parent`) define a procedure, child elements (`parent` set) define its steps. The template emphasizes traceability â€” every work step declares its inputs, outputs, parent procedure, and the roles responsible for it.
+The Procedures Template is designed for modeling repeatable workflows with clear accountability. It follows the belief that any procedure can be understood as a hierarchical tree of procedures and steps, each producing or consuming artifacts, assigned to roles via a RACI matrix, and supported by tools. Work elements form a tree: root elements (no `parent`) define a procedure, child elements (`parent` set) define its steps. The template emphasizes traceability — every work step declares its inputs, outputs, parent procedure, and the roles responsible for it.
 
 ## Objectives
 
@@ -124,21 +124,21 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 
 ### Matrices
 
-| Matrix | Source â†’ Target | Purpose |
+| Matrix | Source → Target | Purpose |
 |---|---|---|
-| Work-Roles | Work â†’ Roles | RACI assignment (Responsible, Accountable, Consulted, Informed) |
+| Work-Roles | Work → Roles | RACI assignment (Responsible, Accountable, Consulted, Informed) |
 
-| Work-Tools | Work â†’ Tools | Which tools are used by each work step |
-| Work-Artifacts | Work â†’ Artifact | I/O relationships (Creates, Modifies, Validates, Reviews) |
+| Work-Tools | Work → Tools | Which tools are used by each work step |
+| Work-Artifacts | Work → Artifact | I/O relationships (Creates, Modifies, Validates, Reviews) |
 
 ### Relationship Types
 
 | Type | Enabled | Representation |
 |---|---|---|
-| Hierarchy | âœ… | Implicit via Work `parent` field â€” root elements are procedures, children are steps |
-| Evaluable matrix | âœ… | Sourceâ†’target tables with RACI params |
+| Hierarchy | âœ… | Implicit via Work `parent` field — root elements are procedures, children are steps |
+| Evaluable matrix | âœ… | Source→target tables with RACI params |
 | Graph edge | âŒ | Not applicable |
-| Sequence | âœ… | Via Work `next` field â€” hand-linked order between siblings at same level |
+| Sequence | âœ… | Via Work `next` field — hand-linked order between siblings at same level |
 
 ## Template
 
@@ -196,7 +196,7 @@ title: "<Procedure Name>"
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process â†’ Emergency Hotfix Process), YAML element fields (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
+The official sample for this template is at `specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), YAML element fields (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
 
 ### Model Directory after First Load
 

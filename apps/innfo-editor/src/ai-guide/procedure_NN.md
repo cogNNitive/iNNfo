@@ -10,7 +10,7 @@ title: "Use iNNfo with AI"
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # _NN index
 
@@ -30,7 +30,7 @@ title: "Use iNNfo with AI"
   step_type: task
   tool: "OpenCode"
   ```
-  Download OpenCode from https://github.com/anomalyco/opencode and install it. OpenCode is the supported AI agent for iNNfo â€” it reads project skills natively and discovers them automatically.
+  Download OpenCode from https://github.com/anomalyco/opencode and install it. OpenCode is the supported AI agent for iNNfo — it reads project skills natively and discovers them automatically.
 * _NN Work: Open the workspace folder in OpenCode
   ```yaml
   parent: "Use iNNfo with AI"
@@ -54,7 +54,7 @@ title: "Use iNNfo with AI"
   output: "Edited Model File"
   tool: "OpenCode"
   ```
-  Tell OpenCode what you want to do including a reference to the skill you need, for example: *"innfo: Load the nn-innfo skill â€” I need to edit the business model and add a new concept"*. The skill reference in your message helps OpenCode discover and activate the right skill automatically. The skill provides model validation, MCP activation, and change workflows.
+  Tell OpenCode what you want to do including a reference to the skill you need, for example: *"innfo: Load the nn-innfo skill — I need to edit the business model and add a new concept"*. The skill reference in your message helps OpenCode discover and activate the right skill automatically. The skill provides model validation, MCP activation, and change workflows.
 * _NN Work: Import documents into iNNfo models
   ```yaml
   parent: "Use iNNfo with AI"
@@ -63,7 +63,7 @@ title: "Use iNNfo with AI"
   output: "iNNfo Models"
   tool: "OpenCode"
   ```
-  Place the documents you want to transform in **traNNsform/input/**. Then go to the **Import** panel in iNNfo and copy the generated prompt â€” it tells OpenCode exactly what to do. The **nn-trannsform** skill handles document ingestion, normalization, and conversion.
+  Place the documents you want to transform in **traNNsform/input/**. Then go to the **Import** panel in iNNfo and copy the generated prompt — it tells OpenCode exactly what to do. The **nn-trannsform** skill handles document ingestion, normalization, and conversion.
 * _NN Work: Export models as HTML visualizers
   ```yaml
   parent: "Use iNNfo with AI"
@@ -72,7 +72,7 @@ title: "Use iNNfo with AI"
   output: "HTML Visualizer"
   tool: "OpenCode"
   ```
-  Open the model you want to visualize, then go to the **Export** panel in iNNfo and copy the generated prompt. It includes the model name and instructions for OpenCode. The **nn-innfo** skill handles visualizer generation. Results appear in **traNNsform/output/**. Tell OpenCode: *"innfo: Load the nn-innfo skill â€” I need to generate an HTML visualizer following traNNsform/AGENT.md"*.
+  Open the model you want to visualize, then go to the **Export** panel in iNNfo and copy the generated prompt. It includes the model name and instructions for OpenCode. The **nn-innfo** skill handles visualizer generation. Results appear in **traNNsform/output/**. Tell OpenCode: *"innfo: Load the nn-innfo skill — I need to generate an HTML visualizer following traNNsform/AGENT.md"*.
 * _NN Work: Use the suggested prompts
   ```yaml
   parent: "Use iNNfo with AI"

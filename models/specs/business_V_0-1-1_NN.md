@@ -537,7 +537,7 @@ matrices:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # Business Template
 
@@ -545,7 +545,7 @@ matrices:
 
 ## Philosophy
 
-The Business Template is designed for modeling complete business strategies in a structured, interconnected way. It follows the belief that a business model is best understood as a network of relationships â€” between problems and solutions, stakeholders and channels, assumptions and risks â€” rather than as a linear document.
+The Business Template is designed for modeling complete business strategies in a structured, interconnected way. It follows the belief that a business model is best understood as a network of relationships — between problems and solutions, stakeholders and channels, assumptions and risks — rather than as a linear document.
 
 ## Objectives
 
@@ -590,9 +590,9 @@ Each concept has a `type` that determines its representation:
 
 | Marker | Symbol | Purpose |
 |---|---|---|
-| `weight` | `*` | Core importance score (1â€“10) |
+| `weight` | `*` | Core importance score (1–10) |
 | `completion` | `>` | Progress indicator |
-| `certainty` | `?` | Confidence level (1â€“5) |
+| `certainty` | `?` | Confidence level (1–5) |
 | `priority` | `!` | Urgency flag |
 | `rating` | `+` | Quality rating |
 
@@ -600,14 +600,14 @@ Each concept has a `type` that determines its representation:
 
 The template declares the following evaluable matrices:
 
-| Matrix | Source â†’ Target | Purpose |
+| Matrix | Source → Target | Purpose |
 |---|---|---|
-| Journey Map | Journey â†’ Emotions | Customer experience mapping |
-| Problems-Value Propositions | Problems â†’ Value propositions | Solution fit |
-| Value propositions-Messages | Value propositions â†’ Messages | Message alignment |
-| Messages-Channels | Messages â†’ Channels | Channel strategy |
-| Assumptions-Risks | Assumptions â†’ Risks | Risk assessment |
-| Features-Milestones | Features â†’ Milestones | Release planning |
+| Journey Map | Journey → Emotions | Customer experience mapping |
+| Problems-Value Propositions | Problems → Value propositions | Solution fit |
+| Value propositions-Messages | Value propositions → Messages | Message alignment |
+| Messages-Channels | Messages → Channels | Channel strategy |
+| Assumptions-Risks | Assumptions → Risks | Risk assessment |
+| Features-Milestones | Features → Milestones | Release planning |
 
 All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Neutral;Slightly Low;Low;Very Low;Min`.
 
@@ -616,7 +616,7 @@ All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Ne
 | Type | Enabled | Representation |
 |---|---|---|
 | Hierarchy | âœ… | index block (wikilinks) |
-| Evaluable matrix | âœ… | Sourceâ†’target tables |
+| Evaluable matrix | âœ… | Source→target tables |
 | Graph edge | âŒ | Not applicable |
 | Sequence | âœ… | concept type `steps` / `sequence` |
 
@@ -625,12 +625,12 @@ All evaluable matrices use a 9-point scale: `Max;Very High;High;Slightly High;Ne
 Concepts are organized in a multi-level hierarchy. The root categories are:
 
 ```
-Market â†’ Segments â†’ Profiles â†’ Persona ...
-Solutions â†’ Products and services â†’ Features ...
-Organization â†’ Team â†’ Goals, Skills, Positions ...
-Finance â†’ Revenue, Costs, Funding sources ...
-Analysis â†’ Assumptions, Risks, SWOT, Keys ...
-Validation â†’ Coherence, Experiments ...
+Market → Segments → Profiles → Persona ...
+Solutions → Products and services → Features ...
+Organization → Team → Goals, Skills, Positions ...
+Finance → Revenue, Costs, Funding sources ...
+Analysis → Assumptions, Risks, SWOT, Keys ...
+Validation → Coherence, Experiments ...
 ```
 
 ## Template

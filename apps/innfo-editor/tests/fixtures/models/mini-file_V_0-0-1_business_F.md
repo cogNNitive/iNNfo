@@ -6,12 +6,12 @@ parent:
   name: "business_V_0-1-1"
   url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/business_V_0-1-1_NN.md"
 model_version: "V_0-0-1"
-title: "Mini File â€” FILE mode smoke test"
+title: "Mini File — FILE mode smoke test"
 mode: "FILE"
 ---
 
 > [!NOTE]
-> This is a **FORMAT document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain.
+> This is a **FORMAT document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain.
 
 # _NN index
 

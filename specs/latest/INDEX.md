@@ -1,4 +1,4 @@
-# iNNfo Specification â€” latest
+# iNNfo Specification — latest
 
 > **âš ï¸ This is a convenience alias.** Files here use stable names (no version numbers). Contents mirror the current active version (`specs/v0.2.0/`).
 >
@@ -8,7 +8,7 @@
 
 ## Active Version
 
-**v0.2.0** â€” Published 2026-07-11
+**v0.2.0** — Published 2026-07-11
 
 | File | Canonical Source |
 |---|---|
@@ -20,7 +20,7 @@
 
 ## Stable URLs
 
-These URLs **never change** â€” they always point to the latest version:
+These URLs **never change** — they always point to the latest version:
 
 ```yaml
 # Always the latest defiNNe:

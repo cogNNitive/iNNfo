@@ -1,6 +1,6 @@
 ﻿# Architecture Decision: folder-format
 
-> **Status**: Historical Ã¢â‚¬â€ FOLDER mode and `kb` template removed in V_0-2-0 (2026-07-11).
+> **Status**: Historical Ã¢â‚¬” FOLDER mode and `kb` template removed in V_0-2-0 (2026-07-11).
 > The `folder-format` repo and KB template are no longer part of the iNNfo ecosystem.
 > **Executed**: 2026-07-01
 > **Supersedes**: Original iNNfo repo changeset
@@ -28,14 +28,14 @@ The old `cogNNitive/cogNNitive` repo is archived. A new clean repo `innV0/folder
 ## Relationship
 
 ```
-folder-format/       Ã¢â€ Â this repo (React SPA)
-iNNfo/          Ã¢â€ Â sibling dir: specs + format-core library
+folder-format/       Ã¢” Â this repo (React SPA)
+iNNfo/          Ã¢” Â sibling dir: specs + format-core library
 ```
 
 ## Spec resolution chain
 
 ```
-FORMAT spec  Ã¢â€ â€™ iNNfo/specs/FORMAT_V_0-1-0_FORMAT.md
-Parent       Ã¢â€ â€™ iNNfo/specs/defiNNe_V_0-1-0_FORMAT.md
-Template     Ã¢â€ â€™ iNNfo/specs/kb_V_0-1-0_FORMAT.md
+FORMAT spec  Ã¢” ’ iNNfo/specs/FORMAT_V_0-1-0_FORMAT.md
+Parent       Ã¢” ’ iNNfo/specs/defiNNe_V_0-1-0_FORMAT.md
+Template     Ã¢” ’ iNNfo/specs/kb_V_0-1-0_FORMAT.md
 ```

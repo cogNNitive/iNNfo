@@ -12,7 +12,7 @@ last_saved: "2026-07-01T00:00:00.000Z"
 ---
 
 > [!NOTE]
-> This is a **FORMAT document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory.
+> This is a **FORMAT document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory.
 
 # _NN index
 
@@ -104,7 +104,7 @@ last_saved: "2026-07-01T00:00:00.000Z"
 
 # _NN Business summary
 
-Ghostbusters is a professional paranormal investigation and elimination service based in New York City. The company provides rapid-response containment of supernatural entities â€” ghosts, demons, and other spectral phenomena â€” for residential, commercial, and governmental clients. Revenue is generated through service fees charged per investigation and containment operation. The business was founded by three former Columbia University parapsychology researchers who leveraged their proprietary nuclear-powered containment technology (the Proton Pack) to create an entirely new industry: commercial paranormal elimination.
+Ghostbusters is a professional paranormal investigation and elimination service based in New York City. The company provides rapid-response containment of supernatural entities — ghosts, demons, and other spectral phenomena — for residential, commercial, and governmental clients. Revenue is generated through service fees charged per investigation and containment operation. The business was founded by three former Columbia University parapsychology researchers who leveraged their proprietary nuclear-powered containment technology (the Proton Pack) to create an entirely new industry: commercial paranormal elimination.
 
 # _NN Stakeholders
 
@@ -121,7 +121,7 @@ Ghostbusters is a professional paranormal investigation and elimination service 
 * _NN Stakeholders: EPA (Walter Peck)
   Regulatory antagonist. Represents the risk of government interference with untested technology.
 * _NN Stakeholders: Gozer the Gozerian
-  Existential threat â€” the entity whose invasion validated the Ghostbusters' technology at the highest possible stakes.
+  Existential threat — the entity whose invasion validated the Ghostbusters' technology at the highest possible stakes.
 
 # _NN Segments
 
@@ -193,7 +193,7 @@ Ghostbusters charges a flat fee per call-out plus variable costs based on entity
 
 # _NN Mission
 
-To protect the people of New York City â€” and eventually the world â€” from supernatural threats through professional, science-based paranormal investigation and containment services.
+To protect the people of New York City — and eventually the world — from supernatural threats through professional, science-based paranormal investigation and containment services.
 
 # _NN Vision
 

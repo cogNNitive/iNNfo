@@ -1,10 +1,10 @@
-﻿# Spec Consolidation Ã¢â‚¬â€ Documento de Trabajo
+﻿# Spec Consolidation Ã¢â‚¬” Documento de Trabajo
 
 > **Nota**: Documento histÃƒÂ³rico. El modo `FOLDER` y el template `kb` fueron eliminados en V_0-2-0.
 > La consolidaciÃƒÂ³n final adoptÃƒÂ³ 3 templates: `business`, `procedures`, `organization`.
 > Fecha: 2026-07-01 (v3)
 > PropÃƒÂ³sito: Unificar especificaciones del ecosistema iNNv0 bajo una arquitectura coherente.
-> Estado: HistÃƒÂ³rico Ã¢â‚¬â€ reemplazado por V_0-2-0.
+> Estado: HistÃƒÂ³rico Ã¢â‚¬” reemplazado por V_0-2-0.
 
 ---
 
@@ -25,11 +25,11 @@
 El ecosistema se organiza en **4 niveles**, donde cada nivel aÃƒÂ±ade restricciones sobre el anterior:
 
 ```
-NIVEL 0:  defiNNe Ã¢â‚¬â€ Meta-especificaciÃƒÂ³n: estructura, versionado, RFC 2119
-NIVEL 1:  FORMAT Ã¢â‚¬â€ EspecificaciÃƒÂ³n concreta: concepts, elements, fields, markers, relationships
+NIVEL 0:  defiNNe Ã¢â‚¬” Meta-especificaciÃƒÂ³n: estructura, versionado, RFC 2119
+NIVEL 1:  FORMAT Ã¢â‚¬” EspecificaciÃƒÂ³n concreta: concepts, elements, fields, markers, relationships
            Modos: FILE (documento ÃƒÂºnico) y FOLDER (nodo como carpeta)
-NIVEL 2:  Templates Ã¢â‚¬â€ business, procedures, kb (knowledge base), anydeo (futuro)...
-NIVEL 3:  Modelos Ã¢â‚¬â€ Ghostbusters, Onboarding, KnowledgeBase, VideoAd...
+NIVEL 2:  Templates Ã¢â‚¬” business, procedures, kb (knowledge base), anydeo (futuro)...
+NIVEL 3:  Modelos Ã¢â‚¬” Ghostbusters, Onboarding, KnowledgeBase, VideoAd...
 ```
 
 ### 1.2. Principios
@@ -46,14 +46,14 @@ Cada archivo conoce su lugar en la jerarquÃƒÂ­a mediante `level` y `parent` 
 
 ```
 Ghostbusters_V_0-3-0_business_F.md  (level 3)
-  Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ parent: "business_V_1-0-0" Ã¢â€ â€™ business_V_1-0-0_F.md  (level 2)
-        Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ parent: "FORMAT_V_0-2-0" Ã¢â€ â€™ FORMAT_V_0-2-0_F.md   (level 1)
-              Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ parent: "defiNNe_V_0-2-0" Ã¢â€ â€™ defiNNe_V_0-2-0_F.md  (level 0)
+  Ã¢””Ã¢”â‚¬Ã¢”â‚¬ parent: "business_V_1-0-0" Ã¢” ’ business_V_1-0-0_F.md  (level 2)
+        Ã¢””Ã¢”â‚¬Ã¢”â‚¬ parent: "FORMAT_V_0-2-0" Ã¢” ’ FORMAT_V_0-2-0_F.md   (level 1)
+              Ã¢””Ã¢”â‚¬Ã¢”â‚¬ parent: "defiNNe_V_0-2-0" Ã¢” ’ defiNNe_V_0-2-0_F.md  (level 0)
 ```
 
 **Para la especificaciÃƒÂ³n completa** (frontmatter canÃƒÂ³nico, modos FILE/FOLDER, body sections, tipos de relaciÃƒÂ³n), consultar:
-- [`specs/FORMAT_V_0-1-5_F.md`](../specs/FORMAT_V_0-1-5_F.md) Ã¢â‚¬â€ especificaciÃƒÂ³n actual
-- [`specs/CHANGELOG.md`](../specs/CHANGELOG.md) Ã¢â‚¬â€ cambios entre versiones
+- [`specs/FORMAT_V_0-1-5_F.md`](../specs/FORMAT_V_0-1-5_F.md) Ã¢â‚¬” especificaciÃƒÂ³n actual
+- [`specs/CHANGELOG.md`](../specs/CHANGELOG.md) Ã¢â‚¬” cambios entre versiones
 
 ---
 
@@ -72,7 +72,7 @@ FORMAT define un sistema polimÃƒÂ³rfico de relaciones donde cada tipo tiene 
 | Tipo | FILE | FOLDER |
 |------|------|--------|
 | hierarchy | Index block (wikilinks) | Subdirectorios |
-| evaluable_matrix | Markdown tabla sourceÃ¢â€ â€™target | No aplica |
+| evaluable_matrix | Markdown tabla sourceÃ¢” ’target | No aplica |
 | graph_edge | Frontmatter `graph_edges` array | Frontmatter `graph_edges` |
 | sequence | Concept type steps/sequence | Concept type steps/sequence |
 
@@ -83,10 +83,10 @@ Ver la spec en [`specs/FORMAT_V_0-1-5_F.md`](../specs/FORMAT_V_0-1-5_F.md) para 
 | DecisiÃƒÂ³n | Valor |
 |---|---|
 | `parent` | Objeto con `name` + `url`. `name` es el filename sin `_F.md`. `url` es un tag de git inmutable |
-| Modelos (level 3) | **Lightweight** Ã¢â‚¬â€ NO llevan template inline. Solo `parent` + datos |
-| Templates (level 2) | **Rich** Ã¢â‚¬â€ Philosophy, Objectives, Specification, Template, Examples en el body |
-| FORMAT (level 1) | **Rich** Ã¢â‚¬â€ Philosophy, Objectives, Specification, Template, Examples |
-| defiNNe (level 0) | **Rich** Ã¢â‚¬â€ Philosophy, Objectives, Specification, Template, Examples |
+| Modelos (level 3) | **Lightweight** Ã¢â‚¬” NO llevan template inline. Solo `parent` + datos |
+| Templates (level 2) | **Rich** Ã¢â‚¬” Philosophy, Objectives, Specification, Template, Examples en el body |
+| FORMAT (level 1) | **Rich** Ã¢â‚¬” Philosophy, Objectives, Specification, Template, Examples |
+| defiNNe (level 0) | **Rich** Ã¢â‚¬” Philosophy, Objectives, Specification, Template, Examples |
 | Spec resolver | La app descarga la cadena de parents al cargar un modelo y lo cachea en `specs/` |
 | Cache | `specs/<parent.name>_F.md` por cada nivel. En cargas sucesivas, usa el cache |
 | Skills | NO son especificaciones. Referencian specs por URL, nunca duplican contenido |
@@ -109,21 +109,21 @@ Estrategia primaria: **tag releases en GitHub** (gits tags inmutables). OpciÃƒ
 
 1. **Cada especificaciÃƒÂ³n tiene su propio repositorio**.
 2. **MÃƒÂ­nima informaciÃƒÂ³n**: solo la especificaciÃƒÂ³n, templates, samples, y cÃƒÂ³digo de validaciÃƒÂ³n/generaciÃƒÂ³n.
-3. **Skills referencian specs por URL** Ã¢â‚¬â€ no duplican.
-4. **El website referencia specs por URL** Ã¢â‚¬â€ no las alberga.
+3. **Skills referencian specs por URL** Ã¢â‚¬” no duplican.
+4. **El website referencia specs por URL** Ã¢â‚¬” no las alberga.
 
 ### 3.2. Mapa de repositorios
 
 ```
 innV0/
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ defiNNe/         Ã¢â€ Â REPO NUEVO: meta-especificaciÃƒÂ³n
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ FORMAT/          Ã¢â€ Â REPO EXISTENTE: editor, parser, templates
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ iNNfo/           Ã¢â€ Â REPO EXISTENTE: migrar a docs de modo FOLDER (YA NO es spec separada)
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ innV0_skills/    Ã¢â€ Â REPO EXISTENTE: agent skills, apuntan a specs por URL
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ innV0.com/       Ã¢â€ Â REPO EXISTENTE: website sin specs embebidas (redirects)
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ VidGeNN/         Ã¢â€ Â REPO EXISTENTE: fase 2 Ã¢â‚¬â€ migrar a template FORMAT
-Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ iNNfo/      Ã¢â€ Â REPO ACTUAL: este documento, SDD changes, formato V_0-1-3
-Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ specs/           Ã¢â€ Â REPO OPCIONAL: mirror inmutable de todas las specs
+Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ defiNNe/         Ã¢” Â REPO NUEVO: meta-especificaciÃƒÂ³n
+Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ FORMAT/          Ã¢” Â REPO EXISTENTE: editor, parser, templates
+Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ iNNfo/           Ã¢” Â REPO EXISTENTE: migrar a docs de modo FOLDER (YA NO es spec separada)
+Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ innV0_skills/    Ã¢” Â REPO EXISTENTE: agent skills, apuntan a specs por URL
+Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ innV0.com/       Ã¢” Â REPO EXISTENTE: website sin specs embebidas (redirects)
+Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ VidGeNN/         Ã¢” Â REPO EXISTENTE: fase 2 Ã¢â‚¬” migrar a template FORMAT
+Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ iNNfo/      Ã¢” Â REPO ACTUAL: este documento, SDD changes, formato V_0-1-3
+Ã¢””Ã¢”â‚¬Ã¢”â‚¬ specs/           Ã¢” Â REPO OPCIONAL: mirror inmutable de todas las specs
 ```
 
 ### 3.3. defiNNe sale de innV0.com
@@ -136,10 +136,10 @@ El `public/defiNNe/` actual en innV0.com debe reemplazarse por un redirect al ra
 
 ### Fase 0: ConsolidaciÃƒÂ³n de specs en iNNfo (COMPLETADA)
 
-1. Ã¢Å“â€¦ Finalizar documento `spec_consolidation.md` con decisiones.
-2. Ã¢Å“â€¦ Publicar `FORMAT_V_0-1-3_FORMAT.md` actualizada con workspace index, esquema unificado.
-3. Ã¢Å“â€¦ Template `kb_V_0-1-1_FORMAT.md` como ejemplo de modo FOLDER.
-4. Ã°Å¸â€â€ž SDD consolidate-format-drivers: PR 1 (Core Abstraction), PR 2 (App Wiring), PR 3 (Data Completeness).
+1. Ã¢Å“”¦ Finalizar documento `spec_consolidation.md` con decisiones.
+2. Ã¢Å“”¦ Publicar `FORMAT_V_0-1-3_FORMAT.md` actualizada con workspace index, esquema unificado.
+3. Ã¢Å“”¦ Template `kb_V_0-1-1_FORMAT.md` como ejemplo de modo FOLDER.
+4. Ã°Å¸””ž SDD consolidate-format-drivers: PR 1 (Core Abstraction), PR 2 (App Wiring), PR 3 (Data Completeness).
 
 ### Fase 1: Repositorios (PENDIENTE)
 
@@ -156,8 +156,8 @@ El `public/defiNNe/` actual en innV0.com debe reemplazarse por un redirect al ra
 
 ### Fase 3: App y librerÃƒÂ­a compartida (EN CURSO)
 
-12. Ã¢Å“â€¦ Crear `@cognnitive/format-core` con parser unificado, modelo de datos, validador, IO drivers.
-13. Ã°Å¸â€â€ž Integrar en FORMAT app (Vue) Ã¢â‚¬â€ PR 2.3 del SDD.
+12. Ã¢Å“”¦ Crear `@cognnitive/format-core` con parser unificado, modelo de datos, validador, IO drivers.
+13. Ã°Å¸””ž Integrar en FORMAT app (Vue) Ã¢â‚¬” PR 2.3 del SDD.
 14. Migrar iNNfo app (React) para que consuma `@cognnitive/format-core`.
 15. Despreciar la spec separada de iNNfo.
 
@@ -176,8 +176,8 @@ El `public/defiNNe/` actual en innV0.com debe reemplazarse por un redirect al ra
 
 ### 5.1. SituaciÃƒÂ³n actual
 
-- **FORMAT app**: Vue 3 + Pinia Ã¢â€ â€™ editor FILE mode funcional.
-- **iNNfo app**: React + Radix Ã¢â€ â€™ knowledge base FOLDER mode funcional.
+- **FORMAT app**: Vue 3 + Pinia Ã¢” ’ editor FILE mode funcional.
+- **iNNfo app**: React + Radix Ã¢” ’ knowledge base FOLDER mode funcional.
 - Stack comÃƒÂºn: Vite + Tailwind + TypeScript.
 
 ### 5.2. Estrategia: librerÃƒÂ­a central compartida
@@ -185,29 +185,29 @@ El `public/defiNNe/` actual en innV0.com debe reemplazarse por un redirect al ra
 No se fusionan las UIs. En su lugar se crea una **librerÃƒÂ­a TypeScript pura** que ambas apps consumen:
 
 ```
-Ã°Å¸â€œÂ¦ @cognnitive/format-core/
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ parser.ts               Ã¢â€ Â Parser unificado FILE+FOLDER
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ types.ts                 Ã¢â€ Â Modelo de datos comÃƒÂºn
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ identity.ts              Ã¢â€ Â IdentityRegistry para IDs cualificados
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ metamodel.ts             Ã¢â€ Â ResoluciÃƒÂ³n de metamodelo efectivo
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ driver.ts                Ã¢â€ Â ModelDriver interface + createDriver factory
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ driver-file.ts           Ã¢â€ Â FileDriver implementaciÃƒÂ³n
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ driver-folder.ts         Ã¢â€ Â FolderDriver implementaciÃƒÂ³n
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ recursiveParser.ts       Ã¢â€ Â Parser recursivo con soporte driver/handle
-  Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ validator.ts             Ã¢â€ Â Validador contra template + contenido FORMAT
-  Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ index.ts                 Ã¢â€ Â Public API
+Ã°Å¸“Â¦ @cognnitive/format-core/
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ parser.ts               Ã¢” Â Parser unificado FILE+FOLDER
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ types.ts                 Ã¢” Â Modelo de datos comÃƒÂºn
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ identity.ts              Ã¢” Â IdentityRegistry para IDs cualificados
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ metamodel.ts             Ã¢” Â ResoluciÃƒÂ³n de metamodelo efectivo
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ driver.ts                Ã¢” Â ModelDriver interface + createDriver factory
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ driver-file.ts           Ã¢” Â FileDriver implementaciÃƒÂ³n
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ driver-folder.ts         Ã¢” Â FolderDriver implementaciÃƒÂ³n
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ recursiveParser.ts       Ã¢” Â Parser recursivo con soporte driver/handle
+  Ã¢”Å“Ã¢”â‚¬Ã¢”â‚¬ validator.ts             Ã¢” Â Validador contra template + contenido FORMAT
+  Ã¢””Ã¢”â‚¬Ã¢”â‚¬ index.ts                 Ã¢” Â Public API
 
-Ã°Å¸â€œÂ¦ FORMAT app (Vue) Ã¢â‚¬â€ consume @cognnitive/format-core (modo FILE)
-Ã°Å¸â€œÂ¦ iNNfo app (React) Ã¢â‚¬â€ consume @cognnitive/format-core (modo FOLDER)
+Ã°Å¸“Â¦ FORMAT app (Vue) Ã¢â‚¬” consume @cognnitive/format-core (modo FILE)
+Ã°Å¸“Â¦ iNNfo app (React) Ã¢â‚¬” consume @cognnitive/format-core (modo FOLDER)
 ```
 
 ### 5.3. Roadmap de la librerÃƒÂ­a
 
-1. Ã¢Å“â€¦ Parser: extraer a `@cognnitive/format-core`.
-2. Ã¢Å“â€¦ Modelo: tipar concepts, elements, fields, markers, relationships.
-3. Ã¢Å“â€¦ File/Folder driver: IO abstraction para ambos modos.
-4. Ã¢Å“â€¦ Validador: validar modelo contra template + contenido FORMAT.
-5. Ã¢Å“â€¦ Integrar en FORMAT app: sustituir parser inline por `@cognnitive/format-core` (SDD PR 1-2).
+1. Ã¢Å“”¦ Parser: extraer a `@cognnitive/format-core`.
+2. Ã¢Å“”¦ Modelo: tipar concepts, elements, fields, markers, relationships.
+3. Ã¢Å“”¦ File/Folder driver: IO abstraction para ambos modos.
+4. Ã¢Å“”¦ Validador: validar modelo contra template + contenido FORMAT.
+5. Ã¢Å“”¦ Integrar en FORMAT app: sustituir parser inline por `@cognnitive/format-core` (SDD PR 1-2).
 6. Pendiente: Integrar en iNNfo app para modo FOLDER.
 
 ---
@@ -218,7 +218,7 @@ No se fusionan las UIs. En su lugar se crea una **librerÃƒÂ­a TypeScript pur
 |-----------|---------------|-------------------|---------|
 | `defiNNe.md` | `0.1.1` | `V_0-2-0` | `0` |
 | `_format.md` (FORMAT) | `V_0-1-0` | `V_0-2-0` | `1` |
-| `iNNfo.defiNNe.md` | `1.1.0` | *(desaparece como spec)* | Ã¢â‚¬â€ |
+| `iNNfo.defiNNe.md` | `1.1.0` | *(desaparece como spec)* | Ã¢â‚¬” |
 | `business_V_0-1-1_NN.md` | `V_0-1-1` | `V_1-0-0` | `2` |
 | `procedures_V_0-1-1_NN.md` | `V_0-1-1` | `V_1-0-0` | `2` |
 | Modelos (`Ghostbusters_V_...`) | `V_x-y-z` | Sin cambios | `3` |

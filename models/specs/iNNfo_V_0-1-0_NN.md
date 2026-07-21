@@ -15,7 +15,7 @@ relationship_types:
     representation: "index block with Markdown links"
   - name: "evaluable_matrix"
     description: "N-to-M relationship evaluated on a scale between elements of two concepts"
-    representation: "Markdown sourceâ†’target table with scale parameters"
+    representation: "Markdown source→target table with scale parameters"
   - name: "graph_edge"
     description: "Graph edge with optional label, weight, and arbitrary properties"
     representation: "frontmatter graph_edges array"
@@ -25,7 +25,7 @@ relationship_types:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 ## Versioning
 
@@ -44,9 +44,9 @@ iNNfo specifications follow an immutable versioning policy:
 
 iNNfo is designed around five principles:
 
-1. **Rich specs, lean models**: Specification documents (levels 0â€“2) are semantically rich. Models (level 3) carry only data and a parent pointer. The application resolves and caches the parent chain.
+1. **Rich specs, lean models**: Specification documents (levels 0–2) are semantically rich. Models (level 3) carry only data and a parent pointer. The application resolves and caches the parent chain.
 2. **Self-describing**: Every iNNfo document is valid Markdown with YAML frontmatter. No proprietary tooling required to read it.
-3. **Relationship polymorphism**: Relationships between concepts and elements are expressed through a typed system â€” hierarchy, evaluable matrices, graph edges, and sequences.
+3. **Relationship polymorphism**: Relationships between concepts and elements are expressed through a typed system — hierarchy, evaluable matrices, graph edges, and sequences.
 4. **Template-driven**: Every model conforms to a template that defines its valid concepts, markers, and relationship types.
 5. **Unified structure**: The workspace is declared explicitly via `index.md` and all model data lives within single Markdown files.
 
@@ -158,7 +158,7 @@ Must be the first content in the body.
 
 The index block defines the taxonomy hierarchy via nested Markdown lists. Each list item identifies a concept using one of:
 
-- **Markdown link syntax**: `[Concept Name](./relative-path.md)` (preferred for workspace `index.md` â€” compatible with OKF)
+- **Markdown link syntax**: `[Concept Name](./relative-path.md)` (preferred for workspace `index.md` — compatible with OKF)
 - **WikiLink syntax**: `[[Concept Name]]` (legacy iNNfo, valid inside model index blocks)
 - **`_NN index:` marker**: `_NN index: Concept Name` (consistent with `_NN` structural markers)
 
@@ -227,7 +227,7 @@ All multi-instance types (`weight`, `list`, `steps`, `sequence`) use the same bu
 
 **Element markers**: The visible `_NN` marker (`_NN <ConceptName>:`) on a bullet declares which concept the element belongs to. The colon separates the concept name from the element name. For invisible markers, use the HTML comment alternative: `<!-- _NN <ConceptName>: -->` followed by the element name.
 
-**List characters**: Element markers MUST use `*` (asterisk) or `-` (hyphen) as the bullet character. The parser regex for valid element markers is `/^\s*[*\-]\s+_NN\s+([\w\s-]+?):\s+(.*)$/`. Numbered lists (`1. _NN Concept: Name`, `2. _NN Concept: Name`, etc.) are NOT supported â€” they are silently ignored by the parser and produce no elements. The order of elements is determined exclusively by their position in the document.
+**List characters**: Element markers MUST use `*` (asterisk) or `-` (hyphen) as the bullet character. The parser regex for valid element markers is `/^\s*[*\-]\s+_NN\s+([\w\s-]+?):\s+(.*)$/`. Numbered lists (`1. _NN Concept: Name`, `2. _NN Concept: Name`, etc.) are NOT supported — they are silently ignored by the parser and produce no elements. The order of elements is determined exclusively by their position in the document.
 
 - The YAML fenced code block immediately following the element bullet declares element-specific fields.
 - The description text follows the YAML block (or the bullet line if no YAML block exists).
@@ -263,7 +263,7 @@ A iNNfo workspace is a directory containing one or more models. The entry point 
 
 #### 5.1. index.md (Required)
 
-Every workspace MUST have an `index.md` file at its root. The application reads `index.md` as the single entry point â€” no filesystem scanning is performed.
+Every workspace MUST have an `index.md` file at its root. The application reads `index.md` as the single entry point — no filesystem scanning is performed.
 
 `index.md` uses `# _NN index` with standard Markdown links to list all workspace models:
 
@@ -283,7 +283,7 @@ Each link target MUST be a `*_FORMAT.md` file relative to the workspace root. Th
 
 ##### 5.1.1. Relationship to Open Knowledge Format (OKF)
 
-iNNfo's workspace convention is informed by the [Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) v0.1. Both formats share a common foundation â€” Markdown files with YAML frontmatter â€” while serving different purposes:
+iNNfo's workspace convention is informed by the [Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) v0.1. Both formats share a common foundation — Markdown files with YAML frontmatter — while serving different purposes:
 
 | Aspect | OKF | iNNfo |
 |---|---|---|
@@ -296,12 +296,12 @@ iNNfo's workspace convention is informed by the [Open Knowledge Format (OKF)](ht
 | File suffix | `.md` | `*_FORMAT.md` (canonical) or `.md` |
 
 OKF consumers can navigate a iNNfo workspace without modification:
-- `index.md` has no frontmatter â€” OKF reads it as a reserved index file.
-- Links are standard Markdown â€” OKF follows them to discover concepts.
-- `_NN` markers are standard Markdown text â€” OKF safely ignores them.
-- Distributed `_FORMAT.md` files include `type` in frontmatter â€” OKF conformant.
+- `index.md` has no frontmatter — OKF reads it as a reserved index file.
+- Links are standard Markdown — OKF follows them to discover concepts.
+- `_NN` markers are standard Markdown text — OKF safely ignores them.
+- Distributed `_FORMAT.md` files include `type` in frontmatter — OKF conformant.
 
-iNNfo extends OKF with structured semantic modeling (parent chain, concepts, markers, matrices) that OKF does not define. These are additive â€” OKF consumers remain fully functional with a iNNfo workspace.
+iNNfo extends OKF with structured semantic modeling (parent chain, concepts, markers, matrices) that OKF does not define. These are additive — OKF consumers remain fully functional with a iNNfo workspace.
 
 ##### 5.1.2. OKF Type Requirement
 
@@ -309,7 +309,7 @@ To maintain OKF conformance, every distributed `_FORMAT.md` file (element nodes,
 
 ```yaml
 ---
-type: "Topic"                           # REQUIRED â€” OKF conformance
+type: "Topic"                           # REQUIRED — OKF conformance
 fields:
   category: "technology"
   status: "published"
@@ -405,4 +405,4 @@ parent_spec:
   url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.1.0/level2/business/business_V_0-1-1_NN.md"
 ```
 
-The application resolves: Ghostbusters â†’ business_V_0-1-1 â†’ iNNfo_V_0-1-0 â†’ defiNNe_V_0-1-0.
+The application resolves: Ghostbusters → business_V_0-1-1 → iNNfo_V_0-1-0 → defiNNe_V_0-1-0.

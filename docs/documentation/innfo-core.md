@@ -1,6 +1,6 @@
 ﻿# @cognnitive/innfo-core
 
-Framework-agnostic TypeScript library shared across the iNNv0 ecosystem. Used by both `innfo-editor` and `innfo-mcp`.
+Framework-agnostic TypeScript library shared across the cogNNitive ecosystem. Used by both `innfo-editor` and `innfo-mcp`.
 
 ## Features
 

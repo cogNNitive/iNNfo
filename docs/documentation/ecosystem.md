@@ -1,6 +1,6 @@
 # Ecosystem Architecture
 
-The iNNv0 ecosystem is organized in four specification levels.
+The cogNNitive ecosystem is organized in four specification levels.
 
 ## Level 0: defiNNe
 

@@ -15,7 +15,7 @@ relationship_types:
     representation: "index block with WikiLinks"
   - name: "evaluable_matrix"
     description: "N-to-M relationship evaluated on a value set between elements of two concepts"
-    representation: "Markdown sourceâ†’target table with a declared value set"
+    representation: "Markdown source→target table with a declared value set"
   - name: "graph_edge"
     description: "Graph edge with optional label, weight, and arbitrary properties"
     representation: "frontmatter graph_edges array"
@@ -25,7 +25,7 @@ relationship_types:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # iNNfo Specification
 
@@ -35,9 +35,9 @@ relationship_types:
 
 iNNfo is designed around five principles:
 
-1. **Rich specs, lean models**: Specification documents (levels 0â€“2) are semantically rich. Models (level 3) carry only data and a parent pointer. The application resolves and caches the parent chain.
+1. **Rich specs, lean models**: Specification documents (levels 0–2) are semantically rich. Models (level 3) carry only data and a parent pointer. The application resolves and caches the parent chain.
 2. **Self-describing**: Every iNNfo document is valid Markdown with YAML frontmatter. No proprietary tooling required to read it.
-3. **Relationship polymorphism**: Relationships between concepts and elements are expressed through a typed system â€” hierarchy, evaluable matrices, graph edges, and sequences.
+3. **Relationship polymorphism**: Relationships between concepts and elements are expressed through a typed system — hierarchy, evaluable matrices, graph edges, and sequences.
 4. **Template-driven**: Every model conforms to a template that defines its valid concepts, markers, and relationship types.
 5. **One name, one identity**: An entity is identified by its name. The name is the single source of truth; there is no separate persisted identifier.
 
@@ -58,7 +58,7 @@ The word "node" is an implementation term (a runtime graph representation) and M
 NOT appear in normative text. The words block, section, instance, item, property, and
 attribute MUST NOT be used as substitutes for the entities below.
 
-**Containment spine (generic â†’ specific):**
+**Containment spine (generic → specific):**
 
 | Entity | Definition |
 |---|---|
@@ -88,9 +88,9 @@ attribute MUST NOT be used as substitutes for the entities below.
 The names `Concepts`, `Elements`, and `Markers` are RESERVED. A Template MUST NOT
 declare a Concept with any of these names. They denote cross-cutting sets:
 
-- `Concepts` â€” the set of all Concepts in the Model.
-- `Elements` â€” the set of all Elements across every Concept in the Model.
-- `Markers` â€” the set of all declared Markers.
+- `Concepts` — the set of all Concepts in the Model.
+- `Elements` — the set of all Elements across every Concept in the Model.
+- `Markers` — the set of all declared Markers.
 
 They are used as the `source`/`target` of cross-cutting matrices (for example, the
 reserved `item-markers matrix` targets `Markers`).
@@ -102,7 +102,7 @@ persisted in a model file.
 
 **Uniqueness:**
 
-- An Element name MUST be unique within the whole Model â€” across all Concepts.
+- An Element name MUST be unique within the whole Model — across all Concepts.
 - A Concept name MUST be unique within the Model.
 - A Model's logical name is its frontmatter `title`, which MUST be unique within the
   Workspace.
@@ -119,8 +119,8 @@ application at load time for the Workspace in which the Model is opened; it is N
 persisted in the model file, so a Model stays portable across Workspaces.
 
 **Rename** is an application operation. It MUST rewrite every reference to the renamed
-entity â€” the declaring marker, index entries, matrix row/column labels,
-reference-typed field values, graph edges, and cross-model references â€” in a single
+entity — the declaring marker, index entries, matrix row/column labels,
+reference-typed field values, graph edges, and cross-model references — in a single
 transaction, then re-validate. References that are broken by out-of-application edits
 MUST be reported by the application as dangling references.
 
@@ -195,9 +195,9 @@ scores are assigned to Elements or Concepts via the reserved `item-markers matri
 
 A Field is either **inline** or **file-backed**:
 
-- **Inline field** â€” the value lives in the Element's YAML (`string`, `select`,
+- **Inline field** — the value lives in the Element's YAML (`string`, `select`,
   `reference`) or, for prose, as `markdown_inline` content.
-- **File-backed field** â€” the value is a filename; the content lives in a sidecar file.
+- **File-backed field** — the value is a filename; the content lives in a sidecar file.
   The file-backed types are `markdown_file`, `image`, `file`, `video`, and `audio`.
 
 **Storage convention (single, canonical).** Every file-backed field's file MUST be
@@ -315,7 +315,7 @@ All multi-instance types use the same bullet-list Element syntax:
 **Matrix Block.** iNNfo supports two matrix kinds, distinguished by the section name in
 `# _NN matrices:`:
 
-*Relational Matrix* â€” cross-tabulates Elements of a source Concept (rows) against
+*Relational Matrix* — cross-tabulates Elements of a source Concept (rows) against
 Elements of a target Concept (columns). Cells contain a value from the matrix's
 declared `values`:
 
@@ -326,7 +326,7 @@ declared `values`:
 | Problem name | High |
 ```
 
-*Item-Markers Matrix* â€” the reserved section name `item-markers matrix` assigns Marker
+*Item-Markers Matrix* — the reserved section name `item-markers matrix` assigns Marker
 scores to Elements or Concepts. Rows are Element or Concept names; columns are Marker
 names defined in the template:
 
@@ -343,7 +343,7 @@ A iNNfo Workspace is a directory containing one or more Models. The entry point 
 `index.md` file at the Workspace root.
 
 **index.md (Required).** Every Workspace MUST have an `index.md` at its root. The
-application reads `index.md` as the single entry point â€” no filesystem scanning. It uses
+application reads `index.md` as the single entry point — no filesystem scanning. It uses
 `# _NN index` with standard Markdown links to list all Workspace Models:
 
 ```markdown
@@ -380,9 +380,9 @@ does not define; these are additive.
 
 The following are NOT part of iNNfo:
 
-- **FOLDER mode / `_F` markers** â€” models are single files using `_NN` markers only.
-- **Hierarchy matrices** â€” hierarchy is expressed only through the index block.
-- **`_FORMAT.md` filenames** â€” the canonical suffix is `_NN.md`.
+- **FOLDER mode / `_F` markers** — models are single files using `_NN` markers only.
+- **Hierarchy matrices** — hierarchy is expressed only through the index block.
+- **`_FORMAT.md` filenames** — the canonical suffix is `_NN.md`.
 
 ### Self-Description
 

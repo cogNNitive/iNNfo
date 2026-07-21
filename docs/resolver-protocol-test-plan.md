@@ -1,4 +1,4 @@
-﻿# Resolver Protocol â€” Test Plan
+﻿# Resolver Protocol — Test Plan
 
 > Date: 2026-07-01
 > Status: Draft
@@ -17,18 +17,18 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 
 ## Test Scenarios
 
-### T1: First Load â€” Full Chain Resolution
+### T1: First Load — Full Chain Resolution
 
 **Input**: Ghostbusters_V_0-3-0_business_FORMAT.md
 
 **Expected behavior**:
-1. Read `parent.url` â†’ download `business_V_1-0-0_FORMAT.md`
+1. Read `parent.url` → download `business_V_1-0-0_FORMAT.md`
 2. Save to `specs/business_V_1-0-0_FORMAT.md`
-3. Read its `parent.url` â†’ download `FORMAT_V_0-2-0_FORMAT.md`
+3. Read its `parent.url` → download `FORMAT_V_0-2-0_FORMAT.md`
 4. Save to `specs/FORMAT_V_0-2-0_FORMAT.md`
-5. Read its `parent.url` â†’ download `defiNNe_V_0-2-0_FORMAT.md`
+5. Read its `parent.url` → download `defiNNe_V_0-2-0_FORMAT.md`
 6. Save to `specs/defiNNe_V_0-2-0_FORMAT.md`
-7. No more `parent` â†’ chain complete
+7. No more `parent` → chain complete
 
 **Resulting structure**:
 ```
@@ -45,14 +45,14 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 - Each cached file has correct `level` in frontmatter
 - Each cached file's `parent` matches the expected chain
 
-### T2: Second Load â€” Cache Hit
+### T2: Second Load — Cache Hit
 
 **Input**: Same model, same session
 
 **Expected behavior**:
-1. Check `specs/business_V_1-0-0_FORMAT.md` â€” exists â†’ skip download
-2. Check `specs/FORMAT_V_0-2-0_FORMAT.md` â€” exists â†’ skip download
-3. Check `specs/defiNNe_V_0-2-0_FORMAT.md` â€” exists â†’ skip download
+1. Check `specs/business_V_1-0-0_FORMAT.md` — exists → skip download
+2. Check `specs/FORMAT_V_0-2-0_FORMAT.md` — exists → skip download
+3. Check `specs/defiNNe_V_0-2-0_FORMAT.md` — exists → skip download
 
 **Verification**: Zero HTTP requests made.
 
@@ -85,9 +85,9 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 **Input**: `specs/` contains `business_V_1-0-0_FORMAT.md` but not the others
 
 **Expected behavior**:
-1. `specs/business_V_1-0-0_FORMAT.md` found â†’ skip download
-2. Read its `parent.url` â†’ `specs/FORMAT_V_0-2-0_FORMAT.md` not found â†’ download
-3. Read FORMAT's `parent.url` â†’ `specs/defiNNe_V_0-2-0_FORMAT.md` not found â†’ download
+1. `specs/business_V_1-0-0_FORMAT.md` found → skip download
+2. Read its `parent.url` → `specs/FORMAT_V_0-2-0_FORMAT.md` not found → download
+3. Read FORMAT's `parent.url` → `specs/defiNNe_V_0-2-0_FORMAT.md` not found → download
 
 **Verification**: Only 2 HTTP requests made (for FORMAT and defiNNe).
 
@@ -121,10 +121,10 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 **Input**: TeamKB_V_1-0-0_kb/ (FOLDER mode model)
 
 **Expected behavior**:
-1. Read root `_FORMAT.md` â†’ `parent` = `kb_V_1-0-0`
-2. Download `kb_V_1-0-0_FORMAT.md` â†’ save to `specs/`
+1. Read root `_FORMAT.md` → `parent` = `kb_V_1-0-0`
+2. Download `kb_V_1-0-0_FORMAT.md` → save to `specs/`
 3. Continue chain until level 0
-4. FOLDER mode element `_FORMAT.md` files do NOT have `parent` â€” they inherit from root
+4. FOLDER mode element `_FORMAT.md` files do NOT have `parent` — they inherit from root
 
 **Verification**:
 - Only the root `_FORMAT.md` triggers a chain resolution

@@ -1,6 +1,6 @@
 ﻿---
-title: About â€” iNNfo
-description: Learn about iNNfo, the hub for the iNNfo ecosystem â€” the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain.
+title: About — iNNfo
+description: Learn about iNNfo, the hub for the iNNfo ecosystem — the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain.
 html_url: https://innfo.cognnitive.com/about
 generator: https://skills.innv0.com/innv0-web-design-guide
 ---
@@ -11,7 +11,7 @@ The monorepo that ties the iNNfo ecosystem together.
 
 ## Architecture
 
-npm workspaces monorepo â€” one editor app, three shared packages, the spec chain, and an agent-driven pipeline:
+npm workspaces monorepo — one editor app, three shared packages, the spec chain, and an agent-driven pipeline:
 
 ```
 iNNfo/
@@ -28,7 +28,7 @@ iNNfo/
 
 ## App
 
-**iNNfo Modeler** (`@cognnitive/innfo-editor`) â€” a Vue 3 workspace editor:
+**iNNfo Modeler** (`@cognnitive/innfo-editor`) — a Vue 3 workspace editor:
 - File System Access API to open a workspace folder
 - Single recursive parse pass into one normalized model graph
 - Block sheets, a table view, and metamodel-driven forms for editing
@@ -38,23 +38,23 @@ iNNfo/
 
 ## Packages
 
-**@cognnitive/innfo-core** â€” framework-agnostic TypeScript library with:
+**@cognnitive/innfo-core** — framework-agnostic TypeScript library with:
 - The iNNfo parser
 - Model types (Concept, Element, Field, Marker, Matrix, Relationship)
 - IO drivers for the browser and Node
 - Validator against template schemas
 - Parent-spec-chain resolver
 
-**@cognnitive/innfo-mcp** â€” a Model Context Protocol server (stdio) wrapping innfo-core. Exposes seven semantic tools â€” `list_models`, `read_model`, `get_spec`, `get_template`, `validate_model`, `apply_change`, `validate_model_url` â€” so any MCP-capable AI agent can read, validate, and safely mutate iNNfo models.
+**@cognnitive/innfo-mcp** — a Model Context Protocol server (stdio) wrapping innfo-core. Exposes seven semantic tools — `list_models`, `read_model`, `get_spec`, `get_template`, `validate_model`, `apply_change`, `validate_model_url` — so any MCP-capable AI agent can read, validate, and safely mutate iNNfo models.
 
-**@cognnitive/pipeline-gates** â€” validation and integration gates for iNNfo model pipelines; the dev-tooling layer that validates, integrates, and versions models in CI.
+**@cognnitive/pipeline-gates** — validation and integration gates for iNNfo model pipelines; the dev-tooling layer that validates, integrates, and versions models in CI.
 
 ## Specifications
 
-- **Level 0: defiNNe** â€” Meta-specification (structure, SemVer, RFC 2119)
-- **Level 1: iNNfo** â€” Central spec; single-file `_NN.md` models with YAML frontmatter
-- **Level 2: Templates** â€” business, procedures, organization
-- **Level 3: Models** â€” Concrete data instances (Ghostbusters, Engineering Team)
+- **Level 0: defiNNe** — Meta-specification (structure, SemVer, RFC 2119)
+- **Level 1: iNNfo** — Central spec; single-file `_NN.md` models with YAML frontmatter
+- **Level 2: Templates** — business, procedures, organization
+- **Level 3: Models** — Concrete data instances (Ghostbusters, Engineering Team)
 
 ## Open Knowledge Format compatibility
 
@@ -62,7 +62,7 @@ iNNfo is **100% compatible** with [OKF v0.1](https://github.com/GoogleCloudPlatf
 
 - **Shared substrate**: Both use Markdown + YAML frontmatter. No proprietary tooling.
 - **Conformance**: OKF's three conformance rules (parseable frontmatter, non-empty `type`, reserved filenames) are fully met by iNNfo's structure.
-- **Tolerant extensions**: OKF explicitly tolerates unknown frontmatter keys and unknown `type` values â€” iNNfo's richer metadata (`spec_version`, `level`, `parent`, `concepts`, `markers`, `matrices`) is fully compatible.
+- **Tolerant extensions**: OKF explicitly tolerates unknown frontmatter keys and unknown `type` values — iNNfo's richer metadata (`spec_version`, `level`, `parent`, `concepts`, `markers`, `matrices`) is fully compatible.
 - **A workspace = an OKF Bundle**: an iNNfo workspace produces exactly the directory tree OKF defines as a knowledge bundle. Each `_NN.md` is an OKF concept document.
 
 [Home](https://innfo.cognnitive.com/)

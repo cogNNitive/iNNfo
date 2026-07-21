@@ -1,6 +1,6 @@
 ﻿# innfo-editor
 
-**iNNfo Modeler** — the unified workspace editor for the iNNv0 ecosystem. Open any folder, edit iNNfo models with dedicated per-node views, and let AI agents drive the same workspace alongside you.
+**iNNfo Modeler** — the unified workspace editor for the cogNNitive ecosystem. Open any folder, edit iNNfo models with dedicated per-node views, and let AI agents drive the same workspace alongside you.
 
 ## End-to-end flow
 

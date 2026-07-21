@@ -106,7 +106,7 @@ title: "Comprehensive Test Procedure"
 last_saved: "2026-06-24T12:00:00.000Z"
 ---
 > [!NOTE]
-> This is a **FORMAT document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
+> This is a **FORMAT document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. New to FORMAT? The [onboarding guide](https://format.innv0.com/docs/onboarding) walks you through what this is and how to open it in the visual editor.
 
 # <!-- block: concepts --> index
 * [[roles]]
@@ -144,7 +144,7 @@ This procedure is a comprehensive functional test suite for the FORMAT applicati
    step_type: task
    next: Step with All References
    ```
-   A task step with only step_type and next â€” no input, output, condition, or output_status. Tests that the minimal required fields render correctly and that the next-pointer links to the following step.
+   A task step with only step_type and next — no input, output, condition, or output_status. Tests that the minimal required fields render correctly and that the next-pointer links to the following step.
 2. <!-- block: work --> Step with All References
    ```yaml
    step_type: task
@@ -208,7 +208,7 @@ This procedure is a comprehensive functional test suite for the FORMAT applicati
 * <!-- block: artifact --> Basic Artifact
   An artifact with no fields. Tests that the application renders an artifact container with only its name and description.
 * <!-- block: artifact --> Artifact with Fields
-  Tests that the application correctly renders an artifact containing multiple field types. This artifact has no YAML fields â€” its purpose is to be referenced by steps that exercise the output_status and reference resolution features.
+  Tests that the application correctly renders an artifact containing multiple field types. This artifact has no YAML fields — its purpose is to be referenced by steps that exercise the output_status and reference resolution features.
 * <!-- block: artifact --> Artifact as Input Only
   An artifact that is only consumed (referenced as input) by steps, never produced as output. Tests unidirectional flow in artifact usage.
 * <!-- block: artifact --> Artifact as Output Only

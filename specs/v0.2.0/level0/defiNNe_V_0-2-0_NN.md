@@ -2,16 +2,16 @@
 specification_version: "V_0-2-0"
 specification_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 level: 0
-title: "defiNNe â€” The Definition of Definitions"
+title: "defiNNe — The Definition of Definitions"
 description: "Meta-specification for the iNNv0 ecosystem. Defines the structure, versioning, normative language, terminology discipline, and dependency resolution for all derived specifications."
 author: "innV0 Team"
 status: "Draft"
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
-# defiNNe â€” The Definition of Definitions
+# defiNNe — The Definition of Definitions
 
 ## A meta-specification for defining structured, versioned, and machine-readable technical specifications
 
@@ -21,7 +21,7 @@ defiNNe is built on four foundational values:
 
 1. **Hierarchical Consistency**: Every specification belongs to a level in a defined hierarchy. Each level inherits the constraints of the levels above it and adds its own.
 2. **Explicit Dependencies via Parent Chain**: Every specification declares its parent with an exact name and immutable URL. From any document, the full chain up to level 0 is resolvable.
-3. **Rich Specs, Lean Models**: Specification documents (levels 0â€“2) are semantically rich â€” they carry Philosophy, Objectives, full specification text. Models (level 3) are lightweight â€” they carry only data and a pointer to their parent template.
+3. **Rich Specs, Lean Models**: Specification documents (levels 0–2) are semantically rich — they carry Philosophy, Objectives, full specification text. Models (level 3) are lightweight — they carry only data and a pointer to their parent template.
 4. **Cacheable Resolution**: The parent chain can be resolved at load time and cached locally, making any model functionally self-contained without duplicating specification content.
 
 ## Objectives
@@ -59,8 +59,8 @@ each throughout its normative text. This applies to all derived specifications:
 - A specification MUST include a glossary that names each entity it defines.
 - Normative text MUST use only those canonical names. Synonyms MUST NOT be used
   interchangeably for a defined entity.
-- Implementation-only vocabulary â€” in particular the word **"node"** (a runtime graph
-  representation) â€” MUST NOT appear in normative specification text.
+- Implementation-only vocabulary — in particular the word **"node"** (a runtime graph
+  representation) — MUST NOT appear in normative specification text.
 
 The canonical entity vocabulary for semantic models is defined by iNNfo (level 1).
 
@@ -170,7 +170,7 @@ relationship_types: {...}
 ---
 ```
 
-**Level 3 (models) â€” Lightweight**
+**Level 3 (models) — Lightweight**
 
 ```yaml
 ---
@@ -284,7 +284,7 @@ Level 3 models MUST NOT include these sections. They contain only model data.
 
 ### Document Notice
 
-The first content in the Markdown body â€” immediately after the frontmatter â€” MUST be a GFM `> [!NOTE]` admonition. This applies to ALL levels (0â€“3).
+The first content in the Markdown body — immediately after the frontmatter — MUST be a GFM `> [!NOTE]` admonition. This applies to ALL levels (0–3).
 
 ### Cross-References
 
@@ -322,7 +322,7 @@ title: "Model Name"
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** â€” a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
 
 # _NN index
 ...
@@ -353,8 +353,8 @@ parent_spec:
   name: "defiNNe_V_0-2-0"
   url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 
-# defiNNe_V_0-2-0 (level 0) â€” this document
-# No parent_spec â€” root of the chain
+# defiNNe_V_0-2-0 (level 0) — this document
+# No parent_spec — root of the chain
 ```
 
 ### Cached Directory After First Load
