@@ -166,30 +166,29 @@ const docsUrl = 'https://format.innv0.com/documentation/'
  */
 async function openWorkspace(): Promise<void> {
   error.value = null
-  const picker = (
-    window as unknown as {
-      showDirectoryPicker?: (opts?: { id?: string }) => Promise<DirectoryHandleLike>
-    }
-  ).showDirectoryPicker
-  if (picker) {
-    try {
-      folderBusy.value = true
+  folderBusy.value = true
+  try {
+    const picker = (
+      window as unknown as {
+        showDirectoryPicker?: (opts?: { id?: string }) => Promise<DirectoryHandleLike>
+      }
+    ).showDirectoryPicker
+    if (picker) {
       const handle = await picker.call(window, { id: 'innfo-workspace' })
       await workspace.open(handle)
       await addToHistory(handle.name, handle)
       history.value = await loadHistory()
       router.push('/workspace')
-      return
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return
-      error.value = err instanceof Error ? err.message : String(err)
-      folderBusy.value = false
-      return
+    } else {
+      showToast('File System API not available. Using fallback folder picker (read-only).', 'info')
+      folderInputRef.value?.click()
     }
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') return
+    error.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    folderBusy.value = false
   }
-  // Fallback: trigger the hidden file input
-  showToast('File System API not available in this browser. Using fallback folder picker (read-only).', 'info')
-  folderInputRef.value?.click()
 }
 
 /**
