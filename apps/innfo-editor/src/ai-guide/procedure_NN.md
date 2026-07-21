@@ -22,64 +22,64 @@ title: "Use iNNfo with AI"
 # _NN Work
 
 * _NN Work: Use iNNfo with AI
-  iNNfo lets you edit and view iNNfo models both from its graphical interface and through AI agents. This procedure describes how to use **OpenCode** (the supported AI agent) to work with your models via natural language conversation, leveraging the contextual prompts the application provides.
+  iNNfo lets you edit and view iNNfo models both from its graphical interface and through AI agents. This procedure describes how to use **OpenCode Desktop** (the supported AI agent) to work with your models via natural language conversation, leveraging the contextual prompts the application provides.
 
-* _NN Work: Download and install OpenCode
+* _NN Work: Download and install OpenCode Desktop
   ```yaml
   parent: "Use iNNfo with AI"
   step_type: task
-  tool: "OpenCode"
+  tool: "OpenCode Desktop"
   ```
-  Download OpenCode from https://github.com/anomalyco/opencode and install it. OpenCode is the supported AI agent for iNNfo — it reads project skills natively and discovers them automatically.
-* _NN Work: Open the workspace folder in OpenCode
+  Download OpenCode Desktop from https://opencode.ai/download and install it. OpenCode Desktop is the supported AI agent for iNNfo — it reads project skills natively and discovers them automatically.
+* _NN Work: Open the workspace folder in OpenCode Desktop
   ```yaml
   parent: "Use iNNfo with AI"
   step_type: task
   input: "Workspace Folder"
-  tool: "OpenCode"
+  tool: "OpenCode Desktop"
   ```
-  Start OpenCode in the same workspace folder you use in iNNfo. You can find the exact path at the top of the header by clicking the info icon. OpenCode works directly on the file system.
+  Open the same workspace folder you use in iNNfo inside OpenCode Desktop. You can find the exact path at the top of the header by clicking the info icon. OpenCode Desktop works directly on the file system.
 * _NN Work: Configure MCP tools
   ```yaml
   parent: "Use iNNfo with AI"
   step_type: task
   requires: MCP Server
   ```
-  The first time you work with models, tell OpenCode: *"innfo: Load the nn-innfo skill and check that innfo-mcp is configured"*. The skill detects if the MCP server is set up and guides you through any steps if needed. Reference: `docs/mcp-setup.md`.
+  The first time you work with models, tell OpenCode Desktop: *"innfo: Load the nn-innfo skill and check that innfo-mcp is configured"*. The skill detects if the MCP server is set up and guides you through any steps if needed. Reference: `docs/mcp-setup.md`.
 * _NN Work: Edit models via chat
   ```yaml
   parent: "Use iNNfo with AI"
   step_type: task
   input: "Model File"
   output: "Edited Model File"
-  tool: "OpenCode"
+  tool: "OpenCode Desktop"
   ```
-  Tell OpenCode what you want to do including a reference to the skill you need, for example: *"innfo: Load the nn-innfo skill — I need to edit the business model and add a new concept"*. The skill reference in your message helps OpenCode discover and activate the right skill automatically. The skill provides model validation, MCP activation, and change workflows.
+  Tell OpenCode Desktop what you want to do including a reference to the skill you need, for example: *"innfo: Load the nn-innfo skill — I need to edit the business model and add a new concept"*. The skill reference in your message helps OpenCode Desktop discover and activate the right skill automatically. The skill provides model validation, MCP activation, and change workflows.
 * _NN Work: Import documents into iNNfo models
   ```yaml
   parent: "Use iNNfo with AI"
   step_type: task
   input: "Source Documents"
   output: "iNNfo Models"
-  tool: "OpenCode"
+  tool: "OpenCode Desktop"
   ```
-  Place the documents you want to transform in **traNNsform/input/**. Then go to the **Import** panel in iNNfo and copy the generated prompt — it tells OpenCode exactly what to do. The **nn-trannsform** skill handles document ingestion, normalization, and conversion.
+  Place the documents you want to transform in **traNNsform/input/**. Then go to the **Import** panel in iNNfo and copy the generated prompt — it tells OpenCode Desktop exactly what to do. The **nn-trannsform** skill handles document ingestion, normalization, and conversion.
 * _NN Work: Export models as HTML visualizers
   ```yaml
   parent: "Use iNNfo with AI"
   step_type: task
   input: "Model File"
   output: "HTML Visualizer"
-  tool: "OpenCode"
+  tool: "OpenCode Desktop"
   ```
-  Open the model you want to visualize, then go to the **Export** panel in iNNfo and copy the generated prompt. It includes the model name and instructions for OpenCode. The **nn-innfo** skill handles visualizer generation. Results appear in **traNNsform/output/**. Tell OpenCode: *"innfo: Load the nn-innfo skill — I need to generate an HTML visualizer following traNNsform/AGENT.md"*.
+  Open the model you want to visualize, then go to the **Export** panel in iNNfo and copy the generated prompt. It includes the model name and instructions for OpenCode Desktop. The **nn-innfo** skill handles visualizer generation. Results appear in **traNNsform/output/**. Tell OpenCode Desktop: *"innfo: Load the nn-innfo skill — I need to generate an HTML visualizer following traNNsform/AGENT.md"*.
 * _NN Work: Use the suggested prompts
   ```yaml
   parent: "Use iNNfo with AI"
   step_type: task
   input: "Suggested Prompts"
   ```
-  When viewing a model in iNNfo, the right sidebar shows **suggested prompts** for each concept. Copy them into OpenCode to explore a specific concept or element in more detail.
+  When viewing a model in iNNfo, the right sidebar shows **suggested prompts** for each concept. Copy them into OpenCode Desktop to explore a specific concept or element in more detail.
 
 # _NN Roles
 
@@ -105,14 +105,14 @@ title: "Use iNNfo with AI"
 
 # _NN Tools
 
-* _NN Tools: OpenCode
-  Supported AI agent for iNNfo. Reads project skills natively and discovers them automatically. Download: https://github.com/anomalyco/opencode
+* _NN Tools: OpenCode Desktop
+  Supported AI agent for iNNfo. Reads project skills natively and discovers them automatically. Download: https://opencode.ai/download
 
 # _NN matrices: work-roles matrix
 
 | Work \ Roles | User | AI Agent |
 | :--- | :---: | :---: |
-| Download and install OpenCode | Responsible | - |
-| Open the workspace folder in OpenCode | Responsible | - |
+| Download and install OpenCode Desktop | Responsible | - |
+| Open the workspace folder in OpenCode Desktop | Responsible | - |
 | Edit models via chat | Responsible | Accountable |
 | Use right sidebar prompts | Responsible | Consulted |

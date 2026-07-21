@@ -1,4 +1,4 @@
-﻿# innfo-editor
+# innfo-editor
 
 **iNNfo Modeler** — the unified workspace editor for the cogNNitive ecosystem. Open any folder, edit iNNfo models with dedicated per-node views, and let AI agents drive the same workspace alongside you.
 
@@ -44,7 +44,7 @@ Validation runs automatically on every parse via `@cognnitive/innfo-core`. A pas
 
 The **"Use AI"** button in the header opens `AiWorkflowModal` — a single entry point that replaces three separate full-page panels. It has three tabs:
 
-- **Guide** — a step checklist for connecting an external coding agent (Claude Code, Google Antigravity, or OpenCode) to the current workspace.
+- **Guide** — a step checklist for connecting an external coding agent (Claude Code, Google Antigravity, or OpenCode Desktop) to the current workspace.
 - **Import** — builds a copiable `innfo:`-prefixed agent prompt that instructs an external AI agent to transform source documents into a new iNNfo model following `traNNsform/workflows/import.workflow.md`.
 - **Export** — builds a copiable `innfo:`-prefixed agent prompt that generates an HTML visualizer for the current model following `traNNsform/workflows/export.workflow.md`.
 

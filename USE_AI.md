@@ -1,10 +1,10 @@
-﻿# Using AI with iNNfo Models in iNNfo
+# Using AI with iNNfo Models in iNNfo
 
-To work with iNNfo models from your AI agent (OpenCode, Claude Code, etc.), you need the **actioNN suite** � a collection of agent skills that teach the AI how to create, edit, validate, and transform iNNfo documents.
+To work with iNNfo models from your AI agent (OpenCode Desktop, Claude Code, etc.), you need the **actioNN suite** — a collection of agent skills that teach the AI how to create, edit, validate, and transform iNNfo documents.
 
 ## Quick Start
 
-1. **Install the actioNN bundle** in your OpenCode workspace:
+1. **Install the actioNN bundle** in your OpenCode Desktop workspace:
 
    ```bash
    git clone https://github.com/iNNfo/actioNN.git ~/.agents/skills/actioNN
@@ -17,20 +17,20 @@ To work with iNNfo models from your AI agent (OpenCode, Claude Code, etc.), you 
    mklink /J "%USERPROFILE%\.agents\skills\actioNN" "path\to\actioNN"
    ```
 
-2. **Ensure the MCP server is available** � the skills need `innfo-mcp` to resolve specs and validate models:
+2. **Ensure the MCP server is available** — the skills need `innfo-mcp` to resolve specs and validate models:
 
    ```bash
    cd ~/.agents/skills/actioNN
    node scripts/update-mcp.js
    ```
 
-3. **Open the project** in OpenCode � the skills auto-load based on file context (e.g., editing a `_NN.md` triggers `nn-innfo`).
+3. **Open the project** in OpenCode Desktop  the skills auto-load based on file context (e.g., editing a `_NN.md` triggers `nn-innfo`).
 
 ## What you get
 
 | Skill | Trigger | What it does |
 |-------|---------|-------------|
-| `nn-router` | `/nn-router` or mentioning "innfo" | Entry point � routes to the right skill |
+| `nn-router` | `/nn-router` or mentioning "innfo" | Entry point  routes to the right skill |
 | `nn-innfo` | Editing `*_NN.md` files | Create, edit, validate iNNfo models |
 | `nn-trannsform` | `/nn-trannsform` | Import/export pipeline (PDF?MD, etc.) |
 | `nn-workflow-orchestrator` | `/nn-workflow-orchestrator` | Multi-skill workflows |

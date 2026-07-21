@@ -245,7 +245,7 @@ This workspace was created by iNNfo — a structured knowledge model editor for 
 ## How to edit
 
 - **iNNfo editor**: Open \`iNNfo.html\` in your browser
-- **AI agent**: Use Claude Code, OpenCode, or anti-gravity to edit via natural language.
+- **AI agent**: Use Claude Code, OpenCode Desktop, or Antigravity to edit via natural language.
   Your agent MUST read \`AGENTS.md\` first for skill and MCP setup instructions.
 `
   const readmeHandle = await handle.getFileHandle('README.md', { create: true })
@@ -272,9 +272,9 @@ git clone https://github.com/iNNfo/actioNN.git
 
 | Agent | Method |
 |-------|--------|
-| **OpenCode** | Clone the repo, then run the \`nn-skills-manager\` skill to install via junctions. Skills are auto-discovered from \`~/.config/opencode/skills/\` and project \`.agents/skills/\`. |
+| **OpenCode Desktop** | Clone the repo, then run the \`nn-skills-manager\` skill to install via junctions. Skills are auto-discovered from \`~/.config/opencode/skills/\` and project \`.agents/skills/\`. |
 | **Claude Code** | Add the SKILL.md file paths to your \`CLAUDE.md\` or reference them in the MCP config. |
-| **anti-gravity** | Point your agent configuration to the cloned skill directory. |
+| **Antigravity** | Point your agent configuration to the cloned skill directory. |
 
 ### Workspace skills triggered by file/task type
 
@@ -300,7 +300,7 @@ The \`innfo-mcp\` server wraps \`@cognnitive/innfo-core\` and provides determini
 
 Then configure the MCP per your agent, pointing \`command\` at the bootstrap script:
 
-**OpenCode** — add to \`opencode.json\` or \`~/.config/opencode/opencode.jsonc\` (OpenCode uses the \`mcp\` key with a \`command\` array, NOT \`mcpServers\`):
+**OpenCode Desktop** — add to \`opencode.json\` or \`~/.config/opencode/opencode.jsonc\` (OpenCode Desktop uses the \`mcp\` key with a \`command\` array, NOT \`mcpServers\`):
 \`\`\`jsonc
 {
   "$schema": "https://opencode.ai/config.json",
@@ -325,7 +325,7 @@ Then configure the MCP per your agent, pointing \`command\` at the bootstrap scr
 }
 \`\`\`
 
-**anti-gravity** — same \`mcpServers\` shape as Claude Code, with \`command\` pointing at your platform's bootstrap script.
+**Antigravity** — same \`mcpServers\` shape as Claude Code, with \`command\` pointing at your platform's bootstrap script.
 
 On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`command\` instead of the \`bootstrap.sh\` path shown above (see \`docs/mcp-setup.md\` for the exact escaped JSON).
 
@@ -831,7 +831,7 @@ const stepTitles = [
           <div class="wizard__editor-card">
             <strong>AI agent</strong>
             <p>
-              Edit via natural language with Claude Code, OpenCode, or anti-gravity. In the editor,
+              Edit via natural language with Claude Code, OpenCode Desktop, or Antigravity. In the editor,
               click <strong>"Use AI"</strong> in the top bar for setup instructions.
             </p>
           </div>

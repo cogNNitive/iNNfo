@@ -116,6 +116,13 @@ const starters: StarterTemplate[] = [
 
 onMounted(async () => {
   history.value = await loadHistory()
+
+  // Auto-show wizard when SampleBanner CTA links with ?createTemplate=X
+  const createTemplate = route.query.createTemplate as string | undefined
+  if (createTemplate) {
+    showWizard.value = true
+    router.replace({ query: {} })
+  }
 })
 
 // Watch for empty folder detection and notify the user
@@ -135,6 +142,8 @@ watch(
 const sandboxUrl = `${import.meta.env.BASE_URL}starter/Sandbox_V_1-0-0_starter_NN.md`
 const sandboxBusy = ref(false)
 const showSandbox = ref(!localStorage.getItem('nn_hide_sandbox'))
+const showWizard = ref(false)
+const folderBusy = ref(false)
 
 function closeSandbox(): void {
   localStorage.setItem('nn_hide_sandbox', 'true')
@@ -152,7 +161,7 @@ async function openWorkspace(): Promise<void> {
   error.value = null
   const picker = (
     window as unknown as {
-      showDirectoryPicker?: () => Promise<DirectoryHandleLike>
+      showDirectoryPicker?: (opts?: { id?: string }) => Promise<DirectoryHandleLike>
     }
   ).showDirectoryPicker
   if (!picker) {
@@ -160,8 +169,8 @@ async function openWorkspace(): Promise<void> {
     return
   }
   try {
-    busy.value = true
-    const handle = await picker.call(window)
+    folderBusy.value = true
+    const handle = await picker.call(window, { id: 'innfo-workspace' })
     await workspace.open(handle)
     // Persist to recent-folders history
     await addToHistory(handle.name, handle)
@@ -171,7 +180,7 @@ async function openWorkspace(): Promise<void> {
     if (err instanceof DOMException && err.name === 'AbortError') return
     error.value = err instanceof Error ? err.message : String(err)
   } finally {
-    busy.value = false
+    folderBusy.value = false
   }
 }
 
@@ -411,8 +420,40 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
 
 <template>
   <div class="home">
-    <!-- ── Setup Wizard (primary entry point) ── -->
-    <SetupWizard />
+    <!-- ── Setup Wizard (hidden by default, toggled via "Guided setup" link) ── -->
+    <div v-if="showWizard" class="home__wizard-scrim">
+      <div class="home__wizard-wrap">
+        <button class="home__wizard-close" aria-label="Close wizard" @click="showWizard = false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <SetupWizard @done="showWizard = false" />
+      </div>
+    </div>
+
+    <!-- ── Hero: Open Folder ── -->
+    <section class="hero">
+      <div class="hero__card">
+        <h1 class="hero__title">iNNfo Editor</h1>
+        <p class="hero__desc">
+          Open a folder that contains iNNfo model files, or choose a quick start option below.
+        </p>
+
+        <button class="hero__btn" :disabled="folderBusy" @click="openWorkspace">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z" />
+          </svg>
+          <span>{{ folderBusy ? 'Opening\u2026' : 'Open Folder' }}</span>
+        </button>
+
+        <p v-if="error" class="hero__error" role="alert">{{ error }}</p>
+
+        <button class="hero__guide" @click="showWizard = true">
+          New to iNNfo? Start with guided setup &rarr;
+        </button>
+      </div>
+    </section>
 
     <!-- ── Recent folders ── -->
     <section v-if="history.length" class="recent">
@@ -428,18 +469,8 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
           :disabled="reopenBusy === entry.handleKey"
           @click="reopenFolder(entry)"
         >
-          <svg
-            class="recent__icon"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          >
-            <path
-              d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
-            />
+          <svg class="recent__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z" />
           </svg>
           <span class="recent__name">{{ entry.name }}</span>
           <span class="recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
@@ -451,14 +482,7 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
             @keydown.enter.prevent="removeEntry(entry.handleKey)"
             @keydown.space.prevent="removeEntry(entry.handleKey)"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </span>
@@ -466,103 +490,69 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
       </div>
     </section>
 
-    <!-- ── Sandbox ── -->
-    <section v-if="showSandbox" class="sandbox">
-      <div class="sandbox__card">
-        <button class="sandbox__close" aria-label="Close" @click="closeSandbox">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
+    <!-- ── Quick Start: templates + sandbox ── -->
+    <section class="quickstart">
+      <h3 class="quickstart__title">Quick Start</h3>
+      <p class="quickstart__desc">Choose a template to create a new model, or open the sandbox to explore the editor.</p>
+
+      <div class="quickstart__grid">
+        <button
+          v-for="s in starters"
+          :key="s.id"
+          class="quickstart__card"
+          :disabled="busy"
+          @click="createFromStarter(s)"
+        >
+          <component :is="s.icon" class="quickstart__card-icon" />
+          <span class="quickstart__card-name">{{ s.name }}</span>
+          <span class="quickstart__card-desc">{{ s.description }}</span>
         </button>
-        <FlaskConical class="sandbox__icon" />
-        <h2 class="sandbox__title">TRY THE SANDBOX</h2>
-        <p class="sandbox__desc">
-          Never used iNNfo before? This tiny example model teaches you how the editor works as you
-          explore. Each element explains what you're looking at — the tree, the views, and the
-          concepts. No files needed, just click and learn.
-        </p>
-        <button class="sandbox__btn" :disabled="sandboxBusy" @click="loadSandbox">
-          {{ sandboxBusy ? 'Loading\u2026' : 'Launch Sandbox' }}
+
+        <button
+          v-if="showSandbox"
+          class="quickstart__card quickstart__card--sandbox"
+          :disabled="sandboxBusy"
+          @click="loadSandbox"
+        >
+          <FlaskConical class="quickstart__card-icon" />
+          <span class="quickstart__card-name">Sandbox</span>
+          <span class="quickstart__card-desc">Try a throwaway model instantly — nothing is saved.</span>
         </button>
       </div>
     </section>
 
-    <!-- ── Two-column layout: open existing / start new ── -->
-    <div class="cols">
-      <!-- Left column: open existing -->
-      <div class="col">
-        <h2 class="col__title">Open existing</h2>
-        <p class="col__desc">Select a folder that already contains iNNfo model files.</p>
-
-        <div class="open-action">
-          <button class="home__open" :disabled="busy" @click="openWorkspace">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              class="home__open-icon"
-            >
-              <path
-                d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
-              />
+    <!-- ── Sample models ── -->
+    <section class="samples">
+      <h3 class="samples__title">Explore Example Models</h3>
+      <p class="samples__sub">See how iNNfo models work before creating your own.</p>
+      <div class="samples__grid">
+        <button
+          v-for="s in samples"
+          :key="s.id"
+          class="sample-card"
+          :disabled="urlBusy"
+          @click="onSampleClick(s)"
+        >
+          <div class="sample-card__head">
+            <svg class="sample-card__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z" />
             </svg>
-            {{ busy ? 'Opening\u2026' : 'Open folder\u2026' }}
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Right column: official templates -->
-      <div class="col">
-        <h2 class="col__title">Official templates</h2>
-        <p class="col__desc">
-          Choose a template to start a new model. Preview a sample or create a full copy in a
-          folder.
-        </p>
-
-        <div class="starters">
-          <div v-for="s in starters" :key="s.id" class="starter-card">
-            <div class="starter-card__head">
-              <component :is="s.icon" class="starter-card__icon" />
-              <strong class="starter-card__name">{{ s.name }}</strong>
+            <div class="sample-card__info">
+              <span class="sample-card__name">{{ s.name }}</span>
             </div>
-            <p class="starter-card__desc">{{ s.description }}</p>
-            <div class="starter-card__actions">
-              <button
-                v-if="s.sampleUrl"
-                class="starter-card__sample"
-                :disabled="urlBusy"
-                @click="previewSample(s)"
-              >
-                {{ urlBusy ? 'Loading\u2026' : 'Preview Sample' }}
-              </button>
-              <button class="starter-card__create" :disabled="busy" @click="createFromStarter(s)">
-                {{ busy ? 'Creating\u2026' : 'Create' }}
-              </button>
-            </div>
+            <span class="sample-card__badge">{{ s.templateName }}</span>
           </div>
-        </div>
+          <p class="sample-card__desc">{{ s.description }}</p>
+          <span class="sample-card__action">{{ urlBusy ? 'Loading\u2026' : 'Explore \u2192' }}</span>
+        </button>
       </div>
-    </div>
+    </section>
 
-    <p v-if="error" class="home__error" role="alert">{{ error }}</p>
-
-    <!-- ── Community templates ── -->
+    <!-- ── Load from URL ── -->
     <section class="community">
-      <h3 class="community__title">Community templates</h3>
+      <h3 class="community__title">Load from URL</h3>
       <p class="community__desc">
-        You can also load any iNNfo model from a URL — including templates created by the community
-        or your own custom models hosted anywhere.
+        Load any iNNfo model from a remote URL — community templates, your own models, or samples.
       </p>
 
       <div class="community__url">
@@ -579,49 +569,9 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
       </div>
 
       <p class="community__docs">
-        <BookOpen class="community__docs-icon" /> Learn how to use existing templates or create your own in the
+        <BookOpen class="community__docs-icon" /> Learn how templates work in the
         <a :href="docsUrl" target="_blank" rel="noopener noreferrer">documentation</a>.
       </p>
-    </section>
-
-    <!-- ── Sample models ── -->
-    <section class="samples">
-      <h3 class="samples__title">Explore example models</h3>
-      <p class="samples__sub">
-        See how iNNfo models work before creating your own. Open a sample to explore in read-only
-        mode.
-      </p>
-      <div class="samples__grid">
-        <button
-          v-for="s in samples"
-          :key="s.id"
-          class="sample-card"
-          :disabled="urlBusy"
-          @click="onSampleClick(s)"
-        >
-          <div class="sample-card__head">
-            <svg
-              class="sample-card__icon"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-            >
-              <path
-                d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
-              />
-            </svg>
-            <div class="sample-card__info">
-              <span class="sample-card__name">{{ s.name }}</span>
-            </div>
-            <span class="sample-card__badge">{{ s.templateName }}</span>
-          </div>
-          <p class="sample-card__desc">{{ s.description }}</p>
-          <span class="sample-card__action">{{ urlBusy ? 'Loading…' : 'Explore →' }}</span>
-        </button>
-      </div>
     </section>
   </div>
 </template>
@@ -631,206 +581,148 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 4rem 1rem;
+  gap: 1.5rem;
+  padding: 3rem 1rem 5rem;
   font-family: system-ui, sans-serif;
 }
 
-/* ── Hero ── */
+/* ── Wizard overlay ── */
+
+.home__wizard-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+}
+
+.home__wizard-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+}
+
+.home__wizard-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #666;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.home__wizard-close:hover {
+  color: #333;
+  background: #f5f5f5;
+}
+
+/* ── Hero section ── */
 
 .hero {
+  width: 100%;
+  max-width: 520px;
+}
+
+.hero__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 2.5rem 2rem;
+  border: 2px solid #4d0e4e;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f8f0f8 0%, #fff 100%);
   text-align: center;
-  max-width: 600px;
+  box-shadow: 0 4px 24px rgba(77, 14, 78, 0.10);
 }
 
 .hero__title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 800;
   color: #4d0e4e;
+  letter-spacing: -0.01em;
 }
 
 .hero__desc {
-  margin: 0.5rem 0 0;
-  color: #555;
+  margin: 0;
+  max-width: 380px;
+  color: #666;
   font-size: 14px;
   line-height: 1.6;
 }
 
-/* ── Two-column layout ── */
-
-.cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  width: 100%;
-  max-width: 860px;
-  align-items: start;
-}
-
-@media (max-width: 700px) {
-  .cols {
-    grid-template-columns: 1fr;
-  }
-}
-
-.col {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.col__title {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #888;
-}
-
-.col__desc {
-  margin: 0;
-  font-size: 14px;
-  color: #888;
-  line-height: 1.5;
-}
-
-/* ── Open Folder Action Card ── */
-
-.open-action {
-  margin-top: 1.25rem;
-}
-
-.home__open {
+.hero__btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
+  gap: 0.65rem;
+  padding: 0.9rem 2.2rem;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  border: 1px solid #4d0e4e;
-  border-radius: 8px;
+  border: none;
+  border-radius: 12px;
   background: #4d0e4e;
   color: #fff;
-  font-weight: 600;
   transition: all 0.15s;
-  box-shadow: 0 2px 4px rgba(77, 14, 78, 0.15);
+  box-shadow: 0 4px 14px rgba(77, 14, 78, 0.25);
+  font-family: system-ui, sans-serif;
+  margin-top: 0.25rem;
 }
 
-.home__open:hover:not(:disabled) {
+.hero__btn:hover:not(:disabled) {
   background: #3a0b3b;
-  border-color: #3a0b3b;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(77, 14, 78, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(77, 14, 78, 0.35);
 }
 
-.home__open:disabled {
-  opacity: 0.6;
+.hero__btn:disabled {
+  opacity: 0.5;
   cursor: default;
 }
 
-.home__open-icon {
-  flex-shrink: 0;
-}
-
-/* ── Starter cards ── */
-
-.starters {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.starter-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.75rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background: #fff;
-  transition: border-color 0.15s;
-}
-
-.starter-card:hover {
-  border-color: #4d0e4e;
-}
-
-.starter-card__head {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.starter-card__icon {
-  width: 1.2rem;
-  height: 1.2rem;
-  color: #4d0e4e;
-  flex-shrink: 0;
-}
-
-.starter-card__name {
-  font-size: 14px;
-  color: #333;
-}
-
-.starter-card__desc {
+.hero__error {
   margin: 0;
   font-size: 13px;
-  color: #888;
-  line-height: 1.5;
+  color: #b00020;
+  max-width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: #fff0f0;
+  border-radius: 8px;
+  border: 1px solid #ffcdd2;
 }
 
-.starter-card__actions {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.starter-card__preview,
-.starter-card__create {
-  padding: 0.35rem 0.75rem;
-  font-size: 12px;
+.hero__guide {
+  background: none;
+  border: none;
+  color: #7c3aed;
+  font-size: 13px;
   font-weight: 600;
-  border-radius: 5px;
   cursor: pointer;
   font-family: system-ui, sans-serif;
-  transition: all 0.15s;
+  padding: 0.25rem;
+  transition: color 0.15s;
 }
 
-.starter-card__preview {
-  border: 1px solid #4d0e4e;
-  background: #fff;
+.hero__guide:hover {
   color: #4d0e4e;
-}
-
-.starter-card__preview:hover:not(:disabled) {
-  background: #f8f0f8;
-}
-
-.starter-card__preview:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.starter-card__create {
-  border: 1px solid #4d0e4e;
-  background: #4d0e4e;
-  color: #fff;
-}
-
-.starter-card__create:hover:not(:disabled) {
-  background: #3a0b3b;
-}
-
-.starter-card__create:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.home__error {
-  color: #b00020;
-  max-width: 32rem;
-  text-align: center;
+  text-decoration: underline;
 }
 
 /* ── Recent folders ── */
@@ -943,12 +835,100 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
   background: #ffebee;
 }
 
+/* ── Quick Start grid ── */
+
+.quickstart {
+  width: 100%;
+  max-width: 860px;
+}
+
+.quickstart__title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+}
+
+.quickstart__desc {
+  margin: 0 0 0.75rem;
+  font-size: 14px;
+  color: #888;
+}
+
+.quickstart__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+@media (max-width: 700px) {
+  .quickstart__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .quickstart__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quickstart__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+  width: 100%;
+}
+
+.quickstart__card:hover:not(:disabled) {
+  border-color: #4d0e4e;
+  box-shadow: 0 2px 8px rgba(77, 14, 78, 0.08);
+}
+
+.quickstart__card:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.quickstart__card--sandbox {
+  border-style: dashed;
+}
+
+.quickstart__card-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #4d0e4e;
+  flex-shrink: 0;
+}
+
+.quickstart__card-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.quickstart__card-desc {
+  font-size: 11px;
+  color: #888;
+  line-height: 1.4;
+}
+
 /* ── Sample models ── */
 
 .samples {
   width: 100%;
-  max-width: 480px;
-  margin-top: 0.5rem;
+  max-width: 860px;
 }
 
 .samples__title {
@@ -968,11 +948,17 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
 
 .samples__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 0.5rem;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
+  .samples__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 420px) {
   .samples__grid {
     grid-template-columns: 1fr;
   }
@@ -1021,14 +1007,6 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
   color: #333;
 }
 
-.sample-card__meta {
-  display: block;
-  font-size: 12px;
-  color: #999;
-  font-family: monospace;
-  margin-top: 1px;
-}
-
 .sample-card__badge {
   font-family: monospace;
   font-size: 10px;
@@ -1055,65 +1033,7 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
   color: #4d0e4e;
 }
 
-/* ── Load from URL ── */
-
-.home-url {
-  width: 100%;
-  text-align: center;
-}
-
-.home-url__label {
-  margin: 0 0 0.5rem;
-  font-size: 14px;
-  color: #888;
-}
-
-.home-url__row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.home-url__input {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  font-size: 14px;
-  font-family: system-ui, sans-serif;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  background: #fff;
-  color: #333;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.home-url__input:focus {
-  border-color: #4d0e4e;
-  box-shadow: 0 0 0 2px rgba(77, 14, 78, 0.1);
-}
-
-.home-url__btn {
-  padding: 0.5rem 1rem;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  background: #4d0e4e;
-  color: #fff;
-  border: 1px solid #4d0e4e;
-  transition: all 0.15s;
-  font-family: system-ui, sans-serif;
-}
-
-.home-url__btn:hover:not(:disabled) {
-  background: #3a0b3b;
-}
-
-.home-url__btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-/* ── Sandbox ── */
+/* ── Sandbox banner ── */
 
 .sandbox {
   width: 100%;
@@ -1131,25 +1051,6 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
   border-radius: 16px;
   background: linear-gradient(135deg, #f8f0f8 0%, #fff 100%);
   text-align: center;
-}
-
-.sandbox__close {
-  position: absolute;
-  top: 1rem;
-  right: 1.25rem;
-  background: none;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.15s;
-}
-
-.sandbox__close:hover {
-  color: #4d0e4e;
 }
 
 .sandbox__icon {
@@ -1198,31 +1099,7 @@ async function onSampleClick(sample: ExampleModel): Promise<void> {
   cursor: default;
 }
 
-/* ── Starter sample button ── */
-
-.starter-card__sample {
-  padding: 0.35rem 0.75rem;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: system-ui, sans-serif;
-  transition: all 0.15s;
-  border: 1px solid #7c3aed;
-  background: #f5f3ff;
-  color: #7c3aed;
-}
-
-.starter-card__sample:hover:not(:disabled) {
-  background: #ede9fe;
-}
-
-.starter-card__sample:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-/* ── Community templates ── */
+/* ── Load from URL ── */
 
 .community {
   width: 100%;
