@@ -176,9 +176,21 @@ async function openWorkspace(): Promise<void> {
     if (picker) {
       const handle = await picker.call(window, { id: 'innfo-workspace' })
       await workspace.open(handle)
+      if (!workspace.hasParsed) {
+        if (workspace.emptyFolderError) {
+          error.value = 'No iNNfo model files (_NN.md) found in this folder. Try opening a folder that contains model files, or use the samples below.'
+        } else if (workspace.error) {
+          error.value = workspace.error
+        }
+        return
+      }
+      if (workspace.error) {
+        error.value = workspace.error
+        return
+      }
       await addToHistory(handle.name, handle)
       history.value = await loadHistory()
-      router.push('/workspace')
+      await router.push('/workspace')
     } else {
       showToast('File System API not available. Using fallback folder picker (read-only).', 'info')
       folderInputRef.value?.click()
