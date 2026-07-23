@@ -43,8 +43,8 @@ matrices:
     label: "affinity"
 ---
 
-> [!TIP]
-> 👋 **Welcome!** This sandbox is an interactive example model designed to help you explore and test the editor. Switch between views, edit fields, assign markers, and see how the model adapts!
+> [!NOTE]
+> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/info-doc).
 
 # _NN index
 * [[Guide]]

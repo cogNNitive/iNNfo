@@ -153,7 +153,7 @@ function closeSandbox(): void {
   showSandbox.value = false
 }
 
-const docsUrl = 'https://format.innv0.com/documentation/'
+const docsUrl = 'https://innfo.cognnitive.com/documentation/'
 
 /**
  * Entry point: prompts the user for a workspace directory.

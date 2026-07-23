@@ -11,7 +11,7 @@ mode: "FILE"
 ---
 
 > [!NOTE]
-> This is a starter model for the **Procedures** template. Replace the placeholder elements below with your own procedure definitions. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/info-doc).
 
 # _NN index
 * [[Procedure]]

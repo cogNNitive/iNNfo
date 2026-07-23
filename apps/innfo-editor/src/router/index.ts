@@ -2,9 +2,11 @@ import { createRouter, createWebHistory, type RouteLocationNormalized } from 'vu
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import HomeView from '../views/HomeView.vue'
 import WorkspaceView from '../views/WorkspaceView.vue'
+import InfoDocView from '../views/InfoDocView.vue'
 
 export const routes = [
   { path: '/', name: 'home', component: HomeView },
+  { path: '/info-doc', name: 'info-doc', component: InfoDocView },
   {
     path: '/workspace',
     name: 'workspace',

@@ -10,7 +10,7 @@ title: "Ghostbusters"
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** — a plain-text Markdown file that carries its own schema in the YAML frontmatter. The template definition is resolved via the parent chain and cached in the `specs/` directory. You can view and edit this model online at [format.innv0.com/app](https://format.innv0.com/app/) or contribute via the [GitHub repository](https://github.com/cogNNitive/cogNNitive).
+> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/info-doc).
 
 # _NN index
 
