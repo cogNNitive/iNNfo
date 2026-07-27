@@ -192,7 +192,8 @@ async function openWorkspace(): Promise<void> {
       history.value = await loadHistory()
       await router.push('/workspace')
     } else {
-      showToast('File System API not available. Using fallback folder picker (read-only).', 'info')
+      error.value = 'Your browser does not support the File System Access API. Click the button again to select a folder using the fallback picker (read-only).'
+      showToast('File System Access API not available. Using fallback folder picker (read-only).', 'info')
       folderInputRef.value?.click()
     }
   } catch (err) {

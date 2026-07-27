@@ -593,23 +593,39 @@ export async function recursiveParse(
     }
   }
 
-  // Step 2: Extract wikilink targets from index.md body (strip frontmatter)
+  // Step 2: Extract model file references from index.md body (strip frontmatter).
+  // Supports two formats:
+  //   1. Wikilinks: [[Model_V_1-0-0_template_NN.md]]
+  //   2. Markdown links: [Model](Model_V_1-0-0_template_NN.md) — per iNNfo spec
   const body = indexContent.replace(/^---[\s\S]*?---\n?/, '').trim()
-  const wikilinkRegex = /\[\[([^\]]+)\]\]/g
   const modelRefs: Array<{ name: string; path: string }> = []
+
+  // Wikilinks: [[target]]
+  const wikilinkRegex = /\[\[([^\]]+)\]\]/g
   let match: RegExpExecArray | null
   while ((match = wikilinkRegex.exec(body)) !== null) {
     const target = match[1].trim()
-    // Treat wikilinks ending in .md as model references
-    // (the _NN.md suffix is recommended but not required — §8.1)
-    // Skip targets inside ignored directories (backups/, archive/, specs/, …)
     if (
       target.endsWith(INNFO_FILE_SUFFIX) &&
       target.toLowerCase() !== INDEX_MD &&
       !isIgnoredPath(target)
     ) {
-      const name = stripMdSuffix(target)
-      modelRefs.push({ name, path: target })
+      const ref = { name: stripMdSuffix(target), path: target }
+      if (!modelRefs.some((r) => r.path === ref.path)) modelRefs.push(ref)
+    }
+  }
+
+  // Markdown links: [text](url) — per iNNfo spec
+  const mdLinkRegex = /\[([^\]]*)\]\(([^)]+)\)/g
+  while ((match = mdLinkRegex.exec(body)) !== null) {
+    const target = match[2].trim()
+    if (
+      target.endsWith(INNFO_FILE_SUFFIX) &&
+      target.toLowerCase() !== INDEX_MD &&
+      !isIgnoredPath(target)
+    ) {
+      const ref = { name: stripMdSuffix(target), path: target }
+      if (!modelRefs.some((r) => r.path === ref.path)) modelRefs.push(ref)
     }
   }
 
