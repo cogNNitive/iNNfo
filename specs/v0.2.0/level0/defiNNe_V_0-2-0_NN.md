@@ -1,6 +1,6 @@
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 level: 0
 title: "defiNNe — The Definition of Definitions"
 description: "Meta-specification for the iNNv0 ecosystem. Defines the structure, versioning, normative language, terminology discipline, and dependency resolution for all derived specifications."
@@ -146,7 +146,7 @@ specification_url: "<immutable-URL>"
 level: 1
 parent_spec:
   name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 title: "..."
 description: "..."
 ---
@@ -161,7 +161,7 @@ specification_url: "<immutable-URL>"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "..."
 concepts: [...]
 markers: [...]
@@ -341,17 +341,17 @@ From the sample model `specs/v0.2.0/level2/business/samples/Ghostbusters_V_0-2-0
 # Ghostbusters (level 3)
 parent_spec:
   name: "business_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
 
 # business_V_0-2-0 (level 2)
 parent_spec:
   name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 
 # iNNfo_V_0-2-0 (level 1)
 parent_spec:
   name: "defiNNe_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
 
 # defiNNe_V_0-2-0 (level 0) — this document
 # No parent_spec — root of the chain

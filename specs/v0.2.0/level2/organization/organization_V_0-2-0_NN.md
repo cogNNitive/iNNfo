@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 title: "Organization Template"
 concepts:
   - name: "Organization"
@@ -120,11 +120,11 @@ To create an organization model, create a level 3 FILE mode document with:
 ```yaml
 ---
 specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "organization_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Organization Name>"
 ---

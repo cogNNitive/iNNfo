@@ -30,10 +30,9 @@ To work with iNNfo models from your AI agent (OpenCode Desktop, Claude Code, etc
 
 | Skill | Trigger | What it does |
 |-------|---------|-------------|
-| `nn-router` | `/nn-router` or mentioning "innfo" | Entry point  routes to the right skill |
+| `nn-router` | `/nn-router` or mentioning "innfo" | Entry point — routes to the right skill |
 | `nn-innfo` | Editing `*_NN.md` files | Create, edit, validate iNNfo models |
-| `nn-trannsform` | `/nn-trannsform` | Import/export pipeline (PDF?MD, etc.) |
-| `nn-workflow-orchestrator` | `/nn-workflow-orchestrator` | Multi-skill workflows |
+| `nn-trannsform` | `/nn-trannsform` | Unified ingestion, transformation & multi-step procedure orchestrator (`procedures_V_0-2-0_NN.md`) |
 | `nn-skills-lifecycle` | `/nn-skills-lifecycle` | Install, audit, maintain skills |
 | `nn-site-generator` | `/nn-site-generator` | Generate docs sites |
 | `nn-design-presets` | Auto on web/design files | Visual design tokens |

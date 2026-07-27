@@ -344,7 +344,7 @@ export const useWorkspaceStore = defineStore('workspace', {
         // URL patterns ordered by correctness for the current repo structure
         const urls = [
           // Model-published path (main branch)
-          `https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/models/specs/iNNfo_${specVersion}_NN.md`,
+          `https://raw.githubusercontent.com/cogNNitive/iNNfo/main/models/specs/iNNfo_${specVersion}_NN.md`,
           // Tag-pinned URL (may not exist for unreleased versions)
           buildSpecificationUrl(specVersion),
           // Main branch fallback (legacy path)
