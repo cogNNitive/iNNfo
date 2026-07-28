@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 
 /**
  * innfo-mcp — MCP server wrapping @cognnitive/innfo-core.
