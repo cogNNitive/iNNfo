@@ -1,4 +1,4 @@
-﻿import { ParsedModel } from '../types'
+import { ParsedModel } from '../types'
 import { stringify as yamlStringify } from 'yaml'
 import { printTaxonomyNode } from './taxonomy'
 
@@ -72,7 +72,7 @@ export function serializeModel(model: ParsedModel): string {
   lines.push('')
   lines.push('> [!NOTE]')
   lines.push(
-    '> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/info-doc).',
+    '> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).',
   )
   lines.push('')
 

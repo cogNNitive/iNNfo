@@ -37,7 +37,7 @@ jobs:
         run: |
           rm -rf docs/app/
           cp -r apps/innfo-editor/dist docs/app/
-          cp docs/app/index.html docs/app/404.html
+          cp docs/404.html docs/app/404.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
