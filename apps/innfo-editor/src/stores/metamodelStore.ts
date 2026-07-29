@@ -1,7 +1,8 @@
-﻿import { defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useModelStore } from './modelStore'
 import { useWorkspaceStore } from './workspaceStore'
+import { useUiStore } from './uiStore'
 import { resolveEffectiveMetamodel } from '../model/metamodel'
 import { parseMetamodelDocumentation } from '../utils/documentationParser'
 import { parseFormatFilename } from '../utils/version'
@@ -33,8 +34,24 @@ export interface ConceptTreeNode {
  */
 export const useMetamodelStore = defineStore('metamodel', () => {
   const modelStore = useModelStore()
+  const uiStore = useUiStore()
 
-  const rootId = computed(() => modelStore.rootIds[0])
+  const rootId = computed(() => {
+    const selected = uiStore.selectedNodeId
+    if (selected) {
+      let curr = modelStore.getNode(selected)
+      while (curr?.parentId) {
+        curr = modelStore.getNode(curr.parentId)
+      }
+      if (curr && !curr.id.startsWith('spec:')) return curr.id
+    }
+    return (
+      modelStore.rootIds.find((id) => {
+        const node = modelStore.getNode(id)
+        return node && !id.startsWith('spec:')
+      }) ?? modelStore.rootIds[0]
+    )
+  })
 
   const concepts = computed<MetamodelConcept[]>(() => {
     if (!rootId.value) return []

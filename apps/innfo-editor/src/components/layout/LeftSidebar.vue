@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <aside
     data-testid="left-sidebar"
     class="relative border-r border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 flex flex-col overflow-y-auto shrink-0"
@@ -238,8 +238,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import type { ModelNode } from '../../model/types'
-import { parseModel } from '@cognnitive/innfo-core'
+import type { ModelNode, MetamodelConcept } from '../../model/types'
+import { parseModel, parseFrontmatter } from '@cognnitive/innfo-core'
+import { parseFormatFilename, type SemVer } from '../../utils/version'
+import { resolveEffectiveMetamodel } from '../../model/metamodel'
 import {
   ChevronsDown,
   ChevronsUp,
@@ -319,8 +321,84 @@ watch(
   },
 )
 
+function isTemplateNode(node: ModelNode | undefined): boolean {
+  if (!node) return true
+  if (node.id.startsWith('spec:')) return true
+  if (node.rawContent) {
+    try {
+      const fm = parseFrontmatter(node.rawContent) as any
+      if (fm?.kind === 'template' || fm?.kind === 'spec') return true
+      if (Array.isArray(fm?.concepts) && fm.concepts.length > 0 && !fm?.parent_spec) return true
+    } catch {
+      // silent
+    }
+  }
+  const pathOrName = node.source?.path || node.name || ''
+  if (/_template_NN\.md$/i.test(pathOrName) || /_spec_NN\.md$/i.test(pathOrName)) return true
+  return false
+}
+
+function getModelInfo(rootId: string): { baseName: string; version: SemVer } {
+  const rootNode = modelStore.getNode(rootId)
+  const path = rootNode?.source?.path || ''
+  const filename = path.split('/').pop()?.split('\\').pop() || rootNode?.name || ''
+
+  const parsed = parseFormatFilename(filename)
+  if (parsed) {
+    return { baseName: parsed.baseName, version: parsed.version }
+  }
+
+  let version: SemVer = { major: 0, minor: 0, patch: 0 }
+  let baseName = filename.replace(/\.md$/i, '').replace(/_NN$/i, '')
+  if (rootNode?.rawContent) {
+    try {
+      const fm = parseFrontmatter(rootNode.rawContent) as any
+      if (fm?.title) baseName = fm.title
+      if (typeof fm?.model_version === 'string') {
+        const vMatch = fm.model_version.match(/(\d+)\.(\d+)\.(\d+)/) || fm.model_version.match(/(\d+)-(\d+)-(\d+)/)
+        if (vMatch) {
+          version = { major: Number(vMatch[1]), minor: Number(vMatch[2]), patch: Number(vMatch[3]) }
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  const vMatch = filename.match(/_V_(\d+)-(\d+)-(\d+)/i)
+  if (vMatch) {
+    version = { major: Number(vMatch[1]), minor: Number(vMatch[2]), patch: Number(vMatch[3]) }
+    const parts = filename.split(/_V_\d+-\d+-\d+/i)
+    if (parts[0]) baseName = parts[0]
+  }
+
+  return { baseName, version }
+}
+
+function compareSemVer(a: SemVer, b: SemVer): number {
+  if (a.major !== b.major) return a.major - b.major
+  if (a.minor !== b.minor) return a.minor - b.minor
+  return a.patch - b.patch
+}
+
 const visibleRootIds = computed(() => {
-  return modelStore.rootIds.filter((id) => !id.startsWith('spec:'))
+  const nonTemplateRootIds = modelStore.rootIds.filter((id) => {
+    const node = modelStore.getNode(id)
+    return node && !isTemplateNode(node)
+  })
+
+  // Group by baseName -> keep highest version
+  const bestByBaseName = new Map<string, { id: string; version: SemVer }>()
+  for (const id of nonTemplateRootIds) {
+    const info = getModelInfo(id)
+    const existing = bestByBaseName.get(info.baseName)
+    if (!existing || compareSemVer(info.version, existing.version) > 0) {
+      bestByBaseName.set(info.baseName, { id, version: info.version })
+    }
+  }
+
+  const keptIds = new Set([...bestByBaseName.values()].map((v) => v.id))
+  return nonTemplateRootIds.filter((id) => keptIds.has(id))
 })
 
 const { width, startResize } = useResizablePanel({
@@ -574,6 +652,42 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
     }
   }
 
+  // Resolve template concepts specifically for THIS model
+  let modelConcepts: MetamodelConcept[] = []
+  if (rootNode.rawContent) {
+    try {
+      const fm = parseFrontmatter(rootNode.rawContent) as any
+      const parentName = fm?.parent_spec?.name
+      if (parentName) {
+        const normalizedParent = parentName.replace(/_NN$/, '')
+        const specNode = Object.values(modelStore.nodes).find((n) => {
+          if (!n.localMetamodel?.concepts?.length) return false
+          const nameCandidate = (n.name || n.id).replace(/_NN$/, '').replace(/^spec:/, '')
+          return nameCandidate === normalizedParent
+        })
+        if (specNode?.localMetamodel?.concepts) {
+          modelConcepts = specNode.localMetamodel.concepts
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  if (modelConcepts.length === 0) {
+    const effective = resolveEffectiveMetamodel(rootId, modelStore.nodes, [rootId])
+    modelConcepts = effective.concepts
+  }
+
+  if (modelConcepts.length === 0) {
+    modelConcepts = Array.from(childrenByType.keys()).map((type) => ({
+      name: type,
+      type: 'concept',
+      icon: 'file-text',
+      color: 'slate',
+    }))
+  }
+
   // Helper: check if a concept has content in this model
   function hasContent(conceptName: string): boolean {
     if ((childrenByType.get(conceptName)?.length ?? 0) > 0) return true
@@ -632,14 +746,14 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
     }
   }
 
-  const templateByName = new Map(metamodelStore.concepts.map((c) => [c.name, c]))
-  const templateOrder = new Map(metamodelStore.concepts.map((c, i) => [c.name, i]))
+  const templateByName = new Map(modelConcepts.map((c) => [c.name, c]))
+  const templateOrder = new Map(modelConcepts.map((c, i) => [c.name, i]))
   const seen = new Set<string>()
   const items: TreeGroup[] = []
 
   // Walk taxonomy roots preserving index order
   for (const root of taxonomyRoots) {
-    const isTemplateConcept = metamodelStore.getConceptByName(root) !== undefined
+    const isTemplateConcept = templateByName.has(root)
     if (isTemplateConcept) {
       items.push(buildTree(root))
     }
