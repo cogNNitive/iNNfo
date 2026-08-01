@@ -1,6 +1,6 @@
 ---
 specification_version: "V_0-3-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level1/iNNfo_NN.md"
 level: 1
 parent_spec:
   name: "defiNNe_V_0-2-0"
@@ -438,7 +438,7 @@ specification_url: "<immutable-url>"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level1/iNNfo_NN.md"
 title: "<Template Name>"
 relationship_types: {...}
 ---

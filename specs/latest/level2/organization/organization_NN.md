@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-3-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/organization/organization_V_0-3-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2/organization/organization_NN.md"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level1/iNNfo_NN.md"
 title: "Organization Template"
 relationship_types:
   hierarchy:
@@ -137,11 +137,11 @@ To create an organization model, create a level 3 FILE mode document with:
 ```yaml
 ---
 specification_version: "V_0-3-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level1/iNNfo_NN.md"
 level: 3
 parent_spec:
   name: "organization_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/organization/organization_V_0-3-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2/organization/organization_NN.md"
 model_version: "V_x-y-z"
 title: "<Organization Name>"
 ---
@@ -189,4 +189,4 @@ validate and render your model.
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/v0.3.0/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`. It exercises all concept types, lists, and the positions-roles and persons-positions matrices.
+The official sample for this template is at `specs/latest/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`. It exercises all concept types, lists, and the positions-roles and persons-positions matrices.

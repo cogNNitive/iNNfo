@@ -1,10 +1,10 @@
 ---
 specification_version: "V_0-3-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/procedures/procedures_V_0-3-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2/procedures/procedures_NN.md"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level1/iNNfo_NN.md"
 title: "Procedures Template"
 relationship_types:
   hierarchy:
@@ -178,11 +178,11 @@ To create a procedures model, create a level 3 FILE mode document with:
 ```yaml
 ---
 specification_version: "V_0-3-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level1/iNNfo_NN.md"
 level: 3
 parent_spec:
   name: "procedures_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/procedures/procedures_V_0-3-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2/procedures/procedures_NN.md"
 model_version: "V_x-y-z"
 title: "<Procedure Name>"
 ---
@@ -226,7 +226,7 @@ validate and render your model.
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/v0.3.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), element properties (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
+The official sample for this template is at `specs/latest/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), element properties (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
 
 ### Parent Chain
 
@@ -234,12 +234,12 @@ The official sample for this template is at `specs/v0.3.0/level2/procedures/samp
 # From the CodeReviewProcess sample:
 parent_spec:
   name: "procedures_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/procedures/procedures_V_0-3-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2/procedures/procedures_NN.md"
 
 # This template's parent:
 parent_spec:
   name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level1/iNNfo_NN.md"
 ```
 
 
