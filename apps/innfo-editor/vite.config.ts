@@ -1,5 +1,6 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { resolve } from 'node:path'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import vue from '@vitejs/plugin-vue'
 import { execSync } from 'node:child_process'
 import pkg from './package.json'
@@ -12,9 +13,39 @@ const getGitCommitDate = () => {
   }
 }
 
+/**
+ * Dev-only middleware that serves the repo's `specs/latest` directory at
+ * `/specs/latest`. This lets the home-page samples (and their templates)
+ * load the CURRENT working-tree content instead of the published GitHub
+ * `main` branch, which may still hold legacy-format files.
+ */
+function serveLocalSpecs(): Plugin {
+  const specsRoot = resolve(__dirname, '..', '..', 'specs', 'latest')
+  return {
+    name: 'serve-local-specs',
+    configureServer(server) {
+      server.middlewares.use('/specs/latest', (req, res, next) => {
+        try {
+          const urlPath = (req.url || '').replace(/\?.*$/, '')
+          const abs = resolve(specsRoot, '.' + urlPath)
+          if (abs.startsWith(specsRoot) && existsSync(abs) && statSync(abs).isFile()) {
+            res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+            res.setHeader('Cache-Control', 'no-store')
+            res.end(readFileSync(abs, 'utf8'))
+            return
+          }
+        } catch {
+          /* fall through */
+        }
+        next()
+      })
+    },
+  }
+}
+
 export default defineConfig({
   base: '/app/',
-  plugins: [vue()],
+  plugins: [vue(), serveLocalSpecs()],
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __COMMIT_DATE__: JSON.stringify(getGitCommitDate()),

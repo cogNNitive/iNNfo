@@ -1,5 +1,6 @@
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { normalizeMatrixDecl } from '@cognnitive/innfo-core'
+import { extractTemplateSchemaFromContent } from '@cognnitive/innfo-core'
 import type { LocalMetamodel } from '@cognnitive/innfo-core'
 import type { ModelNode } from '../model/types'
 import type { DirectoryHandleLike, FileHandleLike } from '../model/fs-types'
@@ -44,6 +45,26 @@ async function findLocalSpecInHandle(
     }
   }
   return null
+}
+
+/**
+ * Dev-only fallback: resolves a template from the repo's `specs/latest`
+ * directory (served by vite at `/specs/latest`). `parentName` is a canonical
+ * name like `procedures_V_0-3-0`; the latest folder uses unversioned stable
+ * names, so we derive the folder/slug (`procedures`) and load its `_NN.md`.
+ */
+async function tryDevLocalTemplate(parentName: string): Promise<string | null> {
+  if (!import.meta.env.DEV) return null
+  const slug = parentName.replace(/_V_\d+-\d+-\d+$/, '')
+  if (!slug || slug === parentName) return null
+  const localUrl = `/specs/latest/level2/${slug}/${slug}_NN.md`
+  try {
+    const resp = await fetch(localUrl)
+    if (!resp.ok) return null
+    return await resp.text()
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -99,6 +120,14 @@ export async function resolveParentSpecs(
     }
 
     if (!text) {
+      const devLocal = await tryDevLocalTemplate(parentName)
+      if (devLocal) {
+        text = devLocal
+        specFilename = `spec:${parentName}`
+      }
+    }
+
+    if (!text) {
       try {
         const resp = await fetch(parentUrl)
         if (!resp.ok) continue
@@ -128,29 +157,29 @@ export async function resolveParentSpecs(
     }
 
     try {
-      const tplFm = parseFrontmatter(text) as SpecFrontmatter
-      if (!tplFm?.concepts?.length && !tplFm?.matrices?.length) continue
+      // Templates declare their schema as body elements that instantiate the
+      // root primitives (Concept/Field/Marker/Matrix Definition) — there is no
+      // frontmatter `concepts` block anymore.
+      const schema = extractTemplateSchemaFromContent(text)
+      if (!schema.concepts.length && !schema.matrices.length) continue
 
       // Propagate template matrix declarations to the model root node
-      const tplMatrices = tplFm.matrices
-      if (Array.isArray(tplMatrices) && tplMatrices.length > 0) {
-        if (!root.fields['__matrix_defs']) {
-          root.fields['__matrix_defs'] = {
-            value: tplMatrices.map((m) => normalizeMatrixDecl(m as Record<string, unknown>)),
-            provenance: {
-              author: { kind: 'system', id: 'parser' },
-              timestamp: new Date().toISOString(),
-            },
-          }
+      if (schema.matrices.length > 0 && !root.fields['__matrix_defs']) {
+        root.fields['__matrix_defs'] = {
+          value: schema.matrices.map((m) => normalizeMatrixDecl(m as Record<string, unknown>)),
+          provenance: {
+            author: { kind: 'system', id: 'parser' },
+            timestamp: new Date().toISOString(),
+          },
         }
       }
 
-      if (!tplFm?.concepts?.length) continue
+      if (!schema.concepts.length) continue
 
       const templateId = `spec:${parentName}`
       if (nodes[templateId]) continue
 
-      const concepts = tplFm.concepts.map((c: Record<string, unknown>) => ({
+      const concepts = schema.concepts.map((c) => ({
         name: c.name,
         icon: c.icon,
         color: c.color,
@@ -159,7 +188,7 @@ export async function resolveParentSpecs(
         fields: c.fields,
       }))
 
-      const markers = (tplFm.markers ?? []).map((m: Record<string, unknown>) => ({
+      const markers = schema.markers.map((m) => ({
         name: m.name,
         icon: m.icon,
         color: m.color,

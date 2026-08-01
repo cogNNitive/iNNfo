@@ -15,11 +15,11 @@ type: "BusinessModel"
 
 > [!NOTE] This is an iNNfo business model.
 
-# _NN index
+# NN index
 * [[Stakeholders]]
 
-# _NN Stakeholders
-* _NN Stakeholders: Ghostbusters Inc.
+# NN Stakeholders
+## NN Stakeholders: Ghostbusters Inc.
 `
 
 const validModelNoType = `---
@@ -35,11 +35,11 @@ title: "Ghostbusters"
 
 > [!NOTE] This is an iNNfo business model.
 
-# _NN index
+# NN index
 * [[Stakeholders]]
 
-# _NN Stakeholders
-* _NN Stakeholders: Ghostbusters Inc.
+# NN Stakeholders
+## NN Stakeholders: Ghostbusters Inc.
 `
 
 describe('validateFormatContent', () => {
@@ -91,9 +91,9 @@ describe('validateFormatContent', () => {
     expect(versionCheck?.passed).toBe(false)
   })
 
-  it('flags missing _NN element markers', () => {
+  it('flags bullet elements that are not ## NN headings', () => {
     const noMarkers = validModel.replace(
-      /\* _NN Stakeholders:.*$/m,
+      '## NN Stakeholders: Ghostbusters Inc.',
       '* Stakeholders: Ghostbusters Inc.',
     )
     const report = validateFormatContent(noMarkers, 'test_NN.md')
@@ -101,28 +101,23 @@ describe('validateFormatContent', () => {
     expect(markerCheck?.passed).toBe(false)
   })
 
-  it('warns on numbered-list _NN markers', () => {
+  it('flags numbered headings that are not ## NN element headings', () => {
     const numbered = validModel.replace(
-      '* _NN Stakeholders: Ghostbusters Inc.',
-      '1. _NN Stakeholders: Ghostbusters Inc.',
+      '## NN Stakeholders: Ghostbusters Inc.',
+      '## 1. Stakeholders: Ghostbusters Inc.',
     )
     const report = validateFormatContent(numbered, 'test_NN.md')
-    const numberedCheck = report.checks.find((c) => c.id === 'body-numbered-list-markers')
-    expect(numberedCheck).toBeDefined()
-    expect(numberedCheck!.passed).toBe(false)
-    expect(numberedCheck!.severity).toBe('warning')
+    const markerCheck = report.checks.find((c) => c.id === 'body-element-markers')
+    expect(markerCheck).toBeDefined()
+    expect(markerCheck!.passed).toBe(false)
   })
 
-  it('errors on invalid bullet characters', () => {
-    const plusBullet = validModel.replace(
-      '* _NN Stakeholders: Ghostbusters Inc.',
-      '+ _NN Stakeholders: Ghostbusters Inc.',
-    )
-    const report = validateFormatContent(plusBullet, 'test_NN.md')
-    const invalidCheck = report.checks.find((c) => c.id === 'body-invalid-bullet-chars')
-    expect(invalidCheck).toBeDefined()
-    expect(invalidCheck!.passed).toBe(false)
-    expect(invalidCheck!.severity).toBe('error')
+  it('rejects concept sections without the NN marker', () => {
+    const badSection = validModel.replace('# NN Stakeholders', '# Stakeholders')
+    const report = validateFormatContent(badSection, 'test_NN.md')
+    const sectionsCheck = report.checks.find((c) => c.id === 'body-concept-sections')
+    expect(sectionsCheck).toBeDefined()
+    expect(sectionsCheck!.passed).toBe(false)
   })
 
   it('warns on mismatched spec_version', () => {

@@ -40,16 +40,16 @@ model_version: "V_0-0-1"
 title: "Mi Primer Modelo"
 ---
 
-# _NN Business summary
+# NN Business summary
 
 Un modelo mínimo para pruebas progresivas.
 
-# _NN Problems
+# NN Problems
 
-* _NN Problems: Problema Uno
-  La primera descripción del problema.
-* _NN Problems: Problema Dos
-  La segunda descripción del problema.
+## NN Problems: Problema Uno
+La primera descripción del problema.
+## NN Problems: Problema Dos
+La segunda descripción del problema.
 `
 
 const INDEX_MD = `---
@@ -58,7 +58,7 @@ level: 0
 title: "Workspace Index"
 ---
 
-# _NN index
+# NN index
 
 * [[MiModelo_NN.md]]
 `

@@ -11,7 +11,18 @@ export {
   extractRelationships,
   extractAnalysis,
 } from './parser'
+export {
+  CONCEPT_DEFINITION,
+  FIELD_DEFINITION,
+  MARKER_DEFINITION,
+  MATRIX_DEFINITION,
+  extractTemplateSchema,
+  extractTemplateSchemaFromContent,
+} from './schema'
+export type { TemplateSchema } from './schema'
 export { validateModel, validateFormatContent, validateFormatSyntax } from './validator'
+export { applyMutation } from './mutate'
+export type { MutationResult } from './mutate'
 export { deriveMatrixWidgetType, normalizeMatrixDecl } from './matrix'
 export type { MatrixWidgetType } from './matrix'
 export * from './identity'

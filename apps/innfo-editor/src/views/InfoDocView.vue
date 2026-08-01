@@ -6,6 +6,7 @@ import { useModelStore } from '../stores/modelStore'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import { resolveParentSpecs } from '../services/SpecResolverService'
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
+import { SAMPLE_BASE } from '../config/samples'
 import { Play, Layout, ExternalLink, FileText, ArrowRight } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -19,8 +20,6 @@ const urlInput = ref('')
 const urlBusy = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const targetMode = ref<'workspace' | 'standalone'>('workspace')
-
-const SAMPLE_BASE = 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2'
 
 interface SampleOption {
   name: string

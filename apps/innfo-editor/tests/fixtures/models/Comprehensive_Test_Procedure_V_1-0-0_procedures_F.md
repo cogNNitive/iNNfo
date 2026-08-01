@@ -119,112 +119,88 @@ This procedure is a comprehensive functional test suite for the FORMAT applicati
 
 # <!-- block: concepts --> roles
 * <!-- block: roles --> Role with No Fields
-  A role that has zero fields configured. Tests that the application renders a role with only its name and description, with no field widgets.
+A role that has zero fields configured. Tests that the application renders a role with only its name and description, with no field widgets.
 * <!-- block: roles --> Role with Scope Internal
-  ```yaml
-  scope: internal
-  ```
-  A role restricted to internal scope. Tests that the scope select field renders and filters correctly.
+scope:: internal
+A role restricted to internal scope. Tests that the scope select field renders and filters correctly.
 * <!-- block: roles --> Role with Scope External
-  ```yaml
-  scope: external
-  ```
-  A role restricted to external scope. Tests the alternate value of the scope select field and cross-scope differentiation.
+scope:: external
+A role restricted to external scope. Tests the alternate value of the scope select field and cross-scope differentiation.
 * <!-- block: roles --> Role with Relations
-  ```yaml
-  scope: internal
-  ```
-  A role that appears in every RACI matrix row across multiple steps. Tests that role-step relationships render and update correctly in the work-roles matrix.
+scope:: internal
+A role that appears in every RACI matrix row across multiple steps. Tests that role-step relationships render and update correctly in the work-roles matrix.
 * <!-- block: roles --> Role as Orphan
-  A role that is defined but never referenced in any step or position matrix. Tests that the application handles unreferenced roles gracefully without rendering errors.
+A role that is defined but never referenced in any step or position matrix. Tests that the application handles unreferenced roles gracefully without rendering errors.
 
 # <!-- block: concepts --> steps
 1. <!-- block: work --> Basic Step
-   ```yaml
-   step_type: task
-   next: Step with All References
-   ```
-   A task step with only step_type and next — no input, output, condition, or output_status. Tests that the minimal required fields render correctly and that the next-pointer links to the following step.
+step_type:: task
+next:: Step with All References
+ A task step with only step_type and next — no input, output, condition, or output_status. Tests that the minimal required fields render correctly and that the next-pointer links to the following step.
 2. <!-- block: work --> Step with All References
-   ```yaml
-   step_type: task
-   next: Decision Step with Branching
-   condition: artifact must exist
-   input: Basic Artifact
-   output: Artifact with Fields
-   output_status: draft
-   tool: Test Runner
-   ```
-   A task step that populates every available field: step_type, next, condition, input, output, output_status, and tool. Tests that all seven field types render and that reference fields correctly resolve to artifact and tool names.
+step_type:: task
+next:: Decision Step with Branching
+condition:: artifact must exist
+input:: Basic Artifact
+output:: Artifact with Fields
+output_status:: draft
+tool:: Test Runner
+ A task step that populates every available field: step_type, next, condition, input, output, output_status, and tool. Tests that all seven field types render and that reference fields correctly resolve to artifact and tool names.
 3. <!-- block: work --> Decision Step with Branching
-   ```yaml
-   step_type: decision
-   condition: approval granted
-   ```
-   A decision step that branches. When the condition is met, flow continues to the next step; otherwise it loops back. Tests that decision-type steps render with branching indicators and that condition logic is visible.
+step_type:: decision
+condition:: approval granted
+ A decision step that branches. When the condition is met, flow continues to the next step; otherwise it loops back. Tests that decision-type steps render with branching indicators and that condition logic is visible.
 4. <!-- block: work --> Step Outputting Final Artifact
-   ```yaml
-   step_type: task
-   output: Artifact with Fields
-   output_status: final
-   ```
-   A task step that produces a final-status artifact. Tests that output_status accepts non-draft values and that the artifact reference resolves.
+step_type:: task
+output:: Artifact with Fields
+output_status:: final
+ A task step that produces a final-status artifact. Tests that output_status accepts non-draft values and that the artifact reference resolves.
 5. <!-- block: work --> Event Step External Trigger
-   ```yaml
-   step_type: event
-   condition: external system callback received
-   ```
-   An event-type step triggered by an external condition. Tests that event steps render differently from task steps and that condition text is displayed.
+step_type:: event
+condition:: external system callback received
+ An event-type step triggered by an external condition. Tests that event steps render differently from task steps and that condition text is displayed.
 6. <!-- block: work --> Step with Multiple Inputs
-   ```yaml
-   step_type: task
-   input: Basic Artifact
-   next: Step with All References
-   tool: Mockup Editor
-   ```
-   A task step that consumes an artifact and uses a design tool. Tests that the input and tool references resolve and that the step connects to the next step via the next pointer.
+step_type:: task
+input:: Basic Artifact
+next:: Step with All References
+tool:: Mockup Editor
+ A task step that consumes an artifact and uses a design tool. Tests that the input and tool references resolve and that the step connects to the next step via the next pointer.
 7. <!-- block: work --> Step with No Next (Terminal)
-   ```yaml
-   step_type: task
-   output: Artifact with Fields
-   output_status: approved
-   ```
-   A terminal task step with no next pointer. Tests that the application correctly renders a step that ends the sequence.
+step_type:: task
+output:: Artifact with Fields
+output_status:: approved
+ A terminal task step with no next pointer. Tests that the application correctly renders a step that ends the sequence.
 8. <!-- block: work --> Step Referencing Nonexistent Artifact
-   ```yaml
-   step_type: task
-   input: Ghost Artifact
-   next: Basic Step
-   ```
-   A task step whose input references an artifact that does not exist in the model. Tests that the application surfaces a clear warning or error for broken references.
+step_type:: task
+input:: Ghost Artifact
+next:: Basic Step
+ A task step whose input references an artifact that does not exist in the model. Tests that the application surfaces a clear warning or error for broken references.
 9. <!-- block: work --> Step with Self-Reference Loop
-   ```yaml
-   step_type: task
-   next: Step with Self-Reference Loop
-   ```
-   A task step whose next pointer references itself. Tests that the application detects and handles circular references without crashing.
+step_type:: task
+next:: Step with Self-Reference Loop
+ A task step whose next pointer references itself. Tests that the application detects and handles circular references without crashing.
 
 # <!-- block: concepts --> artifact
 * <!-- block: artifact --> Basic Artifact
-  An artifact with no fields. Tests that the application renders an artifact container with only its name and description.
+An artifact with no fields. Tests that the application renders an artifact container with only its name and description.
 * <!-- block: artifact --> Artifact with Fields
-  Tests that the application correctly renders an artifact containing multiple field types. This artifact has no YAML fields — its purpose is to be referenced by steps that exercise the output_status and reference resolution features.
+Tests that the application correctly renders an artifact containing multiple field types. This artifact has no YAML fields — its purpose is to be referenced by steps that exercise the output_status and reference resolution features.
 * <!-- block: artifact --> Artifact as Input Only
-  An artifact that is only consumed (referenced as input) by steps, never produced as output. Tests unidirectional flow in artifact usage.
+An artifact that is only consumed (referenced as input) by steps, never produced as output. Tests unidirectional flow in artifact usage.
 * <!-- block: artifact --> Artifact as Output Only
-  An artifact that is only produced (referenced as output) by steps, never consumed as input. Tests unidirectional flow in artifact creation.
+An artifact that is only produced (referenced as output) by steps, never consumed as input. Tests unidirectional flow in artifact creation.
 * <!-- block: artifact --> Artifact Referenced by Decision
-  An artifact that is produced by a decision step's output. Tests that artifacts linked to decision-type steps render correctly.
+An artifact that is produced by a decision step's output. Tests that artifacts linked to decision-type steps render correctly.
 * <!-- block: artifact --> Artifact Never Referenced
-  An artifact defined in the model but never referenced by any step. Tests that unreferenced artifacts render without errors.
+An artifact defined in the model but never referenced by any step. Tests that unreferenced artifacts render without errors.
 
 # <!-- block: concepts --> tools
 * <!-- block: tools --> Test Runner
-  A command-line or CI/CD tool that executes automated test suites. Used to validate artifact outputs against expected results.
+A command-line or CI/CD tool that executes automated test suites. Used to validate artifact outputs against expected results.
 * <!-- block: tools --> Mockup Editor
-  A visual design tool used to create and modify artifact previews and mockups during drafting steps.
+A visual design tool used to create and modify artifact previews and mockups during drafting steps.
 * <!-- block: tools --> Code Review Platform
-  A collaborative review tool where artifacts (code diffs, documents) are reviewed and approved before finalization.
+A collaborative review tool where artifacts (code diffs, documents) are reviewed and approved before finalization.
 
 # <!-- block: matrices --> item-markers matrix
 | Item \ Marker | complexity |

@@ -15,14 +15,14 @@ model_version: "V_0-0-1"
 title: "Serializer File Doc"
 ---
 
-# _NN index
+# NN index
 
 * [[Problems]]
 
-# _NN Problems
+# NN Problems
 
-* _NN Problems: Problem One
-  A problem used to exercise the serializer.
+## NN Problems: Problem One
+A problem used to exercise the serializer.
 `
 
 const indexMd = `---
@@ -31,7 +31,7 @@ level: 0
 title: "Workspace Index"
 ---
 
-# _NN index
+# NN index
 
 * [[Doc_NN.md]]
 `

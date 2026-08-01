@@ -13,7 +13,7 @@ model_version: "V_0-0-1"
 title: "Valid Model"
 ---
 
-# _NN Business summary
+# NN Business summary
 
 A valid single-file model.
 `
@@ -24,7 +24,7 @@ level: 0
 title: "Workspace Index"
 ---
 
-# _NN index
+# NN index
 
 * [[modelA_NN.md]]
 `
@@ -64,7 +64,7 @@ level: 0
 title: "Workspace Index"
 ---
 
-# _NN index
+# NN index
 
 * [[exists_NN.md]]
 * [[missing_NN.md]]
@@ -97,14 +97,14 @@ model_version: "V_0-0-1"
 title: "${title}"
 ---
 
-# _NN index
+# NN index
 
 * [[${elementName}]]
 
-# _NN Components
+# NN Components
 
-* _NN Components: ${elementName}
-  Description of ${elementName}.
+## NN Components: ${elementName}
+Description of ${elementName}.
 `
 
     const indexMd = `---
@@ -113,7 +113,7 @@ level: 0
 title: "Workspace Index"
 ---
 
-# _NN index
+# NN index
 
 * [[modelA_NN.md]]
 * [[modelB_NN.md]]
@@ -144,22 +144,22 @@ model_version: "V_0-0-1"
 title: "Full Model"
 ---
 
-# _NN index
+# NN index
 
 * [[Problems]]
 * [[Value propositions]]
 
-# _NN Problems
+# NN Problems
 
-* _NN Problems: Alpha
-  Description of Alpha.
-* _NN Problems: Beta
-  Description of Beta.
+## NN Problems: Alpha
+Description of Alpha.
+## NN Problems: Beta
+Description of Beta.
 
-# _NN Value propositions
+# NN Value propositions
 
-* _NN Value propositions: Gamma
-  Description of Gamma.
+## NN Value propositions: Gamma
+Description of Gamma.
 `
 
     const tree: FakeTree = {

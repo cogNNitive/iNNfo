@@ -82,40 +82,34 @@ The Core Engineering Team at Acme Corp, responsible for building and maintaining
 
 # <!-- block: concepts --> roles
 * <!-- block: roles --> Developer
-  ```yaml
-  scope: internal
-  ```
-  Writes code, builds features, and maintains software services.
+scope:: internal
+Writes code, builds features, and maintains software services.
 * <!-- block: roles --> QA Engineer
-  ```yaml
-  scope: internal
-  ```
-  Designs test plans, executes tests, and verifies releases.
+scope:: internal
+Designs test plans, executes tests, and verifies releases.
 * <!-- block: roles --> Tech Lead
-  ```yaml
-  scope: internal
-  ```
-  Architects solutions, conducts code reviews, and guides engineering decisions.
+scope:: internal
+Architects solutions, conducts code reviews, and guides engineering decisions.
 
 # <!-- block: concepts --> position
 * <!-- block: position --> Senior Developer
-  Senior software engineering seat focused on core backend services.
+Senior software engineering seat focused on core backend services.
 * <!-- block: position --> Junior Developer
-  Associate software engineering seat assisting with feature delivery.
+Associate software engineering seat assisting with feature delivery.
 * <!-- block: position --> Lead Tester
-  Senior QA seat responsible for overall quality control and validation strategies.
+Senior QA seat responsible for overall quality control and validation strategies.
 * <!-- block: position --> Team Tech Lead
-  Leadership seat responsible for technical architecture and delivery of the team.
+Leadership seat responsible for technical architecture and delivery of the team.
 
 # <!-- block: concepts --> person
 * <!-- block: person --> Alice Smith
-  Senior engineer with extensive experience in distributed systems.
+Senior engineer with extensive experience in distributed systems.
 * <!-- block: person --> Bob Jones
-  Junior engineer who recently joined the platform team.
+Junior engineer who recently joined the platform team.
 * <!-- block: person --> Charlie Brown
-  Experienced tester specializing in automated end-to-end testing.
+Experienced tester specializing in automated end-to-end testing.
 * <!-- block: person --> Diana Prince
-  Senior architect and team technical leader.
+Senior architect and team technical leader.
 
 # <!-- block: matrices --> item-markers matrix
 | Item \ Marker | complexity |

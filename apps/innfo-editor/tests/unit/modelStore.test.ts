@@ -56,7 +56,7 @@ describe('modelStore', () => {
   it('resolves parent specifications locally first from specs/ directory handle', async () => {
     const { buildFakeTree } = await import('../helpers/fakeFs')
 
-    const indexMd = '# _NN index\n* [[model_NN.md]]'
+    const indexMd = '# NN index\n* [[model_NN.md]]'
     const modelMd = [
       '---',
       'spec_version: "V_0-1-1"',
@@ -68,11 +68,11 @@ describe('modelStore', () => {
       'title: "My Model"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Market]]',
       '',
-      '# _NN Market',
-      '* _NN Market: Test Market',
+      '# NN Market',
+      '## NN Market: Test Market',
     ].join('\n')
 
     const specMd = [
@@ -81,11 +81,13 @@ describe('modelStore', () => {
       'specification_url: "https://example.com/test-template"',
       'level: 2',
       'title: "Test Template"',
-      'concepts:',
-      '  - name: "Market"',
-      '    type: "weight"',
-      '    color: "blue"',
       '---',
+      '',
+      '# NN Concept Definition',
+      '',
+      '## NN Concept Definition: Market',
+      'type:: weight',
+      'color:: blue',
       '',
       '# Test Template',
       '## Market',

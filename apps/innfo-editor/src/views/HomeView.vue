@@ -19,6 +19,7 @@ import { useModelStore } from '../stores/modelStore'
 import { resolveParentSpecs } from '../services/SpecResolverService'
 import { useToast } from '../shared/useToast'
 import SetupWizard from '../components/layout/SetupWizard.vue'
+import { SAMPLE_BASE } from '../config/samples'
 
 const router = useRouter()
 const route = useRoute()
@@ -50,8 +51,6 @@ interface ExampleModel {
   url: string
   supportsStandalone?: boolean
 }
-
-const SAMPLE_BASE = 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2'
 
 const samples: ExampleModel[] = [
   {
