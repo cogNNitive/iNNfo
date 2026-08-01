@@ -170,7 +170,7 @@ level: 0
 title: "Workspace Index"
 ---
 
-# _NN index
+# NN index
 
 * [[Ghostbusters_NN.md]]
 `
