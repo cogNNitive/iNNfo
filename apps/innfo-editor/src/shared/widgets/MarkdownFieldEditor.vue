@@ -1,10 +1,11 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { marked } from 'marked'
 import { FileText, Pencil, Save, X, ArrowLeftFromLine } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
 import type { FileHandleLike } from '@cognnitive/innfo-core'
+import MinimalMarkdownEditor from '../../components/ui/MinimalMarkdownEditor.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -309,22 +310,9 @@ function insertHeading(): void {
       <span v-else class="mfe-empty">—</span>
     </template>
 
-    <!-- ═══ Edit mode: textarea + toolbar ═══ -->
-    <div v-else class="mfe-edit">
-      <div class="mfe-toolbar">
-        <button class="mfe-tb-btn" @click="insertFormat('**', '**')" title="Bold" type="button">
-          <strong>B</strong>
-        </button>
-        <button class="mfe-tb-btn" @click="insertFormat('*', '*')" title="Italic" type="button">
-          <em>I</em>
-        </button>
-        <button class="mfe-tb-btn" @click="insertBullet()" title="Bullet list" type="button">
-          &bull;
-        </button>
-        <button class="mfe-tb-btn" @click="insertHeading()" title="Heading" type="button">
-          H
-        </button>
-        <span class="mfe-tb-spacer" />
+    <!-- ═══ Edit mode: WYSIWYG editor ═══ -->
+    <div v-else class="mfe-edit space-y-2">
+      <div class="flex items-center justify-end gap-2 bg-slate-50 dark:bg-slate-800 p-1.5 rounded-t-lg border border-slate-200 dark:border-slate-700 -mb-2 border-b-0">
         <button
           class="mfe-tb-action text-slate-500 hover:text-slate-700"
           @click="cancelEdit"
@@ -332,6 +320,7 @@ function insertHeading(): void {
           type="button"
         >
           <X class="w-3.5 h-3.5" />
+          <span>Cancel</span>
         </button>
         <button
           class="mfe-tb-action text-indigo-600 hover:text-indigo-800 font-semibold"
@@ -345,11 +334,8 @@ function insertHeading(): void {
           <span v-else>Save</span>
         </button>
       </div>
-      <textarea
-        ref="textareaRef"
-        class="mfe-textarea"
-        :value="editContent"
-        @input="editContent = ($event.target as HTMLTextAreaElement).value"
+      <MinimalMarkdownEditor
+        v-model="editContent"
         :placeholder="isFileMode ? 'Edit external markdown file...' : 'Enter Markdown...'"
       />
     </div>

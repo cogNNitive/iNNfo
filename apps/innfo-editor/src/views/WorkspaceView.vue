@@ -15,6 +15,7 @@ import { useUiStore, type ActiveView } from '../stores/uiStore'
 import { useMetamodelStore } from '../stores/metamodelStore'
 import { useToast } from '../shared/useToast'
 import { useHashSync } from '../composables/useHashSync'
+import { useViewSync } from '../composables/useViewSync'
 import { ValidationService } from '../services/ValidationService'
 import type { ModelNode } from '../model/types'
 
@@ -33,6 +34,9 @@ const MetamatrixConfig = defineAsyncComponent(
 )
 const ModelInfoPanel = defineAsyncComponent(() => import('../components/editor/ModelInfoPanel.vue'))
 const AiWorkflowPanel = defineAsyncComponent(() => import('../components/editor/AiWorkflowPanel.vue'))
+const GuidedProcedureView = defineAsyncComponent(
+  () => import('../components/editor/GuidedProcedureView.vue'),
+)
 
 
 const router = useRouter()
@@ -46,6 +50,11 @@ const validationService = new ValidationService(modelStore, show)
 // ── Hash sync ──
 // Syncs uiStore.selectedNodeId with the URL hash (#conceptName.elementName)
 useHashSync()
+
+// ── View sync ──
+// Syncs uiStore.activeView with the ?view= query param so browser
+// back/forward navigates between views instead of jumping to home.
+useViewSync()
 
 // ── Toolbar / validation state ──
 const validationReport = computed(() => modelStore.validationReport)
@@ -71,17 +80,21 @@ const selectedNode = computed(() => {
       return child?.type === conceptName && child?.kind === 'element'
     })
 
+    // Resolve the real concept type from the metamodel (e.g. `text`, `weight`).
+    const metaConcept = metamodelStore.getConceptByName(conceptName)
+    const realType = metaConcept?.type ?? conceptName
+
     return {
       id,
       name: conceptName,
       parentId,
       childIds,
-      type: conceptName,
+      type: realType,
       kind: 'concept',
       fields: {},
       markers: {},
       relationships: [],
-      rawSections: {},
+      rawSections: { description: parentNode.rawSections?.[conceptName] ?? '' },
       source: parentNode.source,
     } as any
   }
@@ -217,6 +230,7 @@ const activeEditorProps = computed(() => {
       nodeId: nid,
       conceptName: selectedNodeName.value,
       conceptType: selectedNodeType.value,
+      rootNodeId: rootNode.value?.id ?? '',
     }
   }
   if (editorView.value === 'tree') {
@@ -243,6 +257,7 @@ const activeEditorProps = computed(() => {
     conceptFields: activeConceptFields.value,
     items: childItems.value,
     isListConcept: isListConcept.value,
+    deletable: selectedNode.value?.kind === 'element',
   }
 })
 
@@ -268,6 +283,12 @@ const activeEditorEvents = computed(() => {
     'change-concept': onEditorChange,
     'change-item': onEditorChange,
     'change-concept-name': onConceptNameChange,
+    'add-item': onAddItem,
+    'delete-node': onDeleteSelectedNode,
+    'delete-item': onDeleteItem,
+    'move-item-up': (index: number) => onMoveItem(index, -1),
+    'move-item-down': (index: number) => onMoveItem(index, 1),
+    'navigate-to-node': onNavigateToNode,
   }
 })
 
@@ -296,6 +317,58 @@ function onConceptNameChange(newName: string): void {
 
 function onNavigateToNode(nodeId: string): void {
   uiStore.selectNode(nodeId)
+}
+
+/** Adds a new child element under the selected node (BlockFeed '+' button). */
+function onAddItem(): void {
+  const node = selectedNode.value
+  const type = node?.type || conceptType.value
+  if (!node || !type || !selectedNodeId.value) return
+
+  let parentId = selectedNodeId.value
+  if (selectedNodeId.value.startsWith('virtual:')) {
+    parentId = selectedNodeId.value.split(':')[1]
+  }
+
+  let index = 1
+  let elementName = `New ${type}`
+  let targetId = `${parentId}/${elementName}`
+  while (modelStore.getNode(targetId)) {
+    index++
+    elementName = `New ${type} ${index}`
+    targetId = `${parentId}/${elementName}`
+  }
+
+  const newId = modelStore.createChild(parentId, elementName, type, 'element')
+  if (newId) {
+    uiStore.selectNode(newId)
+  }
+}
+
+/** Deletes the currently selected element (BlockFeed sheet delete button). */
+function onDeleteSelectedNode(): void {
+  const node = selectedNode.value
+  const id = selectedNodeId.value
+  if (!node || !id) return
+  const parentId = node.parentId
+  modelStore.removeNodeTree(id)
+  uiStore.selectNode(parentId ?? modelStore.rootIds[0] ?? null)
+}
+
+/** Deletes one of the child elements rendered as instance sheets. */
+function onDeleteItem(index: number): void {
+  const item = childItems.value[index]
+  if (!item) return
+  modelStore.removeNodeTree(item.id)
+}
+
+/** Moves a child element up/down within its parent. */
+function onMoveItem(index: number, direction: 1 | -1): void {
+  const node = selectedNode.value
+  const item = childItems.value[index]
+  if (!node || !item) return
+  const parentId = node.id.startsWith('virtual:') ? node.id.split(':')[1] : node.id
+  modelStore.reorderChild(parentId, item.id, direction)
 }
 
 /** Switches the active view (editor / graph / matrices / info). */
@@ -511,6 +584,13 @@ onUnmounted(() => {
         <template v-else-if="uiStore.activeView === 'ai-guide'">
           <div class="flex-1 flex flex-col min-h-0">
             <AiWorkflowPanel />
+          </div>
+        </template>
+
+        <!-- ── Guided Procedure View ── -->
+        <template v-else-if="uiStore.activeView === 'guided-procedure'">
+          <div class="flex-1 flex flex-col min-h-0">
+            <GuidedProcedureView />
           </div>
         </template>
       </main>

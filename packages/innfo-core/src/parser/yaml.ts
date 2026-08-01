@@ -116,6 +116,11 @@ export function parseFrontmatter(content: string): SpecFrontmatter | null {
       if (m.params && !m.values) {
         m.values = m.params.split(';').map((s: string) => s.trim())
       }
+      // R-MM-08 uses `widget`; the codebase uses `widgetType` (reader tolerance)
+      if (m.widget && !m.widgetType) {
+        m.widgetType = m.widget
+        delete m.widget
+      }
     }
   }
   return parsed as SpecFrontmatter

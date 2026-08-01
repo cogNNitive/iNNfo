@@ -52,6 +52,7 @@ export function parseModel(content: string): ParsedModel {
 
   const body = normalizedContent.replace(YAML_BLOCK_RE, '').trim()
   const sections = body.split(/(?=^#\s)/m)
+  const rawSections: Record<string, string> = {}
 
   for (const section of sections) {
     const headerMatch = section.match(/^#\s+(.*)$/m)
@@ -64,9 +65,18 @@ export function parseModel(content: string): ParsedModel {
     if (type === 'index') {
       taxonomy = parseIndexBlock(bodyContent)
     } else if (type === 'concept') {
-      const conceptElements = parseConceptSection(name, bodyContent)
-      if (conceptElements.length > 0) {
-        elements.set(name, conceptElements)
+      const parsed = parseConceptSection(name, bodyContent)
+      if (parsed.elements.length > 0) {
+        elements.set(name, parsed.elements)
+      }
+      // Preserve the concept's raw body for round-trip fidelity AND as the
+      // concept-level description/content of `text` concepts. Concepts with
+      // element markers carry their content in `elements`; element-free
+      // concepts (e.g. `text`) keep their free-form Markdown here. Empty
+      // sections are skipped so ghost detection still flags no-content
+      // concepts.
+      if (parsed.elements.length === 0 && bodyContent.trim()) {
+        rawSections[name] = bodyContent
       }
     } else if (type === 'matrix') {
       if (name.toLowerCase() === 'item-markers matrix') {
@@ -125,6 +135,7 @@ export function parseModel(content: string): ParsedModel {
     nodeMarkers,
     slugCollisions,
     parseWarnings: parseWarnings.length > 0 ? parseWarnings : undefined,
+    rawSections: Object.keys(rawSections).length > 0 ? rawSections : undefined,
     rawContent: content,
   }
 }

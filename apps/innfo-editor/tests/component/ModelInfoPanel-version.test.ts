@@ -44,6 +44,18 @@ title: "Unversioned Model"
 A model without explicit version.
 `
 
+const rootContentWithParentSpec = `---
+spec_version: "V_0-2-0"
+parent_spec:
+  name: "business_V_0-2-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
+model_version: "V_1-0-0"
+title: "Business Model"
+---
+
+# _F Business Model
+`
+
 describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -81,7 +93,7 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
     await collapsibleDiv.trigger('click')
 
     // Now the expanded panel should show the current version
-    const versionDisplay = wrapper.find('.font-mono.font-bold')
+    const versionDisplay = wrapper.find('[data-testid="current-version-display"]')
     expect(versionDisplay.exists()).toBe(true)
     expect(versionDisplay.text()).toContain('V_1-2-3')
   })
@@ -111,7 +123,7 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
     await collapsibleDiv.trigger('click')
 
     // Should show default V_1-0-0
-    const versionDisplay = wrapper.find('.font-mono.font-bold')
+    const versionDisplay = wrapper.find('[data-testid="current-version-display"]')
     expect(versionDisplay.exists()).toBe(true)
     expect(versionDisplay.text()).toContain('V_1-0-0')
   })
@@ -308,6 +320,55 @@ describe('ModelInfoPanel.vue — Version Management (R-VM-01, R-VM-06)', () => {
       buttons.forEach((btn) => {
         expect(btn.attributes('disabled')).toBeDefined()
       })
+    })
+
+    it('does not render the Active Model Stack pills anymore', () => {
+      const modelStore = useModelStore()
+      modelStore.setGraph(
+        {
+          Root: makeNode('Root', {
+            kind: 'concept',
+            childIds: [],
+            rawContent: rootContentWithVersion,
+            source: { path: 'MyModel_NN.md' },
+          }),
+        },
+        ['Root'],
+      )
+
+      const wrapper = mount(ModelInfoPanel, {
+        props: { rootNodeId: 'Root' },
+      })
+
+      expect(wrapper.find('[data-testid="info-panel-model-stack"]').exists()).toBe(false)
+      expect(wrapper.text()).not.toContain('Active Model Stack:')
+    })
+
+    it('shows the template name instead of the version in the Name field', () => {
+      const modelStore = useModelStore()
+      modelStore.setGraph(
+        {
+          Root: makeNode('Root', {
+            kind: 'concept',
+            childIds: [],
+            rawContent: rootContentWithParentSpec,
+            source: { path: 'MyModel_NN.md' },
+          }),
+        },
+        ['Root'],
+      )
+
+      const wrapper = mount(ModelInfoPanel, {
+        props: { rootNodeId: 'Root' },
+      })
+
+      const templateSection = wrapper.findAll('div').find((el) => el.text().includes('2. Template'))!
+      expect(templateSection.text()).toContain('Name:')
+      expect(templateSection.text()).toContain('business_V_0-2-0')
+      expect(templateSection.text()).toContain('Version:')
+      expect(templateSection.text()).toContain('V_0-2-0')
+      // The Name field must not fall back to a bare version string
+      expect(templateSection.text()).not.toContain('V_0-1-0')
     })
   })
 })

@@ -12,13 +12,14 @@
       :has-markers="hasMarkers"
       :collapsed="conceptCollapsed"
       :is-editing="editingId === 'concept'"
-      :show-tabs="false"
+      :show-tabs="true"
       :show-reorder="false"
-      :show-delete="false"
+      :show-delete="deletable"
       :show-add-child="isListConcept"
       @update:collapsed="conceptCollapsed = $event"
       @edit-toggle="toggleEdit('concept')"
       @add-child="$emit('add-item')"
+      @delete="$emit('delete-node')"
       @change="$emit('change-concept')"
       @update:concept-name="(name) => $emit('change-concept-name', name)"
       @navigate-to-node="(nodeId) => $emit('navigate-to-node', nodeId)"
@@ -80,6 +81,7 @@ const props = withDefaults(
     isListConcept: boolean
     hasMarkers?: boolean
     selectedItemName?: string
+    deletable?: boolean
   }>(),
   {
     conceptColor: '',
@@ -87,6 +89,7 @@ const props = withDefaults(
     conceptFields: () => [],
     hasMarkers: false,
     selectedItemName: '',
+    deletable: false,
   },
 )
 
@@ -96,6 +99,7 @@ const _emit = defineEmits<{
   'change-concept-name': [name: string]
   'add-item': []
   'delete-item': [index: number]
+  'delete-node': []
   'move-item-up': [index: number]
   'move-item-down': [index: number]
   'navigate-to-node': [nodeId: string]

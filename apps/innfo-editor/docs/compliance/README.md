@@ -1,108 +1,90 @@
-# format-editor Compliance
+# innfo-editor Compliance
 
 ## Purpose
 
-This document describes how the format-editor application implements the defiNNe and FORMAT specification requirements, and how it validates that models meet those requirements.
+This document describes how the `innfo-editor` application implements the defiNNe / iNNfo
+specification requirements (`specs/v0.2.0/**`), and how it validates that models meet those
+requirements.
 
-## defiNNe Compliance (defiNNe §11)
+## defiNNe / iNNfo Compliance
 
-A document is defiNNe-compliant if ALL of the following hold:
-
-| # | Check | Implementation |
+| # | Requirement | Implementation |
 |---|---|---|
-| 1 | Filename matches level convention | `validateFormatContent` — check `fileName.endsWith('_F.md')` |
-| 2 | `specification_version` in `V_MAJOR-MINOR-PATCH` form | `validateFormatContent` — regex test `VERSION_RE` |
-| 3 | `specification_url` present and resolvable | Frontmatter validation — `spec_url` must be a non-empty string |
-| 4 | `level` present | Frontmatter validation — `fm.level` must be defined |
-| 5 | If level > 0: `parent_spec` object with `name` and `url` | Validated via `validateModel` and `validateFormatContent` — checks `fm.parent_spec` exists with both subfields |
-| 6 | If level ≤ 2: body has required sections | Checked via body parsing — sections for Philosophy, Objectives, Specification, Template, Examples |
-| 7 | If level = 3: body does NOT contain specification sections | Implicit — models use `_F` section syntax only |
-| 8 | Body begins with `> [!NOTE]` | `validateFormatContent` — check `body-note` |
-| 9 | Normative language uses RFC 2119 | Not validated programmatically (advisory) |
+| 1 | Filename follows level convention (`_NN.md`) | `validateFormatContent` — `conv-file-naming` check |
+| 2 | `spec_version` in `V_MAJOR-MINOR-PATCH` form | `validateFormatContent` — `fm-version-format` check (`VERSION_RE`) |
+| 3 | `spec_url` present | Frontmatter validation |
+| 4 | `level` present | `validateFormatContent` — `fm-level` |
+| 5 | If level > 0: `parent_spec` object with `name` and `url` | `validateFormatContent` — `fm-parent`; `validateModel` |
+| 6 | If level = 3: model is lightweight (no `concepts`/`markers`/`matrices` in frontmatter) | Parser — level-3 models reference their template via `parent_spec` |
+| 7 | Body begins with `> [!NOTE]` | `validateFormatContent` — `body-note` |
+| 8 | Normative language uses RFC 2119 | Advisory (not programmatic) |
 
-## FORMAT Compliance
+## Validators (`packages/innfo-core/src/validator`)
 
-The format-editor validates FORMAT compliance through two functions in `packages/format-core/src/validator.ts`:
+### `validateFormatContent` (raw content)
 
-### `validateFormatContent` (full content validator)
+- **fm-level**: model must declare `level: 3`
+- **fm-parent**: model must declare `parent_spec` with `name` and `url`
+- **fm-version / fm-version-format**: `model_version` present and in `V_x-y-z` form
+- **fm-title / fm-spec-version**: `title` and `spec_version` present
+- **body-note**: body starts with `> [!NOTE]`
+- **body-index**: taxonomy index block present (`# _NN index` with `[[wikilinks]]`)
+- **body-concept-sections**: valid `_NN` section markers
+- **body-element-markers**: elements use `* _NN Concept: Name` syntax
+- **body-numbered-list-markers**: warns on numbered `_NN` markers (silently ignored)
+- **body-invalid-bullet-chars**: only `*` and `-` are valid bullets
+- **conv-file-naming / conv-type-field / conv-wikilinks**: naming, OKF `type`, and reference checks
 
-Runs checks against a raw document's frontmatter, body syntax, and conventions:
+### `validateModel` (template-aware)
 
-**Frontmatter checks:**
-- **fm-level**: Model must declare `level: 3`
-- **fm-parent**: Model must declare `parent_spec` with `name` and `url`
-- **fm-version**: `model_version` must be present
-- **fm-version-format**: Version must match `V_x-y-z` format
-- **fm-title**: Title must be present
-- **fm-spec-version**: `spec_version` must be declared
-- **fm-spec-version-match**: (optional) Checks against expected spec version
+- Concept sections must correspond to template concepts (error if unknown)
+- Field values validated against template field schemas (`select` options, etc.)
+- Matrix names must be declared in the template (warning if not)
+- **Matrix cell values must belong to the matrix's declared `values` set** (R-MM-08) —
+  the empty cell `-` and the boolean marker `X` are always accepted (warning otherwise)
+- Marker usage validated against template markers
 
-**Body syntax checks:**
-- **body-note**: Document must start with `> [!NOTE]`
-- **body-index**: Taxonomy index block must be present (`# _F index`)
-- **body-concept-sections**: Valid `_F` section markers
-- **body-element-markers**: Elements use `* _F Concept: Name` syntax
-- **body-numbered-list-markers**: Warns on numbered `_F` markers (silently ignored by parser)
-- **body-invalid-bullet-chars**: Only `*` and `-` are valid bullet characters
+## Matrix Declarations (R-MM-08)
 
-**Convention checks:**
-- **conv-file-naming**: File must end with `_F.md`
-- **conv-type-field**: Distributed `_F.md` files should include `type` field
-- **conv-wikilinks**: All `[[wikilinks]]` should reference existing concepts
+A matrix declaration lives in the template frontmatter and may carry:
 
-### `validateModel` (model-level validator)
-
-Validates a `ParsedModel` against its template:
-
-- Checks that all concept sections correspond to template-defined concepts
-- Validates field values against template field schemas (e.g. `select` type options)
-- Validates matrix declarations against template matrix declarations
-- Validates marker usage against template marker definitions
-
-## Resolver Protocol
-
-The parent chain resolver (`packages/format-core/src/resolver.ts`) implements the spec resolver protocol defined in defiNNe (§3):
-
-1. **Entry point**: `resolveParentChain(parentUrl, parentName, basePath, options)`
-2. **Cache-first**: Looks for cached spec files in `{basePath}/specs/{name}_F.md`
-3. **Download-on-miss**: Downloads from `parent_spec.url` if not cached
-4. **Recursive**: Reads downloaded spec's `parent_spec` and repeats until level 0
-5. **Max depth**: Configurable via `options.maxDepth` (default: 10)
-
-The resolver constructs a `SpecCache` with:
-- `specs`: `Map<string, SpecDocument>` — all resolved specs keyed by name
-- `chain`: `string[]` — ordered list of resolved spec names from leaf to root
-
-## Parser Normalization
-
-The parser (`packages/format-core/src/parser.ts`) includes backward-compatibility normalization:
-
-```typescript
-// Normalize legacy parent → parent_spec (defiNNe V_0-1-0 era)
-if ((parsed as any).parent && !(parsed as any).parent_spec) {
-  (parsed as any).parent_spec = (parsed as any).parent;
-  delete (parsed as any).parent;
-}
+```yaml
+matrices:
+  - name: "Journey map"
+    source: "Journey"
+    target: "Emotions"
+    widget: "set"                      # optional; inferred from `values` when absent
+    values: [Max, Very High, High]     # allowed cell values
+    description: "Brief explanation."  # rendered in the matrices view
 ```
 
-This ensures that archived specs (V_0-1-0 and earlier) using the legacy `parent:` field still parse correctly when loaded by the format-editor.
+The editor resolves the widget from an explicit `widget`/`widgetType`, else infers it from
+`values` (`1` value → `boolean`, numeric set → `scale`, multi-value set → `set`, none → `text`).
+Cell values are rendered with the matching interactive widget in `MatricesGrid.vue`.
+
+## Spec Resolution & Caching
+
+The parent chain resolver (`src/services/SpecResolverService.ts`) implements the resolver
+protocol from defiNNe:
+
+1. **Cache-first**: looks for the template in the workspace `.specs/` directory
+2. **Download-on-miss**: fetches `parent_spec.url` and persists to `.specs/`
+3. **Recursive**: follows `parent_spec` until level 0
+4. Template matrix declarations are propagated to the model root node as `__matrix_defs`
+   (via `normalizeMatrixDecl`), so the matrices view, matrix summaries and the
+   metamatrix config share one source of truth.
+
+> When a template version changes, stale `.specs/` caches and the repo `.spec-cache/`
+> must be refreshed (see version bump procedure).
 
 ## Serialization
 
-The `serializeModel` function in `packages/format-core/src/parser.ts` writes the `parent_spec:` key in YAML output. When models are serialized and re-parsed, the `parent_spec` field is preserved through the round trip.
+`serializeModel` (in `packages/innfo-core`) preserves matrix declarations including
+`values`, `widget`/`widgetType`, `description`, `label`, `min_color`, `max_color`, and
+`params` (legacy). Round-trips through parse → serialize → parse are lossless for these fields.
 
-## Caching
+## Versioning
 
-Resolved specs are cached in `{basePath}/specs/` using the spec name as filename:
-- Template specs: `{name}_FORMAT.md`
-- FORMAT specs: `{name}_FORMAT.md`
-- defiNNe specs: `{name}_FORMAT.md`
+Specs are immutable once published (`specs/v0.2.0/**`). Corrections ship as a new patch
+version (e.g. `business_V_0-2-1`), and `specs/latest/**` is manually re-synced.
 
-On subsequent loads, the resolver checks the cache first and only downloads if the file is missing.
-
-## Version Handling
-
-- The format-editor tracks `spec_version` in the frontmatter of every document.
-- The optional `expectedSpecVersion` parameter in `validateFormatContent` enables version-specific validation.
-- When a model's `parent_spec` version changes, the resolver detects the mismatch (new URL vs cached file) and downloads the new parent.
-- Spec versions are immutable — once published, a spec file is never modified in-place.

@@ -12,6 +12,14 @@ concepts:
     type: "text"
     color: "blue"
     weight: 90
+    fields:
+      - name: "status"
+        type: "select"
+        options: ["Ideation", "MVP", "Validation", "Early Revenue", "Scaling"]
+        description: "Current stage or maturity level of the business."
+      - name: "inspiration"
+        type: "string"
+        description: "Original inspiration or origin story behind the business idea."
   - name: "Market"
     icon: "store"
     type: "category"
@@ -22,6 +30,10 @@ concepts:
     type: "weight"
     color: "blue"
     weight: 80
+    fields:
+      - name: "relationship_model"
+        type: "string"
+        description: "Strategic relationship model with the stakeholder."
   - name: "Segments"
     icon: "pie-chart"
     type: "weight"
@@ -32,11 +44,13 @@ concepts:
     type: "weight"
     color: "blue"
     weight: 80
-  - name: "Persona"
-    icon: "user-round"
-    type: "text"
-    color: "blue"
-    weight: 40
+    fields:
+      - name: "persona_notes"
+        type: "markdown_inline"
+        description: "Qualitative buyer persona details, background, and demographics."
+      - name: "relationship_type"
+        type: "string"
+        description: "Customer relationship model (e.g. Automated, Dedicated, Self-service, Community)."
   - name: "Segmentation"
     icon: "split"
     type: "weight"
@@ -82,11 +96,6 @@ concepts:
     type: "weight"
     color: "blue"
     weight: 70
-  - name: "Relationships"
-    icon: "handshake"
-    type: "text"
-    color: "blue"
-    weight: 50
   - name: "Perceptions"
     icon: "eye"
     type: "weight"
@@ -112,21 +121,21 @@ concepts:
     type: "category"
     color: "blue"
     weight: 90
-  - name: "Products and services"
-    icon: "package"
+  - name: "Offerings"
+    icon: "shopping-bag"
     type: "weight"
     color: "blue"
     weight: 80
-  - name: "Portfolio"
-    icon: "briefcase"
-    type: "text"
-    color: "blue"
-    weight: 80
-  - name: "Components"
-    icon: "puzzle"
-    type: "weight"
-    color: "blue"
-    weight: 20
+    fields:
+      - name: "pricing_model"
+        type: "string"
+        description: "Commercial pricing model, price points, and tier structures."
+      - name: "brochure_file"
+        type: "file"
+        description: "Commercial brochure or collateral document."
+      - name: "components_list"
+        type: "string"
+        description: "Key product/service components or modular features."
   - name: "Features"
     icon: "sparkles"
     type: "weight"
@@ -137,46 +146,26 @@ concepts:
     type: "steps"
     color: "blue"
     weight: 20
-  - name: "Pricing"
-    icon: "tag"
-    type: "text"
-    color: "blue"
-    weight: 40
-  - name: "Offerings"
-    icon: "shopping-bag"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Brochure"
-    icon: "book-open"
-    type: "text"
-    color: "blue"
-    weight: 40
   - name: "Marketing"
     icon: "megaphone"
     type: "category"
     color: "blue"
     weight: 60
-  - name: "Naming"
-    icon: "type"
-    type: "text"
-    color: "blue"
-    weight: 40
   - name: "Branding"
     icon: "palette"
     type: "text"
     color: "blue"
     weight: 40
-  - name: "Visual identity"
-    icon: "image"
-    type: "text"
-    color: "blue"
-    weight: 10
-  - name: "Logo"
-    icon: "shapes"
-    type: "text"
-    color: "blue"
-    weight: 10
+    fields:
+      - name: "brand_name"
+        type: "string"
+        description: "Official brand name and naming rationale."
+      - name: "logo_asset"
+        type: "image"
+        description: "Brand logo image asset."
+      - name: "style_guide"
+        type: "string"
+        description: "Visual identity guidelines, color palette, and design tokens."
   - name: "Media plan"
     icon: "newspaper"
     type: "text"
@@ -217,26 +206,11 @@ concepts:
     type: "category"
     color: "blue"
     weight: 60
-  - name: "Inspiration"
-    icon: "sparkles"
-    type: "weight"
-    color: "blue"
-    weight: 30
   - name: "Opportunity"
     icon: "door-open"
     type: "weight"
     color: "blue"
     weight: 40
-  - name: "Business status"
-    icon: "heart-pulse"
-    type: "text"
-    color: "blue"
-    weight: 70
-  - name: "Challenges"
-    icon: "mountain"
-    type: "weight"
-    color: "blue"
-    weight: 20
   - name: "Business objectives"
     icon: "target"
     type: "category"
@@ -287,31 +261,37 @@ concepts:
     type: "category"
     color: "blue"
     weight: 70
-  - name: "Goals"
-    icon: "goal"
+  - name: "Persons"
+    icon: "user-check"
     type: "weight"
     color: "blue"
-    weight: 30
-  - name: "Skills"
-    icon: "award"
-    type: "weight"
-    color: "blue"
-    weight: 30
-  - name: "Contributions"
-    icon: "gift"
-    type: "weight"
-    color: "blue"
-    weight: 10
-  - name: "Compensations"
-    icon: "hand-coins"
-    type: "weight"
-    color: "blue"
-    weight: 10
+    weight: 80
+    fields:
+      - name: "position_ref"
+        type: "reference"
+        target_concepts: ["Positions"]
+        description: "Reference to the Position held by the team member."
+      - name: "compensation"
+        type: "string"
+        description: "Compensation structure, salary, equity, or incentives."
+      - name: "contributions"
+        type: "string"
+        description: "Primary contributions, role dedication, and key deliverables."
   - name: "Positions"
     icon: "contact"
     type: "weight"
     color: "blue"
     weight: 20
+  - name: "Skills"
+    icon: "award"
+    type: "weight"
+    color: "blue"
+    weight: 30
+  - name: "Goals"
+    icon: "goal"
+    type: "weight"
+    color: "blue"
+    weight: 30
   - name: "Project plan"
     icon: "calendar-range"
     type: "category"
@@ -342,26 +322,26 @@ concepts:
     type: "weight"
     color: "blue"
     weight: 65
-  - name: "Life Time Value"
-    icon: "repeat"
-    type: "text"
-    color: "blue"
-    weight: 35
   - name: "Costs"
     icon: "receipt"
     type: "weight"
     color: "blue"
     weight: 50
-  - name: "Customer Acquisition Cost"
-    icon: "user-plus"
-    type: "text"
-    color: "blue"
-    weight: 35
   - name: "Unit economics"
     icon: "calculator"
     type: "text"
     color: "blue"
     weight: 25
+    fields:
+      - name: "cac"
+        type: "string"
+        description: "Customer Acquisition Cost (CAC)."
+      - name: "ltv"
+        type: "string"
+        description: "Customer Life Time Value (LTV)."
+      - name: "payback_months"
+        type: "string"
+        description: "Payback period in months."
   - name: "Funding sources"
     icon: "landmark"
     type: "weight"
@@ -407,6 +387,11 @@ concepts:
     type: "weight"
     color: "red"
     weight: 90
+  - name: "Challenges"
+    icon: "mountain"
+    type: "weight"
+    color: "red"
+    weight: 70
   - name: "Suggestions"
     icon: "messages-square"
     type: "weight"

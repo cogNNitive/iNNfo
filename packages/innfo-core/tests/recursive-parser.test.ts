@@ -227,6 +227,24 @@ describe('recursiveParse (index.md-driven)', () => {
       expect(result.rootIds).toHaveLength(1)
       expect(result.nodes[result.rootIds[0]].name).toBe('real-model')
     })
+
+    it('reports an issue when a _NN.md file exists but has invalid frontmatter', async () => {
+      const root = fakeDir('workspace', [
+        [
+          'broken_V_1-0-0_business_NN.md',
+          fakeFile(
+            'broken_V_1-0-0_business_NN.md',
+            'X---\nspec_version: "V_0-2-0"\ntitle: "Broken"\n---\n\n# _NN Business summary\n\ntext',
+          ),
+        ],
+      ])
+
+      const result = await recursiveParse(root)
+      expect(result.rootIds).toHaveLength(0)
+      const brokenIssues = result.issues.filter((i) => i.message.includes('spec_version'))
+      expect(brokenIssues).toHaveLength(1)
+      expect(brokenIssues[0].path).toBe('broken_V_1-0-0_business_NN.md')
+    })
   })
 
   describe('FR-001: Wikilink to non-existent model', () => {
@@ -380,5 +398,40 @@ describe('normalizeSingleModel', () => {
     const { nodes, issues } = normalizeSingleModel(plainMarkdown, 'doc.md', 'doc')
     expect(issues).toHaveLength(0)
     expect(Object.keys(nodes)).toHaveLength(0)
+  })
+
+  it('propagates text-concept content into the root node rawSections', () => {
+    const modelContent = makeModel(
+      'Text Model',
+      `
+# _NN index
+
+* [[Market size]]
+
+# _NN Market size
+
+En España fallecieron 439.146 personas en 2024 (INE).
+
+**TAM:** ~500.000 procesos de reparto anuales.
+`,
+    )
+    const { nodes, issues } = normalizeSingleModel(modelContent, 'text_NN.md', 'text_NN')
+    expect(issues).toHaveLength(0)
+
+    const rootNode = nodes['text_NN']
+    expect(rootNode).toBeDefined()
+    expect(rootNode.rawSections).toBeDefined()
+    expect(rootNode.rawSections!['Market size']).toContain(
+      'En España fallecieron 439.146 personas en 2024 (INE).',
+    )
+  })
+
+  it('reports an issue when a _NN-named file lacks valid iNNfo frontmatter', () => {
+    const broken =
+      'X---\nspec_version: "V_0-1-2"\ntitle: "Broken"\n---\n\n# _NN Business summary\n\ntext'
+    const { nodes, issues } = normalizeSingleModel(broken, 'broken_NN.md', 'broken_NN')
+    expect(Object.keys(nodes)).toHaveLength(0)
+    expect(issues.some((i) => i.message.includes('spec_version'))).toBe(true)
+    expect(issues.some((i) => i.path === 'broken_NN.md')).toBe(true)
   })
 })

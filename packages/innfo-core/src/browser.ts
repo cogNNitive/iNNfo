@@ -12,6 +12,8 @@ export {
   extractAnalysis,
 } from './parser'
 export { validateModel, validateFormatContent, validateFormatSyntax } from './validator'
+export { deriveMatrixWidgetType, normalizeMatrixDecl } from './matrix'
+export type { MatrixWidgetType } from './matrix'
 export * from './identity'
 export * from './metamodel'
 export * from './fs-types'

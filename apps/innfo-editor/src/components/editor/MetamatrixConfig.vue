@@ -49,7 +49,17 @@
             <th
               class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
             >
+              Values (; separated)
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+            >
               Parameters
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+            >
+              Description
             </th>
             <th
               class="px-4 py-3 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
@@ -108,9 +118,25 @@
             </td>
             <td class="px-4 py-2.5">
               <input
+                :value="(row.values ?? []).join('; ')"
+                @input="onValuesInput(row, ($event.target as HTMLInputElement).value)"
+                placeholder="e.g. Max; High; Low"
+                class="border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-slate-800 dark:text-slate-300"
+              />
+            </td>
+            <td class="px-4 py-2.5">
+              <input
                 v-model="row.params"
                 @input="saveDefs"
-                placeholder="e.g. min:1;max:5 or Low;Medium;High"
+                placeholder="e.g. min:1;max:5 or colWidth:140"
+                class="border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-slate-800 dark:text-slate-300"
+              />
+            </td>
+            <td class="px-4 py-2.5">
+              <input
+                v-model="row.description"
+                @input="saveDefs"
+                placeholder="Brief explanation of what the matrix represents"
                 class="border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-slate-800 dark:text-slate-300"
               />
             </td>
@@ -126,7 +152,7 @@
           </tr>
           <tr v-if="!matrixDefs.length">
             <td
-              colspan="7"
+              colspan="9"
               class="text-center text-slate-400 dark:text-slate-500 text-xs italic py-6"
             >
               No relational matrices configured. Click "+ Add New Matrix Config" to define one.
@@ -153,14 +179,17 @@ interface MatrixDef {
   target: string
   widgetType: 'boolean' | 'cycle' | 'scale' | 'set' | 'text'
   params: string
+  values?: string[]
+  description?: string
   min_color?: string
   max_color?: string
   label?: string
 }
 
 const rootNode = computed(() => {
-  if (modelStore.rootIds.length === 0) return null
-  return modelStore.getNode(modelStore.rootIds[0])
+  const nonSpecId = modelStore.rootIds.find((id) => !id.startsWith('spec:'))
+  if (!nonSpecId) return null
+  return modelStore.getNode(nonSpecId)
 })
 
 const matrixDefs = computed<MatrixDef[]>({
@@ -188,18 +217,26 @@ const allTypes = computed(() => {
 const instantiableTypes = computed(() => allTypes.value)
 
 function saveDefs() {
-  const rootId = modelStore.rootIds[0]
-  if (!rootId) return
+  const root = rootNode.value
+  if (!root) return
   // Read current defs from the reactive computed
-  const raw = rootNode.value?.fields[MATRIX_DEFS_KEY]?.value
+  const raw = root.fields[MATRIX_DEFS_KEY]?.value
   if (raw) {
-    commitFieldValue(modelStore, rootId, MATRIX_DEFS_KEY, raw, { kind: 'user', id: 'anonymous' })
+    commitFieldValue(modelStore, root.id, MATRIX_DEFS_KEY, raw, { kind: 'user', id: 'anonymous' })
   }
 }
 
+function onValuesInput(row: MatrixDef, rawValue: string): void {
+  row.values = rawValue
+    .split(/[;,]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+  saveDefs()
+}
+
 function addMatrixRow() {
-  const rootId = modelStore.rootIds[0]
-  if (!rootId) return
+  const root = rootNode.value
+  if (!root) return
   const current = matrixDefs.value ? [...matrixDefs.value] : []
   const newDef: MatrixDef = {
     name: `New Matrix ${current.length + 1}`,
@@ -210,14 +247,14 @@ function addMatrixRow() {
     label: '',
   }
   current.push(newDef)
-  commitFieldValue(modelStore, rootId, MATRIX_DEFS_KEY, current, { kind: 'user', id: 'anonymous' })
+  commitFieldValue(modelStore, root.id, MATRIX_DEFS_KEY, current, { kind: 'user', id: 'anonymous' })
 }
 
 function removeMatrixRow(index: number) {
-  const rootId = modelStore.rootIds[0]
-  if (!rootId) return
+  const root = rootNode.value
+  if (!root) return
   const current = matrixDefs.value ? [...matrixDefs.value] : []
   current.splice(index, 1)
-  commitFieldValue(modelStore, rootId, MATRIX_DEFS_KEY, current, { kind: 'user', id: 'anonymous' })
+  commitFieldValue(modelStore, root.id, MATRIX_DEFS_KEY, current, { kind: 'user', id: 'anonymous' })
 }
 </script>

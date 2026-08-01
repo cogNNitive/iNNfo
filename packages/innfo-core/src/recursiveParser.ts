@@ -3,6 +3,7 @@ import type { ElementNode, ParsedModel, ModelNode, FieldValue, LocalMetamodel } 
 import { IdentityRegistry } from './identity'
 import type { DirectoryHandleLike } from './fs-types'
 import type { ModelDriver } from './driver'
+import { normalizeMatrixDecl } from './matrix'
 
 const INNFO_FILE_SUFFIX = '.md'
 const INDEX_MD = 'index.md'
@@ -330,8 +331,20 @@ export function normalizeSingleModel(
     return { nodes: ctx.nodes, issues: ctx.issues }
   }
 
-  // Skip files without iNNfo frontmatter — not a model (§2.1)
+  // Skip files without iNNfo frontmatter — not a model (§2.1).
+  // When the filename follows the `_NN` convention, surface the problem so an
+  // "empty folder" report isn't misleading: the file was found but could not
+  // be parsed as a model (e.g. broken YAML delimiters).
   if (!parsed.frontmatter.spec_version) {
+    const isNnNamed =
+      refName.toLowerCase().endsWith('_nn') || refPath.toLowerCase().endsWith('_nn.md')
+    if (isNnNamed) {
+      ctx.issues.push({
+        path: refPath,
+        message:
+          'File uses the _NN naming convention but has no valid iNNfo frontmatter (missing spec_version) — skipped',
+      })
+    }
     return { nodes: ctx.nodes, issues: ctx.issues }
   }
 
@@ -351,7 +364,7 @@ export function normalizeSingleModel(
     markers: {},
     relationships: [],
     assetMode,
-    rawSections: {},
+    rawSections: parsed.rawSections ?? {},
     rawContent: content,
     localMetamodel: toLocalMetamodel(parsed),
     sourceMode: 'parsed',
@@ -378,13 +391,7 @@ export function normalizeSingleModel(
   const fmMatrices = (parsed.frontmatter as any)?.matrices
   if (Array.isArray(fmMatrices) && fmMatrices.length > 0) {
     rootNode.fields['__matrix_defs'] = {
-      value: fmMatrices.map((m: any) => ({
-        name: m.name,
-        source: m.source,
-        target: m.target,
-        widgetType: m.widgetType || 'text',
-        params: m.params || '',
-      })),
+      value: fmMatrices.map((m: any) => normalizeMatrixDecl(m)),
       provenance: { author: { kind: 'system', id: 'parser' }, timestamp: nowIso() },
     }
   }
@@ -567,8 +574,7 @@ export async function recursiveParse(
 
           await parseAndRegisterModel(content, ref.path, ref.name, ctx, elementNameToModel)
         }
-
-        }
+      }
 
       // Add the missing index.md issue as the first warning (downgraded when fallback found models)
       const rootCount = Object.values(ctx.nodes).filter((n) => n.parentId === null).length

@@ -2,7 +2,15 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export type ActiveView =
-  'editor' | 'graph' | 'matrices' | 'info' | 'ai-guide' | 'exports' | 'import' | 'export'
+  | 'editor'
+  | 'graph'
+  | 'matrices'
+  | 'info'
+  | 'ai-guide'
+  | 'exports'
+  | 'import'
+  | 'export'
+  | 'guided-procedure'
 
 export type AiTab = 'guide' | 'import' | 'export'
 

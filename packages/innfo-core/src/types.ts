@@ -37,8 +37,10 @@ export interface MatrixDecl {
   params: string
   /** Values array (V_0-2-0+). When `params` is present without `values`, it is auto-converted (reader tolerance). */
   values?: string[]
-  /** Widget type for matrix cell interaction: 'boolean' | 'cycle' | 'scale' | 'set' | 'text' */
+  /** Widget type for matrix cell interaction: 'boolean' | 'cycle' | 'scale' | 'set' | 'text'. */
   widgetType?: string
+  /** Optional human-readable explanation of what the matrix represents. */
+  description?: string
   /** Min heatmap color (CSS color) */
   min_color?: string
   /** Max heatmap color (CSS color) */

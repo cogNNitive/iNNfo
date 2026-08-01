@@ -217,6 +217,7 @@
             :source="matrix.source"
             :target="matrix.target"
             :label="matrix.label"
+            :value-count="getMatrixValueCount(matrix.name)"
             :selected="uiStore.activeMatrixIndex === idx && uiStore.activeView === 'matrices'"
             :full-width="true"
             interactive
@@ -239,7 +240,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { ModelNode, MetamodelConcept } from '../../model/types'
-import { parseModel, parseFrontmatter } from '@cognnitive/innfo-core'
+import { parseModel, parseFrontmatter, normalizeMatrixDecl } from '@cognnitive/innfo-core'
 import { parseFormatFilename, type SemVer } from '../../utils/version'
 import { resolveEffectiveMetamodel } from '../../model/metamodel'
 import {
@@ -477,6 +478,12 @@ const mergedConcepts = computed<TreeGroup[]>(() => {
     for (const k of kids) {
       subGroups.push(buildTree(k))
     }
+    subGroups.sort((a, b) => {
+      const ta = templateOrder.get(a.name) ?? 99999
+      const tb = templateOrder.get(b.name) ?? 99999
+      if (ta !== tb) return ta - tb
+      return a.name.localeCompare(b.name)
+    })
 
     // A node has content if it has direct elements, a text section, or any descendant has content
     const isPresent = hasContent(name) || subGroups.some((s) => !s.ghost)
@@ -512,13 +519,15 @@ const mergedConcepts = computed<TreeGroup[]>(() => {
     }
   }
 
-  // Stable sort
+  // Stable sort: templateOrder primary, orderedTaxonomyRoots secondary
   const orderedTaxonomyRoots = new Map(taxonomyRoots.map((r, i) => [r, i]))
   items.sort((a, b) => {
+    const ta = templateOrder.get(a.name) ?? 99999
+    const tb = templateOrder.get(b.name) ?? 99999
+    if (ta !== tb) return ta - tb
     const ia = orderedTaxonomyRoots.get(a.name) ?? 99999
     const ib = orderedTaxonomyRoots.get(b.name) ?? 99999
-    if (ia !== ib) return ia - ib
-    return (templateOrder.get(a.name) ?? 999) - (templateOrder.get(b.name) ?? 999)
+    return ia - ib
   })
 
   return items
@@ -574,27 +583,46 @@ function extractMatrixDefs(root: any): any[] {
   if (Array.isArray(defs) && defs.length > 0) return defs
   const raw = root.fields?.matrices?.value
   if (Array.isArray(raw) && raw.length > 0) {
-    return raw.map((m: any) => ({
-      name: m.name,
-      source: m.source,
-      target: m.target,
-      widgetType: m.widgetType || 'text',
-      params: m.params || '',
-    }))
+    return raw.map((m: any) => normalizeMatrixDecl(m))
   }
   return []
 }
 
 const matrixDefs = computed(() => {
   const rootIds = visibleRootIds.value
+  const result: any[] = []
+  const seen = new Set<string>()
+
   for (const id of rootIds) {
     const root = modelStore.getNode(id)
     if (!root) continue
     const defs = extractMatrixDefs(root)
-    if (defs.length > 0) return defs
+    for (const d of defs) {
+      if (!seen.has(d.name)) {
+        seen.add(d.name)
+        result.push(d)
+      }
+    }
   }
-  return []
+  return result
 })
+
+function getMatrixValueCount(matrixName: string): number {
+  let count = 0
+  const prefix = `${matrixName}||`
+  for (const node of Object.values(modelStore.nodes)) {
+    if (!node.fields) continue
+    for (const [key, fv] of Object.entries(node.fields)) {
+      if (key.startsWith(prefix)) {
+        const val = (fv as any)?.value
+        if (val !== undefined && val !== null && val !== '' && val !== '-' && val !== false) {
+          count++
+        }
+      }
+    }
+  }
+  return count
+}
 
 function selectMatrix(idx: number): void {
   emit('select-matrix', idx)
@@ -641,6 +669,7 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
   if (!rootNode) return []
 
   const modelPath = rootNode.source?.path
+  const childIdOrder = new Map((rootNode.childIds ?? []).map((id, i) => [id, i]))
 
   // Collect children per concept type ONLY for this model's nodes
   const childrenByType = new Map<string, ModelNode[]>()
@@ -650,6 +679,15 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
       if (list) list.push(node)
       else childrenByType.set(node.type, [node])
     }
+  }
+
+  // Sort elements within each concept type by document order (childIdOrder)
+  for (const list of childrenByType.values()) {
+    list.sort((a, b) => {
+      const ia = childIdOrder.get(a.id) ?? 99999
+      const ib = childIdOrder.get(b.id) ?? 99999
+      return ia - ib
+    })
   }
 
   // Resolve template concepts specifically for THIS model
@@ -735,6 +773,12 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
     for (const k of kids) {
       subGroups.push(buildTree(k))
     }
+    subGroups.sort((a, b) => {
+      const ta = templateOrder.get(a.name) ?? 99999
+      const tb = templateOrder.get(b.name) ?? 99999
+      if (ta !== tb) return ta - tb
+      return a.name.localeCompare(b.name)
+    })
 
     const isPresent = hasContent(name) || subGroups.some((s) => !s.ghost)
 
@@ -773,13 +817,15 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
     }
   }
 
-  // Stable sort
+  // Stable sort: templateOrder primary, orderedTaxonomyRoots secondary
   const orderedTaxonomyRoots = new Map(taxonomyRoots.map((r, i) => [r, i]))
   items.sort((a, b) => {
+    const ta = templateOrder.get(a.name) ?? 99999
+    const tb = templateOrder.get(b.name) ?? 99999
+    if (ta !== tb) return ta - tb
     const ia = orderedTaxonomyRoots.get(a.name) ?? 99999
     const ib = orderedTaxonomyRoots.get(b.name) ?? 99999
-    if (ia !== ib) return ia - ib
-    return (templateOrder.get(a.name) ?? 999) - (templateOrder.get(b.name) ?? 999)
+    return ia - ib
   })
 
   // Filter out completely empty ghost concepts if ghostMode is 'model' (Complete Only)

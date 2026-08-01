@@ -42,6 +42,27 @@
             Rating: <span class="text-slate-300 font-semibold">{{ getScoreLabel(score) }}</span>
           </div>
 
+          <!-- Possible values scale -->
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500 shrink-0"
+              >Values</span
+            >
+            <div class="flex items-center gap-1 flex-wrap justify-end">
+              <span
+                v-for="level in valueScale"
+                :key="level.value"
+                class="px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-colors"
+                :class="
+                  level.value === score
+                    ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 border-slate-300 dark:border-slate-600'
+                    : 'text-slate-500 border-slate-800'
+                "
+              >
+                {{ level.value }} {{ level.label }}
+              </span>
+            </div>
+          </div>
+
           <!-- Divider -->
           <div class="border-t border-slate-800 my-2"></div>
 
@@ -154,6 +175,13 @@ const getScoreLabel = (score: number) => {
       return 'Not specified'
   }
 }
+
+const valueScale = [
+  { value: 0, label: 'Not set' },
+  { value: 1, label: 'Low' },
+  { value: 2, label: 'Medium' },
+  { value: 3, label: 'High' },
+]
 
 const getActiveDotClass = (markerName: string) => {
   switch (markerName) {

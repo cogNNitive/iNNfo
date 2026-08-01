@@ -36,7 +36,17 @@ describe('Header.vue', () => {
     setActivePinia(createPinia())
   })
 
-  it('renders model metadata from root node fields correctly', () => {
+  it('renders iNNfo Modeler title and version badge', () => {
+    const wrapper = mount(Header)
+    const text = wrapper.text()
+
+    expect(text).toContain('iNNfo Modeler')
+    const versionBadge = wrapper.find('[data-testid="header-version-badge"]')
+    expect(versionBadge.exists()).toBe(true)
+    expect(versionBadge.text()).toContain('v0.1.0')
+  })
+
+  it('does not render Spec, Template, Model pills in header directly', () => {
     const modelStore = useModelStore()
     modelStore.rootIds = ['Root']
     modelStore.nodes = {
@@ -51,26 +61,10 @@ describe('Header.vue', () => {
     const wrapper = mount(Header)
     const text = wrapper.text()
 
-    expect(text).toContain('iNNfo_V_0-1-9_NN.md')
-    expect(text).toContain('CustomTemplate_V_2-0-0')
-    expect(text).toContain('model.md')
-  })
-
-  it('renders fallback values when root node fields are missing', () => {
-    const modelStore = useModelStore()
-    modelStore.rootIds = ['Root']
-    modelStore.nodes = {
-      Root: makeNode('Root', {}),
-    }
-
-    const wrapper = mount(Header)
-    const text = wrapper.text()
-
-    // DEFAULT_INNFO_VERSION = 'V_0-2-0'
-    // DEFAULT_TEMPLATE_NAME = ''
-    // DEFAULT_TEMPLATE_VERSION = 'V_0-1-0'
-    expect(text).toContain('iNNfo_V_0-2-0_NN.md')
-    expect(text).toContain('V_0-1-0')
-    expect(text).toContain('model.md')
+    // Spec, Template, Model pills are moved to ModelInfoPanel
+    expect(text).not.toContain('iNNfo_V_0-1-9_NN.md')
+    expect(text).not.toContain('CustomTemplate_V_2-0-0')
+    const infoButton = wrapper.find('[data-testid="header-info-button"]')
+    expect(infoButton.exists()).toBe(true)
   })
 })

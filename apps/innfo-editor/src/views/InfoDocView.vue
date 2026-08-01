@@ -4,7 +4,9 @@ import { useRouter } from 'vue-router'
 import { normalizeSingleModel } from '@cognnitive/innfo-core'
 import { useModelStore } from '../stores/modelStore'
 import { useWorkspaceStore } from '../stores/workspaceStore'
+import { resolveParentSpecs } from '../services/SpecResolverService'
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
+import { Play, Layout, ExternalLink, FileText, ArrowRight } from 'lucide-vue-next'
 
 const router = useRouter()
 const modelStore = useModelStore()
@@ -16,6 +18,39 @@ const dragOver = ref(false)
 const urlInput = ref('')
 const urlBusy = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const targetMode = ref<'workspace' | 'standalone'>('workspace')
+
+const SAMPLE_BASE = 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level2'
+
+interface SampleOption {
+  name: string
+  template: string
+  description: string
+  url: string
+  supportsStandalone?: boolean
+}
+
+const sampleModels: SampleOption[] = [
+  {
+    name: 'Code Review Process',
+    template: 'procedures',
+    description: 'Hierarchical workflow with FSM step sequence, RACI matrix, and tools.',
+    url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`,
+    supportsStandalone: true,
+  },
+  {
+    name: 'Ghostbusters',
+    template: 'business',
+    description: 'Fictional ghost-catching franchise business model with SWOT & risks.',
+    url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-1-2_business_NN.md`,
+  },
+  {
+    name: 'Engineering Team',
+    template: 'organization',
+    description: 'Organizational chart: reporting lines, roles, and skills matrix.',
+    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`,
+  },
+]
 
 async function loadFile(file: File): Promise<void> {
   error.value = null
@@ -24,12 +59,18 @@ async function loadFile(file: File): Promise<void> {
     const content = await file.text()
     const rootId = file.name.replace(/\.md$/i, '')
 
+    if (targetMode.value === 'standalone' && file.name.includes('procedures')) {
+      // Navigate to standalone procedure view
+      router.push({ name: 'view-procedure' })
+      return
+    }
+
     workspace.reset()
     workspace.isSampleSession = false
 
     const { nodes } = normalizeSingleModel(content, file.name, rootId)
 
-    await modelStore._resolveParentSpecs(nodes, [rootId])
+    await resolveParentSpecs(nodes, [rootId])
     modelStore.setGraph(nodes, [rootId])
 
     workspace.hasParsed = true
@@ -56,17 +97,27 @@ function onDrop(event: DragEvent): void {
   if (file) loadFile(file)
 }
 
-async function loadFromUrl(): Promise<void> {
+async function loadFromUrl(overrideUrl?: string, mode?: 'workspace' | 'standalone'): Promise<void> {
   error.value = null
-  const url = urlInput.value.trim()
+  const url = (overrideUrl || urlInput.value).trim()
+  const effectiveMode = mode || targetMode.value
+
   if (!url) {
     error.value = 'Please enter a valid URL.'
     return
   }
-  try { new URL(url) } catch {
+  try {
+    new URL(url)
+  } catch {
     error.value = 'Invalid URL format.'
     return
   }
+
+  if (effectiveMode === 'standalone') {
+    router.push({ name: 'view-procedure', query: { url } })
+    return
+  }
+
   urlBusy.value = true
   try {
     workspace.reset()
@@ -85,244 +136,159 @@ async function loadFromUrl(): Promise<void> {
     urlBusy.value = false
   }
 }
+
+function openStandaloneSample(sample: SampleOption) {
+  router.push({ name: 'view-procedure', query: { url: sample.url } })
+}
 </script>
 
 <template>
-  <div class="info-doc">
-    <section class="info-doc__card">
-      <h1 class="info-doc__title">cogNNitive — iNNfo Editor</h1>
-      <p class="info-doc__desc">
-        To open your iNNfo document in the cogNNitive editor,
-        drop the file here or click to browse:
-      </p>
+  <div class="info-doc min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 flex flex-col items-center">
+    <div class="max-w-2xl w-full space-y-6">
+      <!-- Main Card -->
+      <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm text-center space-y-5">
+        <div>
+          <span class="px-3 py-1 rounded-full text-2xs font-bold uppercase tracking-wider bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 mb-3 inline-block">
+            cogNNitive &bull; iNNfo Document Hub
+          </span>
+          <h1 class="text-2xl font-black text-slate-900 dark:text-slate-100">
+            Open iNNfo Model Document
+          </h1>
+          <p class="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto mt-1 leading-relaxed">
+            Open your <code>_NN.md</code> document in the full <strong>Workspace Editor</strong> or launch it directly in the <strong>Standalone Procedure Viewer</strong>.
+          </p>
+        </div>
 
-      <div
-        class="info-doc__dropzone"
-        :class="{ 'info-doc__dropzone--over': dragOver, 'info-doc__dropzone--busy': busy }"
-        @dragover.prevent="dragOver = true"
-        @dragleave.prevent="dragOver = false"
-        @drop.prevent="onDrop"
-        @click="fileInputRef?.click()"
-      >
-        <svg class="info-doc__drop-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="17 8 12 3 7 8" />
-          <line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-        <span v-if="busy" class="info-doc__drop-text">Loading&hellip;</span>
-        <span v-else class="info-doc__drop-text">
-          Drop your <strong>_NN.md</strong> file here<br />
-          <span class="info-doc__drop-sub">or click to select one</span>
-        </span>
-      </div>
+        <!-- Mode Toggle Selector -->
+        <div class="flex items-center justify-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/70 rounded-xl max-w-sm mx-auto">
+          <button
+            @click="targetMode = 'workspace'"
+            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            :class="targetMode === 'workspace' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+          >
+            <Layout class="w-3.5 h-3.5 text-blue-500" />
+            <span>Workspace Editor</span>
+          </button>
+          <button
+            @click="targetMode = 'standalone'"
+            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            :class="targetMode === 'standalone' ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+          >
+            <Play class="w-3.5 h-3.5 text-emerald-500" />
+            <span>Standalone Viewer</span>
+          </button>
+        </div>
 
-      <input
-        ref="fileInputRef"
-        type="file"
-        accept=".md"
-        class="info-doc__hidden-input"
-        @change="onFileSelected"
-      />
+        <!-- File Dropzone -->
+        <div
+          class="border-2 border-dashed border-purple-200 dark:border-purple-900/60 rounded-xl p-8 bg-purple-50/40 dark:bg-purple-950/20 hover:border-purple-500 transition-all cursor-pointer flex flex-col items-center gap-2 group"
+          :class="{ 'border-purple-600 bg-purple-100/50': dragOver, 'opacity-50 pointer-events-none': busy }"
+          @dragover.prevent="dragOver = true"
+          @dragleave.prevent="dragOver = false"
+          @drop.prevent="onDrop"
+          @click="fileInputRef?.click()"
+        >
+          <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <FileText class="w-5 h-5" />
+          </div>
+          <div>
+            <span v-if="busy" class="text-xs font-bold text-slate-700 dark:text-slate-300">Loading document&hellip;</span>
+            <span v-else class="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+              Drop your <code class="text-purple-600 dark:text-purple-400">_NN.md</code> file here
+            </span>
+            <span class="text-2xs text-slate-500 dark:text-slate-400">or click to browse your local filesystem</span>
+          </div>
+        </div>
 
-      <p v-if="error" class="info-doc__error" role="alert">{{ error }}</p>
-
-      <div class="info-doc__divider">
-        <span class="info-doc__divider-line"></span>
-        <span class="info-doc__divider-text">or paste a URL</span>
-        <span class="info-doc__divider-line"></span>
-      </div>
-
-      <div class="info-doc__url-row">
         <input
-          v-model="urlInput"
-          type="url"
-          placeholder="https://example.com/model_V_1-0-0_business_NN.md"
-          class="info-doc__url-input"
-          @keydown.enter="loadFromUrl"
+          ref="fileInputRef"
+          type="file"
+          accept=".md"
+          class="hidden"
+          @change="onFileSelected"
         />
-        <button class="info-doc__url-btn" :disabled="urlBusy || !urlInput.trim()" @click="loadFromUrl">
-          {{ urlBusy ? 'Loading' : 'Load' }}
-        </button>
-      </div>
-    </section>
+
+        <p v-if="error" class="p-2.5 rounded-lg text-xs bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/60" role="alert">
+          {{ error }}
+        </p>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-3 text-2xs text-slate-400 uppercase font-bold tracking-wider">
+          <div class="flex-1 h-px bg-slate-200 dark:bg-slate-800"></div>
+          <span>Or load from URL</span>
+          <div class="flex-1 h-px bg-slate-200 dark:bg-slate-800"></div>
+        </div>
+
+        <!-- URL Input Row -->
+        <div class="flex gap-2">
+          <input
+            v-model="urlInput"
+            type="url"
+            placeholder="https://example.com/CodeReviewProcess_V_1-0-0_procedures_NN.md"
+            class="flex-1 px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 text-slate-800 dark:text-slate-200"
+            @keydown.enter="loadFromUrl()"
+          />
+          <button
+            class="px-4 py-2 text-xs font-bold bg-purple-700 hover:bg-purple-800 text-white rounded-lg transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+            :disabled="urlBusy || !urlInput.trim()"
+            @click="loadFromUrl()"
+          >
+            <span>{{ urlBusy ? 'Loading' : 'Load' }}</span>
+            <ArrowRight class="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </section>
+
+      <!-- Samples & Direct Quick Launch Cards -->
+      <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-2">
+            <Play class="w-4 h-4 text-purple-600" />
+            <span>Sample Models &amp; Interactive Extension Viewers</span>
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div
+            v-for="sample in sampleModels"
+            :key="sample.name"
+            class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex flex-col justify-between space-y-3"
+          >
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <span class="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  {{ sample.name }}
+                </span>
+                <span class="px-1.5 py-0.5 rounded text-3xs font-bold bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300">
+                  {{ sample.template }}
+                </span>
+              </div>
+              <p class="text-2xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                {{ sample.description }}
+              </p>
+            </div>
+
+            <div class="flex flex-col gap-1.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+              <button
+                @click="loadFromUrl(sample.url, 'workspace')"
+                class="w-full py-1.5 px-2.5 rounded text-2xs font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <Layout class="w-3 h-3 text-blue-500" />
+                <span>Open in Workspace</span>
+              </button>
+
+              <button
+                v-if="sample.supportsStandalone"
+                @click="openStandaloneSample(sample)"
+                class="w-full py-1.5 px-2.5 rounded text-2xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <Play class="w-3 h-3" />
+                <span>Open Standalone Viewer</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
-
-<style scoped>
-.info-doc {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  padding: 2rem 1rem;
-  font-family: system-ui, sans-serif;
-}
-
-.info-doc__card {
-  width: 100%;
-  max-width: 520px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 2.5rem 2rem;
-  border: 2px solid #4d0e4e;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #f8f0f8 0%, #fff 100%);
-  text-align: center;
-  box-shadow: 0 4px 24px rgba(77, 14, 78, 0.10);
-}
-
-.info-doc__title {
-  margin: 0;
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: #4d0e4e;
-  letter-spacing: -0.01em;
-}
-
-.info-doc__desc {
-  margin: 0;
-  max-width: 380px;
-  color: #555;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.info-doc__dropzone {
-  width: 100%;
-  min-height: 140px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  border: 2px dashed #c8a8c8;
-  border-radius: 14px;
-  background: #fdfafd;
-  cursor: pointer;
-  transition: all 0.15s;
-  padding: 1.5rem;
-}
-
-.info-doc__dropzone:hover {
-  border-color: #4d0e4e;
-  background: #f8f0f8;
-}
-
-.info-doc__dropzone--over {
-  border-color: #4d0e4e;
-  background: #f3e5f5;
-  border-style: solid;
-}
-
-.info-doc__dropzone--busy {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.info-doc__drop-icon {
-  color: #4d0e4e;
-}
-
-.info-doc__drop-text {
-  font-size: 15px;
-  color: #444;
-  line-height: 1.5;
-}
-
-.info-doc__drop-sub {
-  font-size: 12px;
-  color: #999;
-}
-
-.info-doc__hidden-input {
-  position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.info-doc__error {
-  margin: 0;
-  font-size: 13px;
-  color: #b00020;
-  max-width: 100%;
-  padding: 0.5rem 0.75rem;
-  background: #fff0f0;
-  border-radius: 8px;
-  border: 1px solid #ffcdd2;
-}
-
-.info-doc__divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  margin: 0.25rem 0;
-}
-
-.info-doc__divider-line {
-  flex: 1;
-  height: 1px;
-  background: #e0d0e0;
-}
-
-.info-doc__divider-text {
-  font-size: 12px;
-  color: #999;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.info-doc__url-row {
-  display: flex;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.info-doc__url-input {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  font-size: 14px;
-  font-family: system-ui, sans-serif;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  background: #fff;
-  color: #333;
-  outline: none;
-  transition: border-color 0.15s;
-}
-
-.info-doc__url-input:focus {
-  border-color: #4d0e4e;
-  box-shadow: 0 0 0 2px rgba(77, 14, 78, 0.1);
-}
-
-.info-doc__url-btn {
-  padding: 0.5rem 1rem;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  background: #4d0e4e;
-  color: #fff;
-  border: 1px solid #4d0e4e;
-  transition: all 0.15s;
-  font-family: system-ui, sans-serif;
-  white-space: nowrap;
-}
-
-.info-doc__url-btn:hover:not(:disabled) {
-  background: #3a0b3b;
-}
-
-.info-doc__url-btn:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-</style>

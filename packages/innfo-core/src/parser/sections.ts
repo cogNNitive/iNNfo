@@ -30,13 +30,23 @@ export function parseElementMarker(line: string): string | null {
   return null
 }
 
-export function parseConceptSection(conceptName: string, content: string): ElementNode[] {
+export interface ParsedConceptSection {
+  /** Element instances parsed from `* _NN` markers (empty for `text` concepts). */
+  elements: ElementNode[]
+  /** Free-form Markdown content that precedes/falls outside any element
+   *  (the full section body for `text` concepts; leading prose for others). */
+  content: string
+}
+
+export function parseConceptSection(conceptName: string, content: string): ParsedConceptSection {
   const nodes: ElementNode[] = []
   const lines = content.split('\n')
   let current: ElementNode | null = null
   let descriptionLines: string[] = []
+  let leadingLines: string[] = []
   let yamlBuffer: string[] = []
   let inYaml = false
+  let seenElement = false
 
   for (const line of lines) {
     const elemName = parseElementMarker(line)
@@ -48,6 +58,7 @@ export function parseConceptSection(conceptName: string, content: string): Eleme
       current = { type: conceptName, name: elemName, description: '', fields: {}, markers: {} }
       descriptionLines = []
       inYaml = false
+      seenElement = true
       continue
     }
 
@@ -74,7 +85,11 @@ export function parseConceptSection(conceptName: string, content: string): Eleme
     }
 
     if (!line.trim().startsWith('*') && !line.trim().startsWith('-')) {
-      descriptionLines.push(line)
+      if (seenElement) {
+        descriptionLines.push(line)
+      } else {
+        leadingLines.push(line)
+      }
     }
   }
 
@@ -83,7 +98,10 @@ export function parseConceptSection(conceptName: string, content: string): Eleme
     nodes.push(current)
   }
 
-  return nodes
+  return {
+    elements: nodes,
+    content: leadingLines.join('\n').trim(),
+  }
 }
 
 export function parseMatrixSection(content: string, _matrixName: string): MatrixCell[] {

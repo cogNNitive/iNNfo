@@ -39,6 +39,25 @@ Validation runs automatically on every parse via `@cognnitive/innfo-core`. A pas
 - **GraphViewer** — node and relationship graph visualization of the model.
 - **MatricesGrid** / **MetamatrixConfig** — evaluable matrices between concepts.
 - **ModelInfoPanel** — workspace and metamodel inspection.
+- **GuidedProcedureView** — interactive step-by-step FSM execution engine for `Procedures` models.
+
+## Template Extensions Architecture
+
+The editor features a decoupled **Domain Extension Architecture**:
+- Each level 2 template (e.g. `procedures_V_0-2-0`) can define its own extension in its specification directory (`specs/v0.2.0/level2/procedures/extension/`).
+- **Manifest (`manifest.json`)**: Declares views, widgets, and target concepts provided by the template extension.
+- **Pure Domain Logic (`useProcedureFSM.ts`)**: Decoupled state machine logic operating on a pure node map.
+- **Extension Registry (`registry.ts`)**: Resolves and dynamically mounts extension views based on model `parent_spec`.
+- **Adapters**:
+  - `workspaceAdapter.ts`: Connects the extension to the full workspace stores (`modelStore` & `uiStore`).
+  - `standaloneAdapter.ts`: Connects the extension to a lightweight model graph parsed from a URL or raw Markdown.
+
+## Standalone Procedure Viewer
+
+Models using template extensions can be executed and visualized in **Standalone Mode** without opening the full IDE workspace:
+- **Route**: `/view/procedure` (or `/standalone/procedure`).
+- **URL Parameter**: Pass `?url=<RAW_MD_URL>` (e.g. `http://localhost:5173/app/view/procedure?url=https://raw.githubusercontent.com/.../CodeReviewProcess_V_1-0-0_procedures_NN.md`).
+- **Features**: Full FSM state derivation, step sequence navigation, sub-steps progress tracking, RACI accountability matrix inspection, and artifact I/O mapping in a clean, full-screen interface.
 
 ## AI Workflow Modal
 

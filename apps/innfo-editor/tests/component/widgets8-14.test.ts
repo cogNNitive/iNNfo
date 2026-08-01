@@ -293,10 +293,9 @@ describe('MarkdownWidget (C.14)', () => {
     expect(wrapper.html()).toContain('<em>italic</em>')
   })
 
-  it('renders textarea in edit mode', () => {
+  it('renders editor component in edit mode', () => {
     const wrapper = mount(MarkdownWidget, { props: { modelValue: '# Hello' } })
-    expect(wrapper.find('textarea').exists()).toBe(true)
-    expect((wrapper.find('textarea').element as HTMLTextAreaElement).value).toBe('# Hello')
+    expect(wrapper.find('.minimal-markdown-editor').exists()).toBe(true)
   })
 
   it('shows formatting toolbar in edit mode', () => {
@@ -305,12 +304,6 @@ describe('MarkdownWidget (C.14)', () => {
     expect(toolbar.exists()).toBe(true)
     const btns = toolbar.findAll('button')
     expect(btns.length).toBeGreaterThanOrEqual(4)
-  })
-
-  it('emits update:modelValue on textarea input', async () => {
-    const wrapper = mount(MarkdownWidget, { props: { modelValue: 'hello' } })
-    await wrapper.find('textarea').setValue('world')
-    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['world'])
   })
 
   it('shows empty state in read mode when no value', () => {

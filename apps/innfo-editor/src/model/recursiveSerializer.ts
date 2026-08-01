@@ -22,6 +22,11 @@ function serializeNodeContent(node: ModelNode): {
     throw new Error(`Node "${node.id}" has no rawContent to serialize from`)
   }
   const parsed = parseModel(node.rawContent)
+  // Apply any edited `text`-concept sections (rawSections) onto the parsed
+  // model so they round-trip back to disk.
+  if (node.rawSections && Object.keys(node.rawSections).length > 0) {
+    parsed.rawSections = { ...(parsed.rawSections ?? {}), ...node.rawSections }
+  }
   const serialized = serializeModel(parsed)
   const fidelity: 'exact' | 'canonical' = serialized === node.rawContent ? 'exact' : 'canonical'
   if (fidelity === 'canonical') {

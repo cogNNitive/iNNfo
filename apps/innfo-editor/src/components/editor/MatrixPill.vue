@@ -10,20 +10,37 @@
     <IconRenderer
       :icon="resolvedSourceIcon"
       custom-class="shrink-0 w-3.5 h-3.5"
-      :class="sourceAccent"
+      :class="[sourceAccent, isGhost ? 'opacity-60' : '']"
     />
     <span
       v-if="showSourceTarget && source && target"
-      class="truncate min-w-0 leading-tight flex items-center gap-1"
+      class="truncate min-w-0 leading-tight flex items-center gap-1 flex-1"
+      :class="isGhost ? 'italic' : ''"
     >
-      <span :class="sourceText">{{ source }}</span>
+      <span :class="[sourceText, isGhost ? 'opacity-70 font-normal' : '']">{{ source }}</span>
       <span v-if="label" class="text-xs text-slate-400 dark:text-slate-500 font-normal italic">{{
         label
       }}</span>
       <span class="text-slate-300 dark:text-slate-600 font-normal">&rarr;</span>
-      <span :class="targetText">{{ target }}</span>
+      <span :class="[targetText, isGhost ? 'opacity-70 font-normal' : '']">{{ target }}</span>
     </span>
-    <span v-else class="truncate min-w-0 leading-tight">{{ name }}</span>
+    <span
+      v-else
+      class="truncate min-w-0 leading-tight flex-1"
+      :class="isGhost ? 'italic opacity-70' : ''"
+    >
+      {{ name }}
+    </span>
+
+    <span
+      v-if="valueCount !== undefined"
+      class="text-2xs px-1.5 py-0.5 rounded-full shrink-0 font-medium tabular-nums ml-auto"
+      :class="countBadgeClasses"
+      :data-testid="'matrix-pill-count-' + name"
+    >
+      {{ valueCount }}
+    </span>
+
     <ChevronRight
       v-if="interactive"
       class="shrink-0 w-3.5 h-3.5 transition-colors"
@@ -47,11 +64,14 @@ const props = withDefaults(
     source?: string
     target?: string
     label?: string
+    description?: string
     interactive?: boolean
     selected?: boolean
     fullWidth?: boolean
     showSourceTarget?: boolean
     as?: string
+    valueCount?: number
+    ghost?: boolean
   }>(),
   {
     interactive: false,
@@ -60,12 +80,20 @@ const props = withDefaults(
     showSourceTarget: false,
     label: '',
     as: 'div',
+    valueCount: undefined,
+    ghost: undefined,
   },
 )
 
 defineEmits<{
   (e: 'click', event: MouseEvent): void
 }>()
+
+const isGhost = computed(() => {
+  if (props.ghost !== undefined) return props.ghost
+  if (props.valueCount !== undefined) return props.valueCount === 0
+  return false
+})
 
 // Resolve concept icon from modelStore nodes by type
 function getConceptIcon(typeName: string | undefined): string {
@@ -126,12 +154,28 @@ const chevronClasses = computed(() => {
 })
 
 const tooltipText = computed(() => {
+  let countStr = ''
+  if (props.valueCount !== undefined) {
+    countStr = props.valueCount === 1 ? ' (1 value)' : ` (${props.valueCount} values)`
+  }
   if (props.showSourceTarget && props.source && props.target) {
     let t = `${props.name} \u2014 ${props.source} \u2192 ${props.target}`
     if (props.label) t += ` (${props.label})`
-    return t
+    if (props.description) t += ` \u2014 ${props.description}`
+    return t + countStr
   }
-  return props.name
+  if (props.description) return `${props.name} \u2014 ${props.description}` + countStr
+  return props.name + countStr
+})
+
+const countBadgeClasses = computed(() => {
+  if (isGhost.value) {
+    return 'text-slate-400 dark:text-slate-500 italic bg-slate-100/80 dark:bg-slate-800/80 border border-dashed border-slate-200 dark:border-slate-700'
+  }
+  if (props.selected) {
+    return 'bg-primary/20 text-primary dark:text-primary-300 font-semibold'
+  }
+  return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold'
 })
 
 const pillClasses = computed(() => {
@@ -143,15 +187,34 @@ const pillClasses = computed(() => {
   ]
 
   if (props.selected) {
-    return [...base, 'bg-primary/10 text-primary border border-primary/30']
+    return [
+      ...base,
+      'bg-primary/10 text-primary border',
+      isGhost.value ? 'border-dashed border-primary/40' : 'border-primary/30',
+    ]
   }
 
   if (props.interactive) {
+    if (isGhost.value) {
+      return [
+        ...base,
+        'bg-slate-50/50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border border-dashed border-slate-300 dark:border-slate-700/80',
+        'hover:bg-primary/5 hover:text-primary hover:border-primary/30',
+        'cursor-pointer active:scale-[0.99] group opacity-80',
+      ]
+    }
     return [
       ...base,
       'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700',
       'hover:bg-primary/5 hover:text-primary hover:border-primary/30',
       'cursor-pointer active:scale-[0.99] group',
+    ]
+  }
+
+  if (isGhost.value) {
+    return [
+      ...base,
+      'text-slate-400 dark:text-slate-500 border border-dashed border-slate-300 dark:border-slate-700 opacity-75',
     ]
   }
 

@@ -1,5 +1,38 @@
 ﻿# Changelog
 
+## v0.2.1 (2026-08-01)
+
+### Business template patch — `business_V_0-2-1`
+- Added per-matrix `description`, `widget` and per-matrix `values` to the business template
+  matrix declarations (`specs/v0.2.1/level2/business/business_V_0-2-1_NN.md`). The
+  Functions-Positions Matrix is now a boolean assignment matrix (`values: [Assumes]`);
+  evaluative matrices keep the 9-point `set`.
+- `specs/v0.2.0/**` stays frozen; `specs/latest/level2/business/business_NN.md` re-synced.
+- New `specs/v0.2.1/INDEX.md` + Ghostbusters sample pinned to `business_V_0-2-1`.
+
+### Core (`@cognnitive/innfo-core`)
+- `MatrixDecl` gains `description`; YAML reader tolerates `widget` → `widgetType`
+  (R-MM-08).
+- `serializeModel` now round-trips matrix `values`, `widget`/`widgetType`,
+  `description`, `label`, `min_color`, `max_color` (previously dropped).
+- New `deriveMatrixWidgetType` / `normalizeMatrixDecl` helpers (widget inference from
+  `values`: 1 value → `boolean`, numeric → `scale`, multi → `set`).
+- `validateModel` validates matrix cell values against the declared `values` set
+  (`-` and `X` always accepted; out-of-set values produce a warning).
+- `recursiveParser` `__matrix_defs` propagation now carries `values`/`description`
+  and the inferred widget.
+
+### Editor (`@cognnitive/innfo-editor`)
+- Fixed "Empty → Empty text" matrix header: concept pills now render source/target
+  names (`hide-empty` support in `BlockPill`).
+- Matrix cells use the declared `values` as the `set`/`scale` widget options; out-of-set
+  values (e.g. legacy `X`) are still displayed.
+- Matrix `description` rendered under the grid header and in the matrix pill tooltip.
+- `MetamatrixConfig` edits `values` and `description`.
+- `BlockMatrixSummary` / `BlockSheet` read matrix definitions from `__matrix_defs`
+  (template source) instead of the model's own frontmatter.
+- Spec resolver and matrix def propagation unified via `normalizeMatrixDecl`.
+
 ## v0.2.0 (2026-07-03)
 
 ### BREAKING: Renamed FORMAT → iNNfo

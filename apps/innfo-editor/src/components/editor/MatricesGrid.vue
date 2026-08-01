@@ -31,6 +31,8 @@
               :source="matrix.source"
               :target="matrix.target"
               :label="matrix.label"
+              :description="matrix.description"
+              :value-count="getMatrixValueCount(matrix.name)"
               :selected="activeMatrixIndex === idx"
               :full-width="true"
               interactive
@@ -65,15 +67,35 @@
             class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider"
             >Matrix:</span
           >
-          <BlockPill kind="concept" :concept-type="activeMatrix.source" />
+          <BlockPill
+            kind="concept"
+            :concept-type="activeMatrix.source"
+            :name="activeMatrix.source"
+            :icon="getConceptMeta(activeMatrix.source).icon"
+            :color="getConceptMeta(activeMatrix.source).color"
+            hide-empty
+          />
           <span class="text-slate-400 dark:text-slate-500">&rarr;</span>
-          <BlockPill kind="concept" :concept-type="activeMatrix.target" />
+          <BlockPill
+            kind="concept"
+            :concept-type="activeMatrix.target"
+            :name="activeMatrix.target"
+            :icon="getConceptMeta(activeMatrix.target).icon"
+            :color="getConceptMeta(activeMatrix.target).color"
+            hide-empty
+          />
           <Badge class="text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400">{{
             activeMatrix.widgetType
           }}</Badge>
         </div>
+      </div>
 
-
+      <!-- Matrix description -->
+      <div
+        v-if="activeMatrix.description"
+        class="mb-3 px-3 py-2 rounded-md bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400"
+      >
+        {{ activeMatrix.description }}
       </div>
 
       <!-- Value Distribution Card -->
@@ -105,15 +127,29 @@
         >
           <!-- Corner cell -->
           <div
-            class="shrink-0 flex items-center gap-1 px-4 py-3 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs"
-            :style="{ width: FIRST_COL_WIDTH + 'px', minWidth: FIRST_COL_WIDTH + 'px' }"
+            class="shrink-0 flex items-center gap-1 px-4 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs overflow-visible"
+            :style="{ width: FIRST_COL_WIDTH + 'px', minWidth: FIRST_COL_WIDTH + 'px', height: HEADER_HEIGHT + 'px' }"
           >
-            <BlockPill kind="concept" :concept-type="activeMatrix.source" />
+            <BlockPill
+              kind="concept"
+              :concept-type="activeMatrix.source"
+              :name="activeMatrix.source"
+              :icon="getConceptMeta(activeMatrix.source).icon"
+              :color="getConceptMeta(activeMatrix.source).color"
+              hide-empty
+            />
             <span class="text-slate-400 dark:text-slate-500 font-normal">\</span>
-            <BlockPill kind="concept" :concept-type="activeMatrix.target" />
+            <BlockPill
+              kind="concept"
+              :concept-type="activeMatrix.target"
+              :name="activeMatrix.target"
+              :icon="getConceptMeta(activeMatrix.target).icon"
+              :color="getConceptMeta(activeMatrix.target).color"
+              hide-empty
+            />
           </div>
           <!-- Column header virtual scroll overlay -->
-          <div class="overflow-hidden flex-1 relative" style="scrollbar-width: none">
+          <div class="overflow-visible flex-1 relative" style="scrollbar-width: none">
             <div
               v-if="columns.length"
               :style="{
@@ -125,7 +161,7 @@
               <div
                 v-for="vCol in colVirtualizer.getVirtualItems()"
                 :key="'hc-' + String(vCol.key)"
-                class="absolute top-0 flex items-center justify-center px-3 py-3 border-r border-slate-100 dark:border-slate-800 text-xs"
+                class="absolute top-0 overflow-visible border-r border-slate-100 dark:border-slate-800 text-xs"
                 :style="{
                   left: 0,
                   width: colWidth + 'px',
@@ -133,13 +169,26 @@
                   transform: 'translateX(' + (vCol.start - scrollLeft) + 'px)',
                 }"
               >
-                <BlockPill
-                  kind="instance"
-                  :concept-type="activeMatrix.target"
-                  :name="columns[vCol.index]"
-                  :interactive="true"
-                  :block-id="resolveBlockId(columns[vCol.index], activeMatrix.target)"
-                />
+                <div
+                  class="absolute left-1 bottom-1 whitespace-nowrap"
+                  :style="{
+                    transform: 'rotate(' + HEADER_LABEL_ROTATION + 'deg)',
+                    transformOrigin: '0 100%',
+                  }"
+                >
+                  <BlockPill
+                    kind="instance"
+                    :concept-type="activeMatrix.target"
+                    :name="columns[vCol.index]"
+                    :interactive="true"
+                    :block-id="resolveBlockId(columns[vCol.index], activeMatrix.target)"
+                    :node-id="resolveBlockId(columns[vCol.index], activeMatrix.target)"
+                    :description="getNodeDescription(columns[vCol.index])"
+                    :fields="getNodeFields(columns[vCol.index])"
+                    :concept-fields="getConceptFields(activeMatrix.target)"
+                    hide-empty
+                  />
+                </div>
               </div>
             </div>
             <div
@@ -175,6 +224,11 @@
                   :name="rows[vRow.index]"
                   :interactive="true"
                   :block-id="resolveBlockId(rows[vRow.index], activeMatrix.source)"
+                  :node-id="resolveBlockId(rows[vRow.index], activeMatrix.source)"
+                  :description="getNodeDescription(rows[vRow.index])"
+                  :fields="getNodeFields(rows[vRow.index])"
+                  :concept-fields="getConceptFields(activeMatrix.source)"
+                  hide-empty
                 />
               </div>
             </div>
@@ -271,6 +325,12 @@
                     class="border rounded px-1.5 py-1 text-xs w-full text-center outline-none focus:ring-1 focus:ring-primary border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300"
                   >
                     <option value="">-</option>
+                    <option
+                      v-if="isOutOfSetValue(getVal(rows[vRow.index], columns[vCol.index]))"
+                      :value="String(getVal(rows[vRow.index], columns[vCol.index]))"
+                    >
+                      {{ getVal(rows[vRow.index], columns[vCol.index]) }}
+                    </option>
                     <option v-for="num in scaleRange" :key="num" :value="num">{{ num }}</option>
                   </select>
 
@@ -292,6 +352,12 @@
                     class="border rounded px-1.5 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-300"
                   >
                     <option value="">-</option>
+                    <option
+                      v-if="isOutOfSetValue(getVal(rows[vRow.index], columns[vCol.index]))"
+                      :value="String(getVal(rows[vRow.index], columns[vCol.index]))"
+                    >
+                      {{ getVal(rows[vRow.index], columns[vCol.index]) }}
+                    </option>
                     <option v-for="opt in getSetOptionsList()" :key="opt" :value="opt">
                       {{ opt }}
                     </option>
@@ -343,12 +409,15 @@ import BlockPill from './BlockPill.vue'
 import MatrixPill from './MatrixPill.vue'
 import Badge from '../ui/Badge.vue'
 import { commitFieldValue } from '../../shared/provenance'
+import { normalizeMatrixDecl } from '@cognnitive/innfo-core'
+import type { MatrixWidgetType } from '@cognnitive/innfo-core'
 
 // ── Constants ──
 const ROW_HEIGHT = 48
-const HEADER_HEIGHT = 40
+const HEADER_HEIGHT = 96
+const HEADER_LABEL_ROTATION = -45
 const FIRST_COL_WIDTH = 180
-const MIN_COL_WIDTH = 140
+const MIN_COL_WIDTH = 48
 const OVERSCAN = 3
 
 const props = defineProps<{
@@ -368,44 +437,60 @@ interface MatrixDef {
   name: string
   source: string
   target: string
-  widgetType: 'boolean' | 'cycle' | 'scale' | 'set' | 'text'
+  widgetType: MatrixWidgetType
   params: string
+  values?: string[]
+  description?: string
   min_color?: string
   max_color?: string
   label?: string
 }
 
 const rootNode = computed(() => {
-  const ids = modelStore.rootIds
-  for (const id of ids) {
-    const r = modelStore.getNode(id)
-    if (!r) continue
-    if (r.fields?.[MATRIX_DEFS_KEY]?.value || r.fields?.matrices?.value) return r
+  if (modelStore.rootIds.length === 0) return null
+  if (activeMatrix.value) {
+    const matrixName = activeMatrix.value.name
+    for (const id of modelStore.rootIds) {
+      const r = modelStore.getNode(id)
+      if (!r) continue
+      const defs = r.fields?.[MATRIX_DEFS_KEY]?.value || r.fields?.matrices?.value
+      if (Array.isArray(defs) && defs.some((d: any) => d.name === matrixName)) {
+        return r
+      }
+    }
   }
-  return ids.length > 0 ? modelStore.getNode(ids[0]) : null
+  const nonSpecId = modelStore.rootIds.find((id) => !id.startsWith('spec:'))
+  return modelStore.getNode(nonSpecId || modelStore.rootIds[0])
 })
 
 const matrixDefs = computed<MatrixDef[]>(() => {
   const ids = modelStore.rootIds
+  const defs: MatrixDef[] = []
+  const seen = new Set<string>()
+
   for (const id of ids) {
     const r = modelStore.getNode(id)
     if (!r) continue
     const defsField = r.fields[MATRIX_DEFS_KEY]
-    if (defsField?.value && Array.isArray(defsField.value) && defsField.value.length > 0) {
-      return defsField.value as MatrixDef[]
+    if (defsField?.value && Array.isArray(defsField.value)) {
+      for (const m of defsField.value as any[]) {
+        if (!seen.has(m.name)) {
+          seen.add(m.name)
+          defs.push(normalizeMatrixDecl(m))
+        }
+      }
     }
     const rawMatrices = r.fields?.matrices?.value
-    if (Array.isArray(rawMatrices) && rawMatrices.length > 0) {
-      return rawMatrices.map((m: any) => ({
-        name: m.name,
-        source: m.source,
-        target: m.target,
-        widgetType: m.widgetType || 'text',
-        params: m.params || '',
-      }))
+    if (Array.isArray(rawMatrices)) {
+      for (const m of rawMatrices) {
+        if (!seen.has(m.name)) {
+          seen.add(m.name)
+          defs.push(normalizeMatrixDecl(m))
+        }
+      }
     }
   }
-  return []
+  return defs
 })
 
 const activeMatrixIndex = ref(props.matrixIndex)
@@ -467,12 +552,17 @@ const colWidth = computed(() => {
   if (!activeMatrix.value) return MIN_COL_WIDTH
   const params = activeMatrix.value.params
   const match = params?.match(/colWidth:(\d+)/)
-  const w = match ? parseInt(match[1]) : 180
+  const w = match ? parseInt(match[1]) : 120
   return Math.max(w, MIN_COL_WIDTH)
 })
 
 const scaleRange = computed(() => {
   if (!activeMatrix.value) return []
+  const values = activeMatrix.value.values
+  if (Array.isArray(values) && values.length > 0) {
+    const numeric = values.map(Number).filter((n) => !Number.isNaN(n))
+    if (numeric.length === values.length) return numeric
+  }
   const params = activeMatrix.value.params
   const minMatch = params.match(/min:(\d+)/)
   const maxMatch = params.match(/max:(\d+)/)
@@ -562,11 +652,15 @@ function matrixCellKey(row: string, col: string): string {
 const getVal = (row: string, col: string): string | number | boolean => {
   if (!activeMatrix.value) return ''
   const key = matrixCellKey(row, col)
-  const root = rootNode.value
-  if (!root) return '-'
-  const field = root.fields[key]
-  if (!field || field.value === undefined || field.value === null) return '-'
-  return field.value as string | number | boolean
+  for (const id of modelStore.rootIds) {
+    const r = modelStore.getNode(id)
+    if (!r) continue
+    const field = r.fields[key]
+    if (field && field.value !== undefined && field.value !== null) {
+      return field.value as string | number | boolean
+    }
+  }
+  return '-'
 }
 
 const setVal = (row: string, col: string, value: string | number | boolean) => {
@@ -574,9 +668,7 @@ const setVal = (row: string, col: string, value: string | number | boolean) => {
   const root = rootNode.value
   if (!root) return
   const key = matrixCellKey(row, col)
-  const rootId = modelStore.rootIds[0]
-  if (!rootId) return
-  commitFieldValue(modelStore, rootId, key, value, { kind: 'user', id: 'anonymous' })
+  commitFieldValue(modelStore, root.id, key, value, { kind: 'user', id: 'anonymous' })
   emit('cell-change', key, value)
 }
 
@@ -585,14 +677,19 @@ const valueDistribution = computed(() => {
   if (!activeMatrix.value || !rows.value.length || !columns.value.length)
     return {} as Record<string, number>
   const counts: Record<string, number> = {}
-  const root = rootNode.value
-  if (!root) return {}
   const prefix = activeMatrix.value.name + '||'
   for (const row of rows.value) {
     for (const col of columns.value) {
       const key = `${prefix}${row}||${col}`
-      const field = root.fields[key]
-      const val = field?.value
+      let val: any = undefined
+      for (const id of modelStore.rootIds) {
+        const r = modelStore.getNode(id)
+        const field = r?.fields?.[key]
+        if (field && field.value !== undefined && field.value !== null) {
+          val = field.value
+          break
+        }
+      }
       const strVal = val === undefined || val === null || val === '-' ? '-' : String(val)
       counts[strVal] = (counts[strVal] || 0) + 1
     }
@@ -629,11 +726,25 @@ const getHeatmapClasses = (row: string, col: string): string => {
 // ── Utility functions ──
 const getSetOptionsList = (): string[] => {
   if (!activeMatrix.value) return []
+  const values = activeMatrix.value.values
+  if (Array.isArray(values) && values.length > 0) return values
   const params = activeMatrix.value.params
   return params
     .split(/[;,]/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0)
+}
+
+/** True when a cell holds a non-empty value that is not part of the widget's options. */
+const isOutOfSetValue = (value: string | number | boolean): boolean => {
+  if (value === '-' || value === '' || value === undefined || value === null) return false
+  if (activeMatrix.value?.widgetType === 'scale') {
+    return !scaleRange.value.includes(Number(value))
+  }
+  if (activeMatrix.value?.widgetType === 'set') {
+    return !getSetOptionsList().includes(String(value))
+  }
+  return false
 }
 
 const rotateCycle = (row: string, col: string) => {
@@ -656,5 +767,70 @@ const rotateCycle = (row: string, col: string) => {
 const resolveBlockId = (name: string, _conceptType: string): string | undefined => {
   const node = Object.values(modelStore.nodes).find((n) => n.name === name)
   return node?.id
+}
+
+// ── Node + concept metadata for header pills ───────────────────
+
+const getNodeByName = (name: string) => Object.values(modelStore.nodes).find((n) => n.name === name)
+
+const getNodeDescription = (name: string): string => {
+  return getNodeByName(name)?.rawSections?.description ?? ''
+}
+
+/** Unwraps FieldValue entries into plain values for the BlockPill popup. */
+const getNodeFields = (name: string): Record<string, any> => {
+  const node = getNodeByName(name)
+  const out: Record<string, any> = {}
+  if (node?.fields) {
+    for (const [k, v] of Object.entries(node.fields)) {
+      const val = (v as any)?.value
+      if (val !== undefined && val !== null && val !== '' && val !== false) out[k] = val
+    }
+  }
+  return out
+}
+
+const getConceptFields = (conceptType: string): any[] => {
+  const lower = conceptType?.toLowerCase()
+  for (const id of modelStore.rootIds) {
+    const r = modelStore.getNode(id)
+    const concepts = r?.localMetamodel?.concepts
+    if (Array.isArray(concepts)) {
+      const c = concepts.find((x) => x.name.toLowerCase() === lower)
+      if (c?.fields) return c.fields
+    }
+  }
+  return []
+}
+
+/** Resolves the concept icon/color from the effective (template) metamodel. */
+const getConceptMeta = (conceptType: string): { icon?: string; color?: string } => {
+  const lower = conceptType?.toLowerCase()
+  for (const id of modelStore.rootIds) {
+    const r = modelStore.getNode(id)
+    const concepts = r?.localMetamodel?.concepts
+    if (Array.isArray(concepts)) {
+      const c = concepts.find((x) => x.name.toLowerCase() === lower)
+      if (c) return { icon: c.icon, color: c.color }
+    }
+  }
+  return {}
+}
+
+const getMatrixValueCount = (matrixName: string): number => {
+  let count = 0
+  const prefix = `${matrixName}||`
+  for (const node of Object.values(modelStore.nodes)) {
+    if (!node.fields) continue
+    for (const [key, fv] of Object.entries(node.fields)) {
+      if (key.startsWith(prefix)) {
+        const val = (fv as any)?.value
+        if (val !== undefined && val !== null && val !== '' && val !== '-' && val !== false) {
+          count++
+        }
+      }
+    }
+  }
+  return count
 }
 </script>

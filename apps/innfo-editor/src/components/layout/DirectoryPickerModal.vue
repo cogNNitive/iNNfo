@@ -349,7 +349,10 @@ function generatePreview(): string {
                 d="M2 6a2 2 0 0 1 2-2h5l2 2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6z"
               />
             </svg>
-            <span class="dp-recent__name">{{ entry.name }}</span>
+            <span class="dp-recent__info">
+              <span class="dp-recent__name">{{ entry.name }}</span>
+              <span v-if="entry.path && entry.path !== entry.name" class="dp-recent__path">{{ entry.path }}</span>
+            </span>
             <span class="dp-recent__time">{{ formatTimestamp(entry.timestamp) }}</span>
           </button>
         </div>
@@ -673,11 +676,25 @@ function generatePreview(): string {
   color: #4d0e4e;
 }
 
-.dp-recent__name {
+.dp-recent__info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dp-recent__name {
   font-weight: 600;
   color: #333;
-  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dp-recent__path {
+  font-size: 11px;
+  color: #999;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

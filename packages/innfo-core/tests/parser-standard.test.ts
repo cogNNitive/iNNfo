@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseModel, parseYaml } from '../src/parser'
+import { parseModel, parseYaml, serializeModel } from '../src/parser'
 
 describe('Standardised Parser (TDD)', () => {
   it('parses complex nested frontmatter with standard YAML features', () => {
@@ -68,5 +68,68 @@ title: "Complex Model"
     expect(partner.name).toBe('Partner')
     expect(partner.fields.importance).toBe('medium')
     expect(partner.description).toBe('Partner description.')
+  })
+
+  it('preserves free-form Markdown content of `text` concepts in rawSections', () => {
+    const modelContent = `---
+spec_version: "V_0-2-0"
+level: 3
+model_version: "V_1-0-0"
+title: "Text Concept Model"
+---
+
+# _NN index
+
+* [[Market size]]
+
+# _NN Market size
+
+En España fallecieron 439.146 personas en 2024 (INE).
+
+**TAM:** ~500.000 procesos de reparto anuales.
+
+# _NN Stakeholders
+
+* _NN Stakeholders: Customer
+  Customer description.
+`
+    const model = parseModel(modelContent)
+    expect(model.rawSections).toBeDefined()
+    // `text` concepts have no elements but their body IS the content.
+    expect(model.elements.get('Market size')).toBeUndefined()
+    expect(model.rawSections!['Market size']).toContain(
+      'En España fallecieron 439.146 personas en 2024 (INE).',
+    )
+    expect(model.rawSections!['Market size']).toContain('**TAM:** ~500.000 procesos de reparto anuales.')
+    // Element-bearing concepts are serialized from `elements`; their raw body
+    // is not duplicated in rawSections.
+    expect(model.rawSections!['Stakeholders']).toBeUndefined()
+  })
+
+  it('round-trips `text` concept content through serializer', () => {
+    const modelContent = `---
+spec_version: "V_0-2-0"
+level: 3
+model_version: "V_1-0-0"
+title: "Text Round Trip"
+---
+
+# _NN index
+
+* [[Market size]]
+
+# _NN Market size
+
+En España fallecieron 439.146 personas en 2024 (INE).
+
+**TAM:** ~500.000 procesos de reparto anuales.
+`
+    const model = parseModel(modelContent)
+    expect(model.rawSections!['Market size']).toContain('**TAM:**')
+
+    const serialized = serializeModel(model)
+    expect(serialized).toContain('# _NN Market size')
+    expect(serialized).toContain('En España fallecieron 439.146 personas en 2024 (INE).')
+    expect(serialized).toContain('**TAM:** ~500.000 procesos de reparto anuales.')
   })
 })

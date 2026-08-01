@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="flex flex-col gap-3">
     <!-- Action Bar -->
     <div class="flex items-center justify-between">
@@ -91,6 +91,7 @@
                 :description="getDescription(child)"
                 :fields="getRawFields(child)"
                 :concept-fields="conceptFields || []"
+                :show-markers="true"
                 interactive
                 full-width
               />
@@ -127,6 +128,14 @@
                 >
                   <ChevronDown class="w-3.5 h-3.5" />
                 </button>
+                <span class="w-px h-3.5 bg-slate-200 dark:bg-slate-700 mx-0.5"></span>
+                <button
+                  @click.stop="deleteElement(child.id)"
+                  class="p-1 rounded hover:bg-rose-50 dark:hover:bg-rose-900/30 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer flex items-center justify-center"
+                  title="Delete element"
+                >
+                  <Trash2 class="w-3.5 h-3.5" />
+                </button>
               </div>
             </td>
           </tr>
@@ -152,7 +161,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ChevronUp, ChevronDown, Plus, Eye, Pencil } from 'lucide-vue-next'
+import { ChevronUp, ChevronDown, Plus, Eye, Pencil, Trash2 } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
@@ -226,6 +235,10 @@ function moveDown(childId: string): void {
   } else {
     modelStore.reorderChild(id, childId, 1)
   }
+}
+
+function deleteElement(childId: string): void {
+  modelStore.removeNodeTree(childId)
 }
 
 function addElement(): void {
