@@ -622,8 +622,8 @@ To create a business model, create a level 3 FILE mode document with:
 
 ```yaml
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+spec_version: "V_0-2-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "business_V_0-2-0"
