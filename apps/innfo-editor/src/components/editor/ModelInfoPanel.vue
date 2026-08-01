@@ -31,7 +31,7 @@
         <button
           v-for="m in availableModels"
           :key="m.id"
-          @click="selectedModelId = m.id"
+          @click="activeModelId = m.id"
           class="px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer border"
           :class="
             activeModelId === m.id
@@ -586,11 +586,17 @@ const availableModels = computed(() => {
     })
 })
 
-const activeModelId = computed(() => {
-  if (selectedModelId.value && availableModels.value.some((m) => m.id === selectedModelId.value)) {
-    return selectedModelId.value
-  }
-  return props.rootNodeId || availableModels.value[0]?.id || ''
+const activeModelId = computed({
+  get(): string {
+    if (selectedModelId.value && availableModels.value.some((m) => m.id === selectedModelId.value)) {
+      return selectedModelId.value
+    }
+    return uiStore.activeModelId || props.rootNodeId || availableModels.value[0]?.id || ''
+  },
+  set(newId: string): void {
+    selectedModelId.value = newId
+    uiStore.setActiveModel(newId)
+  },
 })
 
 // ── Frontmatter resolution from root node rawContent ──

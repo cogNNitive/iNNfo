@@ -37,7 +37,7 @@ function clearFolderSelection() {
   folderPath.value = ''
 }
 
-const STARTER_BASE = `${import.meta.env.BASE_URL}starter/`
+const STARTER_BASE = `${SAMPLE_BASE}/`
 
 const samples: SampleInfo[] = [
   {
@@ -546,17 +546,17 @@ function getStarterByTemplate(tpl: TemplateChoice) {
     {
       id: 'starter-business',
       templateName: 'business',
-      url: `${STARTER_BASE}Business_V_1-0-0_starter_NN.md`,
+      url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-1-2_business_NN.md`,
     },
     {
       id: 'starter-procedures',
       templateName: 'procedures',
-      url: `${STARTER_BASE}Procedures_V_1-0-0_starter_NN.md`,
+      url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`,
     },
     {
       id: 'starter-organization',
       templateName: 'organization',
-      url: `${STARTER_BASE}Organization_V_1-0-0_starter_NN.md`,
+      url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`,
     },
   ]
   return starters.find((s) => s.templateName === tpl)

@@ -33,43 +33,52 @@ export function useViewSync(): void {
 
   // URL → Store: when route query changes via back/forward
   watch(
-    () => route.query.view,
-    (view) => {
+    () => [route.query.view, route.query.model],
+    ([view, model]) => {
       if (updating) return
+      updating = true
       if (typeof view === 'string' && VALID_VIEWS.includes(view as ActiveView)) {
-        updating = true
         uiStore.setActiveView(view as ActiveView)
-        updating = false
       }
+      if (typeof model === 'string' && model) {
+        uiStore.setActiveModel(model)
+      }
+      updating = false
     },
   )
 
-  // Store → URL: create a history entry when switching views
+  // Store → URL: update query when view or activeModelId changes
   watch(
-    () => uiStore.activeView,
-    (view) => {
+    () => [uiStore.activeView, uiStore.activeModelId],
+    ([view, model]) => {
       if (updating) return
       updating = true
-      // Read the live hash: node selection is synced to the URL hash via
-      // useHashSync using raw history.pushState, which vue-router's
-      // `route.hash` does not observe. Using the live value keeps the
-      // selected node in the URL when switching views.
-      router.push({
-        query: { ...route.query, view },
+      const query: Record<string, any> = { ...route.query, view }
+      if (model) {
+        query.model = model
+      } else {
+        delete query.model
+      }
+      router.replace({
+        query,
         hash: window.location.hash || undefined,
       })
       updating = false
     },
   )
 
-  // On mount, seed the URL with the current view if no view param exists
+  // On mount, seed the URL with the current view and model if present
   onMounted(() => {
     const viewParam = route.query.view as string | undefined
+    const modelParam = route.query.model as string | undefined
     if (viewParam && VALID_VIEWS.includes(viewParam as ActiveView)) {
       uiStore.setActiveView(viewParam as ActiveView)
-    } else if (!viewParam) {
+    }
+    if (modelParam) {
+      uiStore.setActiveModel(modelParam)
+    } else {
       router.replace({
-        query: { ...route.query, view: uiStore.activeView },
+        query: { ...route.query, view: uiStore.activeView, model: uiStore.activeModelId || undefined },
         hash: window.location.hash || undefined,
       })
     }

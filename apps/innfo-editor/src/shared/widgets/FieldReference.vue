@@ -4,11 +4,11 @@
  * suggestions from modelStore.nodes by target_concepts.
  * Part of the unified widget registry (rebuild-format-editor-ui Phase 4).
  * Uses v-model contract: modelValue / update:modelValue.
- * No label — rendered by parent (WidgetField or BlockSheet).
- * Store deps: useModelStore (Pinia singleton — no prop drilling needed).
+ * Supports Qualified Cross-Model References (Idea 1).
  */
 import { ref, computed } from 'vue'
 import { useModelStore } from '../../stores/modelStore'
+import { useUiStore } from '../../stores/uiStore'
 
 const props = withDefaults(
   defineProps<{
@@ -24,6 +24,7 @@ const emit = defineEmits<{
 }>()
 
 const modelStore = useModelStore()
+const uiStore = useUiStore()
 const showDropdown = ref(false)
 const query = ref(props.modelValue || '')
 
@@ -35,7 +36,10 @@ const placeholderText = computed(() => {
 
 interface ReferenceSuggestion {
   name: string
+  qualifiedName: string
   modelName: string
+  rootId: string
+  isCrossModel: boolean
 }
 
 const filteredSuggestions = computed<ReferenceSuggestion[]>(() => {
@@ -43,15 +47,30 @@ const filteredSuggestions = computed<ReferenceSuggestion[]>(() => {
   const lowerQuery = query.value.toLowerCase()
   const matches: ReferenceSuggestion[] = []
 
+  const activeModelId =
+    uiStore.activeModelId || modelStore.rootIds.find((id) => !id.startsWith('spec:')) || ''
+
   for (const node of Object.values(modelStore.nodes)) {
     if (node.kind !== 'element' && node.kind !== 'concept') continue
     if (targets.length === 0 || targets.includes(node.type)) {
-      if (!lowerQuery || node.name.toLowerCase().includes(lowerQuery)) {
-        const path = node.source?.path || ''
-        const modelName = path.split('/').pop()?.split('\\').pop() || ''
+      const rootId = modelStore.getModelRootForNode(node.id) || ''
+      const path = node.source?.path || ''
+      const modelFileName = path.split('/').pop()?.split('\\').pop() || ''
+      const modelBaseName = modelFileName.replace(/\.md$/i, '').replace(/_NN$/i, '')
+      const isCrossModel = Boolean(rootId && activeModelId && rootId !== activeModelId)
+      const qualifiedName = modelBaseName ? `[${modelBaseName}] ${node.name}` : node.name
+
+      if (
+        !lowerQuery ||
+        node.name.toLowerCase().includes(lowerQuery) ||
+        qualifiedName.toLowerCase().includes(lowerQuery)
+      ) {
         matches.push({
           name: node.name,
-          modelName,
+          qualifiedName,
+          modelName: modelFileName,
+          rootId,
+          isCrossModel,
         })
       }
     }
@@ -67,10 +86,11 @@ function onInput(event: Event): void {
   }
 }
 
-function selectSuggestion(name: string): void {
-  query.value = name
+function selectSuggestion(suggestion: ReferenceSuggestion): void {
+  const selectedVal = suggestion.isCrossModel ? suggestion.qualifiedName : suggestion.name
+  query.value = selectedVal
   showDropdown.value = false
-  emit('update:modelValue', name)
+  emit('update:modelValue', selectedVal)
 }
 
 function onBlur(): void {
@@ -96,11 +116,16 @@ function onBlur(): void {
     <ul v-if="!readonly && showDropdown && filteredSuggestions.length > 0" class="field-reference-dropdown">
       <li
         v-for="suggestion in filteredSuggestions"
-        :key="suggestion.name + '_' + suggestion.modelName"
+        :key="suggestion.qualifiedName + '_' + suggestion.modelName"
         class="field-reference-option flex items-center justify-between"
-        @mousedown.prevent="selectSuggestion(suggestion.name)"
+        @mousedown.prevent="selectSuggestion(suggestion)"
       >
-        <span>{{ suggestion.name }}</span>
+        <span class="flex items-center gap-1.5">
+          <span v-if="suggestion.isCrossModel" class="px-1 py-0.5 rounded text-[9px] font-bold uppercase bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700">
+            Cross-Model
+          </span>
+          <span>{{ suggestion.name }}</span>
+        </span>
         <span v-if="suggestion.modelName" class="text-3xs opacity-60 font-mono ml-2 shrink-0">
           {{ suggestion.modelName }}
         </span>

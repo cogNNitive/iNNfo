@@ -3,8 +3,8 @@
     <!-- Pinned concept Sheet at top -->
     <BlockSheet
       :block="conceptBlock"
-      kind="concept"
-      :concept-name="conceptName"
+      :kind="topSheetKind"
+      :concept-name="topSheetConceptName"
       :concept-type="conceptType"
       :concept-color="conceptColor"
       :concept-icon="conceptIcon"
@@ -65,9 +65,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import BlockSheet from './BlockSheet.vue'
 import type { ParsedItem } from '../../stores/types'
+import type { BlockKind } from '../../utils/conceptVisuals'
 
 const props = withDefaults(
   defineProps<{
@@ -82,6 +83,8 @@ const props = withDefaults(
     hasMarkers?: boolean
     selectedItemName?: string
     deletable?: boolean
+    isElement?: boolean
+    kind?: BlockKind
   }>(),
   {
     conceptColor: '',
@@ -90,8 +93,23 @@ const props = withDefaults(
     hasMarkers: false,
     selectedItemName: '',
     deletable: false,
+    isElement: false,
   },
 )
+
+const isElementNode = computed(() => props.isElement || props.deletable || props.kind === 'instance')
+
+const topSheetKind = computed<BlockKind>(() => {
+  if (props.kind) return props.kind
+  return isElementNode.value ? 'instance' : 'concept'
+})
+
+const topSheetConceptName = computed(() => {
+  if (topSheetKind.value === 'instance') {
+    return props.conceptType || props.conceptName
+  }
+  return props.conceptName
+})
 
 const _emit = defineEmits<{
   'change-concept': []

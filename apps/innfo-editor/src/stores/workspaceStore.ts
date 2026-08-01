@@ -331,8 +331,12 @@ export const useWorkspaceStore = defineStore('workspace', {
      * Best-effort: network failures or missing versions degrade gracefully.
      */
     async _ensureGeneralSpec(handle: DirectoryHandleLike): Promise<void> {
+      const uiStore = useUiStore()
       const modelStore = useModelStore()
-      const rootId = modelStore.rootIds[0]
+      const rootId =
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
+        modelStore.rootIds[0]
       if (!rootId) return
       const rootNode = modelStore.getNode(rootId)
       if (!rootNode?.rawContent) return
@@ -446,8 +450,13 @@ export const useWorkspaceStore = defineStore('workspace', {
      * Renames the active file on disk (if handle present) and updates the source path in memory.
      */
     async renameActiveFile(newFilename: string, targetRootId?: string): Promise<void> {
+      const uiStore = useUiStore()
       const modelStore = useModelStore()
-      const rootId = targetRootId ?? modelStore.rootIds.find((id) => !id.startsWith('spec:')) ?? modelStore.rootIds[0]
+      const rootId =
+        targetRootId ??
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
+        modelStore.rootIds[0]
       const rootNode = rootId ? modelStore.getNode(rootId) : null
       if (!rootNode) throw new Error('No root node found to rename')
 
@@ -489,8 +498,13 @@ export const useWorkspaceStore = defineStore('workspace', {
     async saveActiveFileWithVersionBump(level: BumpLevel, targetRootId?: string): Promise<void> {
       if (!this.handle) throw new Error('No workspace handle')
 
+      const uiStore = useUiStore()
       const modelStore = useModelStore()
-      const rootId = targetRootId ?? modelStore.rootIds.find((id) => !id.startsWith('spec:')) ?? modelStore.rootIds[0]
+      const rootId =
+        targetRootId ??
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
+        modelStore.rootIds[0]
       const rootNode = modelStore.getNode(rootId)
       if (!rootNode) throw new Error('No root node found for version bump')
 

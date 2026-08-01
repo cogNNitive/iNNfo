@@ -18,7 +18,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" class="w-6 h-6 shrink-0 text-primary" aria-label="iNNfo Logo">
           <path d="M 160 490 L 160 295 Q 160 270 180 285 L 330 475 Q 350 490 350 470 L 350 235 Q 350 210 370 225 L 530 415 Q 550 430 550 410 L 550 90 L 495 145 L 550 90 L 605 145" fill="none" stroke="currentColor" stroke-width="82" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        <span class="font-mono text-lg font-black text-primary select-none leading-none">_NN</span>
+        <span class="font-mono text-lg font-black text-primary select-none leading-none">NN</span>
         <h1 class="text-sm font-semibold tracking-tight">iNNfo Modeler</h1>
         <span
           class="font-mono text-xs text-slate-400 dark:text-slate-500 font-normal select-none cursor-default ml-0.5"
@@ -255,9 +255,12 @@ const bumpError = ref('')
 // ── Root node frontmatter extraction ────────────────────────────
 
 const rootNode = computed(() => {
-  const ids = modelStore.rootIds
-  if (ids.length === 0) return null
-  return modelStore.getNode(ids[0])
+  const activeId =
+    (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+    modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
+    modelStore.rootIds[0]
+  if (!activeId) return null
+  return modelStore.getNode(activeId) ?? null
 })
 
 const hasRootNode = computed(() => rootNode.value !== null)
@@ -370,7 +373,7 @@ async function bumpVersion(level: 'major' | 'minor' | 'patch'): Promise<void> {
     return
   }
   try {
-    await workspaceStore.saveActiveFileWithVersionBump(level)
+    await workspaceStore.saveActiveFileWithVersionBump(level, rootNode.value?.id)
     saveDropdownOpen.value = false
   } catch (err) {
     bumpError.value = err instanceof Error ? err.message : 'Version bump failed'

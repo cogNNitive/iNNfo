@@ -300,7 +300,7 @@
                 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
               >
                 <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Matrix
+                Relations
               </div>
               <div
                 v-if="hasMatrices && block.id"
@@ -308,7 +308,7 @@
               >
                 <BlockMatrixSummary :root-node-id="rootNodeId" :node-concept="conceptType" :node-id="block.id" />
               </div>
-              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No matrix participation</div>
+              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No relations participation</div>
             </div>
 
             <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
@@ -398,7 +398,7 @@
                 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
               >
                 <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Matrix
+                Relations
               </div>
               <div
                 class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
@@ -531,8 +531,12 @@ const tabDefs = computed(() => {
 
 const activeTab = ref(isConcept.value ? 'table' : 'view')
 
-/** When showTabs is disabled, force the effective tab to 'view' (no tab bar). */
-const resolvedTab = computed(() => props.showTabs ? activeTab.value : 'view')
+/** When showTabs is disabled or current activeTab is invalid for tabDefs, force the effective tab to 'view'. */
+const resolvedTab = computed(() => {
+  if (!props.showTabs) return 'view'
+  const isValid = tabDefs.value.some((t) => t.id === activeTab.value)
+  return isValid ? activeTab.value : 'view'
+})
 
 // ── Palette ─────────────────────────────────────────────────────
 

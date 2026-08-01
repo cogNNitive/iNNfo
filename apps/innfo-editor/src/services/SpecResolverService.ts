@@ -166,7 +166,7 @@ export async function resolveParentSpecs(
       // Propagate template matrix declarations to the model root node
       if (schema.matrices.length > 0 && !root.fields['__matrix_defs']) {
         root.fields['__matrix_defs'] = {
-          value: schema.matrices.map((m) => normalizeMatrixDecl(m as Record<string, unknown>)),
+          value: schema.matrices.map((m) => normalizeMatrixDecl(m as unknown as Record<string, unknown>)),
           provenance: {
             author: { kind: 'system', id: 'parser' },
             timestamp: new Date().toISOString(),

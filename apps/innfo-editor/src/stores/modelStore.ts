@@ -6,6 +6,8 @@ import { validateFormatContent } from '@cognnitive/innfo-core'
 import type { ModelDriver, ParseIssue, ValidationReport } from '@cognnitive/innfo-core'
 import { resolveParentSpecs } from '../services/SpecResolverService'
 
+import { useUiStore } from './uiStore'
+
 export interface ModelState {
   nodes: Record<string, ModelNode>
   rootIds: string[]
@@ -43,14 +45,18 @@ export const useModelStore = defineStore('model', {
         .filter(Boolean),
 
     /**
-     * Returns the first root node id as the default "active" node.
-     * View-only selection (which node is highlighted/interacted with)
-     * lives in uiStore.selectedNodeId — this getter provides a fallback
-     * for components that need a stable node reference to derive data
-     * (e.g., metamodel resolution).
+     * Returns the active model root node id or the first root node id as fallback.
      */
     activeNodeId: (state): string | null => {
-      return state.rootIds[0] ?? null
+      try {
+        const uiStore = useUiStore()
+        if (uiStore.activeModelId && state.nodes[uiStore.activeModelId]) {
+          return uiStore.activeModelId
+        }
+      } catch {
+        // Fallback if called outside Pinia active context
+      }
+      return state.rootIds.find((id) => !id.startsWith('spec:')) ?? state.rootIds[0] ?? null
     },
   },
   actions: {
@@ -177,22 +183,50 @@ export const useModelStore = defineStore('model', {
     },
 
     /**
-     * Creates a child element for a concept under the specified (or default) root node.
+     * Finds the root model ID that owns the given node.
+     */
+    getModelRootForNode(nodeId: string): string | null {
+      if (nodeId.startsWith('virtual:')) {
+        const parentId = nodeId.split(':')[1]
+        return this.getModelRootForNode(parentId)
+      }
+      let curr = this.nodes[nodeId]
+      if (!curr) return null
+      while (curr && curr.parentId) {
+        const parent = this.nodes[curr.parentId]
+        if (!parent) break
+        curr = parent
+      }
+      return curr?.id ?? null
+    },
+
+    /**
+     * Creates a child element for a concept under the specified (or active) root node.
      * Convenience wrapper used by the ghost "Add first element" action.
      * @returns the new node's id
      */
     addConceptElement(conceptName: string, elementName: string, targetModelId?: string): string {
-      const rootId = targetModelId ?? this.rootIds.find((id) => !id.startsWith('spec:')) ?? this.rootIds[0]
+      const uiStore = useUiStore()
+      const rootId =
+        targetModelId ??
+        (uiStore.activeModelId && this.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        this.rootIds.find((id) => !id.startsWith('spec:')) ??
+        this.rootIds[0]
       if (!rootId) throw new Error('No root node — cannot add element')
       return this.createChild(rootId, elementName, conceptName, 'element')
     },
 
     /**
-     * Creates a text-type section under the specified (or default) root node.
+     * Creates a text-type section under the specified (or active) root node.
      * For concepts of type `text` (single Markdown block).
      */
     addTextSection(conceptName: string, targetModelId?: string): void {
-      const rootId = targetModelId ?? this.rootIds.find((id) => !id.startsWith('spec:')) ?? this.rootIds[0]
+      const uiStore = useUiStore()
+      const rootId =
+        targetModelId ??
+        (uiStore.activeModelId && this.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        this.rootIds.find((id) => !id.startsWith('spec:')) ??
+        this.rootIds[0]
       if (!rootId) throw new Error('No root node — cannot add section')
       const root = this.nodes[rootId]
       if (!root) throw new Error(`Root node "${rootId}" not found`)

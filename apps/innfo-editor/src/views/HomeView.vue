@@ -150,7 +150,7 @@ async function clearAllHistory(): Promise<void> {
   history.value = await loadHistory()
 }
 
-const sandboxUrl = `${import.meta.env.BASE_URL}starter/Sandbox_V_1-0-0_starter_NN.md`
+const sandboxUrl = `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`
 const sandboxBusy = ref(false)
 const showSandbox = ref(!localStorage.getItem('nn_hide_sandbox'))
 const showWizard = ref(false)

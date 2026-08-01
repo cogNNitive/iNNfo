@@ -142,15 +142,20 @@
         <div v-for="rootId in visibleRootIds" :key="rootId" class="space-y-1">
           <!-- Model Header (File) -->
           <div
-            class="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            @click="toggleModelExpanded(rootId)"
+            class="flex items-center gap-1 px-2 py-1.5 rounded-md text-xs font-semibold cursor-pointer transition-colors"
+            :class="
+              rootId === activeModelId
+                ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-100 font-bold ring-1 ring-primary/20'
+                : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+            "
+            @click="selectModelHeader(rootId)"
           >
             <ChevronDown
               class="transition-transform duration-200 w-3 h-3 text-slate-400 dark:text-slate-500"
               :class="{ '-rotate-90': !isModelExpanded(rootId) }"
             />
-            <FileText class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-            <span class="truncate flex-1 text-slate-700 dark:text-slate-300">{{
+            <FileText class="w-3.5 h-3.5 shrink-0" :class="rootId === activeModelId ? 'text-primary' : 'text-slate-400 dark:text-slate-500'" />
+            <span class="truncate flex-1">{{
               getModelName(rootId)
             }}</span>
           </div>
@@ -169,8 +174,8 @@
                 :depth="0"
                 :expanded-generation="expandedGeneration"
                 :ghost="item.ghost"
-                @select="(id: string) => $emit('select-node', id)"
-                @click-ghost="handleClickGhost"
+                @select="(id: string) => handleSelectNode(rootId, id)"
+                @click-ghost="(cname: string) => handleClickGhost(cname, rootId)"
               />
             </div>
             <p
@@ -606,14 +611,28 @@ const conceptTreeRoots = computed<TreeGroup[]>(() => {
   return mergedConcepts.value.filter((item) => !item.ghost)
 })
 
-function handleClickGhost(conceptName: string): void {
+const activeModelId = computed(() => uiStore.activeModelId || visibleRootIds.value[0] || null)
+
+function selectModelHeader(rootId: string): void {
+  uiStore.setActiveModel(rootId)
+  toggleModelExpanded(rootId)
+}
+
+function handleSelectNode(rootId: string, nodeId: string): void {
+  uiStore.setActiveModel(rootId)
+  emit('select-node', nodeId)
+}
+
+function handleClickGhost(conceptName: string, targetRootId?: string): void {
+  const rootId = targetRootId ?? activeModelId.value ?? visibleRootIds.value[0]
+  if (rootId) uiStore.setActiveModel(rootId)
   const concept = metamodelStore.getConceptByName(conceptName)
   const type = concept?.type ?? 'text'
   if (type === 'text') {
-    modelStore.addTextSection(conceptName)
-    uiStore.selectNode(visibleRootIds.value[0])
+    modelStore.addTextSection(conceptName, rootId ?? undefined)
+    uiStore.selectNode(rootId ?? visibleRootIds.value[0])
   } else {
-    const id = modelStore.addConceptElement(conceptName, `New ${conceptName}`)
+    const id = modelStore.addConceptElement(conceptName, `New ${conceptName}`, rootId ?? undefined)
     if (id) uiStore.selectNode(id)
   }
 }

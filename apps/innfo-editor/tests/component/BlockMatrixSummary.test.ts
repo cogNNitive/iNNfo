@@ -74,7 +74,7 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
     setActivePinia(createPinia())
   })
 
-  it('renders a chip when the node participates as a row in a matrix', () => {
+  it('renders a MatrixPill when the node participates as a row in a matrix', () => {
     const modelStore = useModelStore()
     const root = makeRootNode([{ name: 'M1', source: 'Task', target: 'Phase' }], {
       'M1||MyTask||Phase1': { value: 'active' },
@@ -90,12 +90,13 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('M1')
-    expect(wrapper.text()).toContain('row')
-    expect(wrapper.text()).toContain('(1)')
+    expect(wrapper.find('[data-testid="matrix-pill-M1"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Task')
+    expect(wrapper.text()).toContain('Phase')
+    expect(wrapper.find('[data-testid="matrix-pill-count-M1"]').text()).toBe('1')
   })
 
-  it('renders a chip when the node participates as a column in a matrix', () => {
+  it('renders a MatrixPill when the node participates as a column in a matrix', () => {
     const modelStore = useModelStore()
     const root = makeRootNode([{ name: 'M1', source: 'Task', target: 'Phase' }], {
       'M1||SomeTask||MyPhase': { value: 'done' },
@@ -111,9 +112,10 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('M1')
-    expect(wrapper.text()).toContain('col')
-    expect(wrapper.text()).toContain('(1)')
+    expect(wrapper.find('[data-testid="matrix-pill-M1"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Task')
+    expect(wrapper.text()).toContain('Phase')
+    expect(wrapper.find('[data-testid="matrix-pill-count-M1"]').text()).toBe('1')
   })
 
   it('counts cells with non-dash/empty values only', () => {
@@ -135,7 +137,7 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
     })
 
     // Only one non-dash cell counted
-    expect(wrapper.text()).toContain('(1)')
+    expect(wrapper.find('[data-testid="matrix-pill-count-M1"]').text()).toBe('1')
   })
 
   it('shows empty state when node does not participate in any matrix', () => {
@@ -152,7 +154,7 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('No matrix participation.')
+    expect(wrapper.text()).toContain('No relations participation.')
   })
 
   it('shows empty state when root node has no matrix definitions', () => {
@@ -169,7 +171,7 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('No matrix participation.')
+    expect(wrapper.text()).toContain('No relations participation.')
   })
 
   it('handles multiple matrices with different concept participation', () => {
@@ -195,8 +197,7 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('M1')
-    expect(wrapper.text()).toContain('M2')
-    expect(wrapper.text()).toContain('row')
+    expect(wrapper.find('[data-testid="matrix-pill-M1"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="matrix-pill-M2"]').exists()).toBe(true)
   })
 })

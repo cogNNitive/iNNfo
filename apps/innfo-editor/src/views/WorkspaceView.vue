@@ -258,6 +258,7 @@ const activeEditorProps = computed(() => {
     items: childItems.value,
     isListConcept: isListConcept.value,
     deletable: selectedNode.value?.kind === 'element',
+    isElement: selectedNode.value?.kind === 'element',
   }
 })
 

@@ -24,6 +24,7 @@ export type GhostFilterMode = 'model' | 'all'
  * view) lives in uiStore.
  */
 export const useUiStore = defineStore('ui', () => {
+  const activeModelId = ref<string | null>(null)
   const activeConcept = ref<string | null>(null)
   const activePerspective = ref<string>('default')
   const activeView = ref<ActiveView>('editor')
@@ -36,6 +37,10 @@ export const useUiStore = defineStore('ui', () => {
   const showAiModal = ref(false)
   const activeAiTab = ref<AiTab>('guide')
   const ghostFilterMode = ref<GhostFilterMode>('all')
+
+  function setActiveModel(id: string | null): void {
+    activeModelId.value = id
+  }
 
   function setActiveConcept(name: string | null): void {
     activeConcept.value = name
@@ -82,6 +87,7 @@ export const useUiStore = defineStore('ui', () => {
   }
 
   return {
+    activeModelId,
     activeConcept,
     activePerspective,
     activeView,
@@ -94,6 +100,7 @@ export const useUiStore = defineStore('ui', () => {
     showAiModal,
     activeAiTab,
     ghostFilterMode,
+    setActiveModel,
     setActiveConcept,
     setActivePerspective,
     setActiveView,
