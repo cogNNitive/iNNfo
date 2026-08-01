@@ -7,30 +7,82 @@
     v-bind="$attrs"
     @click="$emit('click', $event)"
   >
-    <IconRenderer
-      :icon="resolvedSourceIcon"
-      custom-class="shrink-0 w-3.5 h-3.5"
-      :class="[sourceAccent, isGhost ? 'opacity-60' : '']"
-    />
-    <span
-      v-if="showSourceTarget && source && target"
-      class="truncate min-w-0 leading-tight flex items-center gap-1 flex-1"
-      :class="isGhost ? 'italic' : ''"
-    >
-      <span :class="[sourceText, isGhost ? 'opacity-70 font-normal' : '']">{{ source }}</span>
-      <span v-if="label" class="text-xs text-slate-400 dark:text-slate-500 font-normal italic">{{
-        label
-      }}</span>
-      <span class="text-slate-300 dark:text-slate-600 font-normal">&rarr;</span>
-      <span :class="[targetText, isGhost ? 'opacity-70 font-normal' : '']">{{ target }}</span>
-    </span>
-    <span
-      v-else
-      class="truncate min-w-0 leading-tight flex-1"
-      :class="isGhost ? 'italic opacity-70' : ''"
-    >
-      {{ name }}
-    </span>
+    <!-- Source → Target rendered like tree concept headers (icon + colored uppercase name + element count) -->
+    <template v-if="showSourceTarget && source && target">
+      <span class="truncate min-w-0 leading-tight flex items-center gap-1.5 flex-1">
+        <span class="flex items-center gap-1 min-w-0">
+          <span class="relative shrink-0 flex items-center justify-center w-4 h-4">
+            <IconRenderer
+              :icon="getConceptMeta(source).icon"
+              fallback="folder"
+              custom-class="shrink-0"
+              :style="{ color: getConceptHex(source), width: '14px', height: '14px' }"
+            />
+          </span>
+          <span
+            class="truncate text-[11px] font-bold uppercase tracking-wider"
+            :style="{ color: getConceptHex(source) }"
+          >
+            {{ source }}
+          </span>
+          <span
+            class="text-2xs px-1.5 py-0.5 rounded-full shrink-0 font-medium tabular-nums"
+            :style="{
+              backgroundColor: getConceptHex(source) + '18',
+              color: getConceptHex(source),
+            }"
+            :data-testid="'matrix-pill-source-count-' + name"
+          >
+            {{ getConceptElementCount(source) }}
+          </span>
+        </span>
+        <span v-if="label" class="text-xs text-slate-400 dark:text-slate-500 font-normal italic">{{
+          label
+        }}</span>
+        <span class="text-slate-300 dark:text-slate-600 font-normal shrink-0">&rarr;</span>
+        <span class="flex items-center gap-1 min-w-0">
+          <span class="relative shrink-0 flex items-center justify-center w-4 h-4">
+            <IconRenderer
+              :icon="getConceptMeta(target).icon"
+              fallback="folder"
+              custom-class="shrink-0"
+              :style="{ color: getConceptHex(target), width: '14px', height: '14px' }"
+            />
+          </span>
+          <span
+            class="truncate text-[11px] font-bold uppercase tracking-wider"
+            :style="{ color: getConceptHex(target) }"
+          >
+            {{ target }}
+          </span>
+          <span
+            class="text-2xs px-1.5 py-0.5 rounded-full shrink-0 font-medium tabular-nums"
+            :style="{
+              backgroundColor: getConceptHex(target) + '18',
+              color: getConceptHex(target),
+            }"
+            :data-testid="'matrix-pill-target-count-' + name"
+          >
+            {{ getConceptElementCount(target) }}
+          </span>
+        </span>
+      </span>
+    </template>
+
+    <!-- Legacy: leading icon + matrix name -->
+    <template v-else>
+      <IconRenderer
+        :icon="resolvedSourceIcon"
+        custom-class="shrink-0 w-3.5 h-3.5"
+        :class="[sourceAccent, isGhost ? 'opacity-60' : '']"
+      />
+      <span
+        class="truncate min-w-0 leading-tight flex-1"
+        :class="isGhost ? 'italic opacity-70' : ''"
+      >
+        {{ name }}
+      </span>
+    </template>
 
     <span
       v-if="valueCount !== undefined"
@@ -53,10 +105,13 @@
 import { computed } from 'vue'
 import { ChevronRight } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
+import { useMetamodelStore } from '../../stores/metamodelStore'
 import { getColorClasses } from '../../utils/colors'
+import { getHexColor, COLOR_HEX } from '../../composables/useConceptVisuals'
 import IconRenderer from './IconRenderer.vue'
 
 const modelStore = useModelStore()
+const metamodelStore = useMetamodelStore()
 
 const props = withDefaults(
   defineProps<{
@@ -95,61 +150,45 @@ const isGhost = computed(() => {
   return false
 })
 
-// Resolve concept icon from modelStore nodes by type
-function getConceptIcon(typeName: string | undefined): string {
-  if (!typeName) return 'table-2'
+// Resolve concept icon + color from the effective metamodel (same mechanism as the tree)
+function getConceptMeta(typeName: string | undefined): { icon?: string; color?: string } {
+  if (!typeName) return {}
+  const concept = metamodelStore.getConceptByName(typeName)
+  if (concept) return { icon: concept.icon, color: concept.color }
+  return {}
+}
+
+/** Hex color for a concept type (for the colored name / icon / count badge). */
+function getConceptHex(typeName: string | undefined): string {
+  const color = getConceptMeta(typeName).color
+  return color ? getHexColor(color) : COLOR_HEX.slate
+}
+
+/** Number of element instances of a given concept type across the model. */
+function getConceptElementCount(typeName: string | undefined): number {
+  if (!typeName) return 0
   const lowerType = typeName.toLowerCase()
-  // Find first node with this type and check its localMetamodel
+  let count = 0
   for (const node of Object.values(modelStore.nodes)) {
-    if (node.conceptBinding?.name?.toLowerCase() === lowerType) {
-      return 'table-2'
-    }
-    if (node.type?.toLowerCase() === lowerType && node.localMetamodel?.concepts) {
-      const match = node.localMetamodel.concepts.find((c) => c.name.toLowerCase() === lowerType)
-      if (match?.icon) return match.icon
-    }
+    if (node.kind === 'element' && node.type?.toLowerCase() === lowerType) count++
   }
-  return 'table-2'
+  return count
 }
 
-function getConceptColor(typeName: string | undefined): string | null {
-  if (!typeName) return null
-  const lowerType = typeName.toLowerCase()
-  // Check localMetamodel of root for concept color
-  const rootId = modelStore.rootIds[0]
-  if (!rootId) return null
-  const root = modelStore.getNode(rootId)
-  if (root?.localMetamodel?.concepts) {
-    const match = root.localMetamodel.concepts.find((c) => c.name.toLowerCase() === lowerType)
-    if (match?.color) return match.color
-  }
-  return null
-}
+const resolvedSourceIcon = computed(() => getConceptMeta(props.source).icon || 'table-2')
 
-const resolvedSourceIcon = computed(() => {
-  return getConceptIcon(props.source) || 'table-2'
+const sourceAccent = computed(() => {
+  const color = getConceptMeta(props.source).color
+  const palette = color ? getColorClasses(color) : null
+  return palette?.accent || 'text-slate-400 dark:text-slate-500'
 })
-
-const sourcePalette = computed(() => {
-  const color = getConceptColor(props.source)
-  return color ? getColorClasses(color) : null
-})
-
-const targetPalette = computed(() => {
-  const color = getConceptColor(props.target)
-  return color ? getColorClasses(color) : null
-})
-
-const sourceText = computed(() => sourcePalette.value?.text || 'text-slate-600 dark:text-slate-400')
-const targetText = computed(() => targetPalette.value?.text || 'text-slate-600 dark:text-slate-400')
-const sourceAccent = computed(
-  () => sourcePalette.value?.accent || 'text-slate-400 dark:text-slate-500',
-)
 
 const chevronClasses = computed(() => {
   if (!props.interactive) return 'hidden'
-  return sourcePalette.value?.accent
-    ? `${sourcePalette.value.accent} opacity-0 group-hover:opacity-100`
+  const color = getConceptMeta(props.source).color
+  const palette = color ? getColorClasses(color) : null
+  return palette?.accent
+    ? `${palette.accent} opacity-0 group-hover:opacity-100`
     : 'text-slate-300 dark:text-slate-600 group-hover:text-primary'
 })
 
