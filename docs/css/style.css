@@ -192,11 +192,19 @@ pre,
 }
 
 .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 800;
   font-size: 20px;
   color: var(--brand-primary);
   text-decoration: none;
   letter-spacing: -0.02em;
+}
+
+.logo img {
+  height: 30px;
+  width: auto;
 }
 
 .logo span {
