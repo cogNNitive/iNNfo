@@ -37,20 +37,20 @@ model_version: "V_1-0-0"
 title: "Complex Model"
 ---
 
-# _NN Stakeholders
+# NN Stakeholders
 
-* _NN Stakeholders: Customer
-  \`\`\`yaml
-  importance: "high"
-  needs: ["speed", "accuracy"]
-  \`\`\`
+## NN Stakeholders: Customer
+
+importance:: "high"
+needs:: ["speed", "accuracy"]
+
   Customer description goes here.
   It can span multiple lines.
 
-* _NN Stakeholders: Partner
-  \`\`\`yaml
-  importance: "medium"
-  \`\`\`
+## NN Stakeholders: Partner
+
+importance:: "medium"
+
   Partner description.
 `
     const model = parseModel(modelContent)
@@ -78,19 +78,19 @@ model_version: "V_1-0-0"
 title: "Text Concept Model"
 ---
 
-# _NN index
+# NN index
 
 * [[Market size]]
 
-# _NN Market size
+# NN Market size
 
 En España fallecieron 439.146 personas en 2024 (INE).
 
 **TAM:** ~500.000 procesos de reparto anuales.
 
-# _NN Stakeholders
+# NN Stakeholders
 
-* _NN Stakeholders: Customer
+## NN Stakeholders: Customer
   Customer description.
 `
     const model = parseModel(modelContent)
@@ -114,11 +114,11 @@ model_version: "V_1-0-0"
 title: "Text Round Trip"
 ---
 
-# _NN index
+# NN index
 
 * [[Market size]]
 
-# _NN Market size
+# NN Market size
 
 En España fallecieron 439.146 personas en 2024 (INE).
 
@@ -128,7 +128,7 @@ En España fallecieron 439.146 personas en 2024 (INE).
     expect(model.rawSections!['Market size']).toContain('**TAM:**')
 
     const serialized = serializeModel(model)
-    expect(serialized).toContain('# _NN Market size')
+    expect(serialized).toContain('# NN Market size')
     expect(serialized).toContain('En España fallecieron 439.146 personas en 2024 (INE).')
     expect(serialized).toContain('**TAM:** ~500.000 procesos de reparto anuales.')
   })

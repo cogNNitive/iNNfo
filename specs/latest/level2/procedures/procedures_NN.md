@@ -1,63 +1,11 @@
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
+specification_version: "V_0-3-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/procedures/procedures_V_0-3-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  name: "iNNfo_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 title: "Procedures Template"
-concepts:
-  - name: "Work"
-    icon: "list-ordered"
-    type: "list"
-    color: "blue"
-    weight: 100
-    fields:
-      - name: "step_type"
-        type: "select"
-        options: ["task", "decision", "event"]
-      - name: "parent"
-        type: "string"
-      - name: "next"
-        type: "string"
-      - name: "condition"
-        type: "string"
-      - name: "input"
-        type: "reference"
-        target_concepts: ["Artifact"]
-      - name: "output"
-        type: "reference"
-        target_concepts: ["Artifact"]
-      - name: "output_status"
-        type: "string"
-      - name: "tool"
-        type: "reference"
-        target_concepts: ["Tools"]
-  - name: "Artifact"
-    icon: "package"
-    type: "list"
-    color: "orange"
-    weight: 80
-  - name: "Tools"
-    icon: "wrench"
-    type: "list"
-    color: "orange"
-    weight: 70
-  - name: "Roles"
-    icon: "users"
-    type: "list"
-    color: "green"
-    weight: 60
-    fields:
-      - name: "scope"
-        type: "select"
-        options: ["internal", "external"]
-
-markers:
-  - name: "complexity"
-    icon: "gauge"
-    color: "green"
-    weight: 50
 relationship_types:
   hierarchy:
     enabled: false
@@ -67,27 +15,110 @@ relationship_types:
     enabled: false
   sequence:
     enabled: true
-matrices:
-  - name: "work-roles matrix"
-    source: "Work"
-    target: "Roles"
-    values: [Responsible, Accountable, Consulted, Informed]
-
-  - name: "work-tools matrix"
-    source: "Work"
-    target: "Tools"
-    values: [Uses]
-  - name: "work-artifacts matrix"
-    source: "Work"
-    target: "Artifact"
-    values: [Creates, Modifies, Validates, Reviews]
-  - name: "item-markers matrix"
-    source: "Elements"
-    target: "Markers"
 ---
 
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
+
+# NN index
+
+* [[Work]]
+* [[Artifact]]
+* [[Tools]]
+* [[Roles]]
+
+# NN Concept Definition
+
+## NN Concept Definition: Work
+icon:: list-ordered
+type:: list
+color:: blue
+weight:: 100
+
+## NN Concept Definition: Artifact
+icon:: package
+type:: list
+color:: orange
+weight:: 80
+
+## NN Concept Definition: Tools
+icon:: wrench
+type:: list
+color:: orange
+weight:: 70
+
+## NN Concept Definition: Roles
+icon:: users
+type:: list
+color:: green
+weight:: 60
+
+# NN Field Definition
+
+## NN Field Definition: step_type
+concept:: Work
+type:: select
+options:: [task, decision, event]
+
+## NN Field Definition: parent
+concept:: Work
+type:: string
+
+## NN Field Definition: next
+concept:: Work
+type:: string
+
+## NN Field Definition: condition
+concept:: Work
+type:: string
+
+## NN Field Definition: input
+concept:: Work
+type:: reference
+target_concepts:: [Artifact]
+
+## NN Field Definition: output
+concept:: Work
+type:: reference
+target_concepts:: [Artifact]
+
+## NN Field Definition: output_status
+concept:: Work
+type:: string
+
+## NN Field Definition: tool
+concept:: Work
+type:: reference
+target_concepts:: [Tools]
+
+## NN Field Definition: scope
+concept:: Roles
+type:: select
+options:: [internal, external]
+
+# NN Marker Definition
+
+## NN Marker Definition: complexity
+icon:: gauge
+color:: green
+weight:: 50
+
+# NN Matrix Definition
+
+## NN Matrix Definition: work-roles matrix
+source:: Work
+target:: Roles
+values:: [Responsible, Accountable, Consulted, Informed]
+
+## NN Matrix Definition: work-tools matrix
+source:: Work
+target:: Tools
+values:: [Uses]
+
+## NN Matrix Definition: work-artifacts matrix
+source:: Work
+target:: Artifact
+values:: [Creates, Modifies, Validates, Reviews]
 
 # Procedures Template
 
@@ -100,7 +131,7 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 ## Objectives
 
 - Provide a complete set of concepts for workflow modeling: hierarchical procedures and steps (Work), produced artifacts (Artifact), supporting tools (Tools), and functional roles (Roles).
-- Enable RACI accountability mapping via evaluable matrices (Work â†” Roles).
+- Enable RACI accountability mapping via evaluable matrices (Work ↔ Roles).
 - Support sequential step definitions with conditional branching, tool assignment, and artifact I/O.
 - Serve as the default template for procedure and process modeling in the iNNfo ecosystem.
 
@@ -115,7 +146,6 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 | **Tools** | `list` | Software or hardware used to execute work steps |
 | **Roles** | `list` | Functional roles with accountability scope (internal/external) |
 
-
 ### Markers
 
 | Marker | Purpose |
@@ -127,7 +157,6 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 | Matrix | Source → Target | Purpose |
 |---|---|---|
 | Work-Roles | Work → Roles | RACI assignment (Responsible, Accountable, Consulted, Informed) |
-
 | Work-Tools | Work → Tools | Which tools are used by each work step |
 | Work-Artifacts | Work → Artifact | I/O relationships (Creates, Modifies, Validates, Reviews) |
 
@@ -135,10 +164,10 @@ The Procedures Template is designed for modeling repeatable workflows with clear
 
 | Type | Enabled | Representation |
 |---|---|---|
-| Hierarchy | âœ… | Implicit via Work `parent` field — root elements are procedures, children are steps |
-| Evaluable matrix | âœ… | Source→target tables with RACI params |
-| Graph edge | âŒ | Not applicable |
-| Sequence | âœ… | Via Work `next` field — hand-linked order between siblings at same level |
+| Hierarchy | ✅ | Implicit via Work `parent` field — root elements are procedures, children are steps |
+| Evaluable matrix | ✅ | Source→target tables with RACI params |
+| Graph edge | ❌ | Not applicable |
+| Sequence | ✅ | Via Work `next` field — hand-linked order between siblings at same level |
 
 ## Template
 
@@ -148,12 +177,12 @@ To create a procedures model, create a level 3 FILE mode document with:
 
 ```yaml
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_version: "V_0-3-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 level: 3
 parent_spec:
-  name: "procedures_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
+  name: "procedures_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/procedures/procedures_V_0-3-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Procedure Name>"
 ---
@@ -161,68 +190,56 @@ title: "<Procedure Name>"
 > [!NOTE]
 > This is an **iNNfo document**...
 
-# _NN index
+# NN index
 * [[Work]]
 * [[Artifact]]
 * [[Tools]]
 * [[Roles]]
 
+# NN Work
+## NN Work: Procedure Name
+next:: "Next Procedure Name"
+Procedure description.
 
-# _NN Work
-* _NN Work: Procedure Name
-  next: "Next Procedure Name"
-  Description of the overall procedure.
+## NN Work: Step Name
+parent:: "Procedure Name"
+step_type:: task
+next:: "Next Step Name"
+tool:: "Tool Name"
+Step description.
 
-* _NN Work: Step Name
-  ```yaml
-  parent: "Procedure Name"
-  step_type: "task"
-  next: "Next Step Name"
-  tool: "Tool Name"
-  ```
-  Step description.
+# NN Artifact
+## NN Artifact: Artifact Name
+Artifact description.
 
-# _NN Artifact
-* _NN Artifact: Artifact Name
-  Description of the artifact.
-
-# _NN matrices: work-roles matrix
+# NN matrices: work-roles matrix
 | Work \ Roles | Role Name |
 | :--- | :---: |
 | Step Name | Responsible |
 ```
 
+The application will resolve the `parent_spec` URL, download this template, and use its
+Concept Definitions, Field Definitions, Marker Definitions, and Matrix Definitions to
+validate and render your model.
+
 ## Examples
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/v0.2.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), YAML element fields (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
-
-### Model Directory after First Load
-
-When the sample is loaded for the first time:
-
-```
-ðŸ“ CodeReviewProcess_V_1-0-0_procedures/
-  ðŸ“„ CodeReviewProcess_V_1-0-0_procedures_NN.md
-  ðŸ“ specs/
-    ðŸ“„ procedures_V_0-2-0_NN.md
-    ðŸ“„ iNNfo_V_0-2-0_NN.md
-    ðŸ“„ defiNNe_V_0-2-0_NN.md
-```
+The official sample for this template is at `specs/v0.3.0/level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), element properties (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
 
 ### Parent Chain
 
 ```yaml
 # From the CodeReviewProcess sample:
 parent_spec:
-  name: "procedures_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/procedures/procedures_V_0-2-0_NN.md"
+  name: "procedures_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/procedures/procedures_V_0-3-0_NN.md"
 
 # This template's parent:
 parent_spec:
-  name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  name: "iNNfo_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 ```
 
 
@@ -357,4 +374,3 @@ Description of item-markers matrix.
 
 ### Prompts
 *No prompts provided.*
-

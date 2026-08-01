@@ -1,4 +1,6 @@
 import { ParsedModel, SpecDocument, ValidationResult, ValidationError } from '../types'
+import { parseModel } from '../parser'
+import { extractTemplateSchema } from '../schema'
 
 /**
  * Validates model contents against template specification (level 2).
@@ -69,9 +71,13 @@ export function validateModel(
   }
 
   const templateFm = template.frontmatter
-  const templateConcepts = templateFm.concepts ?? []
-  const templateMarkers = templateFm.markers ?? []
-  const templateMatrices = templateFm.matrices ?? []
+  // Level-2 templates declare their schema as body elements that instantiate
+  // `Concept Definition` / `Field Definition` / `Matrix Definition` /
+  // `Marker Definition`. There is no frontmatter fallback.
+  const bodySchema = extractTemplateSchema(parseModel(template.rawContent))
+  const templateConcepts = bodySchema.concepts
+  const templateMarkers = bodySchema.markers
+  const templateMatrices = bodySchema.matrices
 
   // Check concept documentation in template rawContent (R-MVW-01 & R-MVW-02)
   const rawContent = template.rawContent || ''
@@ -134,7 +140,7 @@ export function validateModel(
     if (conceptType === 'text' && elements.length > 0) {
       warnings.push({
         path: `elements.${conceptName}`,
-        message: `Text-type concept "${conceptName}" should use plain Markdown content, not element markers (* _NN ${conceptName}:). Found ${elements.length} element(s).`,
+        message: `Text-type concept "${conceptName}" should use plain Markdown content, not element headings (## NN ${conceptName}:). Found ${elements.length} element(s).`,
         severity: 'warning',
       })
     }

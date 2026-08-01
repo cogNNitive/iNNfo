@@ -104,7 +104,7 @@ describe('iNNfo model with _NN markers (level 3)', () => {
     '> [!NOTE]',
     '> This is an **iNNfo document**.',
     '',
-    '# _NN index',
+    '# NN index',
     '',
     '* [[Market]]',
     '  * [[Segments]]',
@@ -112,34 +112,34 @@ describe('iNNfo model with _NN markers (level 3)', () => {
     '* [[Problems]]',
     '* [[Value propositions]]',
     '',
-    '# _NN Stakeholders',
+    '# NN Stakeholders',
     '',
-    '* _NN Stakeholders: Founder One',
+    '## NN Stakeholders: Founder One',
     '  A founder.',
-    '* _NN Stakeholders: Founder Two',
+    '## NN Stakeholders: Founder Two',
     '  Another founder.',
-    '* _NN Stakeholders: Investor',
+    '## NN Stakeholders: Investor',
     '  An investor.',
     '',
-    '# _NN Problems',
+    '# NN Problems',
     '',
-    '* _NN Problems: Problem Alpha',
+    '## NN Problems: Problem Alpha',
     '  Description of alpha.',
-    '* _NN Problems: Problem Beta',
+    '## NN Problems: Problem Beta',
     '  Description of beta.',
     '',
-    '# _NN Value propositions',
+    '# NN Value propositions',
     '',
-    '* _NN Value propositions: Prop A',
+    '## NN Value propositions: Prop A',
     '  Value prop A.',
     '',
-    '# _NN matrices: problems-value propositions matrix',
+    '# NN matrices: problems-value propositions matrix',
     '| Problems \\ Value propositions | Prop A |',
     '| :--- | :---: |',
     '| Problem Alpha | X |',
     '| Problem Beta | - |',
     '',
-    '# _NN matrices: item-markers matrix',
+    '# NN matrices: item-markers matrix',
     '| Item \\ Marker | weight |',
     '| :--- | :---: |',
     '| Problem Alpha | 9 |',
@@ -192,9 +192,9 @@ describe('iNNfo model with _NN markers (level 3)', () => {
     const { serializeModel } = await import('../src/index')
     const serialized = serializeModel(model)
     expect(serialized).toContain('spec_version: "V_0-2-0"')
-    expect(serialized).toContain('# _NN Stakeholders')
-    expect(serialized).toContain('# _NN matrices: problems-value propositions matrix')
-    expect(serialized).toContain('* _NN Stakeholders:')
+    expect(serialized).toContain('# NN Stakeholders')
+    expect(serialized).toContain('# NN matrices: problems-value propositions matrix')
+    expect(serialized).toContain('## NN Stakeholders:')
   })
 
   it('serializes and re-parses preserving full structure', async () => {
@@ -259,27 +259,27 @@ describe('validator', () => {
     '  url: "https://example.com/business"',
     '---',
     '',
-    '# _NN index',
+    '# NN index',
     '',
     '* [[Stakeholders]]',
     '',
-    '# _NN Stakeholders',
-    '* _NN Stakeholders: Alice',
+    '# NN Stakeholders',
+    '## NN Stakeholders: Alice',
     '',
   ].join('\n')
 
-  const bizTemplateContent = readSpec('level2/business/business_V_0-2-0_NN.md')
+  const bizTemplateContent = readLatestSpec('level2/business/business_NN.md')
   const bizTemplateFm = parseFrontmatter(bizTemplateContent)!
 
-  it('validates a model with _NN markers', () => {
+  it('validates a model against the migrated business template', () => {
     const model = parseModel(validModelContent)
 
     const result = validateModel(
       model,
       {
-        name: 'business_V_0-2-0',
+        name: 'business_V_0-3-0',
         level: 2,
-        parentName: 'iNNfo_V_0-2-0',
+        parentName: 'iNNfo_V_0-3-0',
         frontmatter: bizTemplateFm,
         rawContent: bizTemplateContent,
       },
@@ -300,9 +300,9 @@ describe('validator', () => {
     const result = validateModel(
       model,
       {
-        name: 'business_V_0-2-0',
+        name: 'business_V_0-3-0',
         level: 2,
-        parentName: 'iNNfo_V_0-2-0',
+        parentName: 'iNNfo_V_0-3-0',
         frontmatter: bizTemplateFm,
         rawContent: bizTemplateContent,
       },
@@ -315,18 +315,20 @@ describe('validator', () => {
 })
 
 describe('reserved names validation (R-MM-02)', () => {
-  it('rejects model with reserved concept name "Concepts"', () => {
+  it('rejects template with reserved concept name "Concepts"', () => {
     const content = [
       '---',
       'spec_version: "V_0-2-0"',
       'level: 2',
       'title: "Bad Template"',
-      'concepts:',
-      '  - name: "Concepts"',
-      '    type: "text"',
       '---',
       '',
-      '# _NN index',
+      '# NN Concept Definition',
+      '',
+      '## NN Concept Definition: Concepts',
+      'type:: text',
+      '',
+      '# NN index',
       '* [[Concepts]]',
       '',
     ].join('\n')
@@ -339,22 +341,20 @@ describe('reserved names validation (R-MM-02)', () => {
     expect(reservedCheck!.message).toMatch(/Concepts/)
   })
 
-  it('rejects model with reserved concept name "Elements"', () => {
+  it('rejects template with reserved concept name "Elements"', () => {
     const content = [
       '---',
       'spec_version: "V_0-2-0"',
-      'level: 3',
-      'model_version: "V_0-1-0"',
+      'level: 2',
       'title: "Bad Model"',
-      'parent_spec:',
-      '  name: "test_V_0-1-1"',
-      '  url: "https://example.com/test"',
-      'concepts:',
-      '  - name: "Elements"',
-      '    type: "list"',
       '---',
       '',
-      '# _NN index',
+      '# NN Concept Definition',
+      '',
+      '## NN Concept Definition: Elements',
+      'type:: list',
+      '',
+      '# NN index',
       '* [[Elements]]',
       '',
     ].join('\n')
@@ -366,18 +366,20 @@ describe('reserved names validation (R-MM-02)', () => {
     expect(reservedCheck!.message).toMatch(/Elements/)
   })
 
-  it('rejects model with reserved concept name "Markers"', () => {
+  it('rejects template with reserved concept name "Markers"', () => {
     const content = [
       '---',
       'spec_version: "V_0-2-0"',
       'level: 2',
       'title: "Bad Template"',
-      'concepts:',
-      '  - name: "Markers"',
-      '    type: "text"',
       '---',
       '',
-      '# _NN index',
+      '# NN Concept Definition',
+      '',
+      '## NN Concept Definition: Markers',
+      'type:: text',
+      '',
+      '# NN index',
       '* [[Markers]]',
       '',
     ].join('\n')
@@ -395,14 +397,17 @@ describe('reserved names validation (R-MM-02)', () => {
       'spec_version: "V_0-2-0"',
       'level: 2',
       'title: "Good Template"',
-      'concepts:',
-      '  - name: "Customer"',
-      '    type: "text"',
-      '  - name: "Product"',
-      '    type: "text"',
       '---',
       '',
-      '# _NN index',
+      '# NN Concept Definition',
+      '',
+      '## NN Concept Definition: Customer',
+      'type:: text',
+      '',
+      '## NN Concept Definition: Product',
+      'type:: text',
+      '',
+      '# NN index',
       '* [[Customer]]',
       '* [[Product]]',
       '',
@@ -435,13 +440,13 @@ describe('identity collision throws error (R-IE-02)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Duplicate]]',
       '',
-      '# _NN Components',
-      '* _NN Components: Duplicate',
+      '# NN Components',
+      '## NN Components: Duplicate',
       '  First element.',
-      '* _NN Components: Duplicate',
+      '## NN Components: Duplicate',
       '  Second element — same name.',
       '',
     ].join('\n')
@@ -470,15 +475,15 @@ describe('identity collision throws error (R-IE-02)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Review]]',
       '',
-      '# _NN Work',
-      '* _NN Work: Review',
+      '# NN Work',
+      '## NN Work: Review',
       '  First.',
       '',
-      '# _NN Steps',
-      '* _NN Steps: Review',
+      '# NN Steps',
+      '## NN Steps: Review',
       '  Second — same name across concepts.',
       '',
     ].join('\n')
@@ -503,18 +508,18 @@ describe('identity collision throws error (R-IE-02)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Work]]',
       '  * [[Review]]',
       '* [[Steps]]',
       '  * [[Review]]',
       '',
-      '# _NN Work',
-      '* _NN Work: Review',
+      '# NN Work',
+      '## NN Work: Review',
       '  First review.',
       '',
-      '# _NN Steps',
-      '* _NN Steps: Review',
+      '# NN Steps',
+      '## NN Steps: Review',
       '  Colliding review.',
       '',
     ].join('\n')
@@ -532,28 +537,35 @@ describe('applyMutation (R-IE-01)', () => {
     const content = [
       '---',
       'spec_version: "V_0-2-0"',
-      'level: 3',
+      'level: 2',
       'model_version: "V_0-0-1"',
       'title: "Test"',
       'parent_spec:',
       '  name: "test_V_0-1-1"',
       '  url: "https://example.com/test"',
-      'concepts:',
-      '  - name: "Work"',
-      '    type: "list"',
-      '    fields:',
-      '      - name: "status"',
-      '        type: "string"',
-      'markers:',
-      '  - name: "priority"',
-      '    symbol: "!"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Work]]',
       '',
-      '# _NN Work',
-      '* _NN Work: Triage',
+      '# NN Concept Definition',
+      '',
+      '## NN Concept Definition: Work',
+      'type:: list',
+      '',
+      '# NN Field Definition',
+      '',
+      '## NN Field Definition: status',
+      'concept:: Work',
+      'type:: string',
+      '',
+      '# NN Marker Definition',
+      '',
+      '## NN Marker Definition: priority',
+      'symbol:: !',
+      '',
+      '# NN Work',
+      '## NN Work: Triage',
       '  First element.',
       '',
     ].join('\n')
@@ -564,7 +576,7 @@ describe('applyMutation (R-IE-01)', () => {
     const model = makeModel()
     const result = applyMutation(model, 'add_concept', { conceptName: 'Steps', type: 'list' })
     expect(result.success).toBe(true)
-    expect(model.frontmatter.concepts!.some((c) => c.name === 'Steps')).toBe(true)
+    expect(model.elements.get('Concept Definition')!.some((d) => d.name === 'Steps')).toBe(true)
   })
 
   it('rejects duplicate concept', () => {
@@ -616,8 +628,11 @@ describe('applyMutation (R-IE-01)', () => {
       newName: 'Task',
     })
     expect(result.success).toBe(true)
-    expect(model.frontmatter.concepts!.some((c) => c.name === 'Task')).toBe(true)
-    expect(model.frontmatter.concepts!.some((c) => c.name === 'Work')).toBe(false)
+    const defs = model.elements.get('Concept Definition')!
+    expect(defs.some((d) => d.name === 'Task')).toBe(true)
+    expect(defs.some((d) => d.name === 'Work')).toBe(false)
+    const fds = model.elements.get('Field Definition')!
+    expect(fds.every((f) => f.fields['concept'] !== 'Work')).toBe(true)
     const elements = model.elements.get('Task')
     expect(elements).toBeDefined()
     expect(elements![0].type).toBe('Task')
@@ -659,8 +674,8 @@ describe('applyMutation (R-IE-01)', () => {
       fieldType: 'string',
     })
     expect(result.success).toBe(true)
-    const concept = model.frontmatter.concepts!.find((c) => c.name === 'Work')
-    expect(concept!.fields!.some((f) => f.name === 'assignee')).toBe(true)
+    const fds = model.elements.get('Field Definition')!
+    expect(fds.some((f) => f.name === 'assignee' && f.fields['concept'] === 'Work')).toBe(true)
   })
 
   it('sets a marker', () => {
@@ -670,41 +685,46 @@ describe('applyMutation (R-IE-01)', () => {
       symbol: '!!',
     })
     expect(result.success).toBe(true)
-    expect(model.frontmatter.markers!.some((m) => m.name === 'urgency')).toBe(true)
+    expect(model.elements.get('Marker Definition')!.some((m) => m.name === 'urgency')).toBe(true)
   })
 
   it('rename_concept updates matrix declaration source/target', () => {
     const model = parseModel([
       '---',
       'spec_version: "V_0-2-0"',
-      'level: 3',
+      'level: 2',
       'model_version: "V_0-0-1"',
       'title: "Rename Concept Matrix"',
       'parent_spec:',
       '  name: "test_V_0-1-1"',
       '  url: "https://example.com/test"',
-      'concepts:',
-      '  - name: "Work"',
-      '    type: "list"',
-      '  - name: "Roles"',
-      '    type: "list"',
-      'matrices:',
-      '  - name: "work-roles matrix"',
-      '    source: "Work"',
-      '    target: "Roles"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Open PR]]',
       '* [[Reviewer]]',
       '',
-      '# _NN Work',
-      '* _NN Work: Open PR',
+      '# NN Concept Definition',
       '',
-      '# _NN Roles',
-      '* _NN Roles: Reviewer',
+      '## NN Concept Definition: Work',
+      'type:: list',
       '',
-      '# _NN matrices: work-roles matrix',
+      '## NN Concept Definition: Roles',
+      'type:: list',
+      '',
+      '# NN Matrix Definition',
+      '',
+      '## NN Matrix Definition: work-roles matrix',
+      'source:: Work',
+      'target:: Roles',
+      '',
+      '# NN Work',
+      '## NN Work: Open PR',
+      '',
+      '# NN Roles',
+      '## NN Roles: Reviewer',
+      '',
+      '# NN matrices: work-roles matrix',
       '| Work \\ Roles | Reviewer |',
       '| Open PR      | ✅ |',
       '',
@@ -713,10 +733,11 @@ describe('applyMutation (R-IE-01)', () => {
     // Rename "Work" concept to "Task"
     applyMutation(model, 'rename_concept', { conceptName: 'Work', newName: 'Task' })
 
-    const matrixDecl = model.frontmatter.matrices!.find((m) => m.name === 'work-roles matrix')
+    const mds = model.elements.get('Matrix Definition')!
+    const matrixDecl = mds.find((m) => m.name === 'work-roles matrix')
     expect(matrixDecl).toBeDefined()
     // Source and target should be updated
-    expect(matrixDecl!.source).toBe('Task')
+    expect(matrixDecl!.fields['source']).toBe('Task')
   })
 
   it('rename_element updates taxonomy entries', () => {
@@ -734,14 +755,14 @@ describe('applyMutation (R-IE-01)', () => {
       '    type: "list"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Parent]]',
       '  * [[Open PR]]',
       '',
-      '# _NN Work',
-      '* _NN Work: Parent',
+      '# NN Work',
+      '## NN Work: Parent',
       '  Top-level.',
-      '* _NN Work: Open PR',
+      '## NN Work: Open PR',
       '  Nested child.',
       '',
     ].join('\n'))
@@ -777,15 +798,15 @@ describe('CRLF line-ending handling', () => {
       'mode: "FILE"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '',
-      '* _NN index: Parent',
-      '  * _NN index: Child',
+      '* [[Parent]]',
+      '  * [[Child]]',
       '',
-      '# _NN Stakeholders',
-      '* _NN Stakeholders: First Stakeholder',
+      '# NN Stakeholders',
+      '## NN Stakeholders: First Stakeholder',
       '  Description text for the stakeholder.',
-      '* _NN Stakeholders: Second Stakeholder',
+      '## NN Stakeholders: Second Stakeholder',
       '  Another description.',
       '',
     ].join('\n')
@@ -820,25 +841,25 @@ describe('CRLF line-ending handling', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '',
       '* [[Market]]',
       '  * [[Segments]]',
       '* [[Stakeholders]]',
       '* [[Problems]]',
       '',
-      '# _NN Stakeholders',
-      '* _NN Stakeholders: S1',
-      '* _NN Stakeholders: S2',
-      '* _NN Stakeholders: S3',
-      '* _NN Stakeholders: S4',
-      '* _NN Stakeholders: S5',
-      '* _NN Stakeholders: S6',
-      '* _NN Stakeholders: S7',
+      '# NN Stakeholders',
+      '## NN Stakeholders: S1',
+      '## NN Stakeholders: S2',
+      '## NN Stakeholders: S3',
+      '## NN Stakeholders: S4',
+      '## NN Stakeholders: S5',
+      '## NN Stakeholders: S6',
+      '## NN Stakeholders: S7',
       '',
-      '# _NN Problems',
-      '* _NN Problems: P1',
-      '* _NN Problems: P2',
+      '# NN Problems',
+      '## NN Problems: P1',
+      '## NN Problems: P2',
       '',
     ].join('\n')
     const crlfContent = lfContent.replace(/\n/g, '\r\n')
@@ -867,25 +888,25 @@ describe('extended parser features', () => {
     '  url: "https://example.com/test"',
     '---',
     '',
-    '# _NN index',
+    '# NN index',
     '',
     '* [[Market]]',
     '  * [[Segments]]',
     '* [[Stakeholders]]',
     '* [[Problems]]',
     '',
-    '# _NN Stakeholders',
-    '* _NN Stakeholders: S1',
-    '* _NN Stakeholders: S2',
-    '* _NN Stakeholders: S3',
-    '* _NN Stakeholders: S4',
-    '* _NN Stakeholders: S5',
-    '* _NN Stakeholders: S6',
-    '* _NN Stakeholders: S7',
+    '# NN Stakeholders',
+    '## NN Stakeholders: S1',
+    '## NN Stakeholders: S2',
+    '## NN Stakeholders: S3',
+    '## NN Stakeholders: S4',
+    '## NN Stakeholders: S5',
+    '## NN Stakeholders: S6',
+    '## NN Stakeholders: S7',
     '',
-    '# _NN Problems',
-    '* _NN Problems: P1',
-    '* _NN Problems: P2',
+    '# NN Problems',
+    '## NN Problems: P1',
+    '## NN Problems: P2',
     '',
   ].join('\n')
   const model = parseModel(modelContent)
@@ -995,14 +1016,14 @@ describe('diagnostic policy (R-IE-05) — slug collisions surfaced', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[My Element]]',
       '* [[my element]]',
       '',
-      '# _NN Components',
-      '* _NN Components: My Element',
+      '# NN Components',
+      '## NN Components: My Element',
       '  First one.',
-      '* _NN Components: my element',
+      '## NN Components: my element',
       '  Second one — same slug.',
       '',
     ].join('\n')
@@ -1032,17 +1053,17 @@ describe('validateReferences (R-IE-04)', () => {
       '    target: "Roles"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Open PR]]',
       '* [[Reviewer]]',
       '',
-      '# _NN Work',
-      '* _NN Work: Open PR',
+      '# NN Work',
+      '## NN Work: Open PR',
       '',
-      '# _NN Roles',
-      '* _NN Roles: Reviewer',
+      '# NN Roles',
+      '## NN Roles: Reviewer',
       '',
-      '# _NN matrices: work-roles matrix',
+      '# NN matrices: work-roles matrix',
       '| Work \\ Roles | Reviewer |',
       '| Open PR      | ✅ |',
       '| NonExistent  | ✅ |',
@@ -1071,17 +1092,17 @@ describe('validateReferences (R-IE-04)', () => {
       '    target: "Roles"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Open PR]]',
       '* [[Reviewer]]',
       '',
-      '# _NN Work',
-      '* _NN Work: Open PR',
+      '# NN Work',
+      '## NN Work: Open PR',
       '',
-      '# _NN Roles',
-      '* _NN Roles: Reviewer',
+      '# NN Roles',
+      '## NN Roles: Reviewer',
       '',
-      '# _NN matrices: work-roles matrix',
+      '# NN matrices: work-roles matrix',
       '| Work \\ Roles | Reviewer |',
       '| Open PR      | ✅ |',
       '',
@@ -1106,7 +1127,7 @@ describe('legacy params → values reader tolerance (4.5)', () => {
       '    params: "Red;Green;Blue"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Test]]',
       '',
     ].join('\n')
@@ -1131,7 +1152,7 @@ describe('legacy params → values reader tolerance (4.5)', () => {
       '    params: "Red;Green;Blue"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Test]]',
       '',
     ].join('\n')
@@ -1156,9 +1177,9 @@ describe('element slug derivation (FR-002)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN Problems',
+      '# NN Problems',
       '',
-      '* _NN Problems: My Great Element',
+      '## NN Problems: My Great Element',
       '  A description.',
       '',
     ].join('\n')
@@ -1181,13 +1202,13 @@ describe('element slug derivation (FR-002)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN Problems',
+      '# NN Problems',
       '',
-      '* _NN Problems: My Element',
-      '  ```yaml',
-      '  slug: my-custom-slug',
-      '  severity: high',
-      '  ```',
+      '## NN Problems: My Element',
+
+      'slug:: my-custom-slug',
+      'severity:: high',
+
       '  A description.',
       '',
     ].join('\n')
@@ -1243,11 +1264,11 @@ describe('element slug derivation (FR-002)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN Components',
+      '# NN Components',
       '',
-      '* _NN Components: My Element',
+      '## NN Components: My Element',
       '  First one.',
-      '* _NN Components: my element',
+      '## NN Components: my element',
       '  Second one with same slug.',
       '',
     ].join('\n')
@@ -1294,12 +1315,12 @@ describe('element slug derivation (FR-002)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[TestEl]]',
       '',
-      '# _NN Components',
+      '# NN Components',
       '',
-      '* _NN Components: Test El',
+      '## NN Components: Test El',
       '  A test element.',
       '',
     ].join('\n')
@@ -1311,7 +1332,7 @@ describe('element slug derivation (FR-002)', () => {
       'title: "Index"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '',
       '* [[test_NN.md]]',
       '',
@@ -1356,18 +1377,18 @@ describe('ConceptField.type with asset types (FR-003)', () => {
       '        type: audio',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[ScreenshotOne]]',
       '',
-      '# _NN Screenshots',
+      '# NN Screenshots',
       '',
-      '* _NN Screenshots: ScreenshotOne',
-      '  ```yaml',
-      '  screenshot: photo.png',
-      '  source: docs/report.pdf',
-      '  demo: walkthrough.mp4',
-      '  narration: voiceover.mp3',
-      '  ```',
+      '## NN Screenshots: ScreenshotOne',
+
+      'screenshot:: photo.png',
+      'source:: docs/report.pdf',
+      'demo:: walkthrough.mp4',
+      'narration:: voiceover.mp3',
+
       '  A test element with asset fields.',
       '',
     ].join('\n')
@@ -1399,12 +1420,12 @@ describe('asset_mode (FR-004)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[TestEl]]',
       '',
-      '# _NN Components',
+      '# NN Components',
       '',
-      '* _NN Components: TestEl',
+      '## NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n')
@@ -1427,12 +1448,12 @@ describe('asset_mode (FR-004)', () => {
       'asset_mode: centralized',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[TestEl]]',
       '',
-      '# _NN Components',
+      '# NN Components',
       '',
-      '* _NN Components: TestEl',
+      '## NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n')
@@ -1454,12 +1475,12 @@ describe('asset_mode (FR-004)', () => {
       'asset_mode: per-element',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[TestEl]]',
       '',
-      '# _NN Components',
+      '# NN Components',
       '',
-      '* _NN Components: TestEl',
+      '## NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n')
@@ -1500,23 +1521,26 @@ describe('asset_mode (FR-004)', () => {
       '  name: "test_V_0-1-1"',
       '  url: "https://example.com/test"',
       'asset_mode: centralized',
-      'concepts:',
-      '  - name: Screenshots',
-      '    type: text',
-      '    fields:',
-      '      - name: screenshot',
-      '        type: image',
       '---',
       '',
-      '# _NN index',
+      '# NN Concept Definition',
+      '',
+      '## NN Concept Definition: Screenshots',
+      'type:: text',
+      '',
+      '# NN Field Definition',
+      '',
+      '## NN Field Definition: screenshot',
+      'concept:: Screenshots',
+      'type:: image',
+      '',
+      '# NN index',
       '* [[ScreenshotOne]]',
       '',
-      '# _NN Screenshots',
+      '# NN Screenshots',
       '',
-      '* _NN Screenshots: ScreenshotOne',
-      '  ```yaml',
-      '  screenshot: photo.png',
-      '  ```',
+      '## NN Screenshots: ScreenshotOne',
+      'screenshot:: photo.png',
       '  A screenshot element.',
       '',
     ].join('\n')
@@ -1528,7 +1552,7 @@ describe('asset_mode (FR-004)', () => {
       'title: "Index"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '',
       '* [[test_NN.md]]',
       '',
@@ -1540,13 +1564,15 @@ describe('asset_mode (FR-004)', () => {
     ])
 
     const result = await recursiveParse(root as any)
-    const elementNodes = Object.values(result.nodes).filter((n) => n.kind === 'element')
-    expect(elementNodes.length).toBeGreaterThan(0)
+    // Locate the ScreenshotOne element (Concept Definition elements are also
+    // graph nodes, so filter by name).
+    const screenshotNode = Object.values(result.nodes).find((n) => n.name === 'ScreenshotOne')
+    expect(screenshotNode).toBeDefined()
     // The asset path for centralized: <model-dir>/assets/photo.png
     // model-dir is '' (no directory prefix in the test), so path is 'assets/photo.png'
-    expect(elementNodes[0].assets).toBeDefined()
-    expect(elementNodes[0].assets!.length).toBeGreaterThan(0)
-    expect(elementNodes[0].assets![0]).toContain('assets/photo.png')
+    expect(screenshotNode!.assets).toBeDefined()
+    expect(screenshotNode!.assets!.length).toBeGreaterThan(0)
+    expect(screenshotNode!.assets![0]).toContain('assets/photo.png')
   })
 })
 
@@ -1566,12 +1592,12 @@ describe('FOLDER mode rejection (FR-007)', () => {
       'mode: FOLDER',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[TestEl]]',
       '',
-      '# _NN Components',
+      '# NN Components',
       '',
-      '* _NN Components: TestEl',
+      '## NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n')
@@ -1595,12 +1621,12 @@ describe('FOLDER mode rejection (FR-007)', () => {
       'mode: FOLDER',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[TestEl]]',
       '',
-      '# _NN Components',
+      '# NN Components',
       '',
-      '* _NN Components: TestEl',
+      '## NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n')
@@ -1626,12 +1652,12 @@ describe('FOLDER mode rejection (FR-007)', () => {
       'mode: FOLDER',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[TestEl]]',
       '',
-      '# _NN Components',
+      '# NN Components',
       '',
-      '* _NN Components: TestEl',
+      '## NN Components: TestEl',
       '  A test.',
       '',
     ].join('\n')
@@ -1655,7 +1681,7 @@ describe('FOLDER mode rejection (FR-007)', () => {
       '  url: "https://example.com/test"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[Market]]',
       '* [[Product]]',
     ].join('\n')
@@ -1668,13 +1694,17 @@ describe('FOLDER mode rejection (FR-007)', () => {
         spec_version: 'V_0-1-1',
         spec_url: 'https://example.com/test',
         level: 2 as const,
-        concepts: [
-          { name: 'Market', type: 'weight' as const },
-          { name: 'Product', type: 'weight' as const },
-        ],
       },
       rawContent: [
         '# Test Template',
+        '',
+        '# NN Concept Definition',
+        '',
+        '## NN Concept Definition: Market',
+        'type:: weight',
+        '',
+        '## NN Concept Definition: Product',
+        'type:: weight',
         '',
         '## Market',
         '### Summary',
@@ -1786,19 +1816,19 @@ describe('matrix value-set validation (R-MM-08)', () => {
         '  url: "https://example.com/business"',
         '---',
         '',
-        '# _NN index',
+        '# NN index',
         '* [[Problems]]',
         '* [[Value propositions]]',
         '',
-        '# _NN Problems',
-        '* _NN Problems: Problem One',
+        '# NN Problems',
+        '## NN Problems: Problem One',
         '  Description.',
         '',
-        '# _NN Value propositions',
-        '* _NN Value propositions: VP One',
+        '# NN Value propositions',
+        '## NN Value propositions: VP One',
         '  Description.',
         '',
-        '# _NN matrices: problems-value propositions matrix',
+        '# NN matrices: problems-value propositions matrix',
         '| Problems \\ Value propositions | VP One |',
         '| :--- | :---: |',
         `| Problem One | ${cellValue} |`,
@@ -1815,20 +1845,26 @@ describe('matrix value-set validation (R-MM-08)', () => {
         spec_version: 'V_0-2-0',
         spec_url: 'https://example.com/business',
         level: 2 as const,
-        concepts: [
-          { name: 'Problems', type: 'weight' as const },
-          { name: 'Value propositions', type: 'weight' as const },
-        ],
-        matrices: [
-          {
-            name: 'Problems-Value propositions Matrix',
-            source: 'Problems',
-            target: 'Value propositions',
-            values: ['Max', 'Very High', 'High'],
-          },
-        ],
       },
-      rawContent: '',
+      rawContent: [
+        '# Test Template',
+        '',
+        '# NN Concept Definition',
+        '',
+        '## NN Concept Definition: Problems',
+        'type:: weight',
+        '',
+        '## NN Concept Definition: Value propositions',
+        'type:: weight',
+        '',
+        '# NN Matrix Definition',
+        '',
+        '## NN Matrix Definition: Problems-Value propositions Matrix',
+        'source:: Problems',
+        'target:: Value propositions',
+        'values:: [Max, Very High, High]',
+        '',
+      ].join('\n'),
     }
   }
 
@@ -1865,7 +1901,7 @@ describe('matrix metadata serializer round-trip', () => {
       '    description: "A test matrix."',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[A]]',
       '',
     ].join('\n')
@@ -1896,7 +1932,7 @@ describe('matrix metadata serializer round-trip', () => {
       '    params: "Low;Medium;High"',
       '---',
       '',
-      '# _NN index',
+      '# NN index',
       '* [[A]]',
       '',
     ].join('\n')

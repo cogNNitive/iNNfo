@@ -232,6 +232,62 @@
             No relations defined.
           </p>
         </div>
+
+        <!-- Selected matrix details -->
+        <div
+          v-if="selectedMatrix"
+          class="mt-3 px-2.5 py-2.5 rounded-md bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-2"
+        >
+          <div class="flex items-center gap-1.5 flex-wrap text-xs">
+            <span
+              class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider"
+              >Matrix:</span
+            >
+            <BlockPill
+              kind="concept"
+              :concept-type="selectedMatrix.source"
+              :name="selectedMatrix.source"
+              :icon="getConceptMeta(selectedMatrix.source).icon"
+              :color="getConceptMeta(selectedMatrix.source).color"
+              hide-empty
+            />
+            <span class="text-slate-400 dark:text-slate-500">&rarr;</span>
+            <BlockPill
+              kind="concept"
+              :concept-type="selectedMatrix.target"
+              :name="selectedMatrix.target"
+              :icon="getConceptMeta(selectedMatrix.target).icon"
+              :color="getConceptMeta(selectedMatrix.target).color"
+              hide-empty
+            />
+            <span
+              class="inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+            >
+              {{ selectedMatrix.widgetType }}
+            </span>
+          </div>
+
+          <div class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed" data-testid="selected-matrix-description">
+            {{ selectedMatrix.description }}
+          </div>
+
+          <div
+            v-if="Object.keys(selectedMatrixDistribution).length > 0"
+            class="flex items-center gap-1.5 flex-wrap text-xs"
+          >
+            <span
+              class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0"
+              >Values:</span
+            >
+            <span
+              v-for="(count, value) in selectedMatrixDistribution"
+              :key="value"
+              class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-bold border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+            >
+              {{ value === '-' ? '\u2014' : value }}: {{ count }}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </aside>
@@ -265,6 +321,7 @@ import { useResizablePanel } from '../../composables/useResizablePanel'
 import ConceptTreeNode from './ConceptTreeNode.vue'
 import VirtualGroupNode, { type TreeGroup } from './VirtualGroupNode.vue'
 import MatrixPill from '../editor/MatrixPill.vue'
+import BlockPill from '../editor/BlockPill.vue'
 
 const emit = defineEmits<{
   'select-node': [nodeId: string]
@@ -622,6 +679,44 @@ function getMatrixValueCount(matrixName: string): number {
     }
   }
   return count
+}
+
+/** The matrix currently shown in the matrices view. */
+const selectedMatrix = computed(() => {
+  const idx = uiStore.activeMatrixIndex
+  if (uiStore.activeView !== 'matrices' || idx < 0 || idx >= matrixDefs.value.length) return null
+  return matrixDefs.value[idx]
+})
+
+/** Value distribution over ALL cells of the selected matrix (not just visible). */
+const selectedMatrixDistribution = computed(() => {
+  if (!selectedMatrix.value) return {} as Record<string, number>
+  const counts: Record<string, number> = {}
+  const prefix = selectedMatrix.value.name + '||'
+  for (const node of Object.values(modelStore.nodes)) {
+    if (!node.fields) continue
+    for (const [key, fv] of Object.entries(node.fields)) {
+      if (!key.startsWith(prefix)) continue
+      const val = (fv as any)?.value
+      const strVal = val === undefined || val === null || val === '-' ? '-' : String(val)
+      counts[strVal] = (counts[strVal] || 0) + 1
+    }
+  }
+  return counts
+})
+
+/** Resolves the concept icon/color from the effective (template) metamodel. */
+function getConceptMeta(conceptType: string): { icon?: string; color?: string } {
+  const lower = conceptType?.toLowerCase()
+  for (const id of modelStore.rootIds) {
+    const r = modelStore.getNode(id)
+    const concepts = r?.localMetamodel?.concepts
+    if (Array.isArray(concepts)) {
+      const c = concepts.find((x) => x.name.toLowerCase() === lower)
+      if (c) return { icon: c.icon, color: c.color }
+    }
+  }
+  return {}
 }
 
 function selectMatrix(idx: number): void {

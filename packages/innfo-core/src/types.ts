@@ -366,7 +366,7 @@ export interface ModelNode {
   /**
    * Optional node-kind discriminator.
    * - 'root': the top-level node of a workspace (parentId === null).
-   * - 'concept': a `# _NN` section representing a type/group.
+   * - 'concept': a `# NN` section representing a type/group.
    * - 'element': an index-block instance.
    * Undefined means the node was created before this discriminator existed
    * (backward-compatible with existing graphs).

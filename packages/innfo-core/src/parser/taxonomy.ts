@@ -1,5 +1,5 @@
 import { TaxonomyEdge } from '../types'
-import { normalizeSource, WIKILINK_RE, INDEX_NN_RE } from './markdown'
+import { normalizeSource, WIKILINK_RE } from './markdown'
 
 export function parseIndexBlock(content: string): TaxonomyEdge[] {
   const edges: TaxonomyEdge[] = []
@@ -11,18 +11,10 @@ export function parseIndexBlock(content: string): TaxonomyEdge[] {
     if (!trimmed.startsWith('*') && !trimmed.startsWith('-')) continue
     const depth = line.search(/\S/) / 2
 
-    // Support both [[wikilinks]] and _NN index: Name syntax
-    let name: string | null = null
+    // Index items use [[wikilinks]].
     const wikiMatch = trimmed.match(WIKILINK_RE)
-    if (wikiMatch) {
-      name = wikiMatch[0].slice(2, -2)
-    } else {
-      const fMatch = trimmed.match(INDEX_NN_RE)
-      if (fMatch) {
-        name = fMatch[1].trim()
-      }
-    }
-    if (!name) continue
+    if (!wikiMatch) continue
+    const name = wikiMatch[0].slice(2, -2)
 
     while (stack.length > 0 && stack[stack.length - 1].depth >= depth) stack.pop()
 

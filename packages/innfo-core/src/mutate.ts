@@ -1,4 +1,10 @@
 import type { ParsedModel, ElementNode } from './types'
+import {
+  CONCEPT_DEFINITION,
+  FIELD_DEFINITION,
+  MARKER_DEFINITION,
+  MATRIX_DEFINITION,
+} from './schema'
 
 export interface MutationResult {
   success: boolean
@@ -88,6 +94,7 @@ export function applyMutation(
   }
 }
 
+/** A template declares concepts as `# NN Concept Definition` body elements. */
 function addConcept(model: ParsedModel, args: Record<string, unknown>): MutationResult {
   const req = requireArgs(args, ['conceptName'])
   if (!req.ok) return req.result
@@ -97,61 +104,77 @@ function addConcept(model: ParsedModel, args: Record<string, unknown>): Mutation
     return {
       success: false,
       errors: [{
-        path: 'frontmatter.concepts',
+        path: 'Concept Definition',
         message: `"${conceptName}" is a reserved pseudo-concept name and MUST NOT be declared`,
       }],
     }
   }
 
-  const concepts = model.frontmatter.concepts ?? []
-  if (concepts.some((c) => c.name.toLowerCase() === conceptName.toLowerCase())) {
+  const defs = model.elements.get(CONCEPT_DEFINITION) ?? []
+  if (defs.some((c) => c.name.toLowerCase() === conceptName.toLowerCase())) {
     return { success: false, errors: [{ path: '', message: `Concept "${conceptName}" already exists` }] }
   }
 
-  concepts.push({
-    name: conceptName,
-    type: (args.type as string) ?? 'text',
-    icon: args.icon as string | undefined,
-    color: args.color as string | undefined,
-  } as any)
-  model.frontmatter.concepts = concepts
+  const fields: Record<string, unknown> = { type: (args.type as string) ?? 'text' }
+  if (args.icon !== undefined) fields['icon'] = args.icon
+  if (args.color !== undefined) fields['color'] = args.color
+  if (args.weight !== undefined) fields['weight'] = args.weight
+  defs.push({ type: CONCEPT_DEFINITION, name: conceptName, description: '', fields, markers: {} })
+  model.elements.set(CONCEPT_DEFINITION, defs)
   return { success: true }
 }
 
+/** A template declares fields as `# NN Field Definition` elements whose
+ *  `concept` property references the owning `Concept Definition`. */
 function addField(model: ParsedModel, args: Record<string, unknown>): MutationResult {
   const req = requireArgs(args, ['conceptName', 'fieldName'])
   if (!req.ok) return req.result
   const { conceptName, fieldName } = req.values
 
-  const concepts = model.frontmatter.concepts ?? []
-  const concept = concepts.find((c) => c.name.toLowerCase() === conceptName.toLowerCase())
-  if (!concept) return { success: false, errors: [{ path: '', message: `Concept "${conceptName}" not found` }] }
+  const defs = model.elements.get(CONCEPT_DEFINITION) ?? []
+  if (!defs.some((c) => c.name.toLowerCase() === conceptName.toLowerCase())) {
+    return { success: false, errors: [{ path: '', message: `Concept "${conceptName}" not found` }] }
+  }
 
-  const fields = concept.fields ?? []
-  if (fields.some((f) => f.name.toLowerCase() === fieldName.toLowerCase())) {
+  const fds = model.elements.get(FIELD_DEFINITION) ?? []
+  if (
+    fds.some(
+      (f) =>
+        f.name.toLowerCase() === fieldName.toLowerCase() &&
+        f.fields['concept'] === conceptName,
+    )
+  ) {
     return { success: false, errors: [{ path: '', message: `Field "${fieldName}" already exists on concept "${conceptName}"` }] }
   }
 
-  fields.push({ name: fieldName, type: (args.fieldType as string) ?? 'string', options: args.options as string[] | undefined } as any)
-  concept.fields = fields
+  const fields: Record<string, unknown> = { concept: conceptName, type: (args.fieldType as string) ?? 'string' }
+  if (args.options !== undefined) fields['options'] = args.options
+  if (args.target_concepts !== undefined) fields['target_concepts'] = args.target_concepts
+  fds.push({ type: FIELD_DEFINITION, name: fieldName, description: '', fields, markers: {} })
+  model.elements.set(FIELD_DEFINITION, fds)
   return { success: true }
 }
 
+/** A template declares markers as `# NN Marker Definition` body elements. */
 function setMarker(model: ParsedModel, args: Record<string, unknown>): MutationResult {
   const req = requireArgs(args, ['markerName'])
   if (!req.ok) return req.result
   const { markerName } = req.values
 
-  const markers = model.frontmatter.markers ?? []
-  const existing = markers.find((m) => m.name.toLowerCase() === markerName.toLowerCase())
+  const defs = model.elements.get(MARKER_DEFINITION) ?? []
+  const existing = defs.find((m) => m.name.toLowerCase() === markerName.toLowerCase())
   if (existing) {
-    if (args.symbol !== undefined) existing.symbol = args.symbol as string
-    if (args.icon !== undefined) existing.icon = args.icon as string
-    if (args.color !== undefined) existing.color = args.color as string
+    if (args.symbol !== undefined) existing.fields['symbol'] = args.symbol
+    if (args.icon !== undefined) existing.fields['icon'] = args.icon
+    if (args.color !== undefined) existing.fields['color'] = args.color
   } else {
-    markers.push({ name: markerName, symbol: args.symbol as string | undefined, icon: args.icon as string | undefined, color: args.color as string | undefined })
+    const fields: Record<string, unknown> = {}
+    if (args.symbol !== undefined) fields['symbol'] = args.symbol
+    if (args.icon !== undefined) fields['icon'] = args.icon
+    if (args.color !== undefined) fields['color'] = args.color
+    defs.push({ type: MARKER_DEFINITION, name: markerName, description: '', fields, markers: {} })
   }
-  model.frontmatter.markers = markers
+  model.elements.set(MARKER_DEFINITION, defs)
   return { success: true }
 }
 
@@ -196,6 +219,8 @@ function removeElement(model: ParsedModel, args: Record<string, unknown>): Mutat
   return { success: true }
 }
 
+/** Renames a `Concept Definition` element, re-pointing its `Field Definition`
+ *  and `Matrix Definition` elements, taxonomy edges, and rawSections. */
 function renameConcept(model: ParsedModel, args: Record<string, unknown>): MutationResult {
   const req = requireArgs(args, ['conceptName', 'newName'])
   if (!req.ok) return req.result
@@ -204,7 +229,7 @@ function renameConcept(model: ParsedModel, args: Record<string, unknown>): Mutat
   if (RESERVED_CONCEPT_NAMES.has(newName)) {
     return {
       success: false,
-      errors: [{ path: 'frontmatter.concepts', message: `"${newName}" is a reserved pseudo-concept name` }],
+      errors: [{ path: 'Concept Definition', message: `"${newName}" is a reserved pseudo-concept name` }],
     }
   }
 
@@ -212,45 +237,59 @@ function renameConcept(model: ParsedModel, args: Record<string, unknown>): Mutat
   const lowerNew = newName.toLowerCase()
   if (lowerOld === lowerNew) return { success: false, errors: [{ path: '', message: 'newName must differ from conceptName' }] }
 
-  const concepts = model.frontmatter.concepts ?? []
-  const concept = concepts.find((c) => c.name.toLowerCase() === lowerOld)
-  if (!concept) return { success: false, errors: [{ path: '', message: `Concept "${conceptName}" not found in frontmatter` }] }
-  if (concepts.some((c) => c.name.toLowerCase() === lowerNew && c.name !== concept.name)) {
-    return { success: false, errors: [{ path: '', message: `Concept "${newName}" already exists in frontmatter` }] }
+  const defs = model.elements.get(CONCEPT_DEFINITION) ?? []
+  const def = defs.find((c) => c.name.toLowerCase() === lowerOld)
+  if (!def) {
+    return { success: false, errors: [{ path: '', message: `Concept "${conceptName}" not found in Concept Definition elements` }] }
   }
-  concept.name = newName
-  model.frontmatter.concepts = concepts
+  if (defs.some((c) => c.name.toLowerCase() === lowerNew && c !== def)) {
+    return { success: false, errors: [{ path: '', message: `Concept "${newName}" already exists in Concept Definition elements` }] }
+  }
+  def.name = newName
 
-  // Update elements map
+  // Re-point Field Definition owners.
+  const fds = model.elements.get(FIELD_DEFINITION) ?? []
+  for (const f of fds) {
+    if (typeof f.fields['concept'] === 'string' && f.fields['concept'].toLowerCase() === lowerOld) {
+      f.fields['concept'] = newName
+    }
+  }
+  if (fds.length > 0) model.elements.set(FIELD_DEFINITION, fds)
+
+  // Re-point Matrix Definition source/target.
+  const mds = model.elements.get(MATRIX_DEFINITION) ?? []
+  for (const m of mds) {
+    if (typeof m.fields['source'] === 'string' && m.fields['source'].toLowerCase() === lowerOld) {
+      m.fields['source'] = newName
+    }
+    if (typeof m.fields['target'] === 'string' && m.fields['target'].toLowerCase() === lowerOld) {
+      m.fields['target'] = newName
+    }
+  }
+  if (mds.length > 0) model.elements.set(MATRIX_DEFINITION, mds)
+
+  model.elements.set(CONCEPT_DEFINITION, defs)
+
+  // Rename the element group keyed by the concept name (if present).
   const nodes = model.elements.get(conceptName)
   if (nodes) {
-    for (const node of nodes) {
-      node.type = newName
-    }
+    for (const node of nodes) node.type = newName
     model.elements.set(newName, nodes)
     model.elements.delete(conceptName)
   }
 
-  // Update taxonomy edges
+  // Update taxonomy edges.
   for (const edge of model.taxonomy) {
     if (edge.parent.toLowerCase() === lowerOld) edge.parent = newName
     if (edge.child.toLowerCase() === lowerOld) edge.child = newName
   }
 
-  // Update rawSections key
+  // Update rawSections key.
   if (model.rawSections) {
     const raw = model.rawSections[conceptName]
     if (raw !== undefined) {
       delete model.rawSections[conceptName]
       model.rawSections[newName] = raw
-    }
-  }
-
-  // Update matrix declaration source/target (R-IE-03)
-  if (model.frontmatter.matrices) {
-    for (const matrix of model.frontmatter.matrices) {
-      if (matrix.source.toLowerCase() === lowerOld) matrix.source = newName
-      if (matrix.target.toLowerCase() === lowerOld) matrix.target = newName
     }
   }
 

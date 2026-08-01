@@ -55,7 +55,7 @@ function makeModel(title: string, body?: string): string {
 
 function makeIndex(wikilinks: string[]): string {
   const items = wikilinks.map((w) => `* [[${w}]]`).join('\n')
-  return `---\nspec_version: "V_0-1-2"\nlevel: 0\ntitle: "Workspace Index"\n---\n\n# _NN index\n\n${items}\n`
+  return `---\nspec_version: "V_0-1-2"\nlevel: 0\ntitle: "Workspace Index"\n---\n\n# NN index\n\n${items}\n`
 }
 
 /* ── Tests ───────────────────────────────────────────────────── */
@@ -95,15 +95,15 @@ describe('recursiveParse (index.md-driven)', () => {
       const modelContent = makeModel(
         'Test Model',
         `
-# _NN index
+# NN index
 
 * [[Problems]]
 
-# _NN Problems
+# NN Problems
 
-* _NN Problems: Problem One
+## NN Problems: Problem One
   Description of problem one.
-* _NN Problems: Problem Two
+## NN Problems: Problem Two
   Description of problem two.
 `,
       )
@@ -123,40 +123,6 @@ describe('recursiveParse (index.md-driven)', () => {
       expect(problemOne!.kind).toBe('element')
     })
 
-    it('parses the hidden marker form (`<!-- _NN -->`) identically to the visible form', async () => {
-      // Spec §8: the hidden form keeps the marker invisible in rendered
-      // Markdown while the heading/bullet text renders normally. The parser
-      // must decompose it exactly like the visible `# _NN` / `* _NN` form.
-      const modelContent = makeModel(
-        'Hidden Model',
-        `
-# <!-- _NN --> index
-
-* [[Problems]]
-
-# <!-- _NN --> Problems
-
-* <!-- _NN Problems: --> Problem One
-  Description of problem one.
-* <!-- _NN Problems: --> Problem Two
-  Description of problem two.
-`,
-      )
-
-      const root = fakeDir('workspace', [
-        ['index.md', fakeFile('index.md', makeIndex(['hidden_NN.md']))],
-        ['hidden_NN.md', fakeFile('hidden_NN.md', modelContent)],
-      ])
-
-      const result = await recursiveParse(root)
-      expect(result.issues).toHaveLength(0)
-
-      const problemOne = Object.values(result.nodes).find((n) => n.name === 'Problem One')
-      const problemTwo = Object.values(result.nodes).find((n) => n.name === 'Problem Two')
-      expect(problemOne).toBeDefined()
-      expect(problemOne!.kind).toBe('element')
-      expect(problemTwo).toBeDefined()
-    })
   })
 
   describe('FR-001: Missing index.md', () => {
@@ -234,7 +200,7 @@ describe('recursiveParse (index.md-driven)', () => {
           'broken_V_1-0-0_business_NN.md',
           fakeFile(
             'broken_V_1-0-0_business_NN.md',
-            'X---\nspec_version: "V_0-2-0"\ntitle: "Broken"\n---\n\n# _NN Business summary\n\ntext',
+            'X---\nspec_version: "V_0-2-0"\ntitle: "Broken"\n---\n\n# NN Business summary\n\ntext',
           ),
         ],
       ])
@@ -271,13 +237,13 @@ describe('recursiveParse (index.md-driven)', () => {
       const modelA = makeModel(
         'Model A',
         `
-# _NN index
+# NN index
 
 * [[Database]]
 
-# _NN Components
+# NN Components
 
-* _NN Components: Database
+## NN Components: Database
   The database component.
 `,
       )
@@ -285,13 +251,13 @@ describe('recursiveParse (index.md-driven)', () => {
       const modelB = makeModel(
         'Model B',
         `
-# _NN index
+# NN index
 
 * [[Database]]
 
-# _NN Components
+# NN Components
 
-* _NN Components: Database
+## NN Components: Database
   Another database component.
 `,
       )
@@ -319,13 +285,13 @@ describe('recursiveParse (index.md-driven)', () => {
       const modelA = makeModel(
         'Model A',
         `
-# _NN index
+# NN index
 
 * [[Users]]
 
-# _NN Components
+# NN Components
 
-* _NN Components: Users
+## NN Components: Users
   User management.
 `,
       )
@@ -333,13 +299,13 @@ describe('recursiveParse (index.md-driven)', () => {
       const modelB = makeModel(
         'Model B',
         `
-# _NN index
+# NN index
 
 * [[Orders]]
 
-# _NN Components
+# NN Components
 
-* _NN Components: Orders
+## NN Components: Orders
   Order management.
 `,
       )
@@ -365,13 +331,13 @@ describe('normalizeSingleModel', () => {
     const modelContent = makeModel(
       'Standalone Model',
       `
-# _NN index
+# NN index
 
 * [[SingleNode]]
 
-# _NN Concepts
+# NN Concepts
 
-* _NN Concepts: SingleNode
+## NN Concepts: SingleNode
   Description of single node.
 `,
     )
@@ -404,11 +370,11 @@ describe('normalizeSingleModel', () => {
     const modelContent = makeModel(
       'Text Model',
       `
-# _NN index
+# NN index
 
 * [[Market size]]
 
-# _NN Market size
+# NN Market size
 
 En España fallecieron 439.146 personas en 2024 (INE).
 
@@ -428,7 +394,7 @@ En España fallecieron 439.146 personas en 2024 (INE).
 
   it('reports an issue when a _NN-named file lacks valid iNNfo frontmatter', () => {
     const broken =
-      'X---\nspec_version: "V_0-1-2"\ntitle: "Broken"\n---\n\n# _NN Business summary\n\ntext'
+      'X---\nspec_version: "V_0-1-2"\ntitle: "Broken"\n---\n\n# NN Business summary\n\ntext'
     const { nodes, issues } = normalizeSingleModel(broken, 'broken_NN.md', 'broken_NN')
     expect(Object.keys(nodes)).toHaveLength(0)
     expect(issues.some((i) => i.message.includes('spec_version'))).toBe(true)

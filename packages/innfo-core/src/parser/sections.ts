@@ -1,12 +1,25 @@
 import { ElementNode, MatrixCell } from '../types'
-import { parseYaml } from './yaml'
 import { parseMarkdownTable } from './markdown'
 
-const NN_ELEMENT_RE = /^\s*[*-]\s+_NN\s+([\w\s-]+?):\s+(.*)$/
+/**
+ * Unified syntax (Metaplantilla Nivel 1, V_0-3-0). There is NO legacy syntax:
+ *
+ *   Concept section:  `# NN <Concept>`              (H1 heading)
+ *   Element heading:  `## NN <Concept>: <Element>`  (H2 heading)
+ *   Property line:    `key:: value`                 (immediately after the H2)
+ */
+
+/** Unified element heading: `## NN Concept: Element`. */
+const UNIFIED_ELEMENT_RE = /^\s*##\s+NN\s+([^:\n]+?):\s+(.*)$/
+
+/** Property line: `key:: value`. */
+const PROPERTY_RE = /^\s*([A-Za-z_][A-Za-z0-9_-]*)\s*::\s*(.*)$/
+
+/** Section heading marker: `NN`, followed by `matrices: name` or a bare concept name. */
+const SECTION_RE = /^NN\s+(?:(matrices):\s*(.*)|(.*))/
 
 export function sectionName(rawTitle: string): string | null {
-  // _NN syntax: `_NN ConceptName` or `_NN matrices: Name`
-  const fm = rawTitle.match(/^_NN\s+(?:(matrices):\s*(.*)|(.*))/)
+  const fm = rawTitle.match(SECTION_RE)
   if (fm) {
     if (fm[1]) return fm[1] // 'matrices'
     if (fm[3] != null) return 'concepts' // implicit 'concepts' for bare ConceptName
@@ -15,8 +28,7 @@ export function sectionName(rawTitle: string): string | null {
 }
 
 export function sectionTitle(rawTitle: string): string {
-  // _NN syntax: `_NN ConceptName` or `_NN matrices: Name`
-  const fm = rawTitle.match(/^_NN\s+(?:(matrices):\s*(.*)|(.*))/)
+  const fm = rawTitle.match(SECTION_RE)
   if (fm) {
     if (fm[2]) return fm[2].trim() // matrix name
     if (fm[3] != null) return fm[3].trim() // concept name
@@ -24,14 +36,52 @@ export function sectionTitle(rawTitle: string): string {
   return rawTitle
 }
 
-export function parseElementMarker(line: string): string | null {
-  const match = line.match(NN_ELEMENT_RE)
+/** Unified element heading parser: `## NN <Concept>: <Element>`. */
+export function parseElementHeading(line: string): string | null {
+  const match = line.match(UNIFIED_ELEMENT_RE)
   if (match) return match[2].trim()
   return null
 }
 
+/** Unified property line parser: `key:: value`. Returns `[key, value]`. */
+export function parsePropertyLine(line: string): [string, string] | null {
+  const match = line.match(PROPERTY_RE)
+  if (!match) return null
+  return [match[1], match[2].trim()]
+}
+
+/** Parses a property value into a plain JS value (arrays, numbers, booleans, quoted strings). */
+export function parsePropertyValue(raw: string): unknown {
+  const value = raw.trim()
+  if (value === '') return ''
+  if (
+    (value.startsWith('"') && value.endsWith('"') && value.length >= 2) ||
+    (value.startsWith("'") && value.endsWith("'") && value.length >= 2)
+  ) {
+    return value.slice(1, -1)
+  }
+  if (value.startsWith('[') && value.endsWith(']')) {
+    const inner = value.slice(1, -1).trim()
+    if (inner === '') return []
+    return inner.split(',').map((part) => parsePropertyValue(part.trim()))
+  }
+  if (value.startsWith('{') && value.endsWith('}')) {
+    try {
+      return JSON.parse(value)
+    } catch {
+      /* fall through to scalar parsing */
+    }
+  }
+  if (value.toLowerCase() === 'true') return true
+  if (value.toLowerCase() === 'false') return false
+  if (value.toLowerCase() === 'null') return null
+  if (/^-?\d+$/.test(value)) return parseInt(value, 10)
+  if (/^-?\d+\.\d+$/.test(value)) return parseFloat(value)
+  return value
+}
+
 export interface ParsedConceptSection {
-  /** Element instances parsed from `* _NN` markers (empty for `text` concepts). */
+  /** Element instances parsed from `## NN` headings (empty for `text` concepts). */
   elements: ElementNode[]
   /** Free-form Markdown content that precedes/falls outside any element
    *  (the full section body for `text` concepts; leading prose for others). */
@@ -44,44 +94,38 @@ export function parseConceptSection(conceptName: string, content: string): Parse
   let current: ElementNode | null = null
   let descriptionLines: string[] = []
   let leadingLines: string[] = []
-  let yamlBuffer: string[] = []
-  let inYaml = false
   let seenElement = false
 
+  const startElement = (name: string): ElementNode => {
+    if (current) {
+      current.description = descriptionLines.join('\n').trim()
+      nodes.push(current)
+    }
+    const node: ElementNode = { type: conceptName, name, description: '', fields: {}, markers: {} }
+    descriptionLines = []
+    seenElement = true
+    return node
+  }
+
   for (const line of lines) {
-    const elemName = parseElementMarker(line)
-    if (elemName !== null) {
-      if (current) {
-        current.description = descriptionLines.join('\n').trim()
-        nodes.push(current)
-      }
-      current = { type: conceptName, name: elemName, description: '', fields: {}, markers: {} }
-      descriptionLines = []
-      inYaml = false
-      seenElement = true
+    // Unified element heading: `## NN Concept: Element`
+    const headingName = parseElementHeading(line)
+    if (headingName !== null) {
+      current = startElement(headingName)
       continue
     }
 
-    if (line.trim().startsWith('```yaml')) {
-      inYaml = true
-      yamlBuffer = []
-      continue
-    }
-    if (inYaml) {
-      if (line.trim() === '```') {
-        inYaml = false
-        if (current) {
-          current.fields = parseYaml(yamlBuffer.join('\n')) as Record<string, unknown>
-          // Extract slug from fields if present (FR-002)
-          if (typeof current.fields['slug'] === 'string') {
-            current.slug = current.fields['slug'] as string
-            delete current.fields['slug']
-          }
+    // Unified property line: `key:: value` (immediately after an element heading)
+    if (current) {
+      const prop = parsePropertyLine(line)
+      if (prop !== null) {
+        if (prop[0] === 'slug') {
+          current.slug = String(prop[1])
+        } else {
+          current.fields[prop[0]] = parsePropertyValue(prop[1])
         }
         continue
       }
-      yamlBuffer.push(line)
-      continue
     }
 
     if (!line.trim().startsWith('*') && !line.trim().startsWith('-')) {

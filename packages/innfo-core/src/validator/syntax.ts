@@ -29,11 +29,11 @@ export function validateFormatSyntax(content: string): SyntaxCheck[] {
   const hasIndex = parsed.taxonomy.length > 0
   checks.push({
     id: 'syntax-index',
-    label: '_NN index section present (recommended)',
+    label: 'NN index section present (recommended)',
     passed: hasIndex,
     message: hasIndex
       ? undefined
-      : 'No _NN index found — concepts will render in declaration order. Add one to control hierarchy and ordering.',
+      : 'No NN index found — concepts will render in declaration order. Add one to control hierarchy and ordering.',
   })
 
   const hasConcepts = parsed.elements.size > 0

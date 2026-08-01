@@ -1,6 +1,7 @@
 import { ValidationCheck, ValidationReport } from '../types'
 import { parseModel } from '../parser'
 import { VERSION_RE, WIKILINK_RE, SECTION_NN_RE } from './constants'
+import { CONCEPT_DEFINITION } from '../schema'
 
 /**
  * Validates iNNfo document content (frontmatter + body syntax + conventions).
@@ -21,12 +22,14 @@ export function validateFormatContent(
   const fm = parsed.frontmatter
 
   // ── R-MM-02: Reject reserved concept names ───────────────────
+  // Level-2 templates declare concepts as `# NN Concept Definition` body
+  // elements; there is no frontmatter `concepts` block anymore.
 
   const RESERVED_CONCEPT_NAMES = new Set(['Concepts', 'Elements', 'Markers'])
   const reservedViolations: string[] = []
-  for (const concept of fm.concepts ?? []) {
-    if (RESERVED_CONCEPT_NAMES.has(concept.name)) {
-      reservedViolations.push(concept.name)
+  for (const el of parsed.elements.get(CONCEPT_DEFINITION) ?? []) {
+    if (RESERVED_CONCEPT_NAMES.has(el.name)) {
+      reservedViolations.push(el.name)
     }
   }
   if (reservedViolations.length > 0) {
@@ -189,13 +192,13 @@ export function validateFormatContent(
   checks.push({
     id: 'body-index',
     label: 'Taxonomy index section',
-    description: 'Models should have a # _NN index section with [[wikilinks]] to control ordering and hierarchy',
+    description: 'Models should have a # NN index section with [[wikilinks]] to control ordering and hierarchy',
     category: 'body',
     severity: 'warning',
     passed: hasIndex,
     message: hasIndex
       ? undefined
-      : 'No _NN index section found — concepts will render in front matter declaration order. Add a # _NN index section to control ordering and hierarchy.',
+      : 'No NN index section found — concepts will render in front matter declaration order. Add a # NN index section to control ordering and hierarchy.',
   })
 
   // 9. Concept section markers
@@ -211,31 +214,28 @@ export function validateFormatContent(
     checks.push({
       id: 'body-concept-sections',
       label: 'Valid concept section markers',
-      description: 'Each concept section must use # _NN <ConceptName> syntax',
+      description: 'Each concept section must use # NN <ConceptName> syntax',
       category: 'body',
       severity: 'error',
       passed: conceptSectionCount > 0 && allValid,
       message: !allValid
-        ? 'Some section headers have invalid _NN markers'
+        ? 'Some section headers have invalid NN markers'
         : conceptSectionCount === 0
           ? 'No concept sections found (body is empty or malformed)'
           : undefined,
     })
   }
 
-  // 10. Element marker syntax
-  const visMarkerRe = /^\s*[*-]\s+_NN\s+([\w\s-]+?):\s+(.+)$/gm
-  const hidMarkerRe =
-    /^\s*[*-]\s+<!--\s+(?:_NN\s+([\w\s-]+?):|block:\s*([\w\s-]+?))\s*-->\s*(.*)$/gm
-  const visibleMarkers = [...body.matchAll(visMarkerRe)]
-  const hiddenMarkers = [...body.matchAll(hidMarkerRe)]
-  const totalMarkers = visibleMarkers.length + hiddenMarkers.length
+  // 10. Element marker syntax (unified `## NN Concept: Element` headings)
+  const headingMarkerRe = /^\s*##\s+NN\s+([^:\n]+?):\s+(.+)$/gm
+  const headingMarkers = [...body.matchAll(headingMarkerRe)]
+  const totalMarkers = headingMarkers.length
 
   const suspectLines: string[] = []
   const lines = body.split('\n')
   let inIndexSection = false
   for (const line of lines) {
-    if (/^#\s+_NN\s+index\s*$/im.test(line.trim())) {
+    if (/^#\s+NN\s+index\s*$/im.test(line.trim())) {
       inIndexSection = true
       continue
     }
@@ -244,13 +244,9 @@ export function validateFormatContent(
       else continue
     }
     const trimmed = line.trim()
-    if (
-      (trimmed.startsWith('* ') || trimmed.startsWith('- ')) &&
-      !trimmed.startsWith('* _NN ') &&
-      !trimmed.startsWith('- _NN ') &&
-      !trimmed.startsWith('* <!--') &&
-      !trimmed.startsWith('- <!--')
-    ) {
+    // A bullet inside a concept section that is not an index item looks like
+    // a misplaced element — elements MUST be `## NN Concept: Name` headings.
+    if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
       suspectLines.push(trimmed.substring(0, 60))
     }
   }
@@ -259,76 +255,16 @@ export function validateFormatContent(
     checks.push({
       id: 'body-element-markers',
       label: 'Valid element markers',
-      description:
-        'Elements must use `* _NN ConceptName: Element` or `* <!-- _NN ConceptName: --> Element` syntax',
+      description: 'Elements must use `## NN ConceptName: Element` headings',
       category: 'body',
       severity: 'error',
       passed: suspectLines.length === 0 && totalMarkers > 0,
       message:
         suspectLines.length > 0
-          ? `${suspectLines.length} bullet(s) look like elements but use wrong marker syntax:\n${suspectLines.slice(0, 3).join('\n')}`
+          ? `${suspectLines.length} bullet(s) look like elements but must use ## NN headings:\n${suspectLines.slice(0, 3).join('\n')}`
           : totalMarkers === 0
-            ? 'No _NN element markers found'
+            ? 'No NN element markers found'
             : undefined,
-    })
-  }
-
-  // 10b. Numbered-list markers (silently dropped by parser — warn the user)
-  if (hasBody) {
-    const numberedBulletRe = /^\s*\d+\.\s+_NN\s+([\w\s-]+?):\s+/gm
-    const numberedMatches = [...body.matchAll(numberedBulletRe)]
-    checks.push({
-      id: 'body-numbered-list-markers',
-      label: 'No numbered-list _NN markers',
-      description:
-        'Numbered lists (1. _NN Concept: Name) are silently ignored by the parser. Use bullet syntax (* _NN Concept: Name) instead.',
-      category: 'body',
-      severity: 'warning',
-      passed: numberedMatches.length === 0,
-      message:
-        numberedMatches.length > 0
-          ? `${numberedMatches.length} numbered _NN marker(s) detected — these are silently ignored by the parser`
-          : undefined,
-    })
-  }
-
-  // 10c. Invalid bullet characters in concept sections
-  if (hasBody) {
-    const invalidBulletLines: string[] = []
-    const bodyLines = body.split('\n')
-    let inConceptSection = false
-    for (const bl of bodyLines) {
-      const trimmed = bl.trim()
-      if (/^#\s+_NN\s+(?!index\b)/im.test(trimmed)) {
-        inConceptSection = true
-        continue
-      }
-      if (/^#\s/.test(trimmed)) {
-        inConceptSection = false
-        continue
-      }
-      if (!inConceptSection) continue
-
-      // Detect non-asterisk/hyphen bullet chars used as _NN marker lines.
-      // Only flag lines that contain _NN markers (clearly trying to be elements)
-      // with invalid bullet chars like + or > (numbered lists are handled
-      // separately by body-numbered-list-markers).
-      if (/^\s*[+>]\s+_NN\s/.test(trimmed)) {
-        invalidBulletLines.push(trimmed.substring(0, 60))
-      }
-    }
-    checks.push({
-      id: 'body-invalid-bullet-chars',
-      label: 'Valid bullet characters only (* and -)',
-      description:
-        'Element markers MUST use * (asterisk) or - (hyphen) as bullet character. + and > are invalid.',
-      category: 'body',
-      severity: 'error',
-      passed: invalidBulletLines.length === 0,
-      message:
-        invalidBulletLines.length > 0
-          ? `${invalidBulletLines.length} line(s) use invalid bullet characters:\n${invalidBulletLines.slice(0, 3).join('\n')}`
-          : undefined,
     })
   }
 

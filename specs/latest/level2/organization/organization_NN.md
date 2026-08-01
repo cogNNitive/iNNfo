@@ -1,41 +1,11 @@
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+specification_version: "V_0-3-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/organization/organization_V_0-3-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  name: "iNNfo_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 title: "Organization Template"
-concepts:
-  - name: "Organization"
-    icon: "building"
-    type: "text"
-    color: "blue"
-    weight: 100
-  - name: "Roles"
-    icon: "users"
-    type: "list"
-    color: "green"
-    weight: 60
-    fields:
-      - name: "scope"
-        type: "select"
-        options: ["internal", "external"]
-  - name: "Position"
-    icon: "briefcase"
-    type: "list"
-    color: "green"
-    weight: 50
-  - name: "Person"
-    icon: "user"
-    type: "list"
-    color: "green"
-    weight: 40
-markers:
-  - name: "complexity"
-    icon: "gauge"
-    color: "green"
-    weight: 50
 relationship_types:
   hierarchy:
     enabled: true
@@ -46,22 +16,69 @@ relationship_types:
     enabled: false
   sequence:
     enabled: false
-matrices:
-  - name: "positions-roles matrix"
-    source: "Position"
-    target: "Roles"
-    values: [Assumes]
-  - name: "persons-positions matrix"
-    source: "Person"
-    target: "Position"
-    values: [Occupies]
-  - name: "item-markers matrix"
-    source: "Elements"
-    target: "Markers"
 ---
 
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
+
+# NN index
+
+* [[Organization]]
+* [[Roles]]
+* [[Position]]
+* [[Person]]
+
+# NN Concept Definition
+
+## NN Concept Definition: Organization
+icon:: building
+type:: text
+color:: blue
+weight:: 100
+
+## NN Concept Definition: Roles
+icon:: users
+type:: list
+color:: green
+weight:: 60
+
+## NN Concept Definition: Position
+icon:: briefcase
+type:: list
+color:: green
+weight:: 50
+
+## NN Concept Definition: Person
+icon:: user
+type:: list
+color:: green
+weight:: 40
+
+# NN Field Definition
+
+## NN Field Definition: scope
+concept:: Roles
+type:: select
+options:: [internal, external]
+
+# NN Marker Definition
+
+## NN Marker Definition: complexity
+icon:: gauge
+color:: green
+weight:: 50
+
+# NN Matrix Definition
+
+## NN Matrix Definition: positions-roles matrix
+source:: Position
+target:: Roles
+values:: [Assumes]
+
+## NN Matrix Definition: persons-positions matrix
+source:: Person
+target:: Position
+values:: [Occupies]
 
 # Organization Template
 
@@ -106,10 +123,10 @@ The Organization Template is designed to model the human resource structure of a
 
 | Type | Enabled | Representation |
 |---|---|---|
-| Hierarchy | âœ… | index block (wikilinks) |
-| Evaluable matrix | âœ… | Source→target tables |
-| Graph edge | âŒ | Not applicable |
-| Sequence | âŒ | Not applicable |
+| Hierarchy | ✅ | index block (wikilinks) |
+| Evaluable matrix | ✅ | Source→target tables |
+| Graph edge | ❌ | Not applicable |
+| Sequence | ❌ | Not applicable |
 
 ## Template
 
@@ -119,12 +136,12 @@ To create an organization model, create a level 3 FILE mode document with:
 
 ```yaml
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_version: "V_0-3-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 level: 3
 parent_spec:
-  name: "organization_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/organization/organization_V_0-2-0_NN.md"
+  name: "organization_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/organization/organization_V_0-3-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Organization Name>"
 ---
@@ -132,40 +149,44 @@ title: "<Organization Name>"
 > [!NOTE]
 > This is an **iNNfo document**...
 
-# _NN index
+# NN index
 * [[Organization]]
   * [[Roles]]
   * [[Position]]
   * [[Person]]
 
-# _NN Organization
+# NN Organization
 Description of the overall organization.
 
-# _NN Roles
-* _NN Roles: Role Name
-  Description of the role.
+# NN Roles
+## NN Roles: Role Name
+Role description.
 
-# _NN Position
-* _NN Position: Position Name
-  Description of the position.
+# NN Position
+## NN Position: Position Name
+Position description.
 
-# _NN Person
-* _NN Person: Person Name
-  Description of the person.
+# NN Person
+## NN Person: Person Name
+Person description.
 
-# _NN matrices: positions-roles matrix
+# NN matrices: positions-roles matrix
 | Position \ Roles | Role Name |
 | :--- | :---: |
 | Position Name | Assumes |
 
-# _NN matrices: persons-positions matrix
+# NN matrices: persons-positions matrix
 | Person \ Position | Position Name |
 | :--- | :---: |
 | Person Name | Occupies |
 ```
 
+The application will resolve the `parent_spec` URL, download this template, and use its
+Concept Definitions, Field Definitions, Marker Definitions, and Matrix Definitions to
+validate and render your model.
+
 ## Examples
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/v0.2.0/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`. It exercises all concept types, lists, and the positions-roles and persons-positions matrices.
+The official sample for this template is at `specs/v0.3.0/level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`. It exercises all concept types, lists, and the positions-roles and persons-positions matrices.

@@ -2,6 +2,11 @@ import { ParsedModel } from '../types'
 import { stringify as yamlStringify } from 'yaml'
 import { printTaxonomyNode } from './taxonomy'
 
+/** Serializes a property value into the unified `key:: value` form. */
+function serializePropertyValue(value: unknown): string {
+  return JSON.stringify(value)
+}
+
 export function serializeModel(model: ParsedModel): string {
   const lines: string[] = []
   const fm = model.frontmatter
@@ -66,7 +71,7 @@ export function serializeModel(model: ParsedModel): string {
     }
   }
 
-  // Concept declarations (level-2 templates)
+  // Concept declarations (level-2 templates, legacy frontmatter form)
   if (fm.concepts && fm.concepts.length > 0) {
     lines.push('concepts:')
     for (const c of fm.concepts) {
@@ -78,7 +83,7 @@ export function serializeModel(model: ParsedModel): string {
     }
   }
 
-  // Marker declarations (level-2 templates)
+  // Marker declarations (level-2 templates, legacy frontmatter form)
   if (fm.markers && fm.markers.length > 0) {
     lines.push('markers:')
     for (const m of fm.markers) {
@@ -98,7 +103,7 @@ export function serializeModel(model: ParsedModel): string {
   lines.push('')
 
   if (model.taxonomy.length > 0) {
-    lines.push('# _NN index')
+    lines.push('# NN index')
     const allParents = new Set(model.taxonomy.map((e) => e.parent))
     const allChildren = new Set(model.taxonomy.map((e) => e.child))
     const rootNames = [...allParents].filter((p) => !allChildren.has(p))
@@ -109,16 +114,11 @@ export function serializeModel(model: ParsedModel): string {
   }
 
   for (const [conceptName, elementNodes] of model.elements.entries()) {
-    lines.push(`# _NN ${conceptName}`)
+    lines.push(`# NN ${conceptName}`)
     for (const node of elementNodes) {
-      const prefix = '*' // all concept types use bullet syntax — numbered lists are not supported
-      lines.push(`${prefix} _NN ${conceptName}: ${node.name}`)
-      if (Object.keys(node.fields).length > 0) {
-        lines.push('  ```yaml')
-        for (const [k, v] of Object.entries(node.fields)) {
-          lines.push(`  ${k}: ${JSON.stringify(v)}`)
-        }
-        lines.push('  ```')
+      lines.push(`## NN ${conceptName}: ${node.name}`)
+      for (const [k, v] of Object.entries(node.fields)) {
+        lines.push(`  ${k}:: ${serializePropertyValue(v)}`)
       }
       if (node.description) {
         for (const descLine of node.description.split('\n')) {
@@ -136,7 +136,7 @@ export function serializeModel(model: ParsedModel): string {
     for (const [conceptName, body] of Object.entries(model.rawSections)) {
       if (model.elements.has(conceptName)) continue
       if (!body.trim()) continue
-      lines.push(`# _NN ${conceptName}`)
+      lines.push(`# NN ${conceptName}`)
       lines.push('')
       lines.push(body)
       lines.push('')
@@ -145,7 +145,7 @@ export function serializeModel(model: ParsedModel): string {
 
   for (const matrix of model.matrices) {
     if (matrix.cells.length === 0) continue
-    lines.push(`# _NN matrices: ${matrix.name}`)
+    lines.push(`# NN matrices: ${matrix.name}`)
     const colSet = new Set(matrix.cells.map((c) => c.col))
     const rowSet = new Set(matrix.cells.map((c) => c.row))
     const cols = Array.from(colSet)
@@ -166,7 +166,7 @@ export function serializeModel(model: ParsedModel): string {
   // Node markers (item-markers matrix)
   const nodeMarkerEntries = Object.entries(model.nodeMarkers)
   if (nodeMarkerEntries.length > 0) {
-    lines.push('# _NN matrices: item-markers matrix')
+    lines.push('# NN matrices: item-markers matrix')
     // Collect all unique marker keys
     const markerKeys = new Set<string>()
     for (const [, markers] of nodeMarkerEntries) {

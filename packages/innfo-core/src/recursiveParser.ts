@@ -4,6 +4,7 @@ import { IdentityRegistry } from './identity'
 import type { DirectoryHandleLike } from './fs-types'
 import type { ModelDriver } from './driver'
 import { normalizeMatrixDecl } from './matrix'
+import { extractTemplateSchema } from './schema'
 
 const INNFO_FILE_SUFFIX = '.md'
 const INDEX_MD = 'index.md'
@@ -86,12 +87,13 @@ function nowIso(): string {
   return new Date().toISOString()
 }
 
-/** Extracts a node's own locally-declared metamodel from its frontmatter. */
+/** Extracts a node's own locally-declared metamodel from its body-level
+ *  `Concept Definition` / `Marker Definition` elements (level-2 templates
+ *  instantiate the root primitives of the Metaplantilla Nivel 1). Level-3
+ *  models declare no local metamodel. */
 function toLocalMetamodel(parsed: ParsedModel): LocalMetamodel {
-  return {
-    concepts: (parsed.frontmatter.concepts ?? []) as LocalMetamodel['concepts'],
-    markers: (parsed.frontmatter.markers ?? []) as LocalMetamodel['markers'],
-  }
+  const schema = extractTemplateSchema(parsed)
+  return { concepts: schema.concepts, markers: schema.markers }
 }
 
 function toFieldValues(fields: Record<string, unknown>): Record<string, FieldValue> {
@@ -137,7 +139,7 @@ function normalizeElementsIntoGraph(
     }
   }
 
-  // Re-sort elements by their position in the _NN index (if present).
+  // Re-sort elements by their position in the NN index (if present).
   // The index defines both hierarchy AND display order; elements not listed
   // in the index get a high sort value so they appear after indexed ones.
   if (parsed.taxonomy.length > 0) {
@@ -247,7 +249,8 @@ function resolveElementAssets(
 ): void {
   // Build a map of concept name -> asset field definitions
   const assetFieldsByConcept = new Map<string, Array<{ name: string; type: string }>>()
-  for (const concept of parsed.frontmatter.concepts ?? []) {
+  const schemaConcepts = extractTemplateSchema(parsed).concepts
+  for (const concept of schemaConcepts) {
     const assetFields = (concept.fields ?? []).filter(
       (f) => f.type === 'image' || f.type === 'file' || f.type === 'video' || f.type === 'audio',
     )

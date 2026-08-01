@@ -1,4 +1,8 @@
-﻿# iNNfo
+# iNNfo
+
+<p align="center">
+  <img src="../logo.svg" alt="iNNfo Logo" width="360">
+</p>
 
 > The hub for the iNNfo ecosystem.
 

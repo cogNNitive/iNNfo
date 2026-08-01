@@ -1,555 +1,685 @@
 ---
-specification_version: "V_0-2-1"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.1/level2/business/business_V_0-2-1_NN.md"
+specification_version: "V_0-3-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/business/business_V_0-3-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  name: "iNNfo_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 title: "Business Template"
-concepts:
-  - name: "Business summary"
-    icon: "file-text"
-    type: "text"
-    color: "blue"
-    weight: 90
-    fields:
-      - name: "status"
-        type: "select"
-        options: ["Ideation", "MVP", "Validation", "Early Revenue", "Scaling"]
-        description: "Current stage or maturity level of the business."
-      - name: "inspiration"
-        type: "string"
-        description: "Original inspiration or origin story behind the business idea."
-  - name: "Market"
-    icon: "store"
-    type: "category"
-    color: "blue"
-    weight: 90
-  - name: "Stakeholders"
-    icon: "users"
-    type: "weight"
-    color: "blue"
-    weight: 80
-    fields:
-      - name: "relationship_model"
-        type: "string"
-        description: "Strategic relationship model with the stakeholder."
-  - name: "Segments"
-    icon: "pie-chart"
-    type: "weight"
-    color: "blue"
-    weight: 70
-  - name: "Profiles"
-    icon: "user"
-    type: "weight"
-    color: "blue"
-    weight: 80
-    fields:
-      - name: "persona_notes"
-        type: "markdown_inline"
-        description: "Qualitative buyer persona details, background, and demographics."
-      - name: "relationship_type"
-        type: "string"
-        description: "Customer relationship model (e.g. Automated, Dedicated, Self-service, Community)."
-  - name: "Segmentation"
-    icon: "split"
-    type: "weight"
-    color: "blue"
-    weight: 60
-  - name: "Market trends"
-    icon: "trending-up"
-    type: "weight"
-    color: "blue"
-    weight: 20
-  - name: "Market size"
-    icon: "ruler"
-    type: "text"
-    color: "blue"
-    weight: 50
-  - name: "Competition"
-    icon: "swords"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Roles"
-    icon: "user-cog"
-    type: "weight"
-    color: "blue"
-    weight: 30
-  - name: "Problems"
-    icon: "circle-alert"
-    type: "weight"
-    color: "blue"
-    weight: 85
-  - name: "Value propositions"
-    icon: "gem"
-    type: "weight"
-    color: "blue"
-    weight: 70
-  - name: "Messages"
-    icon: "message-square"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Channels"
-    icon: "share-2"
-    type: "weight"
-    color: "blue"
-    weight: 70
-  - name: "Perceptions"
-    icon: "eye"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Emotions"
-    icon: "heart"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Behaviors"
-    icon: "activity"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Journey"
-    icon: "route"
-    type: "steps"
-    color: "blue"
-    weight: 40
-  - name: "Solutions"
-    icon: "lightbulb"
-    type: "category"
-    color: "blue"
-    weight: 90
-  - name: "Offerings"
-    icon: "shopping-bag"
-    type: "weight"
-    color: "blue"
-    weight: 80
-    fields:
-      - name: "pricing_model"
-        type: "string"
-        description: "Commercial pricing model, price points, and tier structures."
-      - name: "brochure_file"
-        type: "file"
-        description: "Commercial brochure or collateral document."
-      - name: "components_list"
-        type: "string"
-        description: "Key product/service components or modular features."
-  - name: "Features"
-    icon: "sparkles"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Roadmap"
-    icon: "map"
-    type: "steps"
-    color: "blue"
-    weight: 20
-  - name: "Marketing"
-    icon: "megaphone"
-    type: "category"
-    color: "blue"
-    weight: 60
-  - name: "Branding"
-    icon: "palette"
-    type: "text"
-    color: "blue"
-    weight: 40
-    fields:
-      - name: "brand_name"
-        type: "string"
-        description: "Official brand name and naming rationale."
-      - name: "logo_asset"
-        type: "image"
-        description: "Brand logo image asset."
-      - name: "style_guide"
-        type: "string"
-        description: "Visual identity guidelines, color palette, and design tokens."
-  - name: "Media plan"
-    icon: "newspaper"
-    type: "text"
-    color: "blue"
-    weight: 10
-  - name: "Communication"
-    icon: "message-circle"
-    type: "category"
-    color: "blue"
-    weight: 50
-  - name: "Pitch"
-    icon: "presentation"
-    type: "text"
-    color: "blue"
-    weight: 40
-  - name: "Web"
-    icon: "globe"
-    type: "text"
-    color: "blue"
-    weight: 40
-  - name: "Storytelling"
-    icon: "feather"
-    type: "text"
-    color: "blue"
-    weight: 20
-  - name: "Presentations"
-    icon: "monitor-play"
-    type: "text"
-    color: "blue"
-    weight: 35
-  - name: "Organization"
-    icon: "building-2"
-    type: "category"
-    color: "blue"
-    weight: 60
-  - name: "Business idea"
-    icon: "lightbulb"
-    type: "category"
-    color: "blue"
-    weight: 60
-  - name: "Opportunity"
-    icon: "door-open"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Business objectives"
-    icon: "target"
-    type: "category"
-    color: "blue"
-    weight: 70
-  - name: "Mission"
-    icon: "target"
-    type: "text"
-    color: "blue"
-    weight: 50
-  - name: "Vision"
-    icon: "telescope"
-    type: "text"
-    color: "blue"
-    weight: 40
-  - name: "Organizational values"
-    icon: "compass"
-    type: "weight"
-    color: "blue"
-    weight: 35
-  - name: "Organizational goals"
-    icon: "flag"
-    type: "weight"
-    color: "blue"
-    weight: 60
-  - name: "Operations"
-    icon: "settings"
-    type: "category"
-    color: "blue"
-    weight: 50
-  - name: "Activities"
-    icon: "list-checks"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Functions"
-    icon: "workflow"
-    type: "weight"
-    color: "blue"
-    weight: 30
-  - name: "Resources"
-    icon: "boxes"
-    type: "weight"
-    color: "blue"
-    weight: 30
-  - name: "Team"
-    icon: "users-round"
-    type: "category"
-    color: "blue"
-    weight: 70
-  - name: "Persons"
-    icon: "user-check"
-    type: "weight"
-    color: "blue"
-    weight: 80
-    fields:
-      - name: "position_ref"
-        type: "reference"
-        target_concepts: ["Positions"]
-        description: "Reference to the Position held by the team member."
-      - name: "compensation"
-        type: "string"
-        description: "Compensation structure, salary, equity, or incentives."
-      - name: "contributions"
-        type: "string"
-        description: "Primary contributions, role dedication, and key deliverables."
-  - name: "Positions"
-    icon: "contact"
-    type: "weight"
-    color: "blue"
-    weight: 20
-  - name: "Skills"
-    icon: "award"
-    type: "weight"
-    color: "blue"
-    weight: 30
-  - name: "Goals"
-    icon: "goal"
-    type: "weight"
-    color: "blue"
-    weight: 30
-  - name: "Project plan"
-    icon: "calendar-range"
-    type: "category"
-    color: "blue"
-    weight: 30
-  - name: "Phases"
-    icon: "layers"
-    type: "steps"
-    color: "blue"
-    weight: 20
-  - name: "Milestones"
-    icon: "milestone"
-    type: "sequence"
-    color: "blue"
-    weight: 10
-  - name: "Metrics"
-    icon: "gauge"
-    type: "weight"
-    color: "blue"
-    weight: 50
-  - name: "Finance"
-    icon: "banknote"
-    type: "category"
-    color: "blue"
-    weight: 70
-  - name: "Revenue"
-    icon: "coins"
-    type: "weight"
-    color: "blue"
-    weight: 65
-  - name: "Costs"
-    icon: "receipt"
-    type: "weight"
-    color: "blue"
-    weight: 50
-  - name: "Unit economics"
-    icon: "calculator"
-    type: "text"
-    color: "blue"
-    weight: 25
-    fields:
-      - name: "cac"
-        type: "string"
-        description: "Customer Acquisition Cost (CAC)."
-      - name: "ltv"
-        type: "string"
-        description: "Customer Life Time Value (LTV)."
-      - name: "payback_months"
-        type: "string"
-        description: "Payback period in months."
-  - name: "Funding sources"
-    icon: "landmark"
-    type: "weight"
-    color: "blue"
-    weight: 25
-  - name: "Shareholders"
-    icon: "pie-chart"
-    type: "weight"
-    color: "blue"
-    weight: 20
-  - name: "Projections"
-    icon: "line-chart"
-    type: "weight"
-    color: "blue"
-    weight: 20
-  - name: "Legal"
-    icon: "scale"
-    type: "category"
-    color: "blue"
-    weight: 40
-  - name: "Legal issues"
-    icon: "gavel"
-    type: "weight"
-    color: "blue"
-    weight: 40
-  - name: "Contracts"
-    icon: "scroll-text"
-    type: "weight"
-    color: "blue"
-    weight: 10
-  - name: "Analysis"
-    icon: "microscope"
-    type: "category"
-    color: "red"
-    weight: 80
-  - name: "Assumptions"
-    icon: "circle-help"
-    type: "weight"
-    color: "red"
-    weight: 50
-  - name: "Risks"
-    icon: "shield-alert"
-    type: "weight"
-    color: "red"
-    weight: 90
-  - name: "Challenges"
-    icon: "mountain"
-    type: "weight"
-    color: "red"
-    weight: 70
-  - name: "Suggestions"
-    icon: "messages-square"
-    type: "weight"
-    color: "red"
-    weight: 30
-  - name: "Unfair advantage"
-    icon: "zap"
-    type: "text"
-    color: "blue"
-    weight: 30
-  - name: "SWOT"
-    icon: "layout-grid"
-    type: "text"
-    color: "red"
-    weight: 10
-  - name: "Keys"
-    icon: "key-round"
-    type: "weight"
-    color: "red"
-    weight: 50
-  - name: "Validation"
-    icon: "clipboard-check"
-    type: "category"
-    color: "green"
-    weight: 90
-  - name: "Coherence"
-    icon: "link"
-    type: "weight"
-    color: "green"
-    weight: 25
-  - name: "Experiments"
-    icon: "flask-conical"
-    type: "weight"
-    color: "green"
-    weight: 40
-  - name: "Misc"
-    icon: "ellipsis"
-    type: "text"
-    color: "grey"
-    weight: 10
-markers:
-  - name: "weight"
-    symbol: "*"
-    icon: "plus"
-    color: "blue"
-  - name: "completion"
-    symbol: ">"
-    icon: "check"
-    color: "blue"
-  - name: "certainty"
-    symbol: "?"
-    icon: "help-circle"
-    color: "green"
-  - name: "priority"
-    symbol: "!"
-    icon: "flag"
-    color: "red"
-  - name: "rating"
-    symbol: "+"
-    icon: "star"
-    color: "green"
 relationship_types:
   hierarchy:
     enabled: true
-    via: "index block"
+    via: index block
   evaluable_matrix:
     enabled: true
   graph_edge:
     enabled: false
   sequence:
     enabled: true
-matrices:
-  - name: "Journey map"
-    source: "Journey"
-    target: "Emotions"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Cross-tabulates Journey steps (rows) against Emotions (columns) to score the emotional intensity of each touchpoint."
-  - name: "Segmentation-Profiles Matrix"
-    source: "Segmentation"
-    target: "Profiles"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Maps each segmentation criterion against the customer profiles it helps define."
-  - name: "Problems-Value propositions Matrix"
-    source: "Problems"
-    target: "Value propositions"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how strongly each Value proposition addresses each Problem (solution fit)."
-  - name: "Value propositions-Messages Matrix"
-    source: "Value propositions"
-    target: "Messages"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how well each Message conveys each Value proposition (message alignment)."
-  - name: "Messages-Channels Matrix"
-    source: "Messages"
-    target: "Channels"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how effective each Channel is at delivering each Message (channel strategy)."
-  - name: "Assumptions-Risks Matrix"
-    source: "Assumptions"
-    target: "Risks"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how strongly each Risk threatens each Assumption (risk assessment)."
-  - name: "Experiments-Assumptions Matrix"
-    source: "Experiments"
-    target: "Assumptions"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how much each Experiment validates each Assumption."
-  - name: "Metrics-Organizational goals Matrix"
-    source: "Metrics"
-    target: "Organizational goals"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how directly each Metric tracks each Organizational goal."
-  - name: "Features-Milestones Matrix"
-    source: "Features"
-    target: "Milestones"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how much each Feature contributes to each Milestone (release planning)."
-  - name: "Organizational values-Organizational goals Matrix"
-    source: "Organizational values"
-    target: "Organizational goals"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how strongly each Organizational value drives each Organizational goal."
-  - name: "Functions-Positions Matrix"
-    source: "Functions"
-    target: "Positions"
-    widget: "boolean"
-    values: [Assumes]
-    description: "Boolean assignment of which Position assumes responsibility for each Function."
-  - name: "Activities-Resources Matrix"
-    source: "Activities"
-    target: "Resources"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how much each Activity depends on or consumes each Resource."
-  - name: "Problems-Competition Matrix"
-    source: "Problems"
-    target: "Competition"
-    widget: "set"
-    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
-    description: "Scores how well each Competitor exploits each Problem (competitive gap analysis)."
-  - name: "item-markers matrix"
-    source: "Elements"
-    target: "Markers"
-    description: "Reserved matrix assigning Marker scores (weight, completion, certainty, priority, rating) to Elements."
 ---
 
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
+
+# NN index
+
+* [[Business summary]]
+* [[Market]]
+* [[Value propositions]]
+* [[Solutions]]
+* [[Organization]]
+* [[Finance]]
+* [[Analysis]]
+* [[Validation]]
+
+# NN Concept Definition
+
+## NN Concept Definition: Business summary
+icon:: file-text
+type:: text
+color:: blue
+weight:: 90
+
+## NN Concept Definition: Market
+icon:: store
+type:: category
+color:: blue
+weight:: 90
+
+## NN Concept Definition: Stakeholders
+icon:: users
+type:: weight
+color:: blue
+weight:: 80
+
+## NN Concept Definition: Segments
+icon:: pie-chart
+type:: weight
+color:: blue
+weight:: 70
+
+## NN Concept Definition: Profiles
+icon:: user
+type:: weight
+color:: blue
+weight:: 80
+
+## NN Concept Definition: Segmentation
+icon:: split
+type:: weight
+color:: blue
+weight:: 60
+
+## NN Concept Definition: Market trends
+icon:: trending-up
+type:: weight
+color:: blue
+weight:: 20
+
+## NN Concept Definition: Market size
+icon:: ruler
+type:: text
+color:: blue
+weight:: 50
+
+## NN Concept Definition: Competition
+icon:: swords
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Roles
+icon:: user-cog
+type:: weight
+color:: blue
+weight:: 30
+
+## NN Concept Definition: Problems
+icon:: circle-alert
+type:: weight
+color:: blue
+weight:: 85
+
+## NN Concept Definition: Value propositions
+icon:: gem
+type:: weight
+color:: blue
+weight:: 70
+
+## NN Concept Definition: Messages
+icon:: message-square
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Channels
+icon:: share-2
+type:: weight
+color:: blue
+weight:: 70
+
+## NN Concept Definition: Perceptions
+icon:: eye
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Emotions
+icon:: heart
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Behaviors
+icon:: activity
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Journey
+icon:: route
+type:: steps
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Solutions
+icon:: lightbulb
+type:: category
+color:: blue
+weight:: 90
+
+## NN Concept Definition: Offerings
+icon:: shopping-bag
+type:: weight
+color:: blue
+weight:: 80
+
+## NN Concept Definition: Features
+icon:: sparkles
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Roadmap
+icon:: map
+type:: steps
+color:: blue
+weight:: 20
+
+## NN Concept Definition: Marketing
+icon:: megaphone
+type:: category
+color:: blue
+weight:: 60
+
+## NN Concept Definition: Branding
+icon:: palette
+type:: text
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Media plan
+icon:: newspaper
+type:: text
+color:: blue
+weight:: 10
+
+## NN Concept Definition: Communication
+icon:: message-circle
+type:: category
+color:: blue
+weight:: 50
+
+## NN Concept Definition: Pitch
+icon:: presentation
+type:: text
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Web
+icon:: globe
+type:: text
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Storytelling
+icon:: feather
+type:: text
+color:: blue
+weight:: 20
+
+## NN Concept Definition: Presentations
+icon:: monitor-play
+type:: text
+color:: blue
+weight:: 35
+
+## NN Concept Definition: Organization
+icon:: building-2
+type:: category
+color:: blue
+weight:: 60
+
+## NN Concept Definition: Business idea
+icon:: lightbulb
+type:: category
+color:: blue
+weight:: 60
+
+## NN Concept Definition: Opportunity
+icon:: door-open
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Business objectives
+icon:: target
+type:: category
+color:: blue
+weight:: 70
+
+## NN Concept Definition: Mission
+icon:: target
+type:: text
+color:: blue
+weight:: 50
+
+## NN Concept Definition: Vision
+icon:: telescope
+type:: text
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Organizational values
+icon:: compass
+type:: weight
+color:: blue
+weight:: 35
+
+## NN Concept Definition: Organizational goals
+icon:: flag
+type:: weight
+color:: blue
+weight:: 60
+
+## NN Concept Definition: Operations
+icon:: settings
+type:: category
+color:: blue
+weight:: 50
+
+## NN Concept Definition: Activities
+icon:: list-checks
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Functions
+icon:: workflow
+type:: weight
+color:: blue
+weight:: 30
+
+## NN Concept Definition: Resources
+icon:: boxes
+type:: weight
+color:: blue
+weight:: 30
+
+## NN Concept Definition: Team
+icon:: users-round
+type:: category
+color:: blue
+weight:: 70
+
+## NN Concept Definition: Persons
+icon:: user-check
+type:: weight
+color:: blue
+weight:: 80
+
+## NN Concept Definition: Positions
+icon:: contact
+type:: weight
+color:: blue
+weight:: 20
+
+## NN Concept Definition: Skills
+icon:: award
+type:: weight
+color:: blue
+weight:: 30
+
+## NN Concept Definition: Goals
+icon:: goal
+type:: weight
+color:: blue
+weight:: 30
+
+## NN Concept Definition: Project plan
+icon:: calendar-range
+type:: category
+color:: blue
+weight:: 30
+
+## NN Concept Definition: Phases
+icon:: layers
+type:: steps
+color:: blue
+weight:: 20
+
+## NN Concept Definition: Milestones
+icon:: milestone
+type:: sequence
+color:: blue
+weight:: 10
+
+## NN Concept Definition: Metrics
+icon:: gauge
+type:: weight
+color:: blue
+weight:: 50
+
+## NN Concept Definition: Finance
+icon:: banknote
+type:: category
+color:: blue
+weight:: 70
+
+## NN Concept Definition: Revenue
+icon:: coins
+type:: weight
+color:: blue
+weight:: 65
+
+## NN Concept Definition: Costs
+icon:: receipt
+type:: weight
+color:: blue
+weight:: 50
+
+## NN Concept Definition: Unit economics
+icon:: calculator
+type:: text
+color:: blue
+weight:: 25
+
+## NN Concept Definition: Funding sources
+icon:: landmark
+type:: weight
+color:: blue
+weight:: 25
+
+## NN Concept Definition: Shareholders
+icon:: pie-chart
+type:: weight
+color:: blue
+weight:: 20
+
+## NN Concept Definition: Projections
+icon:: line-chart
+type:: weight
+color:: blue
+weight:: 20
+
+## NN Concept Definition: Legal
+icon:: scale
+type:: category
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Legal issues
+icon:: gavel
+type:: weight
+color:: blue
+weight:: 40
+
+## NN Concept Definition: Contracts
+icon:: scroll-text
+type:: weight
+color:: blue
+weight:: 10
+
+## NN Concept Definition: Analysis
+icon:: microscope
+type:: category
+color:: red
+weight:: 80
+
+## NN Concept Definition: Assumptions
+icon:: circle-help
+type:: weight
+color:: red
+weight:: 50
+
+## NN Concept Definition: Risks
+icon:: shield-alert
+type:: weight
+color:: red
+weight:: 90
+
+## NN Concept Definition: Challenges
+icon:: mountain
+type:: weight
+color:: red
+weight:: 70
+
+## NN Concept Definition: Suggestions
+icon:: messages-square
+type:: weight
+color:: red
+weight:: 30
+
+## NN Concept Definition: Unfair advantage
+icon:: zap
+type:: text
+color:: blue
+weight:: 30
+
+## NN Concept Definition: SWOT
+icon:: layout-grid
+type:: text
+color:: red
+weight:: 10
+
+## NN Concept Definition: Keys
+icon:: key-round
+type:: weight
+color:: red
+weight:: 50
+
+## NN Concept Definition: Validation
+icon:: clipboard-check
+type:: category
+color:: green
+weight:: 90
+
+## NN Concept Definition: Coherence
+icon:: link
+type:: weight
+color:: green
+weight:: 25
+
+## NN Concept Definition: Experiments
+icon:: flask-conical
+type:: weight
+color:: green
+weight:: 40
+
+## NN Concept Definition: Misc
+icon:: ellipsis
+type:: text
+color:: grey
+weight:: 10
+
+# NN Field Definition
+
+## NN Field Definition: status
+concept:: Business summary
+type:: select
+options:: [Ideation, MVP, Validation, Early Revenue, Scaling]
+description:: Current stage or maturity level of the business.
+
+## NN Field Definition: inspiration
+concept:: Business summary
+type:: string
+description:: Original inspiration or origin story behind the business idea.
+
+## NN Field Definition: relationship_model
+concept:: Stakeholders
+type:: string
+description:: Strategic relationship model with the stakeholder.
+
+## NN Field Definition: persona_notes
+concept:: Profiles
+type:: markdown_inline
+description:: Qualitative buyer persona details, background, and demographics.
+
+## NN Field Definition: relationship_type
+concept:: Profiles
+type:: string
+description:: Customer relationship model (e.g. Automated, Dedicated, Self-service, Community).
+
+## NN Field Definition: pricing_model
+concept:: Offerings
+type:: string
+description:: Commercial pricing model, price points, and tier structures.
+
+## NN Field Definition: brochure_file
+concept:: Offerings
+type:: file
+description:: Commercial brochure or collateral document.
+
+## NN Field Definition: components_list
+concept:: Offerings
+type:: string
+description:: Key product/service components or modular features.
+
+## NN Field Definition: brand_name
+concept:: Branding
+type:: string
+description:: Official brand name and naming rationale.
+
+## NN Field Definition: logo_asset
+concept:: Branding
+type:: image
+description:: Brand logo image asset.
+
+## NN Field Definition: style_guide
+concept:: Branding
+type:: string
+description:: Visual identity guidelines, color palette, and design tokens.
+
+## NN Field Definition: position_ref
+concept:: Persons
+type:: reference
+target_concepts:: [Positions]
+description:: Reference to the Position held by the team member.
+
+## NN Field Definition: compensation
+concept:: Persons
+type:: string
+description:: Compensation structure, salary, equity, or incentives.
+
+## NN Field Definition: contributions
+concept:: Persons
+type:: string
+description:: Primary contributions, role dedication, and key deliverables.
+
+## NN Field Definition: cac
+concept:: Unit economics
+type:: string
+description:: Customer Acquisition Cost (CAC).
+
+## NN Field Definition: ltv
+concept:: Unit economics
+type:: string
+description:: Customer Life Time Value (LTV).
+
+## NN Field Definition: payback_months
+concept:: Unit economics
+type:: string
+description:: Payback period in months.
+
+# NN Marker Definition
+
+## NN Marker Definition: weight
+symbol:: *
+icon:: plus
+color:: blue
+
+## NN Marker Definition: completion
+symbol:: >
+icon:: check
+color:: blue
+
+## NN Marker Definition: certainty
+symbol:: ?
+icon:: help-circle
+color:: green
+
+## NN Marker Definition: priority
+symbol:: !
+icon:: flag
+color:: red
+
+## NN Marker Definition: rating
+symbol:: +
+icon:: star
+color:: green
+
+# NN Matrix Definition
+
+## NN Matrix Definition: Journey map
+source:: Journey
+target:: Emotions
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Cross-tabulates Journey steps (rows) against Emotions (columns) to score the emotional intensity of each touchpoint.
+
+## NN Matrix Definition: Segmentation-Profiles Matrix
+source:: Segmentation
+target:: Profiles
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Maps each segmentation criterion against the customer profiles it helps define.
+
+## NN Matrix Definition: Problems-Value propositions Matrix
+source:: Problems
+target:: Value propositions
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how strongly each Value proposition addresses each Problem (solution fit).
+
+## NN Matrix Definition: Value propositions-Messages Matrix
+source:: Value propositions
+target:: Messages
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how well each Message conveys each Value proposition (message alignment).
+
+## NN Matrix Definition: Messages-Channels Matrix
+source:: Messages
+target:: Channels
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how effective each Channel is at delivering each Message (channel strategy).
+
+## NN Matrix Definition: Assumptions-Risks Matrix
+source:: Assumptions
+target:: Risks
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how strongly each Risk threatens each Assumption (risk assessment).
+
+## NN Matrix Definition: Experiments-Assumptions Matrix
+source:: Experiments
+target:: Assumptions
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how much each Experiment validates each Assumption.
+
+## NN Matrix Definition: Metrics-Organizational goals Matrix
+source:: Metrics
+target:: Organizational goals
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how directly each Metric tracks each Organizational goal.
+
+## NN Matrix Definition: Features-Milestones Matrix
+source:: Features
+target:: Milestones
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how much each Feature contributes to each Milestone (release planning).
+
+## NN Matrix Definition: Organizational values-Organizational goals Matrix
+source:: Organizational values
+target:: Organizational goals
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how strongly each Organizational value drives each Organizational goal.
+
+## NN Matrix Definition: Functions-Positions Matrix
+source:: Functions
+target:: Positions
+values:: [Assumes]
+widget:: boolean
+description:: Boolean assignment of which Position assumes responsibility for each Function.
+
+## NN Matrix Definition: Activities-Resources Matrix
+source:: Activities
+target:: Resources
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how much each Activity depends on or consumes each Resource.
+
+## NN Matrix Definition: Problems-Competition Matrix
+source:: Problems
+target:: Competition
+values:: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]
+widget:: set
+description:: Scores how well each Competitor exploits each Problem (competitive gap analysis).
 
 # Business Template
 
@@ -562,11 +692,13 @@ The Business Template is designed for modeling complete business strategies in a
 ## Objectives
 
 1. Provide a comprehensive set of concepts covering all major business domains: market, strategy, operations, finance, team, legal, and validation.
-2. Enable relationship mapping between concepts via evaluable matrices (Problemsâ†”Value Propositions, Assumptionsâ†”Risks, etc.).
+2. Enable relationship mapping between concepts via evaluable matrices (Problems↔Value Propositions, Assumptions↔Risks, etc.).
 3. Support both narrative (text-type) and scored (weight-type) concepts for mixed qualitative/quantitative modeling.
 4. Serve as the default template for business model authoring in the iNNfo ecosystem.
 
 ## Specification
+
+The template instantiates the four root primitives of the Metaplantilla Nivel 1: **Concept Definition**, **Field Definition**, **Matrix Definition**, and **Marker Definition**. Its schema is resolved from the body elements of this document (see the sections above), not from frontmatter blocks.
 
 ### Concepts
 
@@ -630,10 +762,10 @@ The evaluative matrices (Journey map, Solution fit, Risk assessment, etc.) use a
 
 | Type | Enabled | Representation |
 |---|---|---|
-| Hierarchy | âœ… | index block (wikilinks) |
-| Evaluable matrix | âœ… | Source→target tables |
-| Graph edge | âŒ | Not applicable |
-| Sequence | âœ… | concept type `steps` / `sequence` |
+| Hierarchy | ✅ | index block (wikilinks) |
+| Evaluable matrix | ✅ | Source→target tables |
+| Graph edge | ❌ | Not applicable |
+| Sequence | ✅ | concept type `steps` / `sequence` |
 
 ### Taxonomy Index
 
@@ -656,12 +788,12 @@ To create a business model, create a level 3 FILE mode document with:
 
 ```yaml
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_version: "V_0-3-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 level: 3
 parent_spec:
-  name: "business_V_0-2-1"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.1/level2/business/business_V_0-2-1_NN.md"
+  name: "business_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/business/business_V_0-3-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Your Business Name>"
 ---
@@ -669,7 +801,7 @@ title: "<Your Business Name>"
 > [!NOTE]
 > This is an **iNNfo document**...
 
-# _NN index
+# NN index
 * [[Market]]
   * [[Stakeholders]]
   * [[Segments]]
@@ -677,52 +809,40 @@ title: "<Your Business Name>"
     * [[Value propositions]]
 ...
 
-# _NN Business summary
+# NN Business summary
 Your business summary here.
 
-# _NN Stakeholders
-* _NN Stakeholders: Stakeholder Name
-  Description and details.
+# NN Stakeholders
+## NN Stakeholders: Stakeholder Name
+relationship_model:: Dedicated
+Description and details.
 
-# _NN matrices: problems-value propositions matrix
+# NN matrices: problems-value propositions matrix
 | Problems \ Value propositions | VP1 | VP2 |
 | :--- | :---: | :---: |
 | Problem 1 | Max | High |
 ```
 
-The application will resolve the `parent_spec` URL, download this template, and use its concepts/markers/matrices to validate and render your model.
+The application will resolve the `parent_spec` URL, download this template, and use its Concept Definitions, Field Definitions, Marker Definitions, and Matrix Definitions to validate and render your model.
 
 ## Examples
 
 ### Canonical Sample
 
-The official sample for this template is `specs/v0.2.1/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`. It exercises all concept types, two matrix types, and the index block.
-
-### Model Directory after First Load
-
-When the sample is loaded for the first time:
-
-```
-ðŸ“ Ghostbusters_V_0-1-2_business/
-  ðŸ“„ Ghostbusters_V_0-1-2_business_NN.md
-  ðŸ“ specs/
-    ðŸ“„ business_V_0-2-1_NN.md         â† this file (downloaded from parent_spec.url)
-    ðŸ“„ iNNfo_V_0-2-0_NN.md             â† downloaded from this file's parent_spec.url
-    ðŸ“„ defiNNe_V_0-2-0_NN.md           â† downloaded from iNNfo's parent_spec.url
-```
+The official sample for this template is `specs/v0.3.0/level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md`. It exercises all concept types, two matrix types, and the index block.
 
 ### Parent Chain
 
 ```yaml
 # From the Ghostbusters sample:
 parent_spec:
-  name: "business_V_0-2-1"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.1/level2/business/business_V_0-2-1_NN.md"
+  name: "business_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level2/business/business_V_0-3-0_NN.md"
 
 # This template's parent:
 parent_spec:
-  name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+  name: "iNNfo_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 ```
 
 

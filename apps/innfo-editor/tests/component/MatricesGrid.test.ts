@@ -473,20 +473,13 @@ describe('R-MM-08: matrix values, description and header pills', () => {
     setActivePinia(createPinia())
   })
 
-  it('renders the matrix description under the header', () => {
+  it('renders concept source/target names in the corner cell (not "Empty")', () => {
     setupStoreWithValuesAndDescription()
     const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
-    expect(wrapper.text()).toContain('A brief matrix explanation.')
-  })
-
-  it('renders concept source/target names in the header (not "Empty")', () => {
-    setupStoreWithValuesAndDescription()
-    const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
-    const header = wrapper.findAll('.mb-4').find((h) => h.text().includes('\u2192'))
-    expect(header).toBeTruthy()
-    expect(header!.text()).toContain('Src')
-    expect(header!.text()).toContain('Tgt')
-    expect(header!.text()).not.toContain('Empty')
+    const pills = wrapper.findAll('[data-testid="block-pill"]')
+    expect(pills[0].text()).toContain('Src')
+    expect(pills[1].text()).toContain('Tgt')
+    expect(wrapper.text()).not.toContain('Empty')
   })
 
   it('renders declared values as set widget options', async () => {
@@ -502,13 +495,11 @@ describe('R-MM-08: matrix values, description and header pills', () => {
     expect(options).toContain('Neutral')
   })
 
-  it('renders the concept icon (not a fallback question mark) in header pills', () => {
+  it('renders the concept icon (not a fallback question mark) in corner pills', () => {
     setupStoreWithMetamodelAndContent()
     const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
-    const header = wrapper.findAll('.mb-4').find((h) => h.text().includes('\u2192'))
-    expect(header).toBeTruthy()
-    expect(header!.html()).toContain('lucide-users')
-    expect(header!.html()).toContain('lucide-heart')
+    expect(wrapper.html()).toContain('lucide-users')
+    expect(wrapper.html()).toContain('lucide-heart')
   })
 
   it('row pill info popup shows the element description and fields', async () => {

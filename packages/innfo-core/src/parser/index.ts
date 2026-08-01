@@ -6,7 +6,9 @@ export { parseIndexBlock, printTaxonomyNode } from './taxonomy'
 export {
   sectionName,
   sectionTitle,
-  parseElementMarker,
+  parseElementHeading,
+  parsePropertyLine,
+  parsePropertyValue,
   parseConceptSection,
   parseMatrixSection,
   getSectionType,

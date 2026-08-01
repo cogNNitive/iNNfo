@@ -17,6 +17,16 @@ export {
 } from './parser'
 
 export {
+  CONCEPT_DEFINITION,
+  FIELD_DEFINITION,
+  MARKER_DEFINITION,
+  MATRIX_DEFINITION,
+  extractTemplateSchema,
+  extractTemplateSchemaFromContent,
+} from './schema'
+export type { TemplateSchema } from './schema'
+
+export {
   getSpecForLevel,
   getTemplate,
   getFormatSpec,

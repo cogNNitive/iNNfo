@@ -1,9 +1,7 @@
 <template>
   <div data-testid="matrices-grid" class="flex-1 flex flex-col min-h-0">
     <!-- Matrix Dropdown Selector Header -->
-    <div
-      class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3 shrink-0 mb-4 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-lg gap-3"
-    >
+    <div class="flex items-center justify-between gap-3 shrink-0 pb-2 mb-2">
       <div class="flex items-center gap-2">
         <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Select Matrix:</span>
         <div v-if="matrixDefs.length" ref="dropdownRef" class="relative">
@@ -61,47 +59,10 @@
 
     <!-- Active Matrix View -->
     <div v-else-if="activeMatrix" class="flex-1 flex flex-col min-h-0">
-      <div class="mb-4 flex items-center justify-between">
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <span
-            class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider"
-            >Matrix:</span
-          >
-          <BlockPill
-            kind="concept"
-            :concept-type="activeMatrix.source"
-            :name="activeMatrix.source"
-            :icon="getConceptMeta(activeMatrix.source).icon"
-            :color="getConceptMeta(activeMatrix.source).color"
-            hide-empty
-          />
-          <span class="text-slate-400 dark:text-slate-500">&rarr;</span>
-          <BlockPill
-            kind="concept"
-            :concept-type="activeMatrix.target"
-            :name="activeMatrix.target"
-            :icon="getConceptMeta(activeMatrix.target).icon"
-            :color="getConceptMeta(activeMatrix.target).color"
-            hide-empty
-          />
-          <Badge class="text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400">{{
-            activeMatrix.widgetType
-          }}</Badge>
-        </div>
-      </div>
-
-      <!-- Matrix description -->
-      <div
-        v-if="activeMatrix.description"
-        class="mb-3 px-3 py-2 rounded-md bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400"
-      >
-        {{ activeMatrix.description }}
-      </div>
-
       <!-- Value Distribution Card -->
       <div
         v-if="Object.keys(valueDistribution).length > 0"
-        class="mb-3 flex items-center gap-1.5 flex-wrap text-xs"
+        class="mb-2 flex items-center gap-1.5 flex-wrap text-xs"
       >
         <span
           class="font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0"
@@ -128,7 +89,7 @@
           <!-- Corner cell -->
           <div
             class="shrink-0 flex items-center gap-1 px-4 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs overflow-visible"
-            :style="{ width: FIRST_COL_WIDTH + 'px', minWidth: FIRST_COL_WIDTH + 'px', height: HEADER_HEIGHT + 'px' }"
+            :style="{ width: FIRST_COL_WIDTH + 'px', minWidth: FIRST_COL_WIDTH + 'px', height: headerHeight + 'px' }"
           >
             <BlockPill
               kind="concept"
@@ -153,7 +114,7 @@
             <div
               v-if="columns.length"
               :style="{
-                height: HEADER_HEIGHT + 'px',
+                height: headerHeight + 'px',
                 position: 'relative',
                 width: colTotalSize + 'px',
               }"
@@ -165,7 +126,7 @@
                 :style="{
                   left: 0,
                   width: colWidth + 'px',
-                  height: HEADER_HEIGHT + 'px',
+                  height: headerHeight + 'px',
                   transform: 'translateX(' + (vCol.start - scrollLeft) + 'px)',
                 }"
               >
@@ -407,14 +368,12 @@ import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import BlockPill from './BlockPill.vue'
 import MatrixPill from './MatrixPill.vue'
-import Badge from '../ui/Badge.vue'
 import { commitFieldValue } from '../../shared/provenance'
 import { normalizeMatrixDecl } from '@cognnitive/innfo-core'
 import type { MatrixWidgetType } from '@cognnitive/innfo-core'
 
 // ── Constants ──
 const ROW_HEIGHT = 48
-const HEADER_HEIGHT = 96
 const HEADER_LABEL_ROTATION = -45
 const FIRST_COL_WIDTH = 180
 const MIN_COL_WIDTH = 48
@@ -554,6 +513,14 @@ const colWidth = computed(() => {
   const match = params?.match(/colWidth:(\d+)/)
   const w = match ? parseInt(match[1]) : 120
   return Math.max(w, MIN_COL_WIDTH)
+})
+
+// ── Adaptive header height: sized so the widest rotated column pill fits ──
+const headerHeight = computed(() => {
+  const longest = columns.value.reduce((a, b) => (b.length > a.length ? b : a), '')
+  const estPillWidth = longest.length * 6.6 + 34
+  const needed = Math.ceil((estPillWidth + 26) / Math.SQRT2) + 12
+  return Math.min(Math.max(needed, 72), 200)
 })
 
 const scaleRange = computed(() => {

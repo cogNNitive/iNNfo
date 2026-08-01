@@ -1,57 +1,179 @@
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
+specification_version: "V_0-3-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
 level: 1
 parent_spec:
   name: "defiNNe_V_0-2-0"
   url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level0/defiNNe_V_0-2-0_NN.md"
-title: "iNNfo Specification"
-description: "Concrete specification for semantic modeling with concepts, elements, fields, markers, and relationships."
+title: "iNNfo Meta-template Specification"
+description: "Level-1 meta-template defining the four root primitives (Concept Definition, Field Definition, Matrix Definition, Marker Definition) and the unified NN syntax: `# NN` sections, `## NN` elements, and `key:: value` properties."
 author: "innV0 Team"
 status: "Draft"
-relationship_types:
-  - name: "hierarchy"
-    description: "Parent-child structural relationship between elements, declared in the index block"
-    representation: "index block with WikiLinks"
-  - name: "evaluable_matrix"
-    description: "N-to-M relationship evaluated on a value set between elements of two concepts"
-    representation: "Markdown source→target table with a declared value set"
-  - name: "graph_edge"
-    description: "Graph edge with optional label, weight, and arbitrary properties"
-    representation: "frontmatter graph_edges array"
-  - name: "sequence"
-    description: "Ordered sequence of steps or milestone events"
-    representation: "concept type 'steps' or 'sequence'"
 ---
 
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
 
-# iNNfo Specification
+# iNNfo Meta-template Specification
 
-## A concrete specification for semantic modeling with concepts, elements, fields, markers, and relationships
+## A concrete specification for semantic modeling with concepts, elements, fields, markers, and relationships, expressed through the unified NN syntax and a self-describing meta-template
 
 ## Philosophy
 
 iNNfo is designed around five principles:
 
 1. **Rich specs, lean models**: Specification documents (levels 0–2) are semantically rich. Models (level 3) carry only data and a parent pointer. The application resolves and caches the parent chain.
-2. **Self-describing**: Every iNNfo document is valid Markdown with YAML frontmatter. No proprietary tooling required to read it.
-3. **Relationship polymorphism**: Relationships between concepts and elements are expressed through a typed system — hierarchy, evaluable matrices, graph edges, and sequences.
-4. **Template-driven**: Every model conforms to a template that defines its valid concepts, markers, and relationship types.
+2. **Self-describing**: Every iNNfo document is valid Markdown with YAML frontmatter and the unified `NN` syntax. No proprietary tooling required to read it.
+3. **Meta-template**: The level-1 specification is itself a *meta-template*. Level-2 templates are ordinary iNNfo documents that instantiate the four root primitives — `Concept Definition`, `Field Definition`, `Matrix Definition`, and `Marker Definition` — as ordinary elements in their body. There is no separate declaration format.
+4. **Relationship polymorphism**: Relationships between concepts and elements are expressed through a typed system — hierarchy, evaluable matrices, graph edges, and sequences.
 5. **One name, one identity**: An entity is identified by its name. The name is the single source of truth; there is no separate persisted identifier.
 
 ## Objectives
 
-- Define a unified conceptual model (concepts, elements, fields, markers, relationships).
-- Provide a template system with rich semantic documentation (Philosophy, Objectives, full spec).
+- Define a unified, minimal syntax: `# NN <Concept>`, `## NN <Concept>: <Element>`, and `key:: value` properties.
+- Define the **Metaplantilla Nivel 1**: the four root primitives that every level-2 template instantiates.
+- Remove the `concepts:` / `markers:` / `matrices:` frontmatter blocks from level-2 templates; their schema is expressed as body elements.
 - Enable machine parsing, validation, and visual rendering of models via the parent chain resolver.
 - Maintain full human readability and Git-diffability.
 - Ensure that model files are lightweight and never duplicate specification content.
 
-## Specification
+## Unified Syntax
 
-### Entity Glossary
+iNNfo uses three structural markers. The `NN` token is required and distinguishes iNNfo structure from ordinary Markdown.
+
+| Construct | Syntax | Example |
+|---|---|---|
+| Concept section | `# NN <Concept>` (H1) | `# NN Stakeholders` |
+| Element | `## NN <Concept>: <Element>` (H2) | `## NN Stakeholders: Customer` |
+| Property | `key:: value` (line immediately after the element heading) | `importance:: high` |
+
+A **Concept** is a named type declared by a Template. A Concept section is introduced by an H1 heading `# NN <Concept>`.
+
+An **Element** is a single instance of a Concept, declared as an H2 heading `## NN <Concept>: <Element>` within the Concept section. The `<Concept>` token names the owning concept (it MUST match the enclosing section concept).
+
+A **Field** is a typed key-value property of an Element. Element properties are written on consecutive `key:: value` lines immediately after the `## NN` heading, before any free-form description text.
+
+```markdown
+# NN Stakeholders
+
+## NN Stakeholders: Customer
+importance:: high
+needs:: [speed, accuracy]
+Customer description text follows the properties.
+```
+
+Property values follow a small value grammar:
+
+- Plain text — `relationship_model:: Dedicated`
+- Quoted text — `brand_name:: "Acme Inc."`
+- Numbers — `weight:: 90`
+- Booleans — `published:: true`
+- Inline arrays — `options:: [Ideation, MVP, Validation]`
+- Inline objects (JSON) — `config:: {"a": 1}`
+
+There is exactly ONE syntax. Older documents that use the legacy `_NN` markers or
+fenced ```yaml blocks are not supported and MUST be migrated to the unified syntax.
+
+## Root Primitives (Metaplantilla Nivel 1)
+
+A level-2 **Template** is an iNNfo document (level 2) that instantiates the four root primitives. Each primitive is a reserved Concept name whose Elements carry the schema of the template.
+
+| Primitive | Reserved Concept | Purpose | Instantiation |
+|---|---|---|---|
+| `Concept Definition` | `# NN Concept Definition` | Declares one Concept of the template | `## NN Concept Definition: <Name>` |
+| `Field Definition` | `# NN Field Definition` | Declares one typed Field of a Concept | `## NN Field Definition: <Name>` |
+| `Marker Definition` | `# NN Marker Definition` | Declares one evaluative Marker | `## NN Marker Definition: <Name>` |
+| `Matrix Definition` | `# NN Matrix Definition` | Declares one evaluable Matrix | `## NN Matrix Definition: <Name>` |
+
+### Concept Definition
+
+Declares a Concept. The Element name is the Concept name. Allowed properties:
+
+| Property | Type | Description |
+|---|---|---|
+| `type` | `text` \| `category` \| `weight` \| `list` \| `steps` \| `sequence` | Representation of the Concept (required) |
+| `icon` | string | Lucide icon identifier |
+| `color` | string | Theme color |
+| `weight` | number | Display priority (higher = more prominent) |
+
+```markdown
+# NN Concept Definition
+
+## NN Concept Definition: Stakeholders
+icon:: users
+type:: weight
+color:: blue
+weight:: 80
+```
+
+### Field Definition
+
+Declares a typed Field of a Concept. The Element name is the Field name. Allowed properties:
+
+| Property | Type | Description |
+|---|---|---|
+| `concept` | string | Name of the owning Concept Definition (required) |
+| `type` | `string` \| `select` \| `reference` \| `markdown_inline` \| `markdown_file` \| `image` \| `file` \| `video` \| `audio` | Field type (required) |
+| `options` | array | Allowed values for `select` fields |
+| `target_concepts` | array | Target concepts for `reference` fields |
+| `description` | string | Human-readable explanation |
+
+```markdown
+# NN Field Definition
+
+## NN Field Definition: status
+concept:: Stakeholders
+type:: select
+options:: [Ideation, MVP, Validation]
+```
+
+### Marker Definition
+
+Declares an evaluative Marker scored per Element or Concept via the reserved `item-markers matrix`. The Element name is the Marker name. Allowed properties:
+
+| Property | Type | Description |
+|---|---|---|
+| `symbol` | string | Display symbol (e.g. `*`, `!`, `?`) |
+| `icon` | string | Lucide icon identifier |
+| `color` | string | Theme color |
+| `weight` | number | Display priority |
+
+```markdown
+# NN Marker Definition
+
+## NN Marker Definition: priority
+symbol:: !
+icon:: flag
+color:: red
+```
+
+### Matrix Definition
+
+Declares an evaluable Matrix. The Element name is the Matrix name. Allowed properties:
+
+| Property | Type | Description |
+|---|---|---|
+| `source` | string | Source Concept (rows) — required |
+| `target` | string | Target Concept (columns) — required |
+| `values` | array | Allowed cell values (empty cell `-` and boolean marker `X` are always accepted) |
+| `widget` | `boolean` \| `cycle` \| `scale` \| `set` \| `text` | Cell interaction widget |
+| `description` | string | Human-readable explanation |
+
+```markdown
+# NN Matrix Definition
+
+## NN Matrix Definition: problems-value propositions matrix
+source:: Problems
+target:: Value propositions
+widget:: set
+values:: [Max, Very High, High]
+```
+
+### Resolving a Template Schema
+
+An application resolves a Template's schema by parsing its body: the effective `concepts` are the elements of its `Concept Definition` sections, each Field Definition is attached to the Concept named by its `concept` property, and so on for Markers and Matrices. There is no other declaration format.
+
+## Entity Glossary
 
 iNNfo defines exactly these entities. Normative text uses only these canonical names.
 The word "node" is an implementation term (a runtime graph representation) and MUST
@@ -81,9 +203,9 @@ attribute MUST NOT be used as substitutes for the entities below.
 | Entity | Definition |
 |---|---|
 | **Specification** | A level-0 (defiNNe) or level-1 (iNNfo) document. |
-| **Template** | A level-2 document that declares the Concepts, Markers, Matrices, and Relationship Types available to its Models. |
+| **Template** | A level-2 document that instantiates the four root primitives (Concept, Field, Marker, Matrix Definitions) to declare the Concepts, Markers, Matrices, and Relationship Types available to its Models. |
 
-### Reserved Pseudo-Concepts
+## Reserved Pseudo-Concepts
 
 The names `Concepts`, `Elements`, and `Markers` are RESERVED. A Template MUST NOT
 declare a Concept with any of these names. They denote cross-cutting sets:
@@ -95,7 +217,7 @@ declare a Concept with any of these names. They denote cross-cutting sets:
 They are used as the `source`/`target` of cross-cutting matrices (for example, the
 reserved `item-markers matrix` targets `Markers`).
 
-### Identity & Naming
+## Identity & Naming
 
 The **name is the single source of truth** for identity. No slug or opaque id is
 persisted in a model file.
@@ -124,7 +246,7 @@ reference-typed field values, graph edges, and cross-model references — in a s
 transaction, then re-validate. References that are broken by out-of-application edits
 MUST be reported by the application as dangling references.
 
-### Parent Chain
+## Parent Chain
 
 iNNfo is a level 1 specification. Its `parent_spec` points to defiNNe:
 
@@ -138,15 +260,16 @@ All templates (level 2) MUST declare `parent_spec` pointing to iNNfo. All models
 (level 3) MUST declare `parent_spec` pointing to their template. Resolution follows the
 Spec Resolver Protocol defined in defiNNe.
 
-### Template Inline Restriction
+## Template Inline Restriction
 
 A level 3 model MUST NOT include `concepts`, `markers`, `matrices`, or
 `relationship_types` in its frontmatter. These are defined by the template (level 2)
-and resolved via the parent chain. The model frontmatter is limited to:
+as body elements instantiating the root primitives, and resolved via the
+parent chain. The model frontmatter is limited to:
 
 ```yaml
 ---
-specification_version: "V_0-2-0"
+specification_version: "V_0-3-0"
 specification_url: "<immutable-url>"
 level: 3
 parent_spec:
@@ -157,46 +280,12 @@ title: "..."
 ---
 ```
 
-### Conceptual Model
-
-**Template.** A Template (level 2) declares:
-- `concepts`: allowed concept names, types, icons, colors, weights, field schemas
-- `markers`: evaluative dimensions (weight, certainty, priority...)
-- `matrices`: relationship declarations between concepts (source, target, values)
-- `relationship_types`: which Relationship Types the template enables
-- Body: Philosophy, Objectives, Specification, Template, Examples
-
-**Concept.**
-
-| Field | Description |
-|---|---|
-| `name` | Unique concept name within the Model |
-| `type` | `text`, `category`, `weight`, `list`, `steps`, `sequence` |
-| `icon` | Lucide icon identifier |
-| `color` | Theme color |
-| `weight` | Display priority (higher = more prominent) |
-| `fields` | Optional field schema for the Concept's Elements |
-
-**Element.** An instance of a Concept, declared as a bullet with `* _NN <Concept>: <Name>`.
-A Concept section is introduced by an H1 heading `# _NN <Concept>` (or the hidden form
-`# <!-- _NN --> <Concept>`, where only the marker is invisible and the heading text
-renders normally). An Element MAY have Fields (YAML key-value), a Description
-(free-form Markdown), and Marker scores.
-
-**Field.** A typed key-value property of an Element. The Concept's `fields` schema
-declares each Field's name and type: `string`, `select`, `reference`, `markdown_inline`
-(inline prose), `markdown_file`, `image`, `file`, `video`, `audio`. A `reference` Field
-declares `target_concepts`. File-backed field types are defined under **Fields & Assets**.
-
-**Marker.** A named evaluative dimension declared in the template `markers`. Marker
-scores are assigned to Elements or Concepts via the reserved `item-markers matrix`.
-
-### Fields & Assets
+## Fields & Assets
 
 A Field is either **inline** or **file-backed**:
 
-- **Inline field** — the value lives in the Element's YAML (`string`, `select`,
-  `reference`) or, for prose, as `markdown_inline` content.
+- **Inline field** — the value lives in the Element's `key:: value` properties
+  (`string`, `select`, `reference`) or, for prose, as `markdown_inline` content.
 - **File-backed field** — the value is a filename; the content lives in a sidecar file.
   The file-backed types are `markdown_file`, `image`, `file`, `video`, and `audio`.
 
@@ -208,7 +297,7 @@ stored at:
 ```
 
 - `{element-slug}` is the Element's derived slug.
-- The Element's YAML field value holds the `{filename}`; the directory is derived by
+- The Element's property value holds the `{filename}`; the directory is derived by
   this convention and never stored.
 - There is exactly ONE storage convention. An application MUST resolve, scan, and write
   file-backed fields through this single rule. There is no `asset_mode` and no
@@ -222,9 +311,9 @@ a Field. There is no parallel discovery mechanism.
 **Rename.** Renaming an Element changes its `{element-slug}`; the transactional rename
 MUST relocate the Element's `assets/{element-slug}/` folder accordingly.
 
-### Relationship Types
+## Relationship Types
 
-A Template enables Relationship Types via a `relationship_types` map:
+A Template enables Relationship Types via a `relationship_types` map in its frontmatter:
 
 ```yaml
 relationship_types:
@@ -240,14 +329,14 @@ relationship_types:
 
 | Type | Meaning | Representation |
 |---|---|---|
-| `hierarchy` | Parent-child taxonomy | The `# _NN index` block (see Index Block) |
+| `hierarchy` | Parent-child taxonomy | The `# NN index` block (see Index Block) |
 | `evaluable_matrix` | N-to-M relationship on a value set | A Matrix table with a declared `values` set |
 | `graph_edge` | Labeled/weighted graph edge | frontmatter `graph_edges` array |
 | `sequence` | Ordered steps or events | Concept of type `steps` or `sequence` |
 
 Hierarchy is expressed **only** through the index block. There is no hierarchy matrix.
 
-### Model Body Syntax
+## Model Body Syntax
 
 **Document Notice (Required).** The first content in the body MUST be:
 
@@ -261,7 +350,7 @@ lists. Each list item identifies a Concept or Element using **WikiLink syntax**
 `[[Name]]`:
 
 ```markdown
-# _NN index
+# NN index
 * [[Parent Concept]]
   * [[Child Concept]]
     * [[Grandchild Concept]]
@@ -283,44 +372,44 @@ syntax depends on the Concept's `type`:
 | Type | Syntax | Description |
 |---|---|---|
 | `text` | Free-form Markdown | Single block of content, no elements |
-| `weight` | Bullet list with `_NN` markers | Multi-instance, each with optional YAML fields |
-| `list` | Bullet list with `_NN` markers | Multi-instance, each with optional YAML fields |
+| `weight` | `## NN` element headings | Multi-instance, each with optional `key:: value` properties |
+| `list` | `## NN` element headings | Multi-instance, each with optional `key:: value` properties |
 | `category` | No content block | Taxonomy-only concept; children appear in index |
-| `steps` | Bullet list with `_NN` markers | Ordered sequence of instances |
-| `sequence` | Bullet list with `_NN` markers | Ordered sequence of events |
+| `steps` | `## NN` element headings | Ordered sequence of instances |
+| `sequence` | `## NN` element headings | Ordered sequence of events |
 
-All multi-instance types use the same bullet-list Element syntax:
+All multi-instance types use the same element-heading syntax:
 
 ```markdown
-# _NN Stakeholders
-* _NN Stakeholders: Element Name
-  ```yaml
-  field1: value1
-  field2: value2
-  ```
-  Optional description text.
-* _NN Stakeholders: Another Element
-  Description without YAML fields.
+# NN Stakeholders
+## NN Stakeholders: Element Name
+field1:: value1
+field2:: value2
+Optional description text.
+
+## NN Stakeholders: Another Element
+Description without properties.
 ```
 
-- The `# _NN <Concept>` heading introduces a Concept block; the Concept name MUST match
-  a concept from the template frontmatter.
-- The visible `_NN` marker (`* _NN <Concept>: <Name>`) declares which Concept an Element
-  belongs to. For invisible markers, use `<!-- _NN <Concept>: -->` followed by the name.
-- Element markers MUST use `*` or `-` bullets. The parser pattern is
-  `/^\s*[*\-]\s+_NN\s+([\w\s-]+?):\s+(.*)$/`. Numbered lists are not supported. Element
-  order is determined by document position.
-- A single-instance `text` concept has no element markers; its content is plain Markdown.
+- The `# NN <Concept>` heading introduces a Concept block; the Concept name MUST match
+  a concept defined in the template.
+- The `## NN <Concept>: <Element>` heading declares an Element of that Concept. The
+  parser pattern is `/^\s*##\s+NN\s+([^:\n]+?):\s+(.*)$/`. Element order is determined
+  by document position.
+- Property lines `key:: value` immediately follow the element heading. The parser
+  pattern is `/^\s*([A-Za-z_][A-Za-z0-9_-]*)\s*::\s*(.*)$/`.
+- A single-instance `text` concept has no element headings; its content is plain
+  Markdown.
 
 **Matrix Block.** iNNfo supports two matrix kinds, distinguished by the section name in
-`# _NN matrices:`:
+`# NN matrices:`:
 
 *Relational Matrix* — cross-tabulates Elements of a source Concept (rows) against
 Elements of a target Concept (columns). Cells contain a value from the matrix's
 declared `values`:
 
 ```markdown
-# _NN matrices: problems-value propositions matrix
+# NN matrices: problems-value propositions matrix
 | Problems \ Value propositions | VP Name |
 | :--- | :---: |
 | Problem name | High |
@@ -331,23 +420,103 @@ scores to Elements or Concepts. Rows are Element or Concept names; columns are M
 names defined in the template:
 
 ```markdown
-# _NN matrices: item-markers matrix
+# NN matrices: item-markers matrix
 | Item \ Marker | weight | certainty | priority |
 | :--- | :---: | :---: | :---: |
 | Element Name | 9 | 5 | - |
 ```
 
-### Workspace Structure
+## Level 2 Template Structure (Metaplantilla)
+
+A template is a level-2 iNNfo document. Its frontmatter declares only identity, parent,
+and relationship settings; its body instantiates the four root primitives.
+
+```yaml
+---
+specification_version: "V_0-3-0"
+specification_url: "<immutable-url>"
+level: 2
+parent_spec:
+  name: "iNNfo_V_0-3-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.3.0/level1/iNNfo_V_0-3-0_NN.md"
+title: "<Template Name>"
+relationship_types: {...}
+---
+```
+
+Body:
+
+```markdown
+> [!NOTE]
+> This is an **iNNfo document**...
+
+# NN index
+* [[...]]  (the template's root concepts)
+
+# NN Concept Definition
+## NN Concept Definition: <Concept>
+icon:: <icon>
+type:: <type>
+color:: <color>
+weight:: <n>
+
+# NN Field Definition
+## NN Field Definition: <Field>
+concept:: <Concept>
+type:: <type>
+options:: [...]
+target_concepts:: [...]
+
+# NN Marker Definition
+## NN Marker Definition: <Marker>
+symbol:: <symbol>
+
+# NN Matrix Definition
+## NN Matrix Definition: <Matrix>
+source:: <Concept>
+target:: <Concept>
+values:: [..]
+widget:: set
+
+# <Template Name>       (prose: Philosophy, Objectives, Specification)
+# Concept Guidance Documentation   (## <Concept> with ### Summary/Description/...)
+```
+
+## Level 3 Model Structure (Lightweight)
+
+```yaml
+---
+specification_version: "V_0-3-0"
+specification_url: "<immutable-url>"
+level: 3
+parent_spec:
+  name: "<template>_V_x-y-z"
+  url: "<immutable-url>"
+model_version: "V_x-y-z"
+title: "..."
+---
+
+> [!NOTE]
+> ...
+# NN index
+...
+# NN Concept
+## NN Concept: Element
+key:: value
+...
+```
+
+## Workspace Structure
 
 A iNNfo Workspace is a directory containing one or more Models. The entry point is an
 `index.md` file at the Workspace root.
 
 **index.md (Required).** Every Workspace MUST have an `index.md` at its root. The
 application reads `index.md` as the single entry point — no filesystem scanning. It uses
-`# _NN index` with standard Markdown links to list all Workspace Models:
+`# NN index` with standard Markdown links to list all Workspace Models:
 
 ```markdown
-# _NN index
+# NN index
 
 * [Business Model](./Business%20Model_V_1-0-0_business_NN.md)
 * [KB Model](./KB%20Model_V_1-0-0_kb_NN.md)
@@ -363,11 +532,11 @@ application reads `index.md` as the single entry point — no filesystem scannin
 informed by the [Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md).
 Both use Markdown files with YAML frontmatter. OKF consumers can navigate a iNNfo
 Workspace: `index.md` has no frontmatter and is read as a reserved index file; links are
-standard Markdown; `_NN` markers are plain text and safely ignored. iNNfo extends OKF
-with structured semantic modeling (parent chain, concepts, markers, matrices) that OKF
-does not define; these are additive.
+standard Markdown; `NN` markers are plain text and safely ignored. iNNfo extends OKF
+with structured semantic modeling (parent chain, root primitives, markers, matrices)
+that OKF does not define; these are additive.
 
-### Immutable Versioning Policy
+## Immutable Versioning Policy
 
 - **Published specs are frozen.** Once a specification version is released, its file is
   never modified. Corrections or improvements require a new spec version.
@@ -376,85 +545,18 @@ does not define; these are additive.
 - **Parent chain resolution** always resolves to the version the model was authored
   against.
 
-### Removed Constructs
+## Removed Constructs
 
 The following are NOT part of iNNfo:
 
-- **FOLDER mode / `_F` markers** — models are single files using `_NN` markers only.
+- **FOLDER mode / `_F` markers** — models are single files using `NN` markers only.
 - **Hierarchy matrices** — hierarchy is expressed only through the index block.
 - **`_FORMAT.md` filenames** — the canonical suffix is `_NN.md`.
+- **`* _NN` element bullets and fenced ```yaml property blocks** — replaced by the
+  unified `## NN` headings and `key:: value` properties.
 
-### Self-Description
+## Self-Description
 
-This document (`iNNfo_V_0-2-0_NN.md`) is itself a level 1 specification following
-defiNNe. It declares `parent_spec: { name: "defiNNe_V_0-2-0", url: "..." }` and includes
-the required body sections in order.
-
-## Template
-
-### Level 2 Template Structure
-
-```yaml
----
-specification_version: "V_0-2-0"
-specification_url: "<immutable-url>"
-level: 2
-parent_spec:
-  name: "iNNfo_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level1/iNNfo_V_0-2-0_NN.md"
-title: "<Template Name>"
-concepts: [...]
-markers: [...]
-matrices: [...]
-relationship_types: {...}
----
-
-> [!NOTE]
-> This is an **iNNfo document**...
-
-# <Template Name>
-
-## One-sentence summary
-
-## Philosophy
-
-## Objectives
-
-## Specification
-
-## Template
-
-## Examples
-```
-
-### Level 3 Model Structure (Lightweight)
-
-```yaml
----
-specification_version: "V_0-2-0"
-specification_url: "<immutable-url>"
-level: 3
-parent_spec:
-  name: "<template>_V_x-y-z"
-  url: "<immutable-url>"
-model_version: "V_x-y-z"
-title: "..."
----
-
-> [!NOTE]
-> ...
-# _NN index
-...
-# _NN Concept
-...
-```
-
-## Examples
-
-### Parent Chain
-
-```yaml
-parent_spec:
-  name: "business_V_0-2-1"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.1/level2/business/business_V_0-2-1_NN.md"
-```
+This document (`iNNfo_V_0-3-0_NN.md`) is itself a level 1 specification following
+defiNNe. It declares `parent_spec: { name: "defiNNe_V_0-2-0", url: "..." }` and defines
+the four root primitives that every level-2 template instantiates.
