@@ -34,14 +34,35 @@ export function serializeModel(model: ParsedModel): string {
 
   // Matrix declarations
   const matrices = fm.matrices as
-    Array<{ name: string; source: string; target: string; params: string }> | undefined
+    | Array<{
+        name: string
+        source: string
+        target: string
+        params?: string
+        values?: string[]
+        widgetType?: string
+        description?: string
+        label?: string
+        min_color?: string
+        max_color?: string
+      }>
+    | undefined
   if (matrices && matrices.length > 0) {
     lines.push('matrices:')
     for (const m of matrices) {
       lines.push(`  - name: "${m.name}"`)
       lines.push(`    source: "${m.source}"`)
       lines.push(`    target: "${m.target}"`)
-      if (m.params) lines.push(`    params: "${m.params}"`)
+      if (m.values && m.values.length > 0) {
+        lines.push(`    values: [${m.values.join(', ')}]`)
+      } else if (m.params) {
+        lines.push(`    params: "${m.params}"`)
+      }
+      if (m.widgetType) lines.push(`    widget: "${m.widgetType}"`)
+      if (m.description) lines.push(`    description: "${m.description}"`)
+      if (m.label) lines.push(`    label: "${m.label}"`)
+      if (m.min_color) lines.push(`    min_color: "${m.min_color}"`)
+      if (m.max_color) lines.push(`    max_color: "${m.max_color}"`)
     }
   }
 
@@ -106,6 +127,20 @@ export function serializeModel(model: ParsedModel): string {
       }
     }
     lines.push('')
+  }
+
+  // Preserve `text`-type concepts (single-block concepts with no element
+  // markers). Their content lives in rawSections keyed by concept name and
+  // must round-trip back into the serialized document.
+  if (model.rawSections) {
+    for (const [conceptName, body] of Object.entries(model.rawSections)) {
+      if (model.elements.has(conceptName)) continue
+      if (!body.trim()) continue
+      lines.push(`# _NN ${conceptName}`)
+      lines.push('')
+      lines.push(body)
+      lines.push('')
+    }
   }
 
   for (const matrix of model.matrices) {

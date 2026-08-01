@@ -1,9 +1,10 @@
-﻿import { defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import type { ModelNode } from '../model/types'
-import type { DirectoryHandleLike, FileHandleLike } from '../model/fs-types'
+import type { DirectoryHandleLike } from '../model/fs-types'
 import { recursiveParse } from '../model/recursiveParser'
-import { validateFormatContent, parseFrontmatter } from '@cognnitive/innfo-core'
-import type { ModelDriver, ParseIssue, ValidationReport, LocalMetamodel } from '@cognnitive/innfo-core'
+import { validateFormatContent } from '@cognnitive/innfo-core'
+import type { ModelDriver, ParseIssue, ValidationReport } from '@cognnitive/innfo-core'
+import { resolveParentSpecs } from '../services/SpecResolverService'
 
 export interface ModelState {
   nodes: Record<string, ModelNode>
@@ -11,37 +12,6 @@ export interface ModelState {
   dirtyIds: Set<string>
   parseIssues: ParseIssue[]
   validationReport: ValidationReport | null
-}
-
-interface LocalSpecResult {
-  content: string
-  filename: string
-}
-
-/** Helper to recursively search a directory handle for a spec file matching parentName. */
-async function findLocalSpecInHandle(
-  dirHandle: DirectoryHandleLike,
-  reqName: string,
-): Promise<LocalSpecResult | null> {
-  const targetName = reqName.toLowerCase()
-  for await (const [name, handle] of dirHandle.entries()) {
-    if (handle.kind === 'file') {
-      const lowerFile = name.toLowerCase()
-      if (
-        lowerFile === `${targetName}_nn.md` ||
-        lowerFile === `${targetName}.md` ||
-        lowerFile === targetName ||
-        (lowerFile.startsWith(targetName) && lowerFile.endsWith('.md'))
-      ) {
-        const file = await (handle as FileHandleLike).getFile()
-        return { content: await file.text(), filename: name }
-      }
-    } else if (handle.kind === 'directory') {
-      const found = await findLocalSpecInHandle(handle as DirectoryHandleLike, reqName)
-      if (found !== null) return found
-    }
-  }
-  return null
 }
 
 /**
@@ -93,19 +63,36 @@ export const useModelStore = defineStore('model', {
     },
 
     validateModel(): void {
-      const rootId = this.rootIds[0]
-      if (rootId && this.nodes[rootId]) {
+      const nonTemplateRoots = this.rootIds.filter((id) => !id.startsWith('spec:') && this.nodes[id])
+      if (nonTemplateRoots.length === 0) {
+        this.validationReport = null
+        return
+      }
+
+      let combinedReport: ValidationReport | null = null
+
+      for (const rootId of nonTemplateRoots) {
         const rootNode = this.nodes[rootId]
+        if (!rootNode?.rawContent) continue
         const path = rootNode.source?.path ?? ''
         const fileName = path.split('/').pop() || path || 'unknown.md'
-        if (rootNode.rawContent) {
-          this.validationReport = validateFormatContent(rootNode.rawContent, fileName)
+        const report = validateFormatContent(rootNode.rawContent, fileName)
+
+        if (!combinedReport) {
+          combinedReport = {
+            checks: [...report.checks],
+            summary: { ...report.summary },
+          }
         } else {
-          this.validationReport = null
+          combinedReport.summary.total += report.summary.total
+          combinedReport.summary.passed += report.summary.passed
+          combinedReport.summary.errors += report.summary.errors
+          combinedReport.summary.warnings += report.summary.warnings
+          combinedReport.checks.push(...report.checks)
         }
-      } else {
-        this.validationReport = null
       }
+
+      this.validationReport = combinedReport
     },
 
     upsertNode(node: ModelNode): void {
@@ -137,155 +124,8 @@ export const useModelStore = defineStore('model', {
     async parseFromHandle(handle: DirectoryHandleLike, driver?: ModelDriver): Promise<void> {
       const result = await recursiveParse(handle, driver)
       this.parseIssues = result.issues
-      await this._resolveParentSpecs(result.nodes, result.rootIds, handle)
+      await resolveParentSpecs(result.nodes, result.rootIds, handle)
       this.setGraph(result.nodes, result.rootIds)
-    },
-
-    /**
-     * Resolves parent_spec URLs for level-3 models and injects template
-     * concepts as synthetic root nodes so findTemplatePeer() can locate
-     * concept colors without relying on co-location.
-     *
-     * Best-effort: network failures or missing templates degrade gracefully
-     * to slate fallback.
-     */
-    async _resolveParentSpecs(
-      nodes: Record<string, ModelNode>,
-      rootIds: string[],
-      handle?: DirectoryHandleLike,
-    ): Promise<void> {
-      for (const rootId of rootIds) {
-        const root = nodes[rootId]
-        if (!root?.rawContent) continue
-
-        const fm = parseFrontmatter(root.rawContent)
-        const parentUrl: string | undefined = (fm as any)?.parent_spec?.url
-        const parentName: string | undefined = (fm as any)?.parent_spec?.name
-        if (!parentUrl || !parentName) continue
-
-        // Skip if already loaded as a peer root with concepts
-        // Name comparison: strip trailing _NN from node name since
-        // parent_spec.name (e.g. "business_V_0-1-1") doesn't include it
-        // but the filename-derived node name does (e.g. "business_V_0-1-1_NN").
-        const normalizedParent = parentName.replace(/_NN$/, '')
-        const existingPeer = rootIds.find((rid) => {
-          if (rid === rootId) return false
-          const candidate = nodes[rid]
-          if (!candidate?.localMetamodel?.concepts?.length) return false
-          const candidateName = candidate.name?.replace(/_NN$/, '')
-          return candidateName === normalizedParent
-        })
-        if (existingPeer) continue
-
-        let text = ''
-        let specFilename = ''
-        if (handle) {
-          try {
-            const specsDir = await handle.getDirectoryHandle('.specs')
-            const localResult = await findLocalSpecInHandle(specsDir, parentName)
-            if (localResult) {
-              text = localResult.content
-              specFilename = `.specs/${localResult.filename}`
-            }
-          } catch (e) {
-            // specs directory not found or error accessing it
-          }
-        }
-
-        if (!text) {
-          try {
-            const resp = await fetch(parentUrl)
-            if (!resp.ok) continue
-            text = await resp.text()
-            // Persist to .specs/ when handle is available
-            if (handle) {
-              specFilename = `.specs/${parentName.replace(/\.md$/i, '')}${parentName.endsWith('_NN') ? '' : '_NN'}.md`
-              try {
-                const specsDir = await handle.getDirectoryHandle('.specs', { create: true })
-                const fileHandle = await specsDir.getFileHandle(
-                  specFilename.replace('.specs/', ''),
-                  { create: true },
-                )
-                if (fileHandle.createWritable) {
-                  const w = await fileHandle.createWritable()
-                  await w.write(text)
-                  await w.close()
-                }
-              } catch (e) {
-                console.warn(`[template] Could not persist spec to .specs/:`, e)
-              }
-            }
-          } catch (err) {
-            const message = err instanceof Error ? err.message : String(err)
-            console.warn(`[template] Failed to resolve parent spec "${parentUrl}": ${message}`)
-            continue
-          }
-        }
-
-        try {
-          const tplFm = parseFrontmatter(text)
-          if (!tplFm?.concepts?.length && !tplFm?.matrices?.length) continue
-
-          // Propagate template matrix declarations to the model root node
-          const tplMatrices = tplFm.matrices
-          if (Array.isArray(tplMatrices) && tplMatrices.length > 0) {
-            if (!root.fields['__matrix_defs']) {
-              root.fields['__matrix_defs'] = {
-                value: tplMatrices.map((m: any) => ({
-                  name: m.name,
-                  source: m.source,
-                  target: m.target,
-                  widgetType: m.widgetType || 'text',
-                  params: m.params || '',
-                })),
-                provenance: { author: { kind: 'system', id: 'parser' }, timestamp: new Date().toISOString() },
-              }
-            }
-          }
-
-          if (!tplFm?.concepts?.length) continue
-
-          const templateId = `spec:${parentName}`
-          if (nodes[templateId]) continue
-
-          const concepts = tplFm.concepts.map((c: any) => ({
-            name: c.name,
-            icon: c.icon,
-            color: c.color,
-            type: c.type,
-            weight: c.weight,
-            fields: c.fields,
-          }))
-
-          const markers = (tplFm.markers ?? []).map((m: any) => ({
-            name: m.name,
-            icon: m.icon,
-            color: m.color,
-            symbol: m.symbol,
-          }))
-
-          nodes[templateId] = {
-            id: templateId,
-            name: parentName,
-            parentId: null,
-            childIds: [],
-            type: 'category',
-            kind: 'root' as const,
-            localMetamodel: { concepts, markers } satisfies LocalMetamodel,
-            fields: {},
-            markers: {},
-            relationships: [],
-            rawSections: {},
-            source: { path: specFilename || `spec:${parentName}` },
-            sourceMode: 'structural' as const,
-            rawContent: text,
-          }
-          rootIds.push(templateId)
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err)
-          console.warn(`[template] Failed to parse parent spec "${parentName}": ${message}`)
-        }
-      }
     },
 
     /**
@@ -337,22 +177,22 @@ export const useModelStore = defineStore('model', {
     },
 
     /**
-     * Creates a child element for a concept under the first root node.
+     * Creates a child element for a concept under the specified (or default) root node.
      * Convenience wrapper used by the ghost "Add first element" action.
      * @returns the new node's id
      */
-    addConceptElement(conceptName: string, elementName: string): string {
-      const rootId = this.rootIds[0]
+    addConceptElement(conceptName: string, elementName: string, targetModelId?: string): string {
+      const rootId = targetModelId ?? this.rootIds.find((id) => !id.startsWith('spec:')) ?? this.rootIds[0]
       if (!rootId) throw new Error('No root node — cannot add element')
       return this.createChild(rootId, elementName, conceptName, 'element')
     },
 
     /**
-     * Creates a text-type section under the first root node.
+     * Creates a text-type section under the specified (or default) root node.
      * For concepts of type `text` (single Markdown block).
      */
-    addTextSection(conceptName: string): void {
-      const rootId = this.rootIds[0]
+    addTextSection(conceptName: string, targetModelId?: string): void {
+      const rootId = targetModelId ?? this.rootIds.find((id) => !id.startsWith('spec:')) ?? this.rootIds[0]
       if (!rootId) throw new Error('No root node — cannot add section')
       const root = this.nodes[rootId]
       if (!root) throw new Error(`Root node "${rootId}" not found`)

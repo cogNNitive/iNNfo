@@ -86,49 +86,15 @@
 
         <!-- Element children with parent-based hierarchy (e.g. Work procedures) -->
         <template v-else>
-          <div v-for="root in treeRoots" :key="root.id" class="space-y-0.5">
-            <div
-              class="flex items-center gap-1 px-2 py-1 rounded-md transition-colors text-xs group cursor-pointer"
-              :class="rootRowClasses(root)"
-              :style="rootRowStyle"
-              @click="$emit('select', root.id)"
-            >
-              <button
-                @click.stop="toggleTreeCollapsed(root.id)"
-                class="p-0.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors flex items-center justify-center shrink-0"
-              >
-                <ChevronDown
-                  class="transition-transform duration-200 w-3.5 h-3.5"
-                  :class="{ '-rotate-90': treeCollapsed[root.id] }"
-                />
-              </button>
-              <div class="relative shrink-0 flex items-center justify-center w-4 h-4">
-                <IconRenderer
-                  :icon="conceptIcon"
-                  fallback="circle"
-                  custom-class="shrink-0"
-                  :style="{ color: conceptColorHex, width: '14px', height: '14px' }"
-                />
-              </div>
-              <span class="flex-1 min-w-0 truncate text-xs font-medium text-slate-700 dark:text-slate-300">
-                {{ root.name }}
-              </span>
-            </div>
-            <div
-              v-if="!treeCollapsed[root.id]"
-              class="ml-3 pl-1 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
-            >
-              <ConceptTreeNode
-                v-for="child in getSemanticChildren(root.name)"
-                :key="child.id"
-                :node-id="child.id"
-                :selected-id="selectedId"
-                :depth="depth + 2"
-                :expanded-generation="expandedGeneration"
-                @select="(id: string) => $emit('select', id)"
-              />
-            </div>
-          </div>
+          <ConceptTreeNode
+            v-for="root in treeRoots"
+            :key="root.id"
+            :node-id="root.id"
+            :selected-id="selectedId"
+            :depth="depth + 1"
+            :expanded-generation="expandedGeneration"
+            @select="(id: string) => $emit('select', id)"
+          />
         </template>
       </div>
     </template>

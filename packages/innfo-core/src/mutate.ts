@@ -8,6 +8,44 @@ export interface MutationResult {
 
 const RESERVED_CONCEPT_NAMES = new Set(['Concepts', 'Elements', 'Markers'])
 
+type RequireArgsResult =
+  | { ok: true; values: Record<string, string> }
+  | { ok: false; result: MutationResult }
+
+/**
+ * Validates that the given string args are present and non-empty.
+ * On success returns the narrowed string values; on failure returns a ready
+ * MutationResult error (`"<a>, <b> are required"`), collapsing the boilerplate
+ * that every mutation used to repeat.
+ */
+function requireArgs(args: Record<string, unknown>, keys: string[]): RequireArgsResult {
+  const values: Record<string, string> = {}
+  const missing: string[] = []
+  for (const key of keys) {
+    const value = args[key]
+    if (typeof value === 'string' && value.length > 0) {
+      values[key] = value
+    } else {
+      missing.push(key)
+    }
+  }
+  if (missing.length > 0) {
+    return {
+      ok: false,
+      result: {
+        success: false,
+        errors: [
+          {
+            path: '',
+            message: `${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} required`,
+          },
+        ],
+      },
+    }
+  }
+  return { ok: true, values }
+}
+
 function getModelWideElementNames(model: ParsedModel): Set<string> {
   const names = new Set<string>()
   for (const [, elements] of model.elements.entries()) {
@@ -51,8 +89,9 @@ export function applyMutation(
 }
 
 function addConcept(model: ParsedModel, args: Record<string, unknown>): MutationResult {
-  const conceptName = args.conceptName as string | undefined
-  if (!conceptName) return { success: false, errors: [{ path: '', message: 'conceptName is required' }] }
+  const req = requireArgs(args, ['conceptName'])
+  if (!req.ok) return req.result
+  const { conceptName } = req.values
 
   if (RESERVED_CONCEPT_NAMES.has(conceptName)) {
     return {
@@ -80,11 +119,9 @@ function addConcept(model: ParsedModel, args: Record<string, unknown>): Mutation
 }
 
 function addField(model: ParsedModel, args: Record<string, unknown>): MutationResult {
-  const conceptName = args.conceptName as string | undefined
-  const fieldName = args.fieldName as string | undefined
-  if (!conceptName || !fieldName) {
-    return { success: false, errors: [{ path: '', message: 'conceptName and fieldName are required' }] }
-  }
+  const req = requireArgs(args, ['conceptName', 'fieldName'])
+  if (!req.ok) return req.result
+  const { conceptName, fieldName } = req.values
 
   const concepts = model.frontmatter.concepts ?? []
   const concept = concepts.find((c) => c.name.toLowerCase() === conceptName.toLowerCase())
@@ -101,8 +138,9 @@ function addField(model: ParsedModel, args: Record<string, unknown>): MutationRe
 }
 
 function setMarker(model: ParsedModel, args: Record<string, unknown>): MutationResult {
-  const markerName = args.markerName as string | undefined
-  if (!markerName) return { success: false, errors: [{ path: '', message: 'markerName is required' }] }
+  const req = requireArgs(args, ['markerName'])
+  if (!req.ok) return req.result
+  const { markerName } = req.values
 
   const markers = model.frontmatter.markers ?? []
   const existing = markers.find((m) => m.name.toLowerCase() === markerName.toLowerCase())
@@ -118,11 +156,9 @@ function setMarker(model: ParsedModel, args: Record<string, unknown>): MutationR
 }
 
 function addElement(model: ParsedModel, args: Record<string, unknown>): MutationResult {
-  const conceptName = args.conceptName as string | undefined
-  const elementName = args.elementName as string | undefined
-  if (!conceptName || !elementName) {
-    return { success: false, errors: [{ path: '', message: 'conceptName and elementName are required' }] }
-  }
+  const req = requireArgs(args, ['conceptName', 'elementName'])
+  if (!req.ok) return req.result
+  const { conceptName, elementName } = req.values
 
   // Model-wide uniqueness check (R-IE-02)
   const existingNames = getModelWideElementNames(model)
@@ -147,14 +183,12 @@ function addElement(model: ParsedModel, args: Record<string, unknown>): Mutation
 }
 
 function removeElement(model: ParsedModel, args: Record<string, unknown>): MutationResult {
-  const conceptName = args.conceptName as string | undefined
-  const elementName = args.elementName as string | undefined
-  if (!conceptName || !elementName) {
-    return { success: false, errors: [{ path: '', message: 'conceptName and elementName are required' }] }
-  }
+  const req = requireArgs(args, ['conceptName', 'elementName'])
+  if (!req.ok) return req.result
+  const { conceptName, elementName } = req.values
 
   const existingElements = model.elements.get(conceptName) ?? []
-  const filtered = existingElements.filter((e) => e.name.toLowerCase() !== elementName!.toLowerCase())
+  const filtered = existingElements.filter((e) => e.name.toLowerCase() !== elementName.toLowerCase())
   if (filtered.length === existingElements.length) {
     return { success: false, errors: [{ path: '', message: `Element "${elementName}" not found in concept "${conceptName}"` }] }
   }
@@ -163,11 +197,9 @@ function removeElement(model: ParsedModel, args: Record<string, unknown>): Mutat
 }
 
 function renameConcept(model: ParsedModel, args: Record<string, unknown>): MutationResult {
-  const conceptName = args.conceptName as string | undefined
-  const newName = args.newName as string | undefined
-  if (!conceptName || !newName) {
-    return { success: false, errors: [{ path: '', message: 'conceptName and newName are required' }] }
-  }
+  const req = requireArgs(args, ['conceptName', 'newName'])
+  if (!req.ok) return req.result
+  const { conceptName, newName } = req.values
 
   if (RESERVED_CONCEPT_NAMES.has(newName)) {
     return {
@@ -226,12 +258,9 @@ function renameConcept(model: ParsedModel, args: Record<string, unknown>): Mutat
 }
 
 function renameElement(model: ParsedModel, args: Record<string, unknown>): MutationResult {
-  const conceptName = args.conceptName as string | undefined
-  const elementName = args.elementName as string | undefined
-  const newName = args.newName as string | undefined
-  if (!conceptName || !elementName || !newName) {
-    return { success: false, errors: [{ path: '', message: 'conceptName, elementName, and newName are required' }] }
-  }
+  const req = requireArgs(args, ['conceptName', 'elementName', 'newName'])
+  if (!req.ok) return req.result
+  const { conceptName, elementName, newName } = req.values
 
   const lowerOld = elementName.toLowerCase()
   const lowerNew = newName.toLowerCase()

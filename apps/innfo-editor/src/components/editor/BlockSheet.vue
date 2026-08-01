@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     data-testid="block-sheet"
     class="rounded-lg bg-slate-50 dark:bg-slate-800/50 transition-all duration-200 flex flex-col relative border border-slate-200 dark:border-slate-700"
@@ -57,13 +57,12 @@
 
       <!-- Marker cycling toolbar -->
       <template v-if="hasMarkers && block.id">
-        <component
+        <MarkerButton
           v-for="marker in allMarkers"
           :key="marker.name"
-          :is="getMarkerIcon(marker.name)"
-          @click.stop="cycleMarker(marker.name)"
-          class="cursor-pointer"
-          :class="markerClassesFor(marker.name)"
+          :marker-name="marker.name"
+          :node-id="block.id"
+          @change="$emit('change')"
         />
         <span class="w-px h-3.5 bg-current/20 mx-0.5"></span>
       </template>
@@ -224,19 +223,17 @@
             </div>
           </div>
 
-          <!-- Description textarea -->
-          <div class="flex flex-col min-h-[100px]">
+          <!-- Description / Details (WYSIWYG Markdown Editor) -->
+          <div class="flex flex-col min-h-[120px] gap-1.5">
             <label
-              class="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+              class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"
               >Description / Details</label
             >
-            <textarea
-              :value="block.description"
-              @input="onInput"
-              rows="4"
-              class="w-full mt-1 border border-slate-200 dark:border-slate-600 rounded-md p-2 text-sm focus:ring-1 focus:ring-indigo-500 outline-none resize-none flex-1 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200"
-              placeholder="Enter description (supports basic markdown)..."
-            ></textarea>
+            <MinimalMarkdownEditor
+              :model-value="block.description"
+              @update:model-value="onDescriptionUpdate"
+              placeholder="Enter description (supports WYSIWYG formatting & markdown)..."
+            />
           </div>
         </template>
 
@@ -449,14 +446,14 @@
 import { ref, computed, watch } from 'vue'
 import { ChevronDown, ArrowUp, ArrowDown, Pencil, Check, Trash2, PlusCircle, X } from 'lucide-vue-next'
 import IconRenderer from './IconRenderer.vue'
+import MarkerButton from './MarkerButton.vue'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
-import { getMarkerIcon, getMarkerClasses } from './MarkerIcons'
+import MinimalMarkdownEditor from '../ui/MinimalMarkdownEditor.vue'
+import { getMarkerDefinitions } from './MarkerIcons'
 import { renderMarkdown } from '../../utils/markdown'
 import { useModelStore } from '../../stores/modelStore'
 import { useNodeMediaScan } from '../../composables/useNodeMediaScan'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
-import { commitMarkerValue } from '../../shared/provenance'
-import { MARKER_CYCLE_COUNT } from '../../utils/constants'
 import { getColorClasses } from '../../utils/colors'
 import type { BlockKind } from '../../utils/conceptVisuals'
 
@@ -568,33 +565,7 @@ const treeSiblings = computed(() => {
 
 // ── Markers ─────────────────────────────────────────────────────
 
-const allMarkers = computed(() => {
-  return [
-    { name: 'completion', icon: 'check-circle', color: 'emerald' },
-    { name: 'certainty', icon: 'help-circle', color: 'blue' },
-    { name: 'priority', icon: 'flag', color: 'rose' },
-    { name: 'rating', icon: 'star', color: 'amber' },
-    { name: 'weight', icon: 'scale', color: 'indigo' },
-  ]
-})
-
-const getMarkerScore = (markerName: string): number => {
-  if (!props.block.id) return 0
-  const node = modelStore.getNode(props.block.id)
-  if (!node?.markers) return 0
-  return (node.markers[markerName] as number) ?? 0
-}
-
-const cycleMarker = (markerName: string) => {
-  const id = props.block.id
-  if (!id) return
-  const current = getMarkerScore(markerName)
-  commitMarkerValue(modelStore, id, markerName, (current + 1) % MARKER_CYCLE_COUNT)
-  emit('change')
-}
-
-const markerClassesFor = (markerName: string) =>
-  getMarkerClasses(markerName, getMarkerScore(markerName))
+const allMarkers = computed(() => getMarkerDefinitions())
 
 // ── Name helpers ────────────────────────────────────────────────
 
@@ -626,7 +597,81 @@ const renderedDescription = computed(() => {
 const rawMarkdown = computed(() => {
   if (!props.block.id) return ''
   const node = modelStore.getNode(props.block.id)
-  return node?.rawContent || node?.rawSections?.description || ''
+
+  // Root nodes: full raw source of the file
+  if (node?.rawContent) return node.rawContent
+
+  const description = node?.rawSections?.description || props.block.description
+
+  // Concept sections (virtual group or concept-kind node): # _NN heading + children
+  if (props.kind === 'concept') {
+    const conceptName = props.conceptName || props.block.name
+    if (!conceptName) return description || ''
+
+    const lines: string[] = [`# _NN ${conceptName}`]
+    const visited = new Set<string>()
+    const walk = (nodeId: string) => {
+      if (visited.has(nodeId)) return
+      visited.add(nodeId)
+      const n = modelStore.getNode(nodeId)
+      if (!n) return
+      for (const cid of n.childIds) {
+        const child = modelStore.getNode(cid)
+        if (!child || child.type !== conceptName) continue
+        lines.push('')
+        lines.push(`* _NN ${conceptName}: ${child.name}`)
+        const yamlFields = Object.entries(child.fields ?? {}).filter(
+          ([, fv]) => (fv as any)?.value !== undefined && (fv as any)?.value !== '',
+        )
+        if (yamlFields.length > 0) {
+          lines.push('  ```yaml')
+          for (const [k, fv] of yamlFields) {
+            lines.push(`  ${k}: ${JSON.stringify((fv as any).value)}`)
+          }
+          lines.push('  ```')
+        }
+        const childDesc = child.rawSections?.description || ''
+        if (childDesc) {
+          for (const line of childDesc.split('\n')) {
+            lines.push(`  ${line}`)
+          }
+        }
+        walk(cid)
+      }
+    }
+    const rootId = rootNodeId.value
+    if (rootId) walk(rootId)
+
+    return lines.join('\n')
+  }
+
+  // Element nodes: * _NN marker line + description
+  const type = props.conceptType || node?.type || ''
+  const name = node?.name || props.block.name
+  if (type && name) {
+    const lines: string[] = [`* _NN ${type}: ${name}`]
+    // Include YAML fields from the node
+    if (node?.fields) {
+      const yamlFields = Object.entries(node.fields).filter(
+        ([, fv]) => (fv as any)?.value !== undefined && (fv as any)?.value !== '',
+      )
+      if (yamlFields.length > 0) {
+        lines.push('  ```yaml')
+        for (const [k, fv] of yamlFields) {
+          lines.push(`  ${k}: ${JSON.stringify((fv as any).value)}`)
+        }
+        lines.push('  ```')
+      }
+    }
+    if (description) {
+      for (const line of description.split('\n')) {
+        lines.push(`  ${line}`)
+      }
+    }
+    return lines.join('\n')
+  }
+
+  return description || ''
 })
 
 // ── Node from store (full model data) ───────────────────────────
@@ -663,7 +708,10 @@ const rootNodeId = computed(() => {
 const hasMatrices = computed(() => {
   if (!rootNodeId.value) return false
   const root = modelStore.getNode(rootNodeId.value)
-  if (!root?.rawContent) return false
+  if (!root) return false
+  const defs = root.fields?.__matrix_defs?.value
+  if (Array.isArray(defs) && defs.length > 0) return true
+  if (!root.rawContent) return false
   const fm = parseFrontmatter(root.rawContent)
   const matrices: unknown[] = (fm as any)?.matrices ?? []
   return matrices.length > 0
@@ -793,6 +841,21 @@ const onConceptNameInput = (event: Event) => {
 }
 
 // ── Input handlers ──────────────────────────────────────────────
+
+const onDescriptionUpdate = (val: string) => {
+  props.block.description = val
+  if (props.block.id) {
+    const node = modelStore.getNode(props.block.id)
+    if (node) {
+      modelStore.upsertNode({
+        ...node,
+        rawSections: { ...node.rawSections, description: val },
+      })
+    }
+  }
+  modelStore.markDirty(props.block.id || '')
+  emit('change')
+}
 
 const onInput = (event: Event) => {
   const textarea = event.target as HTMLTextAreaElement

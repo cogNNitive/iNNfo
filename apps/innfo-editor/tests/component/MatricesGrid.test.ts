@@ -147,6 +147,110 @@ function setupBigStore(rowsCount = 100, colsCount = 100) {
   modelStore.setGraph(nodes as any, [ROOT_ID])
 }
 
+/** Sets up a store whose first matrix carries `values` + `description`. */
+function setupStoreWithValuesAndDescription() {
+  const modelStore = useModelStore()
+  const nodes: Record<string, FakeNode> = {
+    [ROOT_ID]: {
+      id: ROOT_ID,
+      name: 'Root',
+      type: 'model',
+      childIds: [],
+      fields: {
+        __matrix_defs: {
+          value: [
+            {
+              name: 'M1',
+              source: 'Src',
+              target: 'Tgt',
+              widgetType: 'set',
+              params: '',
+              values: ['Max', 'Very High', 'High', 'Neutral'],
+              description: 'A brief matrix explanation.',
+            },
+          ],
+        },
+      },
+    },
+  }
+  for (let i = 0; i < 5; i++) {
+    nodes[`src-${i}`] = makeNode(`src-${i}`, `Src${i}`, 'Src')
+  }
+  for (let i = 0; i < 5; i++) {
+    nodes[`tgt-${i}`] = makeNode(`tgt-${i}`, `Tgt${i}`, 'Tgt')
+  }
+  modelStore.setGraph(nodes as any, [ROOT_ID])
+}
+
+/** Sets up a store with a metamodel root (template concepts) + element content. */
+function setupStoreWithMetamodelAndContent() {
+  const modelStore = useModelStore()
+  const nodes: Record<string, any> = {
+    [ROOT_ID]: {
+      id: ROOT_ID,
+      name: 'Root',
+      type: 'model',
+      childIds: [],
+      fields: {
+        __matrix_defs: {
+          value: [
+            { name: 'M1', source: 'Src', target: 'Tgt', widgetType: 'boolean', params: '' },
+          ],
+        },
+      },
+    },
+    'spec:business': {
+      id: 'spec:business',
+      name: 'business_V_0-2-1',
+      parentId: null,
+      childIds: [],
+      type: 'category',
+      kind: 'root',
+      localMetamodel: {
+        concepts: [
+          {
+            name: 'Src',
+            icon: 'users',
+            type: 'weight',
+            color: 'blue',
+            fields: [{ name: 'status', type: 'string' }],
+          },
+          { name: 'Tgt', icon: 'heart', type: 'weight', color: 'red' },
+        ],
+        markers: [],
+      },
+      fields: {},
+      markers: {},
+      relationships: [],
+      rawSections: {},
+      source: { path: 'spec:business' },
+    },
+  }
+  for (let i = 0; i < 5; i++) {
+    nodes[`src-${i}`] = {
+      id: `src-${i}`,
+      name: `Src${i}`,
+      type: 'Src',
+      kind: 'element',
+      childIds: [],
+      fields: { status: { value: 'active' } },
+      rawSections: { description: `Description for Src${i}.` },
+    }
+  }
+  for (let i = 0; i < 5; i++) {
+    nodes[`tgt-${i}`] = {
+      id: `tgt-${i}`,
+      name: `Tgt${i}`,
+      type: 'Tgt',
+      kind: 'element',
+      childIds: [],
+      fields: {},
+      rawSections: {},
+    }
+  }
+  modelStore.setGraph(nodes as any, [ROOT_ID, 'spec:business'])
+}
+
 /**
  * Mount helper — sets up store + renders the component.
  * The @tanstack/vue-virtual mock handles virtual items, no layout needed.
@@ -361,5 +465,83 @@ describe('R-MV-07: No changes to matrix field/export structure', () => {
     expect(defs[0].name).toBe('M1')
     expect(defs[0].source).toBe('Src')
     expect(defs[0].target).toBe('Tgt')
+  })
+})
+
+describe('R-MM-08: matrix values, description and header pills', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('renders the matrix description under the header', () => {
+    setupStoreWithValuesAndDescription()
+    const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
+    expect(wrapper.text()).toContain('A brief matrix explanation.')
+  })
+
+  it('renders concept source/target names in the header (not "Empty")', () => {
+    setupStoreWithValuesAndDescription()
+    const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
+    const header = wrapper.findAll('.mb-4').find((h) => h.text().includes('\u2192'))
+    expect(header).toBeTruthy()
+    expect(header!.text()).toContain('Src')
+    expect(header!.text()).toContain('Tgt')
+    expect(header!.text()).not.toContain('Empty')
+  })
+
+  it('renders declared values as set widget options', async () => {
+    setupStoreWithValuesAndDescription()
+    const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
+    const selects = wrapper.findAll('select')
+    expect(selects.length).toBeGreaterThan(0)
+    const firstSelect = selects[0]
+    const options = firstSelect.findAll('option').map((o) => o.text())
+    expect(options).toContain('Max')
+    expect(options).toContain('Very High')
+    expect(options).toContain('High')
+    expect(options).toContain('Neutral')
+  })
+
+  it('renders the concept icon (not a fallback question mark) in header pills', () => {
+    setupStoreWithMetamodelAndContent()
+    const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
+    const header = wrapper.findAll('.mb-4').find((h) => h.text().includes('\u2192'))
+    expect(header).toBeTruthy()
+    expect(header!.html()).toContain('lucide-users')
+    expect(header!.html()).toContain('lucide-heart')
+  })
+
+  it('row pill info popup shows the element description and fields', async () => {
+    setupStoreWithMetamodelAndContent()
+    const wrapper = mount(MatricesGrid, {
+      props: { matrixIndex: 0 },
+      attachTo: document.body,
+    })
+    await nextTick()
+
+    const pill = wrapper
+      .findAll('[data-testid="block-pill"]')
+      .find((p) => p.text().includes('Src0'))
+    expect(pill).toBeTruthy()
+
+    await pill!.trigger('mouseenter')
+    await nextTick()
+    const infoIcon = pill!.find('svg.lucide-info-icon')
+    expect(infoIcon.exists()).toBe(true)
+    await infoIcon.trigger('click')
+    await nextTick()
+
+    expect(document.body.textContent).toContain('Description for Src0.')
+    expect(document.body.textContent).toContain('status')
+    wrapper.unmount()
+  })
+
+  it('renders rotated (diagonal) column headers', () => {
+    setupStoreWithValuesAndDescription()
+    const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
+    const rotated = wrapper
+      .findAll('div')
+      .filter((d) => (d.element as HTMLElement).style.transform?.includes('rotate'))
+    expect(rotated.length).toBeGreaterThan(0)
   })
 })

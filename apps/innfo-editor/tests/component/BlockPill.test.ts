@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
+import { nextTick } from 'vue'
 import BlockPill from '../../src/components/editor/BlockPill.vue'
 import { yiqLuminance, textColor } from '../../src/composables/useConceptVisuals'
+import { useUiStore } from '../../src/stores/uiStore'
 
 // ── Utility tests (A.6 — YIQ luminance & contrast) ──────────────
 
@@ -134,6 +136,34 @@ describe('BlockPill.vue — Popup structure (R-TN-03)', () => {
     })
     // The pill itself shows the name
     expect(wrapper.text()).toContain('Test Node')
+  })
+
+  it('navigates to the block page from the popup nav icon', async () => {
+    const wrapper = mount(BlockPill, {
+      props: {
+        name: 'MyNode',
+        blockId: 'Root/MyNode',
+        description: 'A description.',
+      },
+      attachTo: document.body,
+    })
+
+    await wrapper.trigger('mouseenter')
+    await nextTick()
+    const infoIcon = wrapper.find('svg.lucide-info-icon')
+    expect(infoIcon.exists()).toBe(true)
+    await infoIcon.trigger('click')
+    await nextTick()
+
+    const nav = document.body.querySelector('[data-testid="block-pill-nav"]')
+    expect(nav).toBeTruthy()
+    ;(nav as HTMLElement).click()
+    await nextTick()
+
+    const uiStore = useUiStore()
+    expect(uiStore.selectedNodeId).toBe('Root/MyNode')
+    expect(uiStore.activeView).toBe('editor')
+    wrapper.unmount()
   })
 })
 

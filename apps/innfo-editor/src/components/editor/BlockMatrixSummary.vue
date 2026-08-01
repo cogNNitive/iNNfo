@@ -61,12 +61,17 @@ interface MatrixChip {
 
 const chips = computed<MatrixChip[]>(() => {
   const root = modelStore.getNode(props.rootNodeId)
-  if (!root?.rawContent) return []
+  if (!root) return []
 
-  // Parse frontmatter to get matrix definitions
-  const fm = parseFrontmatter(root.rawContent)
-  const rawMatrices = (fm as any)?.matrices
-  const matrices: MatrixDecl[] = Array.isArray(rawMatrices) ? rawMatrices : []
+  // Matrix declarations come from the template via __matrix_defs (populated by
+  // the spec resolver) or, as a fallback, from the model's own frontmatter.
+  const defsField = root.fields?.__matrix_defs?.value
+  const rawMatrices = Array.isArray(defsField) && defsField.length > 0
+    ? defsField
+    : root.rawContent
+      ? (parseFrontmatter(root.rawContent) as any)?.matrices
+      : undefined
+  const matrices: MatrixDecl[] = Array.isArray(rawMatrices) ? (rawMatrices as MatrixDecl[]) : []
   if (matrices.length === 0) return []
 
   const result: MatrixChip[] = []

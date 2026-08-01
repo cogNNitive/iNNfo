@@ -17,52 +17,20 @@
       <div class="flex items-center gap-2 shrink-0">
         <span class="font-mono text-lg font-black text-primary select-none leading-none">_NN</span>
         <h1 class="text-sm font-semibold tracking-tight">iNNfo Modeler</h1>
+        <span
+          class="font-mono text-xs text-slate-400 dark:text-slate-500 font-normal select-none cursor-default ml-0.5"
+          :title="commitDate ? `Commit date: ${commitDate}` : `Version ${appVersion}`"
+          data-testid="header-version-badge"
+        >
+          v{{ appVersion }}<template v-if="commitDate"> ({{ commitDate }})</template>
+        </span>
       </div>
 
-      <!-- Versions Section (Now styled as unified gray badges with info icon trigger) -->
+      <!-- Actions Section (Reload, Info, Validation) -->
       <div
         v-if="hasRootNode"
         class="flex items-center gap-2 text-2xs text-slate-500 dark:text-slate-400 shrink-0 mr-auto"
       >
-        <!-- Spec Badge -->
-        <div
-          class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none"
-        >
-          <span
-            class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider"
-            >Spec</span
-          >
-          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{
-            specFileName
-          }}</span>
-        </div>
-
-        <!-- Template Badge -->
-        <div
-          class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none"
-        >
-          <span
-            class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider"
-            >Template</span
-          >
-          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{
-            fullTemplateName
-          }}</span>
-        </div>
-
-        <!-- Model Badge -->
-        <div
-          class="font-mono bg-slate-100/80 dark:bg-slate-800/80 px-2 py-0.5 rounded flex items-center gap-1 select-none"
-        >
-          <span
-            class="font-sans font-bold text-slate-400 dark:text-slate-505 text-3xs uppercase tracking-wider"
-            >Model</span
-          >
-          <span class="text-slate-750 dark:text-slate-250 text-2xs font-semibold">{{
-            modelFileName
-          }}</span>
-        </div>
-
         <!-- Reload from Disk Button -->
         <button
           @click="handleReload"
@@ -80,6 +48,7 @@
           class="p-1 rounded text-slate-400 hover:text-primary hover:bg-primary/5 transition-all cursor-pointer"
           :class="uiStore.activeView === 'info' ? 'text-primary bg-primary/5' : ''"
           title="View Model Info"
+          data-testid="header-info-button"
         >
           <Info class="w-4 h-4" />
         </button>
@@ -100,6 +69,8 @@
 
     <!-- Right Section Actions -->
     <div class="flex items-center gap-2.5 shrink-0">
+
+
       <!-- Use AI Button — opens unified modal -->
       <button
         @click="uiStore.setActiveView('ai-guide')"
@@ -210,11 +181,13 @@ import {
   AlertTriangle,
   XCircle,
   Sparkles,
+  Play,
 } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { useToast } from '../../shared/useToast'
+import { extensionRegistry } from '../../extensions/registry'
 import {
   DEFAULT_INNFO_VERSION,
   DEFAULT_TEMPLATE_NAME,
@@ -225,6 +198,9 @@ const workspaceStore = useWorkspaceStore()
 const modelStore = useModelStore()
 const uiStore = useUiStore()
 const { show } = useToast()
+
+const appVersion = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.1.0'
+const commitDate = typeof __COMMIT_DATE__ !== 'undefined' ? __COMMIT_DATE__ : ''
 
 const hasErrors = computed(() => (modelStore.validationReport?.summary.errors ?? 0) > 0)
 const hasWarnings = computed(
@@ -323,6 +299,12 @@ const fullTemplateName = computed(() => {
     return name
   }
   return `${name}_${templateVersion.value}`
+})
+
+const hasGuidedProcedureExtension = computed(() => {
+  const tName = fullTemplateName.value || templateName.value || ''
+  const views = extensionRegistry.getExtensionViews(tName)
+  return 'guided-procedure' in views
 })
 
 const modelFileName = computed(() => {

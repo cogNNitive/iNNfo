@@ -153,7 +153,21 @@ watch(
 
 const node = computed<ModelNode | undefined>(() => modelStore.getNode(props.nodeId))
 
-const children = computed<ModelNode[]>(() => modelStore.getChildren(props.nodeId))
+const children = computed<ModelNode[]>(() => {
+  const astKids = modelStore.getChildren(props.nodeId)
+  if (astKids.length > 0) return astKids
+
+  const thisName = node.value?.name
+  if (!thisName) return []
+
+  const nodePath = node.value?.source?.path
+  return Object.values(modelStore.nodes).filter(
+    (n) =>
+      n.kind === 'element' &&
+      n.fields?.parent?.value === thisName &&
+      (!nodePath || n.source?.path === nodePath),
+  )
+})
 
 const hasChildren = computed(() => children.value.length > 0)
 

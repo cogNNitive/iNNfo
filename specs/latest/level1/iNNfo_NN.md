@@ -455,6 +455,6 @@ title: "..."
 
 ```yaml
 parent_spec:
-  name: "business_V_0-2-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.0/level2/business/business_V_0-2-0_NN.md"
+  name: "business_V_0-2-1"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.2.1/level2/business/business_V_0-2-1_NN.md"
 ```

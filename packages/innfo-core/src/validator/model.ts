@@ -165,6 +165,27 @@ export function validateModel(
         message: `Matrix "${matrix.name}" is not declared in template`,
         severity: 'warning',
       })
+      continue
+    }
+
+    // Cell values must belong to the matrix's declared `values` set
+    // (R-MM-08). The empty cell `-` and the boolean marker `X` are always
+    // accepted. When no `values` are declared, any text is allowed.
+    const declaredValues = Array.isArray(decl.values)
+      ? (decl.values as string[]).map((v) => v.toLowerCase())
+      : undefined
+    if (declaredValues && declaredValues.length > 0) {
+      for (const cell of matrix.cells) {
+        const raw = cell.value
+        if (raw === '-' || raw === '' || raw === 'X' || raw === 'x') continue
+        if (!declaredValues.includes(raw.toLowerCase())) {
+          warnings.push({
+            path: `matrices.${matrix.name}.cells["${cell.row}"]["${cell.col}"]`,
+            message: `Matrix "${matrix.name}" cell value "${raw}" is not in the declared value set: ${(decl.values as string[]).join(', ')}`,
+            severity: 'warning',
+          })
+        }
+      }
     }
   }
 

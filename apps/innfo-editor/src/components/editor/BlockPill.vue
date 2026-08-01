@@ -42,12 +42,12 @@
       <!-- Active markers, read-only, rendered inside the pill -->
       <Info v-if="blockId && showInfoIcon" :class="infoIconClass" @click.stop="togglePopup" />
       <span v-if="activeMarkers.length > 0" class="flex items-center gap-1 shrink-0">
-        <component
+        <MarkerButton
           v-for="marker in activeMarkers"
           :key="marker.name"
-          :is="getMarkerIcon(marker.name)"
-          class="pointer-events-none"
-          :class="markerClassesFor(marker.name)"
+          :marker-name="marker.name"
+          :node-id="blockId"
+          :interactive="false"
         />
       </span>
     </div>
@@ -82,6 +82,15 @@
               @click="navigateToBlock"
             >
               {{ name || '(Empty)' }}
+            </button>
+            <!-- Navigate to the block's page -->
+            <button
+              class="ml-auto mr-6 shrink-0 w-6 h-6 flex items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-primary cursor-pointer transition-colors"
+              title="Open block page"
+              data-testid="block-pill-nav"
+              @click.stop="navigateToBlock"
+            >
+              <ArrowUpRight class="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -122,13 +131,11 @@
               Markers
             </div>
             <div class="flex items-center gap-1.5">
-              <component
+              <MarkerButton
                 v-for="marker in allMarkers"
                 :key="marker.name"
-                :is="getMarkerIcon(marker.name)"
-                @click.stop="cycleMarker(marker.name)"
-                class="cursor-pointer"
-                :class="markerClassesFor(marker.name)"
+                :marker-name="marker.name"
+                :node-id="blockId"
               />
             </div>
           </div>
@@ -140,12 +147,14 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { Info, X } from 'lucide-vue-next'
+import { Info, X, ArrowUpRight } from 'lucide-vue-next'
 import IconRenderer from './IconRenderer.vue'
-import { getMarkerIcon, getMarkerClasses } from './MarkerIcons'
+import MarkerButton from './MarkerButton.vue'
+import { getMarkerDefinitions } from './MarkerIcons'
 import { useBlockVisuals } from '../../composables/useBlockVisuals'
 import { useNodeMediaScan } from '../../composables/useNodeMediaScan'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
+import { useUiStore } from '../../stores/uiStore'
 import {
   useConceptVisuals,
   getHexColorLight,
@@ -154,8 +163,6 @@ import {
   getHexColor,
 } from '../../composables/useConceptVisuals'
 import { useModelStore } from '../../stores/modelStore'
-import { commitMarkerValue } from '../../shared/provenance'
-import { MARKER_CYCLE_COUNT } from '../../utils/constants'
 import type { BlockKind, ConceptType } from '../../utils/conceptVisuals'
 
 const props = withDefaults(
@@ -184,6 +191,8 @@ const props = withDefaults(
     instanceCount?: number
     /** Show the marker-cycling toolbar inside the popup. */
     showMarkers?: boolean
+    /** Suppress the "Empty" indicator (used for structural concept pills in matrix headers). */
+    hideEmpty?: boolean
   }>(),
   {
     selected: false,
@@ -191,12 +200,13 @@ const props = withDefaults(
     fullWidth: false,
     as: 'div',
     kind: 'instance',
-    showMarkers: false,
+    showMarkers: true,
     conceptFields: () => [],
   },
 )
 
 const modelStore = useModelStore()
+const uiStore = useUiStore()
 const conceptVisuals = useConceptVisuals()
 
 // ── Parent chain color/icon resolution ─────────────────────────
@@ -216,15 +226,7 @@ function resolveNodeColorName(nodeId: string | undefined): string {
 
 // In Phase 2, markers come from a hardcoded default list since the metamodel
 // adapter is not yet in place. Phase 6 will wire useMetamodelStore().
-const allMarkers = computed(() => {
-  return [
-    { name: 'completion', icon: 'check-circle', color: 'emerald' },
-    { name: 'certainty', icon: 'help-circle', color: 'blue' },
-    { name: 'priority', icon: 'flag', color: 'rose' },
-    { name: 'rating', icon: 'star', color: 'amber' },
-    { name: 'weight', icon: 'scale', color: 'indigo' },
-  ]
-})
+const allMarkers = computed(() => getMarkerDefinitions())
 
 // Resolved color name (like 'blue') or fallback to color prop
 const effectiveColorName = computed(() => {
@@ -280,6 +282,7 @@ const visuals = useBlockVisuals({
 
 // ── Empty state ─────────────────────────────────────────────────
 const isEmpty = computed(() => {
+  if (props.hideEmpty) return false
   const hasDescription = !!props.description && props.description.trim().length > 0
   const hasFields =
     !!props.fields &&
@@ -307,19 +310,12 @@ const activeMarkers = computed(() => {
   return allMarkers.value.filter((m) => getMarkerScore(m.name) > 0)
 })
 
-const cycleMarker = (markerName: string) => {
-  if (!props.blockId) return
-  const current = getMarkerScore(markerName)
-  const next = (current + 1) % MARKER_CYCLE_COUNT
-  commitMarkerValue(modelStore, props.blockId, markerName, next)
-}
-
-const markerClassesFor = (markerName: string) =>
-  getMarkerClasses(markerName, getMarkerScore(markerName))
-
 // ── Navigation ──────────────────────────────────────────────────
 const navigateToBlock = () => {
   popupVisible.value = false
+  if (!props.blockId) return
+  uiStore.selectNode(props.blockId)
+  uiStore.setActiveView('editor')
 }
 
 // ── Thumbnail scanning (file-system media) ──────────────────────

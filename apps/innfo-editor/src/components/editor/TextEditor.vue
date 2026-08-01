@@ -45,6 +45,7 @@ const props = defineProps<{
   nodeId: string
   conceptName: string
   conceptType: string
+  rootNodeId?: string
 }>()
 
 const emit = defineEmits<{
@@ -56,6 +57,13 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const saved = ref(false)
 
 const rawContent = computed(() => {
+  // `text` concepts store their content in the root node's rawSections
+  // keyed by concept name. The selected node may be a virtual concept node
+  // (not present in the store), so resolve content via the root node.
+  if (props.conceptType === 'text') {
+    const root = props.rootNodeId ? modelStore.getNode(props.rootNodeId) : undefined
+    return root?.rawSections?.[props.conceptName] ?? ''
+  }
   const node = modelStore.getNode(props.nodeId)
   return node?.rawContent ?? ''
 })
@@ -85,12 +93,28 @@ const saveContent = () => {
   const node = modelStore.getNode(props.nodeId)
   if (!node) return
 
-  // Update the node's rawContent and stamp provenance
-  modelStore.upsertNode({ ...node, rawContent: content })
-  commitFieldValue(modelStore, props.nodeId, '_rawContent', content, {
-    kind: 'user',
-    id: 'anonymous',
-  })
+  if (props.conceptType === 'text') {
+    // Write back into the root node's rawSections keyed by concept name.
+    const rootId = props.rootNodeId || props.nodeId
+    const root = modelStore.getNode(rootId)
+    if (root) {
+      const rawSections = { ...(root.rawSections ?? {}) }
+      rawSections[props.conceptName] = content
+      modelStore.upsertNode({ ...root, rawSections })
+      modelStore.markDirty(rootId)
+      commitFieldValue(modelStore, rootId, `_rawSection:${props.conceptName}`, content, {
+        kind: 'user',
+        id: 'anonymous',
+      })
+    }
+  } else {
+    // Update the node's rawContent and stamp provenance
+    modelStore.upsertNode({ ...node, rawContent: content })
+    commitFieldValue(modelStore, props.nodeId, '_rawContent', content, {
+      kind: 'user',
+      id: 'anonymous',
+    })
+  }
   localContent.value = null
   saved.value = true
   emit('change')

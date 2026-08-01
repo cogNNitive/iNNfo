@@ -33,14 +33,26 @@ const placeholderText = computed(() => {
   return targets.join(', ')
 })
 
-const filteredSuggestions = computed(() => {
+interface ReferenceSuggestion {
+  name: string
+  modelName: string
+}
+
+const filteredSuggestions = computed<ReferenceSuggestion[]>(() => {
   const targets = props.fieldDefinition?.target_concepts || []
   const lowerQuery = query.value.toLowerCase()
-  const matches: string[] = []
+  const matches: ReferenceSuggestion[] = []
+
   for (const node of Object.values(modelStore.nodes)) {
+    if (node.kind !== 'element' && node.kind !== 'concept') continue
     if (targets.length === 0 || targets.includes(node.type)) {
       if (!lowerQuery || node.name.toLowerCase().includes(lowerQuery)) {
-        matches.push(node.name)
+        const path = node.source?.path || ''
+        const modelName = path.split('/').pop()?.split('\\').pop() || ''
+        matches.push({
+          name: node.name,
+          modelName,
+        })
       }
     }
   }
@@ -84,11 +96,14 @@ function onBlur(): void {
     <ul v-if="!readonly && showDropdown && filteredSuggestions.length > 0" class="field-reference-dropdown">
       <li
         v-for="suggestion in filteredSuggestions"
-        :key="suggestion"
-        class="field-reference-option"
-        @mousedown.prevent="selectSuggestion(suggestion)"
+        :key="suggestion.name + '_' + suggestion.modelName"
+        class="field-reference-option flex items-center justify-between"
+        @mousedown.prevent="selectSuggestion(suggestion.name)"
       >
-        {{ suggestion }}
+        <span>{{ suggestion.name }}</span>
+        <span v-if="suggestion.modelName" class="text-3xs opacity-60 font-mono ml-2 shrink-0">
+          {{ suggestion.modelName }}
+        </span>
       </li>
     </ul>
   </div>

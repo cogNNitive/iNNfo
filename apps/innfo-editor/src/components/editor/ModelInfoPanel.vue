@@ -17,6 +17,108 @@
       </div>
     </div>
 
+    <!-- Workspace Model Selector (Multi-Model Workspace) -->
+    <div
+      v-if="availableModels.length > 1"
+      class="bg-slate-100 dark:bg-slate-800/80 p-3 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3"
+      data-testid="info-panel-model-selector"
+    >
+      <div class="flex items-center gap-2">
+        <Database class="w-4 h-4 text-primary" />
+        <span class="text-xs font-bold text-slate-700 dark:text-slate-200">Inspeccionar Modelo:</span>
+      </div>
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button
+          v-for="m in availableModels"
+          :key="m.id"
+          @click="selectedModelId = m.id"
+          class="px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer border"
+          :class="
+            activeModelId === m.id
+              ? 'bg-primary text-white border-primary shadow-xs'
+              : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-primary/50'
+          "
+        >
+          {{ m.name }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Template Extensions & Custom Viewers Section -->
+    <div
+      class="bg-gradient-to-r from-purple-900/10 via-slate-900/5 to-blue-900/10 dark:from-purple-950/40 dark:via-slate-900/40 dark:to-blue-950/40 border border-purple-200 dark:border-purple-800/40 rounded-xl p-5 shadow-xs space-y-4"
+    >
+      <div class="flex items-center justify-between border-b border-purple-200/60 dark:border-purple-800/40 pb-3">
+        <div class="flex items-center gap-2">
+          <Sparkles class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">
+              Template Extensions &amp; Custom Viewers
+            </h3>
+            <p class="text-3xs text-slate-500 dark:text-slate-400">
+              Specialized domain engines and execution views provided by template <span class="font-mono text-purple-600 dark:text-purple-300 font-bold">{{ fullTemplateName }}</span>.
+            </p>
+          </div>
+        </div>
+        <span
+          class="px-2.5 py-1 rounded-full text-3xs font-bold uppercase tracking-wider"
+          :class="availableExtensions.hasExtensions ? 'bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-700' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700'"
+        >
+          {{ availableExtensions.hasExtensions ? `${Object.keys(availableExtensions.views).length} Extension(s) Active` : 'No Extensions' }}
+        </span>
+      </div>
+
+      <!-- Active Extension Card -->
+      <div v-if="availableExtensions.hasExtensions" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          v-for="(viewComp, viewKey) in availableExtensions.views"
+          :key="viewKey"
+          class="bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-900/60 rounded-lg p-4 flex flex-col justify-between gap-3 shadow-2xs hover:border-purple-400 transition-colors"
+        >
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <Play class="w-3.5 h-3.5 text-blue-500 fill-current" />
+                {{ viewKey === 'guided-procedure' ? 'Guided Procedure Execution Engine' : viewKey }}
+              </span>
+              <span class="text-3xs font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-semibold">
+                {{ viewKey }}
+              </span>
+            </div>
+            <p class="text-2xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              Step-by-step procedure FSM state machine interpreter: sequence navigation, sub-steps progress, RACI matrix, and tools.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <button
+              @click="launchExtensionView(String(viewKey))"
+              class="flex-1 px-3 py-1.5 rounded-md text-xs font-bold bg-purple-700 hover:bg-purple-800 text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <Play class="w-3.5 h-3.5 fill-current" />
+              <span>Launch in Workspace</span>
+            </button>
+
+            <button
+              @click="openStandaloneViewer"
+              class="px-3 py-1.5 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
+              title="Launch in Standalone Mode"
+            >
+              <ExternalLink class="w-3.5 h-3.5" />
+              <span>Standalone</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Extensions State -->
+      <div v-else class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        <p>
+          Template <strong class="text-slate-700 dark:text-slate-300 font-mono">{{ fullTemplateName }}</strong> does not define custom UI extensions. Extension views are defined in template specifications under <code class="text-purple-600 dark:text-purple-400 font-mono">specs/[level2_template]/extension/</code>.
+        </p>
+      </div>
+    </div>
+
     <!-- Main Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Left Column: Workspace & Files -->
@@ -281,9 +383,11 @@
           class="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 p-3 rounded-md border border-slate-200 dark:border-slate-700"
         >
           <span class="text-xs text-slate-500 dark:text-slate-400">Current Version</span>
-          <span class="font-mono font-bold text-slate-900 dark:text-slate-100">{{
-            currentVersionStr || '—'
-          }}</span>
+          <span
+            data-testid="current-version-display"
+            class="font-mono font-bold text-slate-900 dark:text-slate-100"
+            >{{ currentVersionStr || '—' }}</span
+          >
         </div>
 
         <!-- Bump buttons with hover preview -->
@@ -395,9 +499,13 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useWorkspaceStore } from '../../stores/workspaceStore'
+import { useModelStore } from '../../stores/modelStore'
+import { useUiStore } from '../../stores/uiStore'
+import { extensionRegistry } from '../../extensions/registry'
 import {
   FolderOpen,
   FileText,
@@ -408,9 +516,11 @@ import {
   ChevronRight,
   Edit2,
   Info,
+  Database,
+  Sparkles,
+  Play,
+  ExternalLink,
 } from 'lucide-vue-next'
-import { useWorkspaceStore } from '../../stores/workspaceStore'
-import { useModelStore } from '../../stores/modelStore'
 import {
   DEFAULT_INNFO_VERSION,
   DEFAULT_TEMPLATE_NAME,
@@ -430,14 +540,61 @@ const props = defineProps<{
   rootNodeId: string
 }>()
 
+const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const modelStore = useModelStore()
+const uiStore = useUiStore()
 const { show } = useToast()
 
+const availableExtensions = computed(() => {
+  const tName = fullTemplateName.value || templateName.value || ''
+  const ext = extensionRegistry.getExtension(tName)
+  const views = ext ? ext.views : {}
+  const manifest = ext ? ext.manifest : null
+  return {
+    templateName: tName,
+    hasExtensions: Object.keys(views).length > 0,
+    views,
+    manifest,
+  }
+})
+
+function launchExtensionView(viewKey: string) {
+  uiStore.setActiveView(viewKey as any)
+}
+
+function openStandaloneViewer() {
+  const sourceUrl = workspaceStore.sourceUrl
+  if (sourceUrl) {
+    router.push({ name: 'view-procedure', query: { url: sourceUrl } })
+  } else {
+    router.push({ name: 'view-procedure' })
+  }
+}
+
 const showPlainTextView = ref(false)
+const selectedModelId = ref<string>('')
+
+const availableModels = computed(() => {
+  return modelStore.rootIds
+    .filter((id) => !id.startsWith('spec:'))
+    .map((id) => {
+      const node = modelStore.getNode(id)
+      const path = node?.source?.path || ''
+      const name = path.split('/').pop()?.split('\\').pop() || node?.name || id
+      return { id, name }
+    })
+})
+
+const activeModelId = computed(() => {
+  if (selectedModelId.value && availableModels.value.some((m) => m.id === selectedModelId.value)) {
+    return selectedModelId.value
+  }
+  return props.rootNodeId || availableModels.value[0]?.id || ''
+})
 
 // ── Frontmatter resolution from root node rawContent ──
-const rootNode = computed(() => modelStore.getNode(props.rootNodeId))
+const rootNode = computed(() => modelStore.getNode(activeModelId.value))
 
 const rawContent = computed(() => rootNode.value?.rawContent ?? '')
 
@@ -469,15 +626,27 @@ const formatVersion = computed(() => {
   return extractFrontmatterField('spec_version') || DEFAULT_INNFO_VERSION
 })
 
+/** Extracts a nested YAML block field value, e.g. `template:\n  name: "business"`. */
+function extractNestedFieldValue(yaml: string, block: string, field: string): string | null {
+  const match = yaml.match(
+    new RegExp(`^${block}:\\s*\\n\\s+${field}:\\s*["']?(.+?)["']?\\s*$`, 'm'),
+  )
+  return match ? match[1].trim() : null
+}
+
 const templateName = computed(() => {
-  // Try template.name which is nested YAML
   const content = rawContent.value
   if (!content) return DEFAULT_TEMPLATE_NAME
   const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---/)
   if (!fmMatch) return DEFAULT_TEMPLATE_NAME
   const yaml = fmMatch[1]
-  const match = yaml.match(/^template:\s*\n\s+name:\s*["']?(.+?)["']?\s*$/m)
-  return match ? match[1].trim() : DEFAULT_TEMPLATE_NAME
+
+  return (
+    extractNestedFieldValue(yaml, 'template', 'name') ??
+    extractNestedFieldValue(yaml, 'parent_spec', 'name') ??
+    extractNestedFieldValue(yaml, 'parent', 'name') ??
+    DEFAULT_TEMPLATE_NAME
+  )
 })
 
 const templateVersion = computed(() => {
@@ -486,8 +655,17 @@ const templateVersion = computed(() => {
   const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---/)
   if (!fmMatch) return DEFAULT_TEMPLATE_VERSION
   const yaml = fmMatch[1]
-  const match = yaml.match(/^template:\s*\n\s+version:\s*["']?(.+?)["']?\s*$/m)
-  return match ? match[1].trim() : DEFAULT_TEMPLATE_VERSION
+
+  const explicit = extractNestedFieldValue(yaml, 'template', 'version')
+  if (explicit) return explicit
+
+  // Derive the version from the template name (e.g. "business_V_0-2-0")
+  const tplName =
+    extractNestedFieldValue(yaml, 'template', 'name') ??
+    extractNestedFieldValue(yaml, 'parent_spec', 'name') ??
+    extractNestedFieldValue(yaml, 'parent', 'name')
+  const derived = tplName?.match(/V_\d+-\d+-\d+/i)
+  return derived ? derived[0] : DEFAULT_TEMPLATE_VERSION
 })
 
 const modelVersion = computed(() => {
@@ -601,7 +779,7 @@ async function saveVersion(): Promise<void> {
   const level = selectedLevel.value
 
   try {
-    await workspaceStore.saveActiveFileWithVersionBump(level)
+    await workspaceStore.saveActiveFileWithVersionBump(level, activeModelId.value)
     selectedLevel.value = null
   } catch (err) {
     console.error('Version save failed:', err)
@@ -640,7 +818,7 @@ const templateRemoteUrl = computed(() => {
 const fullTemplateName = computed(() => {
   const name = templateName.value || ''
   if (!name || name.toLowerCase() === 'template') {
-    return templateVersion.value || DEFAULT_TEMPLATE_VERSION
+    return '—'
   }
   const hasVersion = /_V_?\d+/i.test(name)
   if (hasVersion || !templateVersion.value) {
@@ -677,7 +855,7 @@ function renameModelFile(): void {
   const currentName = modelFileName.value
   const newName = window.prompt('Enter new filename (e.g. MyModel_NN.md):', currentName)
   if (newName && newName.trim() && newName !== currentName) {
-    workspaceStore.renameActiveFile(newName.trim())
+    workspaceStore.renameActiveFile(newName.trim(), activeModelId.value)
       .then(() => {
         show('Filename updated successfully.', 'success')
       })

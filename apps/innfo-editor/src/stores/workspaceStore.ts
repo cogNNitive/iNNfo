@@ -1,4 +1,4 @@
-﻿import { defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import { useModelStore } from './modelStore'
 import { useUiStore } from './uiStore'
 import { recursiveSerialize } from '../model/recursiveSerializer'
@@ -96,6 +96,18 @@ export const useWorkspaceStore = defineStore('workspace', {
         )
         if (!hasModelRoots) {
           this.emptyFolderError = true
+
+          // Surface per-file parse problems so "no models found" is explainable:
+          // e.g. a _NN.md file that exists but failed to parse. The <root> issue
+          // (missing index.md fallback notice) is expected and not an error.
+          const parseIssues = modelStore.parseIssues.filter((issue) => issue.path !== '<root>')
+          if (parseIssues.length > 0) {
+            this.error = parseIssues
+              .slice(0, 4)
+              .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
+              .join(' — ')
+          }
+
           this.hasHandle = false
           this.handle = null
           this.hasParsed = false
@@ -159,10 +171,17 @@ export const useWorkspaceStore = defineStore('workspace', {
         this.hasParsed = true
         this.parseCount += 1
 
-        // Reset UI state so the dashboard shows after loading
+        // Set UI state to active root node and appropriate view
         const uiStore = useUiStore()
-        uiStore.setActiveView('editor')
-        uiStore.selectNode(null)
+        const modelStore = useModelStore()
+        const firstRootId = modelStore.rootIds[0] || null
+        uiStore.selectNode(firstRootId)
+
+        if (templateName === 'procedures') {
+          uiStore.setActiveView('guided-procedure')
+        } else {
+          uiStore.setActiveView('editor')
+        }
 
         if (templateName) {
           this.isSampleSession = true
@@ -268,46 +287,40 @@ export const useWorkspaceStore = defineStore('workspace', {
       if (!this.handle) return
 
       const modelStore = useModelStore()
-      const rootId = modelStore.rootIds[0]
-      if (!rootId) return
+      const dirtyRootIds = modelStore.rootIds.filter((id) => modelStore.dirtyIds.has(id))
+      if (dirtyRootIds.length === 0) return
 
-      const rootNode = modelStore.getNode(rootId)
-      if (!rootNode?.rawContent) return
+      for (const rootId of dirtyRootIds) {
+        const rootNode = modelStore.getNode(rootId)
+        if (!rootNode?.rawContent) continue
 
-      // Only backup when dirty
-      if (!modelStore.dirtyIds.has(rootId)) return
-
-      try {
-        const now = new Date()
-        const ts =
-          `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_` +
-          `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
-
-        const rawBasename = rootNode.source.path.split(/[/\\]/).pop() ?? 'document'
-        const cleanBasename = rawBasename.split(/[?#]/)[0]
-        const backupName = `${ts}_${cleanBasename.replace(/[^a-zA-Z0-9._-]/g, '_').trim()}`
-
-        // Ensure backups/ subdirectory exists
-        let backupsDir: DirectoryHandleLike
         try {
-          backupsDir = await this.handle.getDirectoryHandle('backups', { create: true })
-        } catch {
-          console.warn('[backup] Could not create backups/ directory')
-          return
-        }
+          const now = new Date()
+          const ts =
+            `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_` +
+            `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
 
-        const fileHandle = await backupsDir.getFileHandle(backupName, { create: true })
-        if (!fileHandle.createWritable) {
-          console.warn('[backup] File handle does not support writing')
-          return
-        }
+          const rawBasename = rootNode.source.path.split(/[/\\]/).pop() ?? 'document'
+          const cleanBasename = rawBasename.split(/[?#]/)[0]
+          const backupName = `${ts}_${cleanBasename.replace(/[^a-zA-Z0-9._-]/g, '_').trim()}`
 
-        const writable = await fileHandle.createWritable()
-        await writable.write(rootNode.rawContent)
-        await writable.close()
-      } catch (err) {
-        // Non-blocking: backup failure must not prevent the save
-        console.warn('[backup] Failed to create backup:', err)
+          let backupsDir: DirectoryHandleLike
+          try {
+            backupsDir = await this.handle.getDirectoryHandle('backups', { create: true })
+          } catch {
+            console.warn('[backup] Could not create backups/ directory')
+            return
+          }
+
+          const fileHandle = await backupsDir.getFileHandle(backupName, { create: true })
+          if (fileHandle.createWritable) {
+            const writable = await fileHandle.createWritable()
+            await writable.write(rootNode.rawContent)
+            await writable.close()
+          }
+        } catch (err) {
+          console.warn('[backup] Failed to create backup:', err)
+        }
       }
     },
 
@@ -432,9 +445,9 @@ export const useWorkspaceStore = defineStore('workspace', {
     /**
      * Renames the active file on disk (if handle present) and updates the source path in memory.
      */
-    async renameActiveFile(newFilename: string): Promise<void> {
+    async renameActiveFile(newFilename: string, targetRootId?: string): Promise<void> {
       const modelStore = useModelStore()
-      const rootId = modelStore.rootIds[0]
+      const rootId = targetRootId ?? modelStore.rootIds.find((id) => !id.startsWith('spec:')) ?? modelStore.rootIds[0]
       const rootNode = rootId ? modelStore.getNode(rootId) : null
       if (!rootNode) throw new Error('No root node found to rename')
 
@@ -473,11 +486,11 @@ export const useWorkspaceStore = defineStore('workspace', {
      * Saves the active file under a new version-bumped filename, then
      * persists all dirty nodes. The original file is NOT deleted.
      */
-    async saveActiveFileWithVersionBump(level: BumpLevel): Promise<void> {
+    async saveActiveFileWithVersionBump(level: BumpLevel, targetRootId?: string): Promise<void> {
       if (!this.handle) throw new Error('No workspace handle')
 
       const modelStore = useModelStore()
-      const rootId = modelStore.rootIds[0]
+      const rootId = targetRootId ?? modelStore.rootIds.find((id) => !id.startsWith('spec:')) ?? modelStore.rootIds[0]
       const rootNode = modelStore.getNode(rootId)
       if (!rootNode) throw new Error('No root node found for version bump')
 

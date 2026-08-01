@@ -9,6 +9,7 @@
 import { normalizeSingleModel } from '@cognnitive/innfo-core'
 import type { ModelNode } from '../model/types'
 import { useModelStore } from '../stores/modelStore'
+import { resolveParentSpecs } from '../services/SpecResolverService'
 
 export interface UrlDocLoaderResult {
   nodes: Record<string, ModelNode>
@@ -67,7 +68,7 @@ export function useUrlDocLoader() {
 
     if (!result.error && Object.keys(result.nodes).length > 0) {
       const modelStore = useModelStore()
-      await modelStore._resolveParentSpecs(result.nodes, result.rootIds)
+      await resolveParentSpecs(result.nodes, result.rootIds)
       modelStore.setGraph(result.nodes, result.rootIds)
     }
 

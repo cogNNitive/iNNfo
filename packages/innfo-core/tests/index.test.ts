@@ -15,6 +15,9 @@ import {
   applyMutation,
   uniqueSlugify,
   validateReferences,
+  serializeModel,
+  deriveMatrixWidgetType,
+  normalizeMatrixDecl,
 } from '../src/index'
 import type { ElementNode } from '../src/types'
 
@@ -1696,5 +1699,211 @@ describe('FOLDER mode rejection (FR-007)', () => {
     const productWarning = result.warnings.find((w) => w.message.includes('Product'))
     expect(productWarning).toBeDefined()
     expect(productWarning!.message).toContain('is undocumented in parent template')
+  })
+})
+
+describe('business template V_0-2-1 (patch)', () => {
+  const content = readFileSync(
+    join(import.meta.dirname!, '..', '..', '..', 'specs', 'v0.2.1', 'level2', 'business', 'business_V_0-2-1_NN.md'),
+    'utf-8',
+  )
+  const fm = parseFrontmatter(content)!
+
+  it('declares V_0-2-1 with parent iNNfo_V_0-2-0', () => {
+    expect(fm.specification_version).toBe('V_0-2-1')
+    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-2-0')
+  })
+
+  it('declares per-matrix description, widget and values', () => {
+    const journey = fm.matrices!.find((m) => m.name === 'Journey map')
+    expect(journey).toBeDefined()
+    expect(journey!.description).toBeTruthy()
+    expect(journey!.widgetType).toBe('set')
+    expect((journey!.values as string[]).length).toBe(9)
+
+    const functionsPositions = fm.matrices!.find((m) => m.name === 'Functions-Positions Matrix')
+    expect(functionsPositions).toBeDefined()
+    expect(functionsPositions!.widgetType).toBe('boolean')
+    expect(functionsPositions!.values).toEqual(['Assumes'])
+  })
+
+  it('normalizes declarations to __matrix_defs shape', () => {
+    const def = normalizeMatrixDecl(fm.matrices!.find((m) => m.name === 'Journey map')! as any)
+    expect(def.widgetType).toBe('set')
+    expect(def.values).toEqual([
+      'Max',
+      'Very High',
+      'High',
+      'Slightly High',
+      'Neutral',
+      'Slightly Low',
+      'Low',
+      'Very Low',
+      'Min',
+    ])
+    expect(def.description).toBeTruthy()
+    expect(def.params).toContain('Max')
+
+    const boolDef = normalizeMatrixDecl(fm.matrices!.find((m) => m.name === 'Functions-Positions Matrix')! as any)
+    expect(boolDef.widgetType).toBe('boolean')
+    expect(boolDef.values).toEqual(['Assumes'])
+  })
+})
+
+describe('matrix widget inference (R-MM-08)', () => {
+  it('uses explicit widgetType first', () => {
+    expect(deriveMatrixWidgetType({ widgetType: 'cycle', values: ['A', 'B'] })).toBe('cycle')
+  })
+
+  it('infers boolean from a single value', () => {
+    expect(deriveMatrixWidgetType({ values: ['Assumes'] })).toBe('boolean')
+  })
+
+  it('infers scale from numeric value sets', () => {
+    expect(deriveMatrixWidgetType({ values: ['1', '2', '3', '4', '5'] })).toBe('scale')
+  })
+
+  it('infers set from multi-value sets', () => {
+    expect(deriveMatrixWidgetType({ values: ['Max', 'High', 'Low'] })).toBe('set')
+  })
+
+  it('falls back to text', () => {
+    expect(deriveMatrixWidgetType({})).toBe('text')
+  })
+})
+
+describe('matrix value-set validation (R-MM-08)', () => {
+  function buildModel(cellValue: string) {
+    return parseModel(
+      [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 3',
+        'model_version: "V_0-1-2"',
+        'title: "Val Test"',
+        'parent_spec:',
+        '  name: "business_V_0-2-1"',
+        '  url: "https://example.com/business"',
+        '---',
+        '',
+        '# _NN index',
+        '* [[Problems]]',
+        '* [[Value propositions]]',
+        '',
+        '# _NN Problems',
+        '* _NN Problems: Problem One',
+        '  Description.',
+        '',
+        '# _NN Value propositions',
+        '* _NN Value propositions: VP One',
+        '  Description.',
+        '',
+        '# _NN matrices: problems-value propositions matrix',
+        '| Problems \\ Value propositions | VP One |',
+        '| :--- | :---: |',
+        `| Problem One | ${cellValue} |`,
+        '',
+      ].join('\n'),
+    )
+  }
+
+  function buildTemplate() {
+    return {
+      name: 'business_V_0-2-1',
+      level: 2 as const,
+      frontmatter: {
+        spec_version: 'V_0-2-0',
+        spec_url: 'https://example.com/business',
+        level: 2 as const,
+        concepts: [
+          { name: 'Problems', type: 'weight' as const },
+          { name: 'Value propositions', type: 'weight' as const },
+        ],
+        matrices: [
+          {
+            name: 'Problems-Value propositions Matrix',
+            source: 'Problems',
+            target: 'Value propositions',
+            values: ['Max', 'Very High', 'High'],
+          },
+        ],
+      },
+      rawContent: '',
+    }
+  }
+
+  it('accepts declared values, the empty cell and the boolean marker X', () => {
+    for (const value of ['High', '-', 'X']) {
+      const result = validateModel(buildModel(value), buildTemplate() as any, null)
+      const valueWarnings = result.warnings.filter((w) => w.message.includes('value set'))
+      expect(valueWarnings).toHaveLength(0)
+    }
+  })
+
+  it('flags cell values outside the declared set', () => {
+    const result = validateModel(buildModel('Garbage'), buildTemplate() as any, null)
+    const warning = result.warnings.find((w) => w.message.includes('value set'))
+    expect(warning).toBeDefined()
+    expect(warning!.message).toContain('Garbage')
+    expect(warning!.message).toContain('Max')
+  })
+})
+
+describe('matrix metadata serializer round-trip', () => {
+  it('preserves values, widget and description', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 2',
+      'title: "Round Trip"',
+      'matrices:',
+      '  - name: "test matrix"',
+      '    source: "A"',
+      '    target: "B"',
+      '    widget: "set"',
+      '    values: [Red, Green, Blue]',
+      '    description: "A test matrix."',
+      '---',
+      '',
+      '# _NN index',
+      '* [[A]]',
+      '',
+    ].join('\n')
+
+    const parsed = parseModel(content)
+    const serialized = serializeModel(parsed)
+    const reparsed = parseModel(serialized)
+
+    const m = reparsed.frontmatter.matrices!.find((x) => x.name === 'test matrix')!
+    expect(m.widgetType).toBe('set')
+    expect(m.values).toEqual(['Red', 'Green', 'Blue'])
+    expect(m.description).toBe('A test matrix.')
+    expect(serialized).toContain('widget: "set"')
+    expect(serialized).toContain('values: [Red, Green, Blue]')
+    expect(serialized).toContain('description: "A test matrix."')
+  })
+
+  it('keeps legacy params when no values are declared', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 2',
+      'title: "Round Trip Legacy"',
+      'matrices:',
+      '  - name: "test matrix"',
+      '    source: "A"',
+      '    target: "B"',
+      '    params: "Low;Medium;High"',
+      '---',
+      '',
+      '# _NN index',
+      '* [[A]]',
+      '',
+    ].join('\n')
+
+    const parsed = parseModel(content)
+    const reparsed = parseModel(serializeModel(parsed))
+    const m = reparsed.frontmatter.matrices!.find((x) => x.name === 'test matrix')!
+    expect(m.values).toEqual(['Low', 'Medium', 'High'])
   })
 })

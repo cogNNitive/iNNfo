@@ -87,7 +87,7 @@ matrices:
 ---
 
 > [!NOTE]
-> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
+> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor, view and edit it with [cogNNitive Workspace Editor](https://innfo.cognnitive.com/app/innfo-doc), or execute it interactively using the [Standalone Procedure Viewer](https://innfo.cognnitive.com/app/view/procedure).
 
 # Procedures Template
 

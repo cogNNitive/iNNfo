@@ -9,6 +9,7 @@ export interface FolderHistoryEntry {
   name: string
   handleKey: string
   timestamp: number
+  path?: string
 }
 
 /** Onboarding sample model entry. */
