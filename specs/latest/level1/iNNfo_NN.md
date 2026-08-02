@@ -286,10 +286,19 @@ A Field is either **inline** or **file-backed**:
 
 - **Inline field** — the value lives in the Element's `key:: value` properties
   (`string`, `select`, `reference`) or, for prose, as `markdown_inline` content.
-- **File-backed field** — the value is a filename; the content lives in a sidecar file.
+- **File-backed field** — the value is a filename or URL; the content lives in a sidecar file or remote URL.
   The file-backed types are `markdown_file`, `image`, `file`, `video`, and `audio`.
 
-**Storage convention (single, canonical).** Every file-backed field's file MUST be
+**Image Fields & Main Image Resolution (Rule 1).** Fields holding image paths or URLs MUST be declared with `type:: image`. The primary/main image of an Element is deterministically defined as the FIRST field declared of `type:: image` in the owning Template's field definition order. Applications MUST NOT guess main images by inspecting field names or file extensions.
+
+**Attribution Companion (`<base>_metadata`).** An optional companion field named `<baseField>_metadata` (`markdown_inline`) MAY be provided next to any file-backed or image field to store provenance and attribution data. When structured citations are provided, they SHOULD be encoded as a single-line CSL-JSON object:
+
+```markdown
+image_url:: assets/actors/Gene_Kelly.png
+image_url_metadata:: {"id":"wikimedia-gene-kelly-1952","type":"webpage","author":[{"literal":"Wikimedia Commons"}],"title":"Gene Kelly (1952)","URL":"https://commons.wikimedia.org/...","license":"CC BY-SA"}
+```
+
+**Storage convention (single, canonical).** Every local file-backed field's file MUST be
 stored at:
 
 ```
@@ -310,6 +319,22 @@ a Field. There is no parallel discovery mechanism.
 
 **Rename.** Renaming an Element changes its `{element-slug}`; the transactional rename
 MUST relocate the Element's `assets/{element-slug}/` folder accordingly.
+
+## Provenance & Traceability (source_ref)
+
+`source_ref` is an **optional** reserved property for Level 3 Elements that establishes traceability to source documents.
+
+- **Optionality:** A Level 3 Model is syntactically valid with or without `source_ref::` properties. The parser and validator MUST NOT emit an error solely because `source_ref::` is omitted.
+- **Location Convention:** Ingested source documents are stored under `sources/markdown/` (or relative subfolders within `sources/`).
+- **Syntax:** `source_ref:: sources/markdown/<filename>#L<start>-L<end>`
+
+Example:
+
+```markdown
+## NN Stakeholders: Enterprise Clients
+source_ref:: sources/markdown/market_analysis.md#L45-L60
+relationship_model:: B2B Long-term
+```
 
 ## Relationship Types
 
