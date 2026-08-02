@@ -8,9 +8,12 @@ type DirEntries = Array<[string, FileHandleLike | DirectoryHandleLike]>
 
 function fakeDir(name: string, entries: DirEntries): DirectoryHandleLike {
   const fileMap = new Map<string, FileHandleLike>()
+  const dirMap = new Map<string, DirectoryHandleLike>()
   for (const [entryName, entry] of entries) {
     if (entry.kind === 'file') {
       fileMap.set(entryName, entry)
+    } else {
+      dirMap.set(entryName, entry)
     }
   }
   return {
@@ -22,6 +25,11 @@ function fakeDir(name: string, entries: DirEntries): DirectoryHandleLike {
     getFileHandle: async (fileName: string) => {
       const found = fileMap.get(fileName)
       if (!found) throw Object.assign(new Error('File not found'), { code: 'ENOENT' })
+      return found
+    },
+    getDirectoryHandle: async (dirName: string) => {
+      const found = dirMap.get(dirName)
+      if (!found) throw Object.assign(new Error('Directory not found'), { code: 'ENOENT' })
       return found
     },
   }
@@ -55,6 +63,11 @@ function makeModel(title: string, body?: string): string {
 
 function makeIndex(wikilinks: string[]): string {
   const items = wikilinks.map((w) => `* [[${w}]]`).join('\n')
+  return `---\nspec_version: "V_0-1-2"\nlevel: 0\ntitle: "Workspace Index"\n---\n\n# NN index\n\n${items}\n`
+}
+
+function makeIndexWithMdLinks(links: string[]): string {
+  const items = links.map((p) => `* [${p}](./${p})`).join('\n')
   return `---\nspec_version: "V_0-1-2"\nlevel: 0\ntitle: "Workspace Index"\n---\n\n# NN index\n\n${items}\n`
 }
 
@@ -122,7 +135,6 @@ describe('recursiveParse (index.md-driven)', () => {
       expect(problemOne).toBeDefined()
       expect(problemOne!.kind).toBe('element')
     })
-
   })
 
   describe('FR-001: Missing index.md', () => {
@@ -229,6 +241,164 @@ describe('recursiveParse (index.md-driven)', () => {
       const missingIssues = result.issues.filter((i) => i.message.includes('not found'))
       expect(missingIssues.length).toBeGreaterThan(0)
       expect(missingIssues[0].path).toBe('missing_NN.md')
+    })
+  })
+
+  describe('FR-001: index.md references with nested paths', () => {
+    it('resolves a wikilink pointing into a subdirectory', async () => {
+      const modelsDir = fakeDir('models', [
+        ['nested_NN.md', fakeFile('nested_NN.md', makeModel('Nested Model'))],
+      ])
+      const root = fakeDir('workspace', [
+        ['index.md', fakeFile('index.md', makeIndex(['./models/nested_NN.md']))],
+        ['models', modelsDir],
+      ])
+
+      const result = await recursiveParse(root)
+      expect(result.issues).toHaveLength(0)
+      expect(result.rootIds).toHaveLength(1)
+      expect(result.nodes[result.rootIds[0]].name).toBe('nested')
+    })
+
+    it('resolves markdown-link references with ./ paths (films index.md case)', async () => {
+      const markdownDir = fakeDir('markdown', [
+        [
+          'Casablanca.md',
+          fakeFile('Casablanca.md', '# Casablanca\n\nPlain source document, not a model.'),
+        ],
+        [
+          'The_Goonies.md',
+          fakeFile('The_Goonies.md', '# The Goonies\n\nPlain source document, not a model.'),
+        ],
+      ])
+      const modelsDir = fakeDir('models', [
+        [
+          'FilmCatalog_V_0-3-0_film_NN.md',
+          fakeFile('FilmCatalog_V_0-3-0_film_NN.md', makeModel('Film Catalog')),
+        ],
+      ])
+      const sourcesDir = fakeDir('sources', [['markdown', markdownDir]])
+      const root = fakeDir('workspace', [
+        [
+          'index.md',
+          fakeFile(
+            'index.md',
+            makeIndexWithMdLinks([
+              'sources/markdown/Casablanca.md',
+              'sources/markdown/The_Goonies.md',
+              'models/FilmCatalog_V_0-3-0_film_NN.md',
+            ]),
+          ),
+        ],
+        ['sources', sourcesDir],
+        ['models', modelsDir],
+      ])
+
+      const result = await recursiveParse(root)
+      // Plain source docs are skipped silently; only the real model is loaded.
+      expect(result.issues).toHaveLength(0)
+      expect(result.rootIds).toHaveLength(1)
+      expect(result.nodes[result.rootIds[0]].name).toBe('FilmCatalog_V_0-3-0_film')
+    })
+
+    it('resolves `_source_NN.md` files inside a `sources/` subdirectory (current films workspace)', async () => {
+      const sourcesDir = fakeDir('sources', [
+        [
+          'Singin_in_the_Rain_source_NN.md',
+          fakeFile('Singin_in_the_Rain_source_NN.md', makeModel('Singin Source')),
+        ],
+        [
+          'Casablanca_source_NN.md',
+          fakeFile('Casablanca_source_NN.md', makeModel('Casablanca Source')),
+        ],
+        [
+          'The_Goonies_source_NN.md',
+          fakeFile('The_Goonies_source_NN.md', makeModel('Goonies Source')),
+        ],
+        [
+          'Una_noche_en_la_opera_source_NN.md',
+          fakeFile('Una_noche_en_la_opera_source_NN.md', makeModel('Opera Source')),
+        ],
+      ])
+      const modelsDir = fakeDir('models', [
+        [
+          'FilmCatalog_V_0-3-0_film_NN.md',
+          fakeFile('FilmCatalog_V_0-3-0_film_NN.md', makeModel('Film Catalog')),
+        ],
+      ])
+      const root = fakeDir('films', [
+        [
+          'index.md',
+          fakeFile(
+            'index.md',
+            makeIndexWithMdLinks([
+              'sources/Singin_in_the_Rain_source_NN.md',
+              'sources/Casablanca_source_NN.md',
+              'sources/The_Goonies_source_NN.md',
+              'sources/Una_noche_en_la_opera_source_NN.md',
+              'film_V_0-5-0_NN.md',
+              'models/FilmCatalog_V_0-3-0_film_NN.md',
+            ]),
+          ),
+        ],
+        ['film_V_0-5-0_NN.md', fakeFile('film_V_0-5-0_NN.md', makeModel('Film Template'))],
+        ['sources', sourcesDir],
+        ['models', modelsDir],
+      ])
+
+      const result = await recursiveParse(root)
+      // No "Name is not allowed" — every nested reference resolves through its directory.
+      expect(result.issues.filter((i) => i.message.includes('Name is not allowed'))).toHaveLength(0)
+      // All 4 sources + template + catalog model register as roots.
+      expect(result.rootIds).toHaveLength(6)
+      const names = result.rootIds.map((id) => result.nodes[id].name)
+      expect(names).toEqual(
+        expect.arrayContaining([
+          'Singin_in_the_Rain_source',
+          'Casablanca_source',
+          'The_Goonies_source',
+          'Una_noche_en_la_opera_source',
+          'FilmCatalog_V_0-3-0_film',
+        ]),
+      )
+    })
+
+    it('resolves backslash-separated references on the same shape as forward slashes', async () => {
+      const modelsDir = fakeDir('models', [
+        ['nested_NN.md', fakeFile('nested_NN.md', makeModel('Nested Model'))],
+      ])
+      const root = fakeDir('workspace', [
+        ['index.md', fakeFile('index.md', makeIndex(['models\\nested_NN.md']))],
+        ['models', modelsDir],
+      ])
+
+      const result = await recursiveParse(root)
+      expect(result.rootIds).toHaveLength(1)
+      expect(result.nodes[result.rootIds[0]].name).toBe('nested')
+    })
+
+    it('reports a clear skip issue when a nested target directory is missing', async () => {
+      const root = fakeDir('workspace', [
+        ['index.md', fakeFile('index.md', makeIndex(['./models/missing_NN.md']))],
+      ])
+
+      const result = await recursiveParse(root)
+      expect(result.rootIds).toHaveLength(0)
+      const missingIssue = result.issues.find((i) => i.message.includes('not found'))
+      expect(missingIssue).toBeDefined()
+      expect(missingIssue!.path).toBe('./models/missing_NN.md')
+    })
+
+    it('does not surface "Name is not allowed" for references that escape the root', async () => {
+      const root = fakeDir('workspace', [
+        ['index.md', fakeFile('index.md', makeIndex(['../outside_NN.md']))],
+      ])
+
+      const result = await recursiveParse(root)
+      expect(result.rootIds).toHaveLength(0)
+      const messages = result.issues.map((i) => i.message)
+      expect(messages.some((m) => m.includes('Name is not allowed'))).toBe(false)
+      expect(messages.some((m) => m.includes('not found'))).toBe(true)
     })
   })
 
