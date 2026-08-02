@@ -3,7 +3,6 @@
  *   - useFileSystem composable (scan, read, guard)
  *   - useUrlDocLoader composable (fetch + parse)
  *   - workspaceStore.loadFromUrl, backupEnabled, backup on save
- *   - DirectoryPickerModal guard logic
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
@@ -332,23 +331,6 @@ describe('workspaceStore backup', () => {
     await store.saveActiveFile()
 
     expect(backupSpy).not.toHaveBeenCalled()
-  })
-})
-
-// ── DirectoryPickerModal guard ──
-
-describe('File System Access API guard', () => {
-  beforeEach(() => {
-    delete (window as any).showDirectoryPicker
-  })
-
-  it('reports availability based on window.showDirectoryPicker', () => {
-    expect(isFileSystemAccessSupported()).toBe(false)
-
-    ;(window as any).showDirectoryPicker = () => Promise.resolve({} as any)
-    expect(isFileSystemAccessSupported()).toBe(true)
-
-    delete (window as any).showDirectoryPicker
   })
 })
 

@@ -15,7 +15,7 @@
         v-if="thumbnailUrl"
         :src="thumbnailUrl"
         class="shrink-0 w-5 h-5 rounded object-cover border border-slate-200 dark:border-slate-600"
-        @error="thumbnailError = true"
+        @error="onThumbnailError"
       />
       <IconRenderer
         v-else-if="visuals.iconToShow.value === 'icon' && visuals.resolvedIcon.value"
@@ -152,7 +152,6 @@ import IconRenderer from './IconRenderer.vue'
 import MarkerButton from './MarkerButton.vue'
 import { getMarkerDefinitions } from './MarkerIcons'
 import { useBlockVisuals } from '../../composables/useBlockVisuals'
-import { useNodeMediaScan } from '../../composables/useNodeMediaScan'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useUiStore } from '../../stores/uiStore'
 import {
@@ -318,32 +317,49 @@ const navigateToBlock = () => {
   uiStore.setActiveView('editor')
 }
 
-// ── Thumbnail scanning (file-system media) ──────────────────────
-const { firstImage, scan, scannedImages } = useNodeMediaScan()
+// ── Main image (rule 1 only) ─────────────────────────────────────
+// The default image of an element is the FIRST field of type `image`,
+// in template declaration order. There is NO value-guessing, NO
+// folder-scan fallback, and NO name-based heuristic.
 const thumbnailUrl = ref('')
-const thumbnailError = ref(false)
+
+function getTemplateImageValue(fieldsRecord: Record<string, any> | undefined): string | null {
+  if (!props.conceptFields?.length || !fieldsRecord) return null
+  for (const field of props.conceptFields) {
+    if (field?.type !== 'image') continue
+    const raw = fieldsRecord[field.name]
+    const value = typeof raw === 'object' && raw !== null && 'value' in raw ? (raw as any).value : raw
+    if (typeof value === 'string' && value.trim()) return value.trim()
+  }
+  return null
+}
 
 watch(
-  () => props.blockId,
-  (id) => {
+  [() => props.blockId, () => props.fields],
+  async () => {
     thumbnailUrl.value = ''
-    thumbnailError.value = false
-    if (id && useWorkspaceStore().handle) {
-      scan(id).then(() => {
-        if (firstImage.value) {
-          // Convert relative path to blob URL via File System Access
-          resolveThumbnailUrl(id!, firstImage.value.relativePath)
-        }
-      })
+
+    const node = props.blockId ? modelStore.getNode(props.blockId) : null
+    const explicitImg = getTemplateImageValue(node?.fields || props.fields)
+    if (!explicitImg) return
+
+    if (explicitImg.startsWith('http') || explicitImg.startsWith('data:') || explicitImg.startsWith('blob:')) {
+      thumbnailUrl.value = explicitImg
+      return
     }
+    const resolved = await resolveThumbnailUrlPath(explicitImg)
+    if (resolved) thumbnailUrl.value = resolved
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
 
-async function resolveThumbnailUrl(nodeId: string, relativePath: string): Promise<void> {
+async function resolveThumbnailUrlPath(relativePath: string): Promise<string | null> {
+  if (relativePath.startsWith('http') || relativePath.startsWith('data:') || relativePath.startsWith('blob:')) {
+    return relativePath
+  }
   const ws = useWorkspaceStore()
   const handle = ws.handle
-  if (!handle) return
+  if (!handle) return relativePath
 
   try {
     const parts = relativePath.split('/').filter(Boolean)
@@ -353,10 +369,16 @@ async function resolveThumbnailUrl(nodeId: string, relativePath: string): Promis
     }
     const fh = await current.getFileHandle(parts[parts.length - 1])
     const file = await fh.getFile()
-    thumbnailUrl.value = URL.createObjectURL(file)
+    return URL.createObjectURL(file)
   } catch {
-    thumbnailError.value = true
+    return relativePath
   }
+}
+
+function onThumbnailError(e: Event) {
+  const target = e.target as HTMLImageElement
+  if (!target) return
+  thumbnailUrl.value = ''
 }
 
 // ── Popup ───────────────────────────────────────────────────────

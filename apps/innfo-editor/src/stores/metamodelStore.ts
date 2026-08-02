@@ -66,7 +66,9 @@ export const useMetamodelStore = defineStore('metamodel', () => {
   })
 
   function getConceptByName(name: string): MetamodelConcept | undefined {
-    return concepts.value.find((c) => c.name === name)
+    if (!name) return undefined
+    const lower = name.toLowerCase()
+    return concepts.value.find((c) => c.name.toLowerCase() === lower)
   }
 
   function getConceptFields(name: string): MetamodelConcept['fields'] {

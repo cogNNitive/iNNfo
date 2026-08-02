@@ -10,6 +10,7 @@
  * The scanner tries per-element first, then falls back to centralized.
  */
 import type { DirectoryHandleLike } from '@cognnitive/innfo-core'
+import { isImageExtension } from '../utils/imageDetection'
 
 export interface ScannedAsset {
   filename: string
@@ -17,7 +18,6 @@ export interface ScannedAsset {
   type: 'image' | 'video' | 'audio' | 'markdown' | 'pdf' | 'file'
 }
 
-const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'])
 const VIDEO_EXTS = new Set(['mp4', 'webm', 'mov', 'avi', 'mkv', 'flv'])
 const AUDIO_EXTS = new Set(['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac'])
 const MARKDOWN_EXTS = new Set(['md', 'txt'])
@@ -25,7 +25,7 @@ const PDF_EXTS = new Set(['pdf'])
 
 function classifyFile(ext: string): ScannedAsset['type'] {
   const clean = ext.toLowerCase().replace(/^\./, '')
-  if (IMAGE_EXTS.has(clean)) return 'image'
+  if (isImageExtension(clean)) return 'image'
   if (VIDEO_EXTS.has(clean)) return 'video'
   if (AUDIO_EXTS.has(clean)) return 'audio'
   if (MARKDOWN_EXTS.has(clean)) return 'markdown'

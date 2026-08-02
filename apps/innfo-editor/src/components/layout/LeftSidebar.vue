@@ -15,6 +15,21 @@
     <div class="px-3 py-4 space-y-4">
       <!-- Navigation Switcher (Horizontal) -->
       <div class="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800/80">
+        <!-- Explorer -->
+        <button
+          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer capitalize border border-transparent"
+          :class="
+            uiStore.activeView === 'explorer'
+              ? 'bg-white dark:bg-slate-700 text-primary shadow-xs'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+          "
+          @click="uiStore.setActiveView('explorer')"
+          data-testid="view-switcher-explorer"
+        >
+          <FolderTree class="w-3.5 h-3.5 shrink-0" />
+          <span>explorer</span>
+        </button>
+
         <!-- Editor -->
         <button
           class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer capitalize border border-transparent"
@@ -44,25 +59,13 @@
           <LayoutDashboard class="w-3.5 h-3.5 shrink-0" />
           <span>graph</span>
         </button>
-
-        <!-- Exports -->
-        <button
-          class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer capitalize border border-transparent"
-          :class="
-            uiStore.activeView === 'exports'
-              ? 'bg-white dark:bg-slate-700 text-primary shadow-xs'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-          "
-          @click="uiStore.setActiveView('exports')"
-          data-testid="view-switcher-exports"
-        >
-          <FileOutput class="w-3.5 h-3.5 shrink-0" />
-          <span>exports</span>
-        </button>
       </div>
 
-      <!-- Header with expand/collapse all + ghost filter -->
-      <div class="flex items-center justify-between px-2">
+      <!-- Explorer View -->
+      <WorkspaceExplorer v-if="uiStore.activeView === 'explorer'" />
+
+      <!-- Header with expand/collapse all + ghost filter (for editor/graph view) -->
+      <div v-else class="flex items-center justify-between px-2">
         <div class="flex items-center gap-1.5">
           <Database class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
           <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -105,40 +108,8 @@
         </div>
       </div>
 
-      <!-- Exports section (when Exports view is active) -->
-      <div v-if="uiStore.activeView === 'exports'" class="space-y-1">
-        <div class="flex items-center gap-1.5 px-2 py-1">
-          <FileOutput class="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
-          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            Outputs
-          </h2>
-        </div>
-
-        <div v-if="exportsLoading" class="flex items-center gap-2 px-2 py-2 text-xs text-slate-400 dark:text-slate-500">
-          <Loader class="w-3 h-3 animate-spin" />
-          <span>Scanning exports...</span>
-        </div>
-
-        <div v-else-if="exportsList.length === 0" class="px-2 py-2 text-xs text-slate-400 dark:text-slate-500 italic">
-          No exports in <code class="text-2xs bg-slate-100 dark:bg-slate-800 px-1 rounded">traNNsform/output/</code>
-        </div>
-
-        <div v-else class="space-y-0.5">
-          <div
-            v-for="xf in exportsList"
-            :key="xf.name"
-            class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors group"
-            @click="openExport(xf)"
-          >
-            <FileOutput class="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
-            <span class="text-xs truncate flex-1 text-slate-700 dark:text-slate-300">{{ xf.name }}</span>
-            <ExternalLink class="w-3 h-3 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-          </div>
-        </div>
-      </div>
-
       <!-- Tree section: complete-only or merged all, grouped by model -->
-      <div v-else class="space-y-2">
+      <div v-if="uiStore.activeView !== 'explorer'" class="space-y-2">
         <div v-for="rootId in visibleRootIds" :key="rootId" class="space-y-1">
           <!-- Model Header (File) -->
           <div
@@ -194,8 +165,8 @@
         </p>
       </div>
 
-      <!-- Relations Section (hidden in exports view) -->
-      <div v-if="uiStore.activeView !== 'exports'" class="space-y-1">
+      <!-- Relations Section -->
+      <div class="space-y-1">
         <div class="flex items-center justify-between px-2 py-1">
           <div class="flex items-center gap-1.5">
             <Table2 class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
@@ -301,8 +272,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { ModelNode, MetamodelConcept } from '../../model/types'
-import { parseModel, parseFrontmatter, normalizeMatrixDecl } from '@cognnitive/innfo-core'
-import { parseFormatFilename, type SemVer } from '../../utils/version'
+import { parseModel, parseFrontmatter } from '@cognnitive/innfo-core'
+import { parseFormatFilename, compareSemVer, type SemVer } from '../../utils/version'
 import { resolveEffectiveMetamodel } from '../../model/metamodel'
 import {
   ChevronsDown,
@@ -311,20 +282,20 @@ import {
   Table2,
   Settings,
   FileText,
-  FileOutput,
-  ExternalLink,
-  Loader,
   Database,
   ChevronDown,
+  FolderTree,
 } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useMetamodelStore } from '../../stores/metamodelStore'
 import { useUiStore } from '../../stores/uiStore'
-import { useWorkspaceStore } from '../../stores/workspaceStore'
-import type { FileHandleLike, DirectoryHandleLike } from '../../model/fs-types'
 import { useResizablePanel } from '../../composables/useResizablePanel'
+import { useMatrixDefinitions } from '../../composables/useMatrixDefinitions'
+import { getConceptMeta } from '../../composables/useConceptVisuals'
+import { useTreeExpansion } from '../../composables/useTreeExpansion'
 import ConceptTreeNode from './ConceptTreeNode.vue'
 import VirtualGroupNode, { type TreeGroup } from './VirtualGroupNode.vue'
+import WorkspaceExplorer from './WorkspaceExplorer.vue'
 import MatrixPill from '../editor/MatrixPill.vue'
 import BlockPill from '../editor/BlockPill.vue'
 
@@ -337,52 +308,6 @@ const emit = defineEmits<{
 const modelStore = useModelStore()
 const metamodelStore = useMetamodelStore()
 const uiStore = useUiStore()
-const workspaceStore = useWorkspaceStore()
-
-const exportsList = ref<Array<{ name: string; handle: FileHandleLike }>>([])
-const exportsLoading = ref(false)
-
-async function scanExports(): Promise<void> {
-  if (!workspaceStore.handle) return
-  exportsLoading.value = true
-  exportsList.value = []
-  try {
-    const transformDir = await workspaceStore.handle.getDirectoryHandle('traNNsform')
-    let outputsDir: DirectoryHandleLike
-    try {
-      outputsDir = await transformDir.getDirectoryHandle('output')
-    } catch {
-      exportsLoading.value = false
-      return
-    }
-    const results: Array<{ name: string; handle: FileHandleLike }> = []
-    for await (const [name, entry] of outputsDir.entries()) {
-      if (entry.kind !== 'file') continue
-      results.push({ name, handle: entry as unknown as FileHandleLike })
-    }
-    results.sort((a, b) => a.name.localeCompare(b.name))
-    exportsList.value = results
-  } catch {
-    // no traNNsform directory
-  } finally {
-    exportsLoading.value = false
-  }
-}
-
-async function openExport(xf: { name: string; handle: FileHandleLike }): Promise<void> {
-  const content = await xf.handle.getFile().then((f) => f.text())
-  const blob = new Blob([content], { type: 'text/html' })
-  const url = URL.createObjectURL(blob)
-  window.open(url, '_blank')
-  setTimeout(() => URL.revokeObjectURL(url), 60000)
-}
-
-watch(
-  () => uiStore.activeView,
-  (view) => {
-    if (view === 'exports') scanExports()
-  },
-)
 
 function isTemplateNode(node: ModelNode | undefined): boolean {
   if (!node) return true
@@ -438,12 +363,6 @@ function getModelInfo(rootId: string): { baseName: string; version: SemVer } {
   return { baseName, version }
 }
 
-function compareSemVer(a: SemVer, b: SemVer): number {
-  if (a.major !== b.major) return a.major - b.major
-  if (a.minor !== b.minor) return a.minor - b.minor
-  return a.patch - b.patch
-}
-
 const visibleRootIds = computed(() => {
   const nonTemplateRootIds = modelStore.rootIds.filter((id) => {
     const node = modelStore.getNode(id)
@@ -478,59 +397,115 @@ function toggleGhostFilter(): void {
   uiStore.setGhostFilterMode(ghostFilterMode.value === 'model' ? 'all' : 'model')
 }
 
-const mergedConcepts = computed<TreeGroup[]>(() => {
-  // Collect children per concept type from all model nodes
-  const childrenByType = new Map<string, ModelNode[]>()
+const activeModelId = computed(() => uiStore.activeModelId || visibleRootIds.value[0] || null)
+
+function selectModelHeader(rootId: string): void {
+  uiStore.setActiveModel(rootId)
+  toggleModel(rootId)
+}
+
+function handleSelectNode(rootId: string, nodeId: string): void {
+  uiStore.setActiveModel(rootId)
+  emit('select-node', nodeId)
+}
+
+function handleClickGhost(conceptName: string, targetRootId?: string): void {
+  const rootId = targetRootId ?? activeModelId.value ?? visibleRootIds.value[0]
+  if (rootId) uiStore.setActiveModel(rootId)
+  const concept = metamodelStore.getConceptByName(conceptName)
+  const type = concept?.type ?? 'text'
+  if (type === 'text') {
+    modelStore.addTextSection(conceptName, rootId ?? undefined)
+    uiStore.selectNode(rootId ?? visibleRootIds.value[0])
+  } else {
+    const id = modelStore.addConceptElement(conceptName, `New ${conceptName}`, rootId ?? undefined)
+    if (id) uiStore.selectNode(id)
+  }
+}
+
+// Expand/collapse all + per-model expand state
+const { expandedGeneration, expandedModels, expandAll, collapseAll, toggleModel } = useTreeExpansion()
+
+// Selected node for highlighting — driven by uiStore in Phase 6
+const selectedId = computed(() => uiStore.selectedNodeId)
+
+// Relations section
+const { matrixDefs, getMatrixValueCount } = useMatrixDefinitions(visibleRootIds, {
+  strategy: 'fallback',
+})
+
+/** The matrix currently shown in the matrices view. */
+const selectedMatrix = computed(() => {
+  const idx = uiStore.activeMatrixIndex
+  if (uiStore.activeView !== 'matrices' || idx < 0 || idx >= matrixDefs.value.length) return null
+  return matrixDefs.value[idx]
+})
+
+/** Value distribution over ALL cells of the selected matrix (not just visible). */
+const selectedMatrixDistribution = computed(() => {
+  if (!selectedMatrix.value) return {} as Record<string, number>
+  const counts: Record<string, number> = {}
+  const prefix = selectedMatrix.value.name + '||'
   for (const node of Object.values(modelStore.nodes)) {
-    if (node.type && node.kind === 'element') {
-      const list = childrenByType.get(node.type)
-      if (list) list.push(node)
-      else childrenByType.set(node.type, [node])
+    if (!node.fields) continue
+    for (const [key, fv] of Object.entries(node.fields)) {
+      if (!key.startsWith(prefix)) continue
+      const val = (fv as any)?.value
+      const strVal = val === undefined || val === null || val === '-' ? '-' : String(val)
+      counts[strVal] = (counts[strVal] || 0) + 1
     }
   }
+  return counts
+})
 
-  // Helper: check if a concept has content (elements or text section) in the model
-  function hasContent(conceptName: string): boolean {
-    if ((childrenByType.get(conceptName)?.length ?? 0) > 0) return true
-    const concept = metamodelStore.getConceptByName(conceptName)
-    if (concept?.type === 'text') {
-      return visibleRootIds.value.some((rid) => {
-        const root = modelStore.getNode(rid)
-        return (
-          root?.rawSections &&
-          Object.keys(root.rawSections).some((k) => k.toLowerCase() === conceptName.toLowerCase())
-        )
-      })
-    }
-    return false
-  }
+function selectMatrix(idx: number): void {
+  emit('select-matrix', idx)
+  emit('select-view', 'matrices')
+}
 
-  // Parse _NN index taxonomy from ALL root models
-  let allTaxonomyEdges: Array<{ parent: string; child: string }> = []
-  for (const rootId of visibleRootIds.value) {
-    const root = modelStore.getNode(rootId)
-    if (root?.rawContent) {
-      try {
-        const parsed = parseModel(root.rawContent)
-        allTaxonomyEdges.push(...(parsed.taxonomy ?? []))
-      } catch {
-        // Silently fall back
+function navigateToConfig(): void {
+  emit('select-view', 'metamatrix-config')
+}
+
+// ── Model-based Concept grouping (Opción A) ──
+
+watch(
+  visibleRootIds,
+  (ids) => {
+    for (const id of ids) {
+      if (expandedModels.value[id] === undefined) {
+        expandedModels.value[id] = true
       }
     }
-  }
+  },
+  { immediate: true },
+)
 
-  // Build taxonomy tree: parent → children names
-  const taxonomyChildren = new Map<string, string[]>()
-  const allChildren = new Set<string>()
-  for (const e of allTaxonomyEdges) {
-    const list = taxonomyChildren.get(e.parent) ?? []
-    list.push(e.child)
-    taxonomyChildren.set(e.parent, list)
-    allChildren.add(e.child)
-  }
+function isModelExpanded(rootId: string): boolean {
+  return expandedModels.value[rootId] !== false
+}
 
-  // Roots = parents that are never a child in the taxonomy
-  const taxonomyRoots = [...taxonomyChildren.keys()].filter((p) => !allChildren.has(p))
+function getModelName(rootId: string): string {
+  const rootNode = modelStore.getNode(rootId)
+  const path = rootNode?.source?.path || ''
+  if (!path) return 'model.md'
+  return path.split('/').pop()?.split('\\').pop() || path
+}
+
+interface TreeGroupsInput {
+  taxonomyRoots: string[]
+  taxonomyChildren: Map<string, string[]>
+  childrenByType: Map<string, ModelNode[]>
+  templateByName: Map<string, MetamodelConcept>
+  templateOrder: Map<string, number>
+  hasContent: (conceptName: string) => boolean
+}
+
+/** Builds the ordered concept tree (taxonomy + template fallback) shared by every tree-view caller. */
+function buildTreeGroups(input: TreeGroupsInput): TreeGroup[] {
+  const { taxonomyRoots, taxonomyChildren, childrenByType, templateByName, templateOrder, hasContent } = input
+  const seen = new Set<string>()
+  const items: TreeGroup[] = []
 
   // Build a recursive tree from taxonomy edges
   function buildTree(name: string): TreeGroup {
@@ -558,14 +533,20 @@ const mergedConcepts = computed<TreeGroup[]>(() => {
     }
   }
 
-  const templateByName = new Map(metamodelStore.concepts.map((c) => [c.name, c]))
-  const templateOrder = new Map(metamodelStore.concepts.map((c, i) => [c.name, i]))
-  const seen = new Set<string>()
-  const items: TreeGroup[] = []
+  function markSeenRecursively(name: string): void {
+    if (seen.has(name)) return
+    seen.add(name)
+    const kids = taxonomyChildren.get(name) ?? []
+    for (const k of kids) markSeenRecursively(k)
+  }
 
   // Walk taxonomy roots preserving index order
   for (const root of taxonomyRoots) {
-    walkTaxonomy(root)
+    const isTemplateConcept = templateByName.has(root)
+    if (isTemplateConcept) {
+      items.push(buildTree(root))
+    }
+    markSeenRecursively(root)
   }
 
   // Append template concepts not in the taxonomy
@@ -593,189 +574,6 @@ const mergedConcepts = computed<TreeGroup[]>(() => {
   })
 
   return items
-
-  function walkTaxonomy(name: string): void {
-    if (seen.has(name)) return
-    seen.add(name)
-    const isTemplateConcept = metamodelStore.getConceptByName(name) !== undefined
-    if (isTemplateConcept) {
-      items.push(buildTree(name))
-    }
-    const kids = taxonomyChildren.get(name) ?? []
-    for (const k of kids) walkTaxonomy(k)
-  }
-})
-
-// Complete-only: filtered to non-ghost items
-const conceptTreeRoots = computed<TreeGroup[]>(() => {
-  return mergedConcepts.value.filter((item) => !item.ghost)
-})
-
-const activeModelId = computed(() => uiStore.activeModelId || visibleRootIds.value[0] || null)
-
-function selectModelHeader(rootId: string): void {
-  uiStore.setActiveModel(rootId)
-  toggleModelExpanded(rootId)
-}
-
-function handleSelectNode(rootId: string, nodeId: string): void {
-  uiStore.setActiveModel(rootId)
-  emit('select-node', nodeId)
-}
-
-function handleClickGhost(conceptName: string, targetRootId?: string): void {
-  const rootId = targetRootId ?? activeModelId.value ?? visibleRootIds.value[0]
-  if (rootId) uiStore.setActiveModel(rootId)
-  const concept = metamodelStore.getConceptByName(conceptName)
-  const type = concept?.type ?? 'text'
-  if (type === 'text') {
-    modelStore.addTextSection(conceptName, rootId ?? undefined)
-    uiStore.selectNode(rootId ?? visibleRootIds.value[0])
-  } else {
-    const id = modelStore.addConceptElement(conceptName, `New ${conceptName}`, rootId ?? undefined)
-    if (id) uiStore.selectNode(id)
-  }
-}
-
-// Expand/collapse all via generation counter
-const expandedGeneration = ref(-1)
-
-function expandAll(): void {
-  expandedGeneration.value = Math.max(0, expandedGeneration.value) + 1
-}
-
-function collapseAll(): void {
-  expandedGeneration.value = Math.min(-1, expandedGeneration.value) - 1
-}
-
-// Selected node for highlighting — driven by uiStore in Phase 6
-const selectedId = computed(() => uiStore.selectedNodeId)
-
-// Relations section
-const MATRIX_DEFS_KEY = '__matrix_defs'
-
-function extractMatrixDefs(root: any): any[] {
-  const defs = root.fields?.[MATRIX_DEFS_KEY]?.value
-  if (Array.isArray(defs) && defs.length > 0) return defs
-  const raw = root.fields?.matrices?.value
-  if (Array.isArray(raw) && raw.length > 0) {
-    return raw.map((m: any) => normalizeMatrixDecl(m))
-  }
-  return []
-}
-
-const matrixDefs = computed(() => {
-  const rootIds = visibleRootIds.value
-  const result: any[] = []
-  const seen = new Set<string>()
-
-  for (const id of rootIds) {
-    const root = modelStore.getNode(id)
-    if (!root) continue
-    const defs = extractMatrixDefs(root)
-    for (const d of defs) {
-      if (!seen.has(d.name)) {
-        seen.add(d.name)
-        result.push(d)
-      }
-    }
-  }
-  return result
-})
-
-function getMatrixValueCount(matrixName: string): number {
-  let count = 0
-  const prefix = `${matrixName}||`
-  for (const node of Object.values(modelStore.nodes)) {
-    if (!node.fields) continue
-    for (const [key, fv] of Object.entries(node.fields)) {
-      if (key.startsWith(prefix)) {
-        const val = (fv as any)?.value
-        if (val !== undefined && val !== null && val !== '' && val !== '-' && val !== false) {
-          count++
-        }
-      }
-    }
-  }
-  return count
-}
-
-/** The matrix currently shown in the matrices view. */
-const selectedMatrix = computed(() => {
-  const idx = uiStore.activeMatrixIndex
-  if (uiStore.activeView !== 'matrices' || idx < 0 || idx >= matrixDefs.value.length) return null
-  return matrixDefs.value[idx]
-})
-
-/** Value distribution over ALL cells of the selected matrix (not just visible). */
-const selectedMatrixDistribution = computed(() => {
-  if (!selectedMatrix.value) return {} as Record<string, number>
-  const counts: Record<string, number> = {}
-  const prefix = selectedMatrix.value.name + '||'
-  for (const node of Object.values(modelStore.nodes)) {
-    if (!node.fields) continue
-    for (const [key, fv] of Object.entries(node.fields)) {
-      if (!key.startsWith(prefix)) continue
-      const val = (fv as any)?.value
-      const strVal = val === undefined || val === null || val === '-' ? '-' : String(val)
-      counts[strVal] = (counts[strVal] || 0) + 1
-    }
-  }
-  return counts
-})
-
-/** Resolves the concept icon/color from the effective (template) metamodel. */
-function getConceptMeta(conceptType: string): { icon?: string; color?: string } {
-  const lower = conceptType?.toLowerCase()
-  for (const id of modelStore.rootIds) {
-    const r = modelStore.getNode(id)
-    const concepts = r?.localMetamodel?.concepts
-    if (Array.isArray(concepts)) {
-      const c = concepts.find((x) => x.name.toLowerCase() === lower)
-      if (c) return { icon: c.icon, color: c.color }
-    }
-  }
-  return {}
-}
-
-function selectMatrix(idx: number): void {
-  emit('select-matrix', idx)
-  emit('select-view', 'matrices')
-}
-
-function navigateToConfig(): void {
-  emit('select-view', 'metamatrix-config')
-}
-
-// ── Model-based Concept grouping (Opción A) ──
-
-const expandedModels = ref<Record<string, boolean>>({})
-
-watch(
-  visibleRootIds,
-  (ids) => {
-    for (const id of ids) {
-      if (expandedModels.value[id] === undefined) {
-        expandedModels.value[id] = true
-      }
-    }
-  },
-  { immediate: true },
-)
-
-function isModelExpanded(rootId: string): boolean {
-  return expandedModels.value[rootId] !== false
-}
-
-function toggleModelExpanded(rootId: string): void {
-  expandedModels.value[rootId] = !isModelExpanded(rootId)
-}
-
-function getModelName(rootId: string): string {
-  const rootNode = modelStore.getNode(rootId)
-  const path = rootNode?.source?.path || ''
-  if (!path) return 'model.md'
-  return path.split('/').pop()?.split('\\').pop() || path
 }
 
 function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGroup[] {
@@ -885,67 +683,16 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
   // Roots = parents that are never a child in the taxonomy
   const taxonomyRoots = [...taxonomyChildren.keys()].filter((p) => !allChildren.has(p))
 
-  // Build a recursive tree from taxonomy edges
-  function buildTree(name: string): TreeGroup {
-    const directElements = childrenByType.get(name) ?? []
-    const kids = taxonomyChildren.get(name) ?? []
-    const subGroups: TreeGroup[] = []
-    for (const k of kids) {
-      subGroups.push(buildTree(k))
-    }
-    subGroups.sort((a, b) => {
-      const ta = templateOrder.get(a.name) ?? 99999
-      const tb = templateOrder.get(b.name) ?? 99999
-      if (ta !== tb) return ta - tb
-      return a.name.localeCompare(b.name)
-    })
-
-    const isPresent = hasContent(name) || subGroups.some((s) => !s.ghost)
-
-    return {
-      name,
-      ghost: !isPresent,
-      elements: directElements,
-      children: subGroups,
-    }
-  }
-
   const templateByName = new Map(modelConcepts.map((c) => [c.name, c]))
   const templateOrder = new Map(modelConcepts.map((c, i) => [c.name, i]))
-  const seen = new Set<string>()
-  const items: TreeGroup[] = []
 
-  // Walk taxonomy roots preserving index order
-  for (const root of taxonomyRoots) {
-    const isTemplateConcept = templateByName.has(root)
-    if (isTemplateConcept) {
-      items.push(buildTree(root))
-    }
-    markSeenRecursively(root)
-  }
-
-  // Append template concepts not in the taxonomy
-  for (const [cname] of templateByName) {
-    if (!seen.has(cname)) {
-      seen.add(cname)
-      items.push({
-        name: cname,
-        ghost: !hasContent(cname),
-        elements: childrenByType.get(cname) ?? [],
-        children: [],
-      })
-    }
-  }
-
-  // Stable sort: templateOrder primary, orderedTaxonomyRoots secondary
-  const orderedTaxonomyRoots = new Map(taxonomyRoots.map((r, i) => [r, i]))
-  items.sort((a, b) => {
-    const ta = templateOrder.get(a.name) ?? 99999
-    const tb = templateOrder.get(b.name) ?? 99999
-    if (ta !== tb) return ta - tb
-    const ia = orderedTaxonomyRoots.get(a.name) ?? 99999
-    const ib = orderedTaxonomyRoots.get(b.name) ?? 99999
-    return ia - ib
+  const items = buildTreeGroups({
+    taxonomyRoots,
+    taxonomyChildren,
+    childrenByType,
+    templateByName,
+    templateOrder,
+    hasContent,
   })
 
   // Filter out completely empty ghost concepts if ghostMode is 'model' (Complete Only)
@@ -954,12 +701,5 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
   }
 
   return items
-
-  function markSeenRecursively(name: string): void {
-    if (seen.has(name)) return
-    seen.add(name)
-    const kids = taxonomyChildren.get(name) ?? []
-    for (const k of kids) markSeenRecursively(k)
-  }
 }
 </script>

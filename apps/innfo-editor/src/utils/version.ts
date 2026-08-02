@@ -85,6 +85,13 @@ export function buildFormatFilename(
   return `${sanitizedBase}_V_${version.major}-${version.minor}-${version.patch}${suffix}_NN.md`
 }
 
+/** Compares two SemVer values: negative if `a` < `b`, positive if `a` > `b`, zero if equal. */
+export function compareSemVer(a: SemVer, b: SemVer): number {
+  if (a.major !== b.major) return a.major - b.major
+  if (a.minor !== b.minor) return a.minor - b.minor
+  return a.patch - b.patch
+}
+
 /** Returns a new SemVer with the requested level incremented (§8.2 SemVer rules). */
 export function bumpVersion(v: SemVer, level: BumpLevel): SemVer {
   switch (level) {

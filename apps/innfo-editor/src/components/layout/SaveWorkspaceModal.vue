@@ -199,6 +199,7 @@ To open this workspace:
     await addToHistory(handle.name, handle)
 
     // Transition editor state
+    workspaceStore.isParsing = false
     await workspaceStore.open(handle, { force: true })
 
     // Ensure the generic iNNfo spec is present locally

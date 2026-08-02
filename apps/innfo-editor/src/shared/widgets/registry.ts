@@ -86,6 +86,8 @@ export const UNIFIED_WIDGET_REGISTRY: Record<string, Component> = {
   reference: FieldReference,
   // asset field-type widgets (FR-003)
   image: FieldAsset,
+  image_url: FieldAsset,
+  asset: FieldAsset,
   file: FieldAsset,
   video: FieldAsset,
   audio: FieldAsset,

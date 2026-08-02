@@ -146,7 +146,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { Link, X, FileText, Hash, HardDrive, Clock, CheckCircle2 } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
-import type { ParsedSourceRef } from './SourceRefPill.vue'
+import type { ParsedSourceRef } from '../../utils/sourceRef'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 
 const props = defineProps<{

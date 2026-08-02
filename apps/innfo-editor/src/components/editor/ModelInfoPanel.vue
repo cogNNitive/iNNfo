@@ -521,20 +521,11 @@ import {
   Play,
   ExternalLink,
 } from 'lucide-vue-next'
-import {
-  DEFAULT_INNFO_VERSION,
-  DEFAULT_TEMPLATE_NAME,
-  DEFAULT_TEMPLATE_VERSION,
-  buildSpecificationUrl,
-} from '../../utils/constants'
-import {
-  bumpVersion,
-  formatVersionString,
-  buildFormatFilename,
-  parseFormatFilename,
-} from '../../utils/version'
-import type { BumpLevel, SemVer } from '../../utils/version'
+import { buildSpecificationUrl } from '../../utils/constants'
+import type { BumpLevel } from '../../utils/version'
 import { useToast } from '../../shared/useToast'
+import { useModelFrontmatter } from './composables/useModelFrontmatter'
+import { useVersionBump } from './composables/useVersionBump'
 
 const props = defineProps<{
   rootNodeId: string
@@ -604,89 +595,14 @@ const rootNode = computed(() => modelStore.getNode(activeModelId.value))
 
 const rawContent = computed(() => rootNode.value?.rawContent ?? '')
 
+const filePath = computed(() => {
+  return rootNode.value?.source?.path || ''
+})
+
 const nodeCount = computed(() => Object.keys(modelStore.nodes).length)
 
-function extractFrontmatterField(field: string): string | null {
-  const content = rawContent.value
-  if (!content) return null
-
-  // Try YAML-like frontmatter between --- markers
-  const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---/)
-  if (!fmMatch) return null
-
-  const yaml = fmMatch[1]
-  // Support dotted paths like "template.name"
-  const parts = field.split('.')
-  let current: any = yaml
-  for (const part of parts) {
-    // Simple YAML line matching
-    const regex = new RegExp(`^${part}:\\s*(.+)$`, 'm')
-    const match = current.match(regex)
-    if (!match) return null
-    current = match[1].trim().replace(/^["']|["']$/g, '')
-  }
-  return current || null
-}
-
-const formatVersion = computed(() => {
-  return extractFrontmatterField('spec_version') || DEFAULT_INNFO_VERSION
-})
-
-/** Extracts a nested YAML block field value, e.g. `template:\n  name: "business"`. */
-function extractNestedFieldValue(yaml: string, block: string, field: string): string | null {
-  const match = yaml.match(
-    new RegExp(`^${block}:\\s*\\n\\s+${field}:\\s*["']?(.+?)["']?\\s*$`, 'm'),
-  )
-  return match ? match[1].trim() : null
-}
-
-const templateName = computed(() => {
-  const content = rawContent.value
-  if (!content) return DEFAULT_TEMPLATE_NAME
-  const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---/)
-  if (!fmMatch) return DEFAULT_TEMPLATE_NAME
-  const yaml = fmMatch[1]
-
-  return (
-    extractNestedFieldValue(yaml, 'template', 'name') ??
-    extractNestedFieldValue(yaml, 'parent_spec', 'name') ??
-    extractNestedFieldValue(yaml, 'parent', 'name') ??
-    DEFAULT_TEMPLATE_NAME
-  )
-})
-
-const templateVersion = computed(() => {
-  const content = rawContent.value
-  if (!content) return DEFAULT_TEMPLATE_VERSION
-  const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---/)
-  if (!fmMatch) return DEFAULT_TEMPLATE_VERSION
-  const yaml = fmMatch[1]
-
-  const explicit = extractNestedFieldValue(yaml, 'template', 'version')
-  if (explicit) return explicit
-
-  // Derive the version from the template name (e.g. "business_V_0-2-0")
-  const tplName =
-    extractNestedFieldValue(yaml, 'template', 'name') ??
-    extractNestedFieldValue(yaml, 'parent_spec', 'name') ??
-    extractNestedFieldValue(yaml, 'parent', 'name')
-  const derived = tplName?.match(/V_\d+-\d+-\d+/i)
-  return derived ? derived[0] : DEFAULT_TEMPLATE_VERSION
-})
-
-const modelVersion = computed(() => {
-  return extractFrontmatterField('model_version') || extractFrontmatterField('version') || '1.0.0'
-})
-
-const lastSaved = computed(() => {
-  const raw = extractFrontmatterField('last_saved')
-  if (!raw) return 'Unknown'
-  try {
-    return new Date(raw).toLocaleString()
-  } catch {
-    return raw
-  }
-})
+const { formatVersion, templateName, templateVersion, modelVersion, rawModelVersion, lastSaved } =
+  useModelFrontmatter(rawContent)
 
 const specUrl = computed(() => buildSpecificationUrl(formatVersion.value))
 
@@ -697,64 +613,8 @@ const selectedLevel = ref<BumpLevel | null>(null)
 
 const bumpLevels: BumpLevel[] = ['major', 'minor', 'patch']
 
-/** Parses a "V_Major-Minor-Patch" string into a SemVer tuple. */
-function parseVersionString(str: string): SemVer | null {
-  const match = str.match(/^V_(\d+)-(\d+)-(\d+)$/)
-  if (!match) return null
-  return {
-    major: Number(match[1]),
-    minor: Number(match[2]),
-    patch: Number(match[3]),
-  }
-}
-
-/** The raw model_version field value (e.g. "V_1-2-3") from frontmatter. */
-const rawModelVersion = computed(() => {
-  return extractFrontmatterField('model_version') || extractFrontmatterField('version') || 'V_1-0-0'
-})
-
-/** Parsed SemVer of the current model version. */
-const currentModelSemVer = computed((): SemVer | null => parseVersionString(rawModelVersion.value))
-
-/** Formatted version string for display (e.g. "V_1-2-3"). */
-const currentVersionStr = computed(() => {
-  const semver = currentModelSemVer.value
-  return semver ? formatVersionString(semver) : rawModelVersion.value
-})
-
-/**
- * Computes the preview version for a given bump level.
- * Returns "V_X-Y-Z" string or "—" if the current version can't be parsed.
- */
-function versionPreview(level: BumpLevel): string {
-  const current = currentModelSemVer.value
-  if (!current) return '—'
-  const bumped = bumpVersion(current, level)
-  return formatVersionString(bumped)
-}
-
-function filenamePreview(level: BumpLevel): string {
-  const current = currentModelSemVer.value
-  if (!current) return '—'
-  const bumped = bumpVersion(current, level)
-  const path = rootNode.value?.source?.path || ''
-  const fileName = path.split('/').pop() || ''
-  const parsed = parseFormatFilename(fileName)
-  const base = parsed?.baseName || 'Model'
-  const tpl = parsed?.templateName || templateName.value || undefined
-  return buildFormatFilename(base, tpl, bumped)
-}
-
-function currentFilename(): string {
-  const current = currentModelSemVer.value
-  if (!current) return '—'
-  const path = rootNode.value?.source?.path || ''
-  const fileName = path.split('/').pop() || ''
-  const parsed = parseFormatFilename(fileName)
-  const base = parsed?.baseName || 'Model'
-  const tpl = parsed?.templateName || templateName.value || undefined
-  return buildFormatFilename(base, tpl, current)
-}
+const { currentModelSemVer, currentVersionStr, versionPreview, filenamePreview, currentFilename } =
+  useVersionBump({ rawModelVersion, templateName, sourcePath: filePath })
 
 /**
  * Computes the tooltip text for a bump button (R-VM-04 filename preview)
@@ -793,10 +653,6 @@ async function saveVersion(): Promise<void> {
 }
 
 // ── Spec, Template, and Model details computed properties ──
-
-const filePath = computed(() => {
-  return rootNode.value?.source?.path || ''
-})
 
 const modelFileName = computed(() => {
   const path = filePath.value || ''

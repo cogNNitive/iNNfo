@@ -165,6 +165,12 @@ watch(
 function onInput(e: Event): void {
   emit('update:modelValue', (e.target as HTMLInputElement).value)
 }
+
+function onImageError(e: Event): void {
+  const img = e.target as HTMLImageElement
+  if (!img) return
+  img.style.display = 'none'
+}
 </script>
 
 <template>
@@ -176,7 +182,7 @@ function onInput(e: Event): void {
         :src="resolvedAssetUrl"
         :alt="fileName"
         class="field-asset__image"
-        @error="($event.target as HTMLImageElement).style.display = 'none'"
+        @error="onImageError"
       />
       <span v-if="!assetPath" class="field-asset__placeholder">No image selected</span>
     </div>

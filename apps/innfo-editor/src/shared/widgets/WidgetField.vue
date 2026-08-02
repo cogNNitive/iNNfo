@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useModelStore } from '../../stores/modelStore'
 import { commitFieldValue } from '../provenance'
 import { resolveWidgetComponent, FallbackWidget } from './index'
+import { isImageFieldName, isImageFieldValue } from '../../utils/imageDetection'
 
 /**
  * Binds one resolved field/marker to its widget: resolves the ported
@@ -37,7 +38,20 @@ const modelStore = useModelStore()
 
 const currentValue = computed(() => modelStore.getNode(props.nodeId)?.fields[props.fieldKey]?.value)
 
-const widgetComponent = computed(() => resolveWidgetComponent(props.widgetType))
+const effectiveWidgetType = computed(() => {
+  const t = props.widgetType || props.fieldDefinition?.type || 'string'
+  if (t === 'image' || t === 'asset' || t === 'file' || t === 'video' || t === 'audio') {
+    return t === 'asset' ? 'image' : t
+  }
+  const name = props.fieldKey || props.fieldDefinition?.name || ''
+  if (isImageFieldName(name)) return 'image'
+  if (typeof currentValue.value === 'string' && currentValue.value.trim()) {
+    if (isImageFieldValue(name, currentValue.value)) return 'image'
+  }
+  return t
+})
+
+const widgetComponent = computed(() => resolveWidgetComponent(effectiveWidgetType.value))
 
 function onCommit(value: unknown): void {
   commitFieldValue(modelStore, props.nodeId, props.fieldKey, value, {

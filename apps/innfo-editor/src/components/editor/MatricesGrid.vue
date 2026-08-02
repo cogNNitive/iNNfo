@@ -368,9 +368,14 @@ import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import BlockPill from './BlockPill.vue'
 import MatrixPill from './MatrixPill.vue'
-import { commitFieldValue } from '../../shared/provenance'
-import { normalizeMatrixDecl } from '@cognnitive/innfo-core'
-import type { MatrixWidgetType } from '@cognnitive/innfo-core'
+import { extractMatrixDefs, useMatrixDefinitions } from '../../composables/useMatrixDefinitions'
+import { getConceptMeta } from '../../composables/useConceptVisuals'
+import { useMatrixCells } from './composables/useMatrixCells'
+import {
+  getCycleBgColor,
+  getDistClasses,
+  getHeatmapClasses as getHeatmapClassesForValue,
+} from './composables/useMatrixColors'
 
 // ── Constants ──
 const ROW_HEIGHT = 48
@@ -390,20 +395,8 @@ const emit = defineEmits<{
 const modelStore = useModelStore()
 
 // ── Matrix definitions stored on root node fields ──
-const MATRIX_DEFS_KEY = '__matrix_defs'
-
-interface MatrixDef {
-  name: string
-  source: string
-  target: string
-  widgetType: MatrixWidgetType
-  params: string
-  values?: string[]
-  description?: string
-  min_color?: string
-  max_color?: string
-  label?: string
-}
+const rootIds = computed(() => modelStore.rootIds)
+const { matrixDefs, getMatrixValueCount } = useMatrixDefinitions(rootIds, { strategy: 'merge' })
 
 const rootNode = computed(() => {
   if (modelStore.rootIds.length === 0) return null
@@ -412,44 +405,14 @@ const rootNode = computed(() => {
     for (const id of modelStore.rootIds) {
       const r = modelStore.getNode(id)
       if (!r) continue
-      const defs = r.fields?.[MATRIX_DEFS_KEY]?.value || r.fields?.matrices?.value
-      if (Array.isArray(defs) && defs.some((d: any) => d.name === matrixName)) {
+      const defs = extractMatrixDefs(r)
+      if (defs.some((d: any) => d.name === matrixName)) {
         return r
       }
     }
   }
   const nonSpecId = modelStore.rootIds.find((id) => !id.startsWith('spec:'))
   return modelStore.getNode(nonSpecId || modelStore.rootIds[0])
-})
-
-const matrixDefs = computed<MatrixDef[]>(() => {
-  const ids = modelStore.rootIds
-  const defs: MatrixDef[] = []
-  const seen = new Set<string>()
-
-  for (const id of ids) {
-    const r = modelStore.getNode(id)
-    if (!r) continue
-    const defsField = r.fields[MATRIX_DEFS_KEY]
-    if (defsField?.value && Array.isArray(defsField.value)) {
-      for (const m of defsField.value as any[]) {
-        if (!seen.has(m.name)) {
-          seen.add(m.name)
-          defs.push(normalizeMatrixDecl(m))
-        }
-      }
-    }
-    const rawMatrices = r.fields?.matrices?.value
-    if (Array.isArray(rawMatrices)) {
-      for (const m of rawMatrices) {
-        if (!seen.has(m.name)) {
-          seen.add(m.name)
-          defs.push(normalizeMatrixDecl(m))
-        }
-      }
-    }
-  }
-  return defs
 })
 
 const activeMatrixIndex = ref(props.matrixIndex)
@@ -523,22 +486,16 @@ const headerHeight = computed(() => {
   return Math.min(Math.max(needed, 72), 200)
 })
 
-const scaleRange = computed(() => {
-  if (!activeMatrix.value) return []
-  const values = activeMatrix.value.values
-  if (Array.isArray(values) && values.length > 0) {
-    const numeric = values.map(Number).filter((n) => !Number.isNaN(n))
-    if (numeric.length === values.length) return numeric
-  }
-  const params = activeMatrix.value.params
-  const minMatch = params.match(/min:(\d+)/)
-  const maxMatch = params.match(/max:(\d+)/)
-  const min = minMatch ? parseInt(minMatch[1]) : 1
-  const max = maxMatch ? parseInt(maxMatch[1]) : 5
-  const range: number[] = []
-  for (let i = min; i <= max; i++) range.push(i)
-  return range
-})
+const {
+  matrixCellKey,
+  getVal,
+  setVal,
+  valueDistribution: valueDistributionFor,
+  getSetOptionsList,
+  isOutOfSetValue,
+  rotateCycle,
+  scaleRange,
+} = useMatrixCells(activeMatrix, rootNode, (key, value) => emit('cell-change', key, value))
 
 // ── Virtual Scroller Setup ──
 const scrollRef = ref<HTMLElement | null>(null)
@@ -610,125 +567,12 @@ watch(activeMatrixIndex, (newIdx, oldIdx) => {
   }
 })
 
-// ── Matrix values stored as fields on root node ──
-function matrixCellKey(row: string, col: string): string {
-  if (!activeMatrix.value) return ''
-  return `${activeMatrix.value.name}||${row}||${col}`
-}
-
-const getVal = (row: string, col: string): string | number | boolean => {
-  if (!activeMatrix.value) return ''
-  const key = matrixCellKey(row, col)
-  for (const id of modelStore.rootIds) {
-    const r = modelStore.getNode(id)
-    if (!r) continue
-    const field = r.fields[key]
-    if (field && field.value !== undefined && field.value !== null) {
-      return field.value as string | number | boolean
-    }
-  }
-  return '-'
-}
-
-const setVal = (row: string, col: string, value: string | number | boolean) => {
-  if (!activeMatrix.value) return
-  const root = rootNode.value
-  if (!root) return
-  const key = matrixCellKey(row, col)
-  commitFieldValue(modelStore, root.id, key, value, { kind: 'user', id: 'anonymous' })
-  emit('cell-change', key, value)
-}
-
 // ── Value distribution iterates ALL cells, not just visible ──
-const valueDistribution = computed(() => {
-  if (!activeMatrix.value || !rows.value.length || !columns.value.length)
-    return {} as Record<string, number>
-  const counts: Record<string, number> = {}
-  const prefix = activeMatrix.value.name + '||'
-  for (const row of rows.value) {
-    for (const col of columns.value) {
-      const key = `${prefix}${row}||${col}`
-      let val: any = undefined
-      for (const id of modelStore.rootIds) {
-        const r = modelStore.getNode(id)
-        const field = r?.fields?.[key]
-        if (field && field.value !== undefined && field.value !== null) {
-          val = field.value
-          break
-        }
-      }
-      const strVal = val === undefined || val === null || val === '-' ? '-' : String(val)
-      counts[strVal] = (counts[strVal] || 0) + 1
-    }
-  }
-  return counts
-})
+const valueDistribution = computed(() => valueDistributionFor(rows.value, columns.value))
 
-// ── Color helpers ──
-const getCycleBgColor = (val: string | number | boolean): string => {
-  if (val === '-' || val === '' || val === undefined)
-    return 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-600 text-slate-400'
-  const colorScale: Record<string, string> = {
-    '1': 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300',
-    '2': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300',
-    '3': 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300',
-    '4': 'bg-lime-100 text-lime-800 border-lime-300 dark:bg-lime-900/30 dark:text-lime-300',
-    '5': 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-300',
-  }
-  return colorScale[String(val)] || 'bg-primary/10 text-primary border-primary/30'
-}
-
-const getDistClasses = (value: string): string => {
-  if (value === '-')
-    return 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-600'
-  return getCycleBgColor(value)
-}
-
-const getHeatmapClasses = (row: string, col: string): string => {
-  const val = getVal(row, col)
-  if (val === '-' || val === '' || val === undefined || val === null) return ''
-  return getCycleBgColor(val)
-}
-
-// ── Utility functions ──
-const getSetOptionsList = (): string[] => {
-  if (!activeMatrix.value) return []
-  const values = activeMatrix.value.values
-  if (Array.isArray(values) && values.length > 0) return values
-  const params = activeMatrix.value.params
-  return params
-    .split(/[;,]/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
-}
-
-/** True when a cell holds a non-empty value that is not part of the widget's options. */
-const isOutOfSetValue = (value: string | number | boolean): boolean => {
-  if (value === '-' || value === '' || value === undefined || value === null) return false
-  if (activeMatrix.value?.widgetType === 'scale') {
-    return !scaleRange.value.includes(Number(value))
-  }
-  if (activeMatrix.value?.widgetType === 'set') {
-    return !getSetOptionsList().includes(String(value))
-  }
-  return false
-}
-
-const rotateCycle = (row: string, col: string) => {
-  if (!activeMatrix.value) return
-  const current = getVal(row, col)
-  const options = getSetOptionsList()
-  if (options.length === 0) {
-    // Default cycle: 1-2-3-4-5
-    const defaultCycle = ['1', '2', '3', '4', '5']
-    const idx = current === '-' ? -1 : defaultCycle.indexOf(String(current))
-    const next = idx >= defaultCycle.length - 1 ? '-' : defaultCycle[idx + 1]
-    setVal(row, col, next)
-  } else {
-    const idx = current === '-' ? -1 : options.indexOf(String(current))
-    const next = idx >= options.length - 1 ? '-' : options[idx + 1]
-    setVal(row, col, next)
-  }
+// ── Heatmap classes for a cell: resolve its value, then classify it ──
+function getHeatmapClasses(row: string, col: string): string {
+  return getHeatmapClassesForValue(getVal(row, col))
 }
 
 const resolveBlockId = (name: string, _conceptType: string): string | undefined => {
@@ -770,34 +614,4 @@ const getConceptFields = (conceptType: string): any[] => {
   return []
 }
 
-/** Resolves the concept icon/color from the effective (template) metamodel. */
-const getConceptMeta = (conceptType: string): { icon?: string; color?: string } => {
-  const lower = conceptType?.toLowerCase()
-  for (const id of modelStore.rootIds) {
-    const r = modelStore.getNode(id)
-    const concepts = r?.localMetamodel?.concepts
-    if (Array.isArray(concepts)) {
-      const c = concepts.find((x) => x.name.toLowerCase() === lower)
-      if (c) return { icon: c.icon, color: c.color }
-    }
-  }
-  return {}
-}
-
-const getMatrixValueCount = (matrixName: string): number => {
-  let count = 0
-  const prefix = `${matrixName}||`
-  for (const node of Object.values(modelStore.nodes)) {
-    if (!node.fields) continue
-    for (const [key, fv] of Object.entries(node.fields)) {
-      if (key.startsWith(prefix)) {
-        const val = (fv as any)?.value
-        if (val !== undefined && val !== null && val !== '' && val !== '-' && val !== false) {
-          count++
-        }
-      }
-    }
-  }
-  return count
-}
 </script>

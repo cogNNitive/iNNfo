@@ -142,6 +142,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { isImageExtension } from '../../utils/imageDetection'
 
 export interface AssetItem {
   filename: string
@@ -152,20 +153,18 @@ const props = defineProps<{
   assets: AssetItem[]
 }>()
 
-const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'bmp', 'ico']
-
 // Separate assets into images and non-images
 const imageAssets = computed(() =>
   props.assets.filter((a) => {
     const ext = a.filename.split('.').pop()?.toLowerCase()
-    return ext ? IMAGE_EXTENSIONS.includes(ext) : false
+    return ext ? isImageExtension(ext) : false
   }),
 )
 
 const nonImageAssets = computed(() =>
   props.assets.filter((a) => {
     const ext = a.filename.split('.').pop()?.toLowerCase()
-    return ext ? !IMAGE_EXTENSIONS.includes(ext) : true
+    return ext ? !isImageExtension(ext) : true
   }),
 )
 

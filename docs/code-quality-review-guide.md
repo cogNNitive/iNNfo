@@ -78,7 +78,6 @@ Lo que hace que el código parezca escrito por **una sola cabeza**, no por diez.
       violaciones: `rg "from '.*apps/" packages/innfo-core/src`.
 - [ ] **Tamaño de los SFC.** Componentes > ~300 líneas son señal de que hacen demasiado.
       Candidatos actuales a descomponer:
-  - `components/layout/DirectoryPickerModal.vue` (~777)
   - `components/editor/GraphViewer.vue` (~669)
   - `components/editor/MatricesGrid.vue` (~561)
   - `components/editor/BlockSheet.vue` (~531)
@@ -165,7 +164,7 @@ Aquí está el **mayor déficit del repo hoy**:
 | 3 | MEDIO | Packages muertos `format-core`/`format-mcp` (solo `dist/`) | `packages/format-*` |
 | 4 | MEDIO | Tres estilos de import para el dominio (`@cognnitive/...`, `../model/*`, alias `@/` sin uso) | `apps/innfo-editor/src` |
 | 5 | MEDIO | ~57 usos de `any`/`as any` erosionan `strict: true` | ~11 archivos del app |
-| 6 | MEDIO | SFCs > 500 líneas difíciles de mantener/testear | `DirectoryPickerModal`, `GraphViewer`, `MatricesGrid`, `BlockSheet` |
+| 6 | MEDIO | SFCs > 500 líneas difíciles de mantener/testear | `GraphViewer`, `MatricesGrid`, `BlockSheet` |
 | 7 | BAJO | Versionado interno inconsistente (`"*"` vs `"^0.1.0"`) | `package.json` del app y del mcp |
 
 **Lo que está BIEN y hay que preservar** (no romper al refactorizar):

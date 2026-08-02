@@ -464,6 +464,9 @@ import BlockMatrixSummary from './BlockMatrixSummary.vue'
 import NodeMedia from './NodeMedia.vue'
 import ConceptTableView from './ConceptTableView.vue'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
+import { readMatrixDefsField } from '../../composables/useMatrixDefinitions'
+import { useBlockRawMarkdown } from './composables/useBlockRawMarkdown'
+import { useBlockAssets } from './composables/useBlockAssets'
 
 const props = withDefaults(
   defineProps<{
@@ -598,84 +601,18 @@ const renderedDescription = computed(() => {
 
 // ── Raw markdown source for Code tab ──────────────────────────
 
-const rawMarkdown = computed(() => {
-  if (!props.block.id) return ''
-  const node = modelStore.getNode(props.block.id)
+const blockIdRef = computed(() => props.block.id ?? '')
+const kindRef = computed(() => props.kind)
+const conceptNameRef = computed(() => props.conceptName)
+const conceptTypeRef = computed(() => props.conceptType)
+const blockRef = computed(() => props.block)
 
-  // Root nodes: full raw source of the file
-  if (node?.rawContent) return node.rawContent
-
-  const description = node?.rawSections?.description || props.block.description
-
-  // Concept sections (virtual group or concept-kind node): # _NN heading + children
-  if (props.kind === 'concept') {
-    const conceptName = props.conceptName || props.block.name
-    if (!conceptName) return description || ''
-
-    const lines: string[] = [`# _NN ${conceptName}`]
-    const visited = new Set<string>()
-    const walk = (nodeId: string) => {
-      if (visited.has(nodeId)) return
-      visited.add(nodeId)
-      const n = modelStore.getNode(nodeId)
-      if (!n) return
-      for (const cid of n.childIds) {
-        const child = modelStore.getNode(cid)
-        if (!child || child.type !== conceptName) continue
-        lines.push('')
-        lines.push(`* _NN ${conceptName}: ${child.name}`)
-        const yamlFields = Object.entries(child.fields ?? {}).filter(
-          ([, fv]) => (fv as any)?.value !== undefined && (fv as any)?.value !== '',
-        )
-        if (yamlFields.length > 0) {
-          lines.push('  ```yaml')
-          for (const [k, fv] of yamlFields) {
-            lines.push(`  ${k}: ${JSON.stringify((fv as any).value)}`)
-          }
-          lines.push('  ```')
-        }
-        const childDesc = child.rawSections?.description || ''
-        if (childDesc) {
-          for (const line of childDesc.split('\n')) {
-            lines.push(`  ${line}`)
-          }
-        }
-        walk(cid)
-      }
-    }
-    const rootId = rootNodeId.value
-    if (rootId) walk(rootId)
-
-    return lines.join('\n')
-  }
-
-  // Element nodes: * _NN marker line + description
-  const type = props.conceptType || node?.type || ''
-  const name = node?.name || props.block.name
-  if (type && name) {
-    const lines: string[] = [`* _NN ${type}: ${name}`]
-    // Include YAML fields from the node
-    if (node?.fields) {
-      const yamlFields = Object.entries(node.fields).filter(
-        ([, fv]) => (fv as any)?.value !== undefined && (fv as any)?.value !== '',
-      )
-      if (yamlFields.length > 0) {
-        lines.push('  ```yaml')
-        for (const [k, fv] of yamlFields) {
-          lines.push(`  ${k}: ${JSON.stringify((fv as any).value)}`)
-        }
-        lines.push('  ```')
-      }
-    }
-    if (description) {
-      for (const line of description.split('\n')) {
-        lines.push(`  ${line}`)
-      }
-    }
-    return lines.join('\n')
-  }
-
-  return description || ''
+const { rawMarkdown } = useBlockRawMarkdown({
+  blockId: blockIdRef,
+  kind: kindRef,
+  conceptName: conceptNameRef,
+  conceptType: conceptTypeRef,
+  block: blockRef,
 })
 
 // ── Node from store (full model data) ───────────────────────────
@@ -713,8 +650,8 @@ const hasMatrices = computed(() => {
   if (!rootNodeId.value) return false
   const root = modelStore.getNode(rootNodeId.value)
   if (!root) return false
-  const defs = root.fields?.__matrix_defs?.value
-  if (Array.isArray(defs) && defs.length > 0) return true
+  const defs = readMatrixDefsField(root)
+  if (defs.length > 0) return true
   if (!root.rawContent) return false
   const fm = parseFrontmatter(root.rawContent)
   const matrices: unknown[] = (fm as any)?.matrices ?? []
@@ -747,64 +684,7 @@ watch(
   { immediate: false },
 )
 
-// Blob URL cache for FS-resolved asset paths
-const blobUrlCache = new Map<string, string>()
-
-async function resolveAssetUrl(relativePath: string): Promise<string> {
-  if (relativePath.startsWith('http') || relativePath.startsWith('data:') || relativePath.startsWith('blob:')) {
-    return relativePath
-  }
-
-  const cached = blobUrlCache.get(relativePath)
-  if (cached) return cached
-
-  const ws = useWorkspaceStore()
-  const handle = ws.handle
-  if (!handle) return relativePath
-
-  try {
-    const parts = relativePath.split('/').filter(Boolean)
-    let current: any = handle
-    for (let i = 0; i < parts.length - 1; i++) {
-      current = await current.getDirectoryHandle(parts[i])
-    }
-    const fh = await current.getFileHandle(parts[parts.length - 1])
-    const file = await fh.getFile()
-    const url = URL.createObjectURL(file)
-    blobUrlCache.set(relativePath, url)
-    return url
-  } catch {
-    return relativePath
-  }
-}
-
-// Merge declared assets (from parser) with scanned assets (from filesystem)
-const assetItems = computed<Array<{ filename: string; url: string }>>(() => {
-  const node = nodeFromStore.value
-  const declared: Array<{ filename: string; url: string }> = node?.assets
-    ? node.assets.map((path: string) => ({
-        filename: path.split('/').pop() || path,
-        url: path,
-      }))
-    : []
-
-  const scanned: Array<{ filename: string; url: string }> = scannedAssets.value.map((a) => ({
-    filename: a.filename,
-    url: a.relativePath,
-  }))
-
-  // Merge: declared assets take precedence, scanned fill gaps
-  const seen = new Set(declared.map((a) => a.filename))
-  const merged = [...declared]
-  for (const item of scanned) {
-    if (!seen.has(item.filename)) {
-      merged.push(item)
-      seen.add(item.filename)
-    }
-  }
-
-  return merged
-})
+const { resolveAssetUrl, assetItems } = useBlockAssets(nodeFromStore, scannedAssets)
 
 // Resolve scanned asset paths to blob URLs for display
 const resolvedAssetItems = ref<Array<{ filename: string; url: string }>>([])

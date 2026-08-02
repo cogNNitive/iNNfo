@@ -24,13 +24,14 @@
         v-else
         class="text-sm font-medium text-slate-800 dark:text-slate-200 flex items-center min-h-[24px]"
       >
-        <!-- Markdown field types: render via WidgetField for proper markdown rendering -->
+        <!-- Markdown & Asset field types: render via WidgetField for proper rendering -->
         <WidgetField
-          v-if="entry.isMarkdownType"
+          v-if="entry.isMarkdownType || entry.isAssetType"
           :node-id="nodeId"
           :field-key="entry.def.name"
           :widget-type="entry.def.type"
           :field-definition="entry.def"
+          :readonly="true"
         />
         <template v-else-if="entry.hasValue && entry.displayValue !== ''">
           <template v-if="entry.def.type === 'select' && entry.def.options">
@@ -104,6 +105,7 @@ import type { ModelNode } from '../../model/types'
 import BlockPill from './BlockPill.vue'
 import SourceRefPill from './SourceRefPill.vue'
 import { parseSourceRef } from '../../utils/sourceRef'
+import { isImageFieldValue } from '../../utils/imageDetection'
 
 function isSourceRef(val: unknown): boolean {
   if (typeof val !== 'string') return false
@@ -111,6 +113,15 @@ function isSourceRef(val: unknown): boolean {
 }
 
 const MARKDOWN_FIELD_TYPES = new Set(['markdown_inline', 'markdown_file', 'markdown'])
+const ASSET_FIELD_TYPES = new Set(['image', 'image_url', 'asset', 'file', 'video', 'audio'])
+
+function isAssetField(def: { name: string; type: string }, val: unknown): boolean {
+  if (ASSET_FIELD_TYPES.has(def.type)) return true
+  if (typeof val === 'string' && val.trim()) {
+    if (isImageFieldValue(def.name, val)) return true
+  }
+  return false
+}
 
 interface FieldEntry {
   def: {
@@ -122,6 +133,7 @@ interface FieldEntry {
   hasValue: boolean
   displayValue: unknown
   isMarkdownType: boolean
+  isAssetType: boolean
   refNode?: ModelNode | null
 }
 
@@ -190,6 +202,7 @@ const fieldEntries = computed<FieldEntry[]>(() => {
       hasValue,
       displayValue: rawValue ?? '',
       isMarkdownType: MARKDOWN_FIELD_TYPES.has(def.type),
+      isAssetType: isAssetField(def, rawValue),
       refNode,
     }
   })

@@ -18,6 +18,8 @@ import { useHashSync } from '../composables/useHashSync'
 import { useViewSync } from '../composables/useViewSync'
 import { ValidationService } from '../services/ValidationService'
 import type { ModelNode } from '../model/types'
+import { isImageFieldName, isImageFieldValue } from '../utils/imageDetection'
+import { MATRIX_DEFS_KEY } from '../composables/useMatrixDefinitions'
 
 // Dynamic sub-editors
 const BlockFeed = defineAsyncComponent(() => import('../components/editor/BlockFeed.vue'))
@@ -135,8 +137,26 @@ const editorView = computed<'text' | 'tree' | 'sheet' | 'table'>(() => {
   return 'sheet'
 })
 
+const inferTypeFromValue = (key: string, val: any): string => {
+  if (isImageFieldName(key)) return 'image'
+  const rawType = typeof val
+  if (rawType === 'boolean') return 'boolean'
+  if (rawType === 'number') return Number.isInteger(val) && val >= 1 && val <= 5 ? 'rating' : 'number'
+  if (rawType === 'string') {
+    if (/^#[0-9a-fA-F]{6}$/.test(val)) return 'color'
+    if (isImageFieldValue(key, val)) return 'image'
+    if (/^https?:\/\//.test(val)) return 'url'
+    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return 'date'
+  }
+  return 'string'
+}
+
 const getConceptFieldsForNode = (node: ModelNode) => {
-  const metamodelFields = metamodelStore.getConceptFields(node.type) ?? []
+  const conceptName = node.conceptBinding?.name ?? node.name ?? node.type
+  const metamodelFields =
+    metamodelStore.getConceptFields(conceptName) ??
+    metamodelStore.getConceptFields(node.type) ??
+    []
   const fieldsMap = new Map<string, { name: string; type: string; [key: string]: any }>()
 
   for (const f of metamodelFields) {
@@ -146,17 +166,22 @@ const getConceptFieldsForNode = (node: ModelNode) => {
   if (node.fields) {
     for (const [key, fv] of Object.entries(node.fields)) {
       if (!fieldsMap.has(key)) {
-        const val = (fv as any).value
-        const rawType = typeof val
-        let type = rawType === 'boolean' ? 'boolean' : 'string'
-        if (rawType === 'number') {
-          type = Number.isInteger(val) && val >= 1 && val <= 5 ? 'rating' : 'number'
-        } else if (rawType === 'string') {
-          if (/^#[0-9a-fA-F]{6}$/.test(val)) type = 'color'
-          else if (/^https?:\/\//.test(val)) type = 'url'
-          else if (/^\d{4}-\d{2}-\d{2}$/.test(val)) type = 'date'
+        const val = (fv as any)?.value ?? fv
+        fieldsMap.set(key, { name: key, type: inferTypeFromValue(key, val) })
+      }
+    }
+  }
+
+  if (Array.isArray(node.childIds)) {
+    for (const cid of node.childIds) {
+      const child = modelStore.getNode(cid)
+      if (child?.fields) {
+        for (const [key, fv] of Object.entries(child.fields)) {
+          if (!fieldsMap.has(key)) {
+            const val = (fv as any)?.value ?? fv
+            fieldsMap.set(key, { name: key, type: inferTypeFromValue(key, val) })
+          }
         }
-        fieldsMap.set(key, { name: key, type })
       }
     }
   }
@@ -379,7 +404,7 @@ function setActiveView(view: ActiveView): void {
     for (const id of modelStore.rootIds) {
       const root = modelStore.getNode(id)
       if (!root) continue
-      const defs = root.fields?.__matrix_defs?.value ?? root.fields?.matrices?.value
+      const defs = root.fields?.[MATRIX_DEFS_KEY]?.value ?? root.fields?.matrices?.value
       if (Array.isArray(defs) && defs.length > 0) {
         uiStore.setActiveMatrixIndex(0)
         break
@@ -567,17 +592,6 @@ onUnmounted(() => {
             >
               No model loaded.
             </p>
-          </div>
-        </template>
-
-        <!-- ── Exports View ── -->
-        <template v-else-if="uiStore.activeView === 'exports'">
-          <div class="flex-1 flex items-center justify-center p-4">
-            <div class="text-center max-w-sm">
-              <p class="text-sm text-slate-500 dark:text-slate-400">
-                Pick an export from the sidebar to open it in a new tab.
-              </p>
-            </div>
           </div>
         </template>
 

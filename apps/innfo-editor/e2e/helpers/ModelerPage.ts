@@ -11,7 +11,6 @@ export class ModelerPage {
   readonly modelHeading: Locator
   readonly viewSwitcherEditor: Locator
   readonly viewSwitcherGraph: Locator
-  readonly viewSwitcherExports: Locator
   readonly wizardSampleCards: Locator
 
   constructor(page: Page) {
@@ -25,7 +24,6 @@ export class ModelerPage {
     this.modelHeading = page.getByText('BTTFKB').first()
     this.viewSwitcherEditor = page.getByTestId('view-switcher-editor')
     this.viewSwitcherGraph = page.getByTestId('view-switcher-graph')
-    this.viewSwitcherExports = page.getByTestId('view-switcher-exports')
     this.wizardSampleCards = page.locator('.wizard__sample-card')
   }
 

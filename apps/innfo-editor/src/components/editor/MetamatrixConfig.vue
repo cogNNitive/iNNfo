@@ -169,22 +169,9 @@ import { computed } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { commitFieldValue } from '../../shared/provenance'
+import { MATRIX_DEFS_KEY, readMatrixDefsField, type MatrixDef } from '../../composables/useMatrixDefinitions'
 
 const modelStore = useModelStore()
-const MATRIX_DEFS_KEY = '__matrix_defs'
-
-interface MatrixDef {
-  name: string
-  source: string
-  target: string
-  widgetType: 'boolean' | 'cycle' | 'scale' | 'set' | 'text'
-  params: string
-  values?: string[]
-  description?: string
-  min_color?: string
-  max_color?: string
-  label?: string
-}
 
 const rootNode = computed(() => {
   const nonSpecId = modelStore.rootIds.find((id) => !id.startsWith('spec:'))
@@ -194,11 +181,7 @@ const rootNode = computed(() => {
 
 const matrixDefs = computed<MatrixDef[]>({
   get() {
-    const root = rootNode.value
-    if (!root) return []
-    const defsField = root.fields[MATRIX_DEFS_KEY]
-    if (!defsField || !defsField.value) return []
-    return defsField.value as MatrixDef[]
+    return readMatrixDefsField(rootNode.value) as MatrixDef[]
   },
   set(_val) {
     // Write-through via saveDefs()

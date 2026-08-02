@@ -4,6 +4,7 @@ import { extractTemplateSchemaFromContent } from '@cognnitive/innfo-core'
 import type { LocalMetamodel } from '@cognnitive/innfo-core'
 import type { ModelNode } from '../model/types'
 import type { DirectoryHandleLike, FileHandleLike } from '../model/fs-types'
+import { MATRIX_DEFS_KEY } from '../composables/useMatrixDefinitions'
 
 /**
  * Frontmatter shape this resolver reads. Kept local (and partial) so callers
@@ -164,8 +165,8 @@ export async function resolveParentSpecs(
       if (!schema.concepts.length && !schema.matrices.length) continue
 
       // Propagate template matrix declarations to the model root node
-      if (schema.matrices.length > 0 && !root.fields['__matrix_defs']) {
-        root.fields['__matrix_defs'] = {
+      if (schema.matrices.length > 0 && !root.fields[MATRIX_DEFS_KEY]) {
+        root.fields[MATRIX_DEFS_KEY] = {
           value: schema.matrices.map((m) => normalizeMatrixDecl(m as unknown as Record<string, unknown>)),
           provenance: {
             author: { kind: 'system', id: 'parser' },

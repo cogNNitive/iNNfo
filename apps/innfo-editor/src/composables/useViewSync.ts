@@ -8,7 +8,6 @@ const VALID_VIEWS: ActiveView[] = [
   'matrices',
   'info',
   'ai-guide',
-  'exports',
   'guided-procedure',
 ]
 

@@ -3,11 +3,11 @@ import { ref } from 'vue'
 
 export type ActiveView =
   | 'editor'
+  | 'explorer'
   | 'graph'
   | 'matrices'
   | 'info'
   | 'ai-guide'
-  | 'exports'
   | 'import'
   | 'export'
   | 'guided-procedure'
@@ -15,6 +15,8 @@ export type ActiveView =
 export type AiTab = 'guide' | 'import' | 'export'
 
 export type GhostFilterMode = 'model' | 'all'
+
+export type ExplorerFilterMode = 'all' | 'models' | 'sources' | 'artifacts'
 
 /**
  * UI-only state that does not belong in modelStore.
@@ -37,6 +39,7 @@ export const useUiStore = defineStore('ui', () => {
   const showAiModal = ref(false)
   const activeAiTab = ref<AiTab>('guide')
   const ghostFilterMode = ref<GhostFilterMode>('all')
+  const explorerFilterMode = ref<ExplorerFilterMode>('all')
 
   function setActiveModel(id: string | null): void {
     activeModelId.value = id
@@ -78,6 +81,10 @@ export const useUiStore = defineStore('ui', () => {
     ghostFilterMode.value = mode
   }
 
+  function setExplorerFilterMode(mode: ExplorerFilterMode): void {
+    explorerFilterMode.value = mode
+  }
+
   function setShowAiModal(val: boolean): void {
     showAiModal.value = val
   }
@@ -100,6 +107,7 @@ export const useUiStore = defineStore('ui', () => {
     showAiModal,
     activeAiTab,
     ghostFilterMode,
+    explorerFilterMode,
     setActiveModel,
     setActiveConcept,
     setActivePerspective,
@@ -112,5 +120,6 @@ export const useUiStore = defineStore('ui', () => {
     setShowAiModal,
     setActiveAiTab,
     setGhostFilterMode,
+    setExplorerFilterMode,
   }
 })

@@ -118,6 +118,30 @@ function findTemplatePeer(
   return null
 }
 
+/**
+ * Resolves the concept icon/color from the effective (template) metamodel by
+ * name, checking every root's `localMetamodel.concepts` in order.
+ *
+ * Distinct from `getConceptForNode` above: this resolves by a bare concept
+ * NAME (e.g. a matrix's `source`/`target` string) against
+ * `root.localMetamodel.concepts` only — it does not walk the ancestor chain.
+ * (Moved verbatim from LeftSidebar.vue / MatricesGrid.vue, where it was
+ * byte-for-byte duplicated.)
+ */
+export function getConceptMeta(conceptType: string): { icon?: string; color?: string } {
+  const modelStore = useModelStore()
+  const lower = conceptType?.toLowerCase()
+  for (const id of modelStore.rootIds) {
+    const r = modelStore.getNode(id)
+    const concepts = r?.localMetamodel?.concepts
+    if (Array.isArray(concepts)) {
+      const c = concepts.find((x) => x.name.toLowerCase() === lower)
+      if (c) return { icon: c.icon, color: c.color }
+    }
+  }
+  return {}
+}
+
 // ── Composable ─────────────────────────────────────────────────
 
 export function useConceptVisuals() {

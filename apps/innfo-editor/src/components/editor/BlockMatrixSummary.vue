@@ -26,6 +26,7 @@ import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { getHexColor } from '../../composables/useConceptVisuals'
+import { readMatrixDefsField } from '../../composables/useMatrixDefinitions'
 import type { MatrixDecl } from '@cognnitive/innfo-core'
 import MatrixPill from './MatrixPill.vue'
 
@@ -54,8 +55,8 @@ const chips = computed<MatrixChip[]>(() => {
 
   // Matrix declarations come from the template via __matrix_defs (populated by
   // the spec resolver) or, as a fallback, from the model's own frontmatter.
-  const defsField = root.fields?.__matrix_defs?.value
-  const rawMatrices = Array.isArray(defsField) && defsField.length > 0
+  const defsField = readMatrixDefsField(root)
+  const rawMatrices = defsField.length > 0
     ? defsField
     : root.rawContent
       ? (parseFrontmatter(root.rawContent) as any)?.matrices
@@ -148,8 +149,8 @@ function onSelectMatrix(matrixName: string): void {
   const root = modelStore.getNode(props.rootNodeId)
   if (!root) return
 
-  const defsField = root.fields?.__matrix_defs?.value
-  const rawMatrices = Array.isArray(defsField) && defsField.length > 0
+  const defsField = readMatrixDefsField(root)
+  const rawMatrices = defsField.length > 0
     ? defsField
     : root.rawContent
       ? (parseFrontmatter(root.rawContent) as any)?.matrices

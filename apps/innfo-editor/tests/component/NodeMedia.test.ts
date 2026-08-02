@@ -95,6 +95,28 @@ describe('NodeMedia.vue — R-SC-05', () => {
     ).toBe(true)
   })
 
+  it('renders additional image formats (webp, avif, tiff, heic) as thumbnails', () => {
+    const wrapper = mount(NodeMedia, {
+      props: {
+        assets: [
+          { filename: 'cover.webp', url: '/assets/cover.webp' },
+          { filename: 'photo.avif', url: '/assets/photo.avif' },
+          { filename: 'scan.tiff', url: '/assets/scan.tiff' },
+          { filename: 'shot.heic', url: '/assets/shot.heic' },
+          { filename: 'notes.md', url: '/assets/notes.md' },
+        ],
+      },
+    })
+
+    const images = wrapper.findAll('img')
+    expect(images.length).toBe(4)
+    const alts = images.map((i) => i.attributes('alt'))
+    expect(alts).toContain('cover.webp')
+    expect(alts).toContain('photo.avif')
+    expect(alts).toContain('scan.tiff')
+    expect(alts).toContain('shot.heic')
+  })
+
   it('shows empty state when no assets provided', () => {
     const wrapper = mount(NodeMedia, {
       props: { assets: [] },

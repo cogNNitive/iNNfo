@@ -5,6 +5,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import SetupWizard from '../../src/components/layout/SetupWizard.vue'
 import { routes } from '../../src/router/index'
 import { buildFakeTree, readFakeTree } from '../helpers/fakeFs'
+import { initWorkspaceStructure } from '../../src/composables/useWorkspaceScaffolding'
 
 describe('SetupWizard — workflow files in initWorkspaceStructure', () => {
   beforeAll(() => {
@@ -41,9 +42,9 @@ describe('SetupWizard — workflow files in initWorkspaceStructure', () => {
 
   it('creates workflows/ directory with export.workflow.md and import.workflow.md', async () => {
     const { tree, handle } = buildEmptyTree()
-    const wrapper = await mountWizard()
+    await mountWizard()
 
-    await wrapper.vm.initWorkspaceStructure(handle, 'TestModel', 'business')
+    await initWorkspaceStructure(handle, 'TestModel', 'business')
 
     // Verify workflow directory was created
     const traNNsformDir = tree['traNNsform'] as Record<string, unknown> | undefined
@@ -72,9 +73,9 @@ describe('SetupWizard — workflow files in initWorkspaceStructure', () => {
 
   it('workflow file content is valid markdown (starts with #)', async () => {
     const { tree, handle } = buildEmptyTree()
-    const wrapper = await mountWizard()
+    await mountWizard()
 
-    await wrapper.vm.initWorkspaceStructure(handle, 'TestModel', 'business')
+    await initWorkspaceStructure(handle, 'TestModel', 'business')
 
     const exportContent = readFakeTree(
       tree as Record<string, string | Record<string, unknown>>,
@@ -108,11 +109,11 @@ describe('SetupWizard — workflow files in initWorkspaceStructure', () => {
     }) as unknown as typeof globalThis.fetch
 
     const { tree, handle } = buildEmptyTree()
-    const wrapper = await mountWizard()
+    await mountWizard()
 
     // Should not throw
     await expect(
-      wrapper.vm.initWorkspaceStructure(handle, 'TestModel', 'business'),
+      initWorkspaceStructure(handle, 'TestModel', 'business'),
     ).resolves.toBeUndefined()
 
     // Workflow files should NOT be created (fetch failed)
