@@ -5,10 +5,10 @@
       :title="`Ver trazabilidad y fuente original: ${parsed.filePath}`"
       @click.stop="openModal"
     >
-      <Link class="w-3.5 h-3.5 text-violet-500 group-hover:scale-110 transition-transform" />
-      <span class="font-mono text-xs font-bold">{{ parsed.sourceId || 'src-ref' }}</span>
+      <IconRenderer icon="link" custom-class="w-3.5 h-3.5 text-violet-500 group-hover:scale-110 transition-transform shrink-0" />
+      <span class="font-mono text-xs font-bold">{{ parsed.sourceId }}</span>
       <span class="text-violet-300 dark:text-violet-700 font-normal">|</span>
-      <span class="truncate max-w-[200px] font-mono text-[11px] font-medium">{{ parsed.fileName }}</span>
+      <span class="truncate max-w-[220px] font-mono text-[11px] font-medium">{{ parsed.fileName }}</span>
       <span v-if="parsed.startLine" class="text-violet-600 dark:text-violet-400 font-mono text-[10px] bg-violet-200/60 dark:bg-violet-900/80 px-1.5 py-0.5 rounded-full font-bold">
         :L{{ parsed.startLine }}
       </span>
@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Link } from 'lucide-vue-next'
+import IconRenderer from './IconRenderer.vue'
 import SourceRefModal from './SourceRefModal.vue'
 import { parseSourceRef, type ParsedSourceRef } from '../../utils/sourceRef'
 

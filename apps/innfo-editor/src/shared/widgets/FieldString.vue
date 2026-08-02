@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import SourceRefPill from '../../components/editor/SourceRefPill.vue'
+import { parseSourceRef } from '../../utils/sourceRef'
+
 /**
- * Renders a string field as a text input.
+ * Renders a string field as a text input or SourceRefPill if it matches a canonical source reference.
  * Part of the unified widget registry (rebuild-format-editor-ui Phase 4).
  * Uses v-model contract: modelValue / update:modelValue.
  */
-withDefaults(
+const props = withDefaults(
   defineProps<{
     modelValue: string
     readonly?: boolean
@@ -15,10 +18,18 @@ withDefaults(
 defineEmits<{
   'update:modelValue': [value: string]
 }>()
+
+function isSourceRef(val: unknown): boolean {
+  if (typeof val !== 'string') return false
+  return parseSourceRef(val).isValid
+}
 </script>
 
 <template>
-  <span v-if="readonly" class="field-string-readonly">{{ modelValue || '—' }}</span>
+  <template v-if="readonly">
+    <SourceRefPill v-if="isSourceRef(modelValue)" :raw-value="modelValue" />
+    <span v-else class="field-string-readonly">{{ modelValue || '—' }}</span>
+  </template>
   <input
     v-else
     type="text"
