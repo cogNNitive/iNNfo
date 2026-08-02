@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { FolderOpen, X, AlertTriangle } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
@@ -126,9 +126,17 @@ async function handleSaveWorkspace(): Promise<void> {
       await writable.close()
     }
 
-    // Update rootNode's path in memory
+    // Update rootNode's path in memory and all child nodes belonging to this model
     if (rootNode.value) {
+      const oldPath = rootNode.value.source.path
       rootNode.value.source.path = targetFilename
+      if (oldPath && oldPath !== targetFilename) {
+        for (const node of Object.values(modelStore.nodes)) {
+          if (node.source && (node.source.path === oldPath || modelStore.getModelRootForNode(node.id) === rootId.value)) {
+            node.source.path = targetFilename
+          }
+        }
+      }
     }
 
     // Write all specs and templates to a local specs/ directory

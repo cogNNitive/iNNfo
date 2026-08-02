@@ -161,12 +161,14 @@ const children = computed<ModelNode[]>(() => {
   if (!thisName) return []
 
   const nodePath = node.value?.source?.path
-  return Object.values(modelStore.nodes).filter(
-    (n) =>
-      n.kind === 'element' &&
-      n.fields?.parent?.value === thisName &&
-      (!nodePath || n.source?.path === nodePath),
-  )
+  const rootId = modelStore.getModelRootForNode(props.nodeId)
+  return Object.values(modelStore.nodes).filter((n) => {
+    if (n.kind !== 'element' || n.fields?.parent?.value !== thisName) return false
+    if (rootId) {
+      return modelStore.getModelRootForNode(n.id) === rootId
+    }
+    return !nodePath || n.source?.path === nodePath
+  })
 })
 
 const hasChildren = computed(() => children.value.length > 0)

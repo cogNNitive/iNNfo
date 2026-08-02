@@ -74,6 +74,9 @@
               {{ entry.displayValue ? 'Yes' : 'No' }}
             </span>
           </template>
+          <template v-else-if="isSourceRef(entry.displayValue)">
+            <SourceRefPill :raw-value="String(entry.displayValue)" />
+          </template>
           <template v-else>
             {{ entry.displayValue }}
           </template>
@@ -99,6 +102,13 @@ import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import type { ModelNode } from '../../model/types'
 import BlockPill from './BlockPill.vue'
+import SourceRefPill from './SourceRefPill.vue'
+import { parseSourceRef } from '../../utils/sourceRef'
+
+function isSourceRef(val: unknown): boolean {
+  if (typeof val !== 'string') return false
+  return parseSourceRef(val).isValid
+}
 
 const MARKDOWN_FIELD_TYPES = new Set(['markdown_inline', 'markdown_file', 'markdown'])
 

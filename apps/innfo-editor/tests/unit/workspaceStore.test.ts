@@ -96,4 +96,57 @@ describe('workspaceStore.open()', () => {
     expect(workspaceStore.hasParsed).toBe(false)
     expect(workspaceStore.error).toBeNull()
   })
+
+  it('updates source.path of all child nodes when performing a version bump', async () => {
+    const workspaceStore = useWorkspaceStore()
+    const modelStore = useModelStore()
+
+    const rootId = 'Test_V_1-0-0_business_NN.md'
+    modelStore.setGraph(
+      {
+        [rootId]: {
+          id: rootId,
+          name: 'Test_V_1-0-0_business',
+          parentId: null,
+          childIds: ['child-1'],
+          kind: 'concept',
+          type: 'root',
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          rawContent: '---\nmodel_version: "V_1-0-0"\n---\n# Test',
+          source: { path: rootId },
+        },
+        'child-1': {
+          id: 'child-1',
+          name: 'Child 1',
+          parentId: rootId,
+          childIds: [],
+          kind: 'element',
+          type: 'WORK',
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          source: { path: rootId },
+        },
+      },
+      [rootId],
+    )
+
+    const handle = buildFakeTree('workspace', {
+      [rootId]: '---\nmodel_version: "V_1-0-0"\n---\n# Test',
+    })
+
+    workspaceStore.handle = handle
+
+    await workspaceStore.saveActiveFileWithVersionBump('patch', rootId)
+
+    const updatedRoot = modelStore.getNode(rootId)
+    const updatedChild = modelStore.getNode('child-1')
+
+    expect(updatedRoot?.source.path).toBe('Test_V_1-0-1_business_NN.md')
+    expect(updatedChild?.source.path).toBe('Test_V_1-0-1_business_NN.md')
+  })
 })

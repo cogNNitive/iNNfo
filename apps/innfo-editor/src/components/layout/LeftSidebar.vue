@@ -788,10 +788,16 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
   // Collect children per concept type ONLY for this model's nodes
   const childrenByType = new Map<string, ModelNode[]>()
   for (const node of Object.values(modelStore.nodes)) {
-    if (node.type && node.kind === 'element' && node.source?.path === modelPath) {
-      const list = childrenByType.get(node.type)
-      if (list) list.push(node)
-      else childrenByType.set(node.type, [node])
+    if (node.type && node.kind === 'element') {
+      const nodeRootId = modelStore.getModelRootForNode(node.id)
+      const belongsToModel = nodeRootId
+        ? nodeRootId === rootId
+        : !modelPath || node.source?.path === modelPath
+      if (belongsToModel) {
+        const list = childrenByType.get(node.type)
+        if (list) list.push(node)
+        else childrenByType.set(node.type, [node])
+      }
     }
   }
 

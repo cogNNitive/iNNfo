@@ -487,8 +487,14 @@ export const useWorkspaceStore = defineStore('workspace', {
         }
       }
 
-      // Update in memory path
+      // Update in memory path for root node and all child nodes belonging to this model
+      const oldPath = rootNode.source.path
       rootNode.source.path = cleanNewFilename
+      for (const node of Object.values(modelStore.nodes)) {
+        if (node.source && (node.source.path === oldPath || modelStore.getModelRootForNode(node.id) === rootId)) {
+          node.source.path = cleanNewFilename
+        }
+      }
     },
 
     /**
@@ -554,8 +560,13 @@ export const useWorkspaceStore = defineStore('workspace', {
         )
       }
 
-      // Update the root node's source path
+      // Update the root node's source path and all child nodes belonging to this model
       rootNode.source.path = cleanNewFilename
+      for (const node of Object.values(modelStore.nodes)) {
+        if (node.source && (node.source.path === oldFilename || modelStore.getModelRootForNode(node.id) === rootId)) {
+          node.source.path = cleanNewFilename
+        }
+      }
 
       // Mark root node dirty so saveActiveFile persists changes
       modelStore.markDirty(rootId)
