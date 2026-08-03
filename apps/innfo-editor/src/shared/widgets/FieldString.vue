@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import SourceRefPill from '../../components/editor/SourceRefPill.vue'
 import { parseSourceRef } from '../../utils/sourceRef'
 
@@ -6,10 +7,17 @@ import { parseSourceRef } from '../../utils/sourceRef'
  * Renders a string field as a text input or SourceRefPill if it matches a canonical source reference.
  * Part of the unified widget registry (rebuild-format-editor-ui Phase 4).
  * Uses v-model contract: modelValue / update:modelValue.
+ *
+ * The `sources` field can carry a single reference string or an array of
+ * reference strings (iNNfo's generic `[a, b]` list syntax, already parsed
+ * into a real JS array by innfo-core before it reaches this component). In
+ * readonly mode each valid entry renders its own SourceRefPill; the edit
+ * path still operates on the raw string form only (multi-value editing is
+ * out of scope for now).
  */
 const props = withDefaults(
   defineProps<{
-    modelValue: string
+    modelValue: string | string[]
     readonly?: boolean
   }>(),
   { readonly: false },
@@ -23,18 +31,30 @@ function isSourceRef(val: unknown): boolean {
   if (typeof val !== 'string') return false
   return parseSourceRef(val).isValid
 }
+
+const editableValue = computed(() =>
+  Array.isArray(props.modelValue) ? props.modelValue.join(', ') : props.modelValue,
+)
 </script>
 
 <template>
   <template v-if="readonly">
-    <SourceRefPill v-if="isSourceRef(modelValue)" :raw-value="modelValue" />
-    <span v-else class="field-string-readonly">{{ modelValue || '—' }}</span>
+    <div v-if="Array.isArray(modelValue)" class="flex flex-wrap gap-1.5 items-center">
+      <template v-for="(item, idx) in modelValue" :key="idx">
+        <SourceRefPill v-if="isSourceRef(item)" :raw-value="item" />
+        <span v-else class="field-string-readonly">{{ item }}</span>
+      </template>
+    </div>
+    <template v-else>
+      <SourceRefPill v-if="isSourceRef(modelValue)" :raw-value="modelValue" />
+      <span v-else class="field-string-readonly">{{ modelValue || '—' }}</span>
+    </template>
   </template>
   <input
     v-else
     type="text"
     class="field-string"
-    :value="modelValue"
+    :value="editableValue"
     @input="(e) => $emit('update:modelValue', (e.target as HTMLInputElement).value)"
   />
 </template>

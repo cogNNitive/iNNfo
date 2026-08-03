@@ -21,7 +21,7 @@
             <div>
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 border border-violet-300/60 dark:border-violet-700">
-                  {{ parsed.sourceId || 'src-ref' }}
+                  Fuente
                 </span>
                 <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">
                   {{ parsed.fileName }}
@@ -49,12 +49,21 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700">
               <FileText class="w-4 h-4 text-violet-500 shrink-0" />
-              <div class="min-w-0">
-                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none">Fuente RAW</span>
+              <div class="min-w-0 flex-1">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none">Archivo Original</span>
                 <span class="font-mono text-xs truncate block font-medium" :title="metadata.source_file || parsed.filePath">
-                  {{ metadata.source_file || 'raw/original' }}
+                  {{ metadata.source_file || 'N/A' }}
                 </span>
               </div>
+              <button
+                v-if="metadata.source_file"
+                type="button"
+                class="p-1 rounded-md text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/40 transition-colors cursor-pointer shrink-0"
+                title="Abrir archivo original en una pestaña nueva"
+                @click="openOriginalFile"
+              >
+                <ExternalLink class="w-3.5 h-3.5" />
+              </button>
             </div>
 
             <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700">
@@ -87,6 +96,9 @@
               </div>
             </div>
           </div>
+          <p v-if="openOriginalError" class="mt-2 text-[11px] text-red-500 dark:text-red-400">
+            No se pudo abrir el archivo original: {{ openOriginalError }}
+          </p>
         </div>
 
         <!-- File Content Display Area -->
@@ -144,7 +156,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
-import { Link, X, FileText, Hash, HardDrive, Clock, CheckCircle2 } from 'lucide-vue-next'
+import { Link, X, FileText, Hash, HardDrive, Clock, CheckCircle2, ExternalLink } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import type { ParsedSourceRef } from '../../utils/sourceRef'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
@@ -168,8 +180,8 @@ const metadata = ref<{
   sha256?: string
   size_bytes?: number
   normalized_at?: string
-  source_id?: string
 }>({})
+const openOriginalError = ref<string | null>(null)
 
 const lines = computed(() => rawContent.value.split('\n'))
 
@@ -239,7 +251,6 @@ async function loadSourceContent(): Promise<void> {
         sha256: fm.sha256,
         size_bytes: fm.size_bytes,
         normalized_at: fm.normalized_at,
-        source_id: fm.source_id || props.parsed.sourceId,
       }
     }
 
@@ -255,6 +266,34 @@ async function loadSourceContent(): Promise<void> {
     error.value = err instanceof Error ? err.message : String(err)
   } finally {
     loading.value = false
+  }
+}
+
+async function openOriginalFile(): Promise<void> {
+  if (!metadata.value.source_file) return
+  openOriginalError.value = null
+
+  try {
+    const handle = workspaceStore.handle
+    const sourceFile = metadata.value.source_file
+
+    if (handle) {
+      const parts = sourceFile.split(/[/\\]/).filter(Boolean)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let current: any = handle
+      for (let i = 0; i < parts.length - 1; i++) {
+        current = await current.getDirectoryHandle(parts[i])
+      }
+      const fileHandle = await current.getFileHandle(parts[parts.length - 1])
+      const file = await fileHandle.getFile()
+      const objectUrl = URL.createObjectURL(file)
+      window.open(objectUrl, '_blank')
+    } else {
+      // Virtual workspace / preview fallback: same resolution style as loadSourceContent's fetch fallback.
+      window.open(sourceFile, '_blank')
+    }
+  } catch (err) {
+    openOriginalError.value = err instanceof Error ? err.message : String(err)
   }
 }
 

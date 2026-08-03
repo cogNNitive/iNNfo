@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import TextWidget from '../../src/shared/widgets/TextWidget.vue'
 import WeightWidget from '../../src/shared/widgets/WeightWidget.vue'
 import CategoryWidget from '../../src/shared/widgets/CategoryWidget.vue'
 import FieldString from '../../src/shared/widgets/FieldString.vue'
 import FieldNumber from '../../src/shared/widgets/FieldNumber.vue'
 import FieldSelect from '../../src/shared/widgets/FieldSelect.vue'
+import SourceRefPill from '../../src/components/editor/SourceRefPill.vue'
 import { resolveWidgetComponent } from '../../src/shared/widgets'
 
 describe('TextWidget (fixture-exercised concept type "text")', () => {
@@ -107,6 +109,44 @@ describe('FieldString (field-type widget for string fields)', () => {
     const input = wrapper.get('input')
     await input.setValue('New text')
     expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['New text'])
+  })
+
+  it('renders one SourceRefPill per valid entry when modelValue is an array of source refs (readonly)', () => {
+    const wrapper = mount(FieldString, {
+      props: {
+        modelValue: ['sources/markdown/a.md#L1', 'sources/markdown/b/c.md#L5-L9'],
+        readonly: true,
+      },
+      global: { plugins: [createPinia()] },
+    })
+    expect(wrapper.text()).toContain('a.md')
+    expect(wrapper.text()).toContain('c.md')
+    expect(wrapper.findAllComponents(SourceRefPill).length).toBe(2)
+  })
+
+  it('falls back to plain text for array entries that are not valid source refs (readonly)', () => {
+    const wrapper = mount(FieldString, {
+      props: {
+        modelValue: ['not a ref', 'sources/markdown/valid.md'],
+        readonly: true,
+      },
+      global: { plugins: [createPinia()] },
+    })
+    expect(wrapper.text()).toContain('not a ref')
+    expect(wrapper.text()).toContain('valid.md')
+  })
+
+  it('does not crash when modelValue is an array in edit mode, and joins values for the raw text input', () => {
+    const wrapper = mount(FieldString, {
+      props: {
+        modelValue: ['sources/markdown/a.md', 'sources/markdown/b.md'],
+        readonly: false,
+      },
+    })
+    const input = wrapper.get('input')
+    expect((input.element as HTMLInputElement).value).toBe(
+      'sources/markdown/a.md, sources/markdown/b.md',
+    )
   })
 })
 
