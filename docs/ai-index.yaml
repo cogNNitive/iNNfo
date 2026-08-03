@@ -1,14 +1,14 @@
-﻿# AI Content Index Ã¢â‚¬â€ https://skills.innv0.com/innv0-web-design-guide
+# AI Content Index — https://actionn.cognnitive.com/nn-design-presets
 site:
   name: 'iNNfo'
   url: 'https://innfo.cognnitive.com/'
   description: 'The hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.'
-  generator: 'https://skills.innv0.com/innv0-web-design-guide'
+  generator: 'https://actionn.cognnitive.com/nn-design-presets'
   language: 'en'
   updated: '2026-07-11'
 pages:
   - path: '/'
-    title: 'iNNfo Ã¢â‚¬â€ the iNNfo modeling hub'
+    title: 'iNNfo Ã¢â‚¬â€  the iNNfo modeling hub'
     description: 'iNNfo is the hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.'
     last_modified: '2026-07-11'
     format: markdown

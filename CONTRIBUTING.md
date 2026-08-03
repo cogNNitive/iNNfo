@@ -1,4 +1,4 @@
-﻿# Guía de Revisión de Calidad de Código — iNNfo
+# Guía de Revisión de Calidad de Código — iNNfo
 
 > Qué mirar en este proyecto para garantizar **coherencia**, **buena estructura**,
 > **aplicación de mejores prácticas** y, en general, **buena calidad de código**.
@@ -18,7 +18,7 @@ Monorepo con **npm workspaces** (`packages/*`, `apps/*`):
 | `apps/innfo-editor` | Editor visual (UI) | Vue 3 (SFC, `<script setup>`), Vite 6, TS 5, Pinia, Vue Router, Tailwind 3, d3/dagre/mermaid, radix-vue |
 | `packages/innfo-core` | Librería de dominio: parser, modelo, drivers IO, validador | TS puro, compilado con `tsc`, sin dependencias de UI |
 | `packages/innfo-mcp` | Servidor MCP sobre `innfo-core` (stdio) | TS + `@modelcontextprotocol/sdk`, build con `tsup` |
-| `packages/format-core`, `packages/format-mcp` | âš ï¸ **Legacy** — solo `dist/`, sin `src/` ni `package.json` de origen | Copias viejas anteriores al rename a `innfo-*` |
+| `packages/format-core`, `packages/format-mcp` | ⚠️ **Legacy** — solo `dist/`, sin `src/` ni `package.json` de origen | Copias viejas anteriores al rename a `innfo-*` |
 
 **Regla de oro de arquitectura**: `innfo-core` es el dominio y **no debe** conocer a Vue,
 Pinia ni al navegador (salvo los drivers `-browser` explícitos). La UI depende del core,
@@ -31,10 +31,10 @@ nunca al revés.
 Pegá esto (o delegá a un agente de revisión) apuntando a un diff o al repo completo:
 
 ```
-Revisá este código de iNNfo usando docs/code-quality-review-guide.md.
+Revisá este código de iNNfo usando CONTRIBUTING.md.
 Evaluá los cuatro ejes: coherencia, estructura, mejores prácticas y calidad general.
 Para cada hallazgo indicá: archivo:línea, severidad (CRÍTICO/ALTO/MEDIO/BAJO),
-el POR QUÃ‰ técnico, y la corrección propuesta. No inventes problemas: si algo está
+el POR QUÉ técnico, y la corrección propuesta. No inventes problemas: si algo está
 bien, decilo. Priorizá los hallazgos por impacto real, no por cantidad.
 ```
 
@@ -73,7 +73,7 @@ Lo que hace que el código parezca escrito por **una sola cabeza**, no por diez.
 
 ### 3.2 Estructura
 
-- [ ] **Límite de capas app â†” core.** `innfo-core` no debe importar nada de `apps/`,
+- [ ] **Límite de capas app ↔ core.** `innfo-core` no debe importar nada de `apps/`,
       de Vue, de Pinia ni de `window`/DOM fuera de los drivers `-browser`. Buscá
       violaciones: `rg "from '.*apps/" packages/innfo-core/src`.
 - [ ] **Tamaño de los SFC.** Componentes > ~300 líneas son señal de que hacen demasiado.
@@ -130,24 +130,16 @@ Lo que hace que el código parezca escrito por **una sola cabeza**, no por diez.
 
 ### 3.4 Calidad general y tooling
 
-Aquí está el **mayor déficit del repo hoy**:
-
-- [ ] âš ï¸ **No hay linter.** No existe ESLint/Biome en ningún workspace. Sin esto, las
-      convenciones de arriba no se pueden **garantizar**, solo esperar. Recomendación:
+- [ ] **No hay linter.** No existe ESLint/Biome en ningún workspace. Recomendación:
       añadir **ESLint 9 (flat config) + `eslint-plugin-vue` + `typescript-eslint`**, o
       **Biome** si se prioriza velocidad. Un script `lint` en la raíz y en cada workspace.
-- [ ] âš ï¸ **No hay formateador.** Sin Prettier/Biome-format, el estilo depende de la
+- [ ] **No hay formateador.** Sin Prettier/Biome-format, el estilo depende de la
       disciplina de cada uno. Añadir formateador con config compartida en la raíz.
-- [ ] âš ï¸ **No hay CI.** No existe `.github/workflows/`. Todo (typecheck, tests, build)
-      corre solo en local y por buena voluntad. Añadir un workflow que en cada PR corra:
-      `vue-tsc --noEmit`, `vitest run`, build de packages, y (cuando exista) `lint`.
-      Los e2e de Playwright, al menos en un job nightly o manual.
+- [ ] **No hay CI.** No existe `.github/workflows/`. Añadir un workflow que en cada PR corra:
+      `vue-tsc --noEmit`, `vitest run`, build de packages, y `lint`.
 - [ ] **Typecheck real.** El build del app ya hace `vue-tsc --noEmit` (bien). Asegurá que
       los packages también typecheckean en CI, no solo compilan.
 - [ ] **Tests.** Hay buena base: ~49 specs, golden tests (`tests/golden/`) y e2e Playwright.
-      Verificá que el código nuevo llegue con tests y que los golden se actualicen
-      **conscientemente**, no a ciegas (`--update` sin leer el diff es un anti-patrón).
-      Ojo con CRLF en Windows en los golden (ya hubo fixes por `autocrlf`).
 - [ ] **`console.*` fuera de producción.** Hay ~5 llamadas `console` en el app. Definí una
       política: logger centralizado o eliminarlas antes de mergear.
 - [ ] **Dependencias sin fijar / duplicadas.** `@cognnitive/innfo-core` está referenciado como
@@ -155,28 +147,7 @@ Aquí está el **mayor déficit del repo hoy**:
 
 ---
 
-## 4. Hallazgos concretos ya detectados (para arrancar con ventaja)
-
-| # | Severidad | Hallazgo | Dónde |
-|---|---|---|---|
-| 1 | ALTO | Sin ESLint/Prettier/Biome en todo el monorepo | raíz + todos los workspaces |
-| 2 | ALTO | Sin CI (`.github/workflows` inexistente) | raíz |
-| 3 | MEDIO | Packages muertos `format-core`/`format-mcp` (solo `dist/`) | `packages/format-*` |
-| 4 | MEDIO | Tres estilos de import para el dominio (`@cognnitive/...`, `../model/*`, alias `@/` sin uso) | `apps/innfo-editor/src` |
-| 5 | MEDIO | ~57 usos de `any`/`as any` erosionan `strict: true` | ~11 archivos del app |
-| 6 | MEDIO | SFCs > 500 líneas difíciles de mantener/testear | `GraphViewer`, `MatricesGrid`, `BlockSheet` |
-| 7 | BAJO | Versionado interno inconsistente (`"*"` vs `"^0.1.0"`) | `package.json` del app y del mcp |
-
-**Lo que está BIEN y hay que preservar** (no romper al refactorizar):
-- `tsconfig` con `strict: true`.
-- `src/model/*` como shims finos de re-export (fachada correcta que preserva rutas).
-- Stores Pinia consistentes y con JSDoc explicando decisiones de diseño.
-- Separación de dominio (`innfo-core`) sin dependencias de UI.
-- Infraestructura de test completa: unit + golden + e2e.
-
----
-
-## 5. Checklist rápido antes de mergear
+## 4. Checklist rápido antes de mergear
 
 ```
 [ ] vue-tsc --noEmit pasa sin errores

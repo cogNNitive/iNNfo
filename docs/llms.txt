@@ -1,8 +1,8 @@
-﻿# iNNfo
+# iNNfo
 
 > The hub for the iNNfo ecosystem. Model, edit, and validate iNNfo knowledge models with the iNNfo Modeler, innfo-core, and an MCP server for AI agents.
 
-# Generator: https://skills.innv0.com/innv0-web-design-guide
+# Generator: https://actionn.cognnitive.com/nn-design-presets
 
 Pages:
 - [Home](https://innfo.cognnitive.com/index.md): iNNfo landing page

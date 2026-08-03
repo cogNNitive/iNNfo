@@ -1,16 +1,16 @@
-﻿# Resolver Protocol — Test Plan
+# Resolver Protocol — Test Plan
 
 > Date: 2026-07-01
 > Status: Draft
-> Purpose: Define test scenarios for the spec resolver protocol before implementing it in `@cognnitive/format-core`.
+> Purpose: Define test scenarios for the spec resolver protocol in `@cognnitive/innfo-core`.
 
 ## Protocol Summary
 
-As defined in defiNNe Â§3, when an application loads a level 3 model:
+As defined in defiNNe §3, when an application loads a level 3 model:
 
 1. Read the model's `parent.url`
 2. If not cached in `specs/`, download from URL
-3. Save to `specs/<parent.name>_FORMAT.md`
+3. Save to `specs/<parent.name>_NN.md`
 4. Read the downloaded spec's `parent.url`, repeat until level 0
 5. On subsequent loads, check `specs/` first
 6. If `parent` changes (version bump), detect mismatch and re-download
@@ -19,25 +19,25 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 
 ### T1: First Load — Full Chain Resolution
 
-**Input**: Ghostbusters_V_0-3-0_business_FORMAT.md
+**Input**: Ghostbusters_V_0-3-0_business_NN.md
 
 **Expected behavior**:
-1. Read `parent.url` → download `business_V_1-0-0_FORMAT.md`
-2. Save to `specs/business_V_1-0-0_FORMAT.md`
-3. Read its `parent.url` → download `FORMAT_V_0-2-0_FORMAT.md`
-4. Save to `specs/FORMAT_V_0-2-0_FORMAT.md`
-5. Read its `parent.url` → download `defiNNe_V_0-2-0_FORMAT.md`
-6. Save to `specs/defiNNe_V_0-2-0_FORMAT.md`
+1. Read `parent.url` → download `business_V_1-0-0_NN.md`
+2. Save to `specs/business_V_1-0-0_NN.md`
+3. Read its `parent.url` → download `NN_V_0-2-0_NN.md`
+4. Save to `specs/NN_V_0-2-0_NN.md`
+5. Read its `parent.url` → download `defiNNe_V_0-2-0_NN.md`
+6. Save to `specs/defiNNe_V_0-2-0_NN.md`
 7. No more `parent` → chain complete
 
 **Resulting structure**:
 ```
-ðŸ“ Ghostbusters_V_0-3-0_business/
-  ðŸ“„ Ghostbusters_V_0-3-0_business_FORMAT.md
-  ðŸ“ specs/
-    ðŸ“„ business_V_1-0-0_FORMAT.md
-    ðŸ“„ FORMAT_V_0-2-0_FORMAT.md
-    ðŸ“„ defiNNe_V_0-2-0_FORMAT.md
+📁 Ghostbusters_V_0-3-0_business/
+  📄 Ghostbusters_V_0-3-0_business_NN.md
+  📁 specs/
+    📄 business_V_1-0-0_NN.md
+    📄 NN_V_0-2-0_NN.md
+    📄 defiNNe_V_0-2-0_NN.md
 ```
 
 **Verification**:
@@ -50,9 +50,9 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 **Input**: Same model, same session
 
 **Expected behavior**:
-1. Check `specs/business_V_1-0-0_FORMAT.md` — exists → skip download
-2. Check `specs/FORMAT_V_0-2-0_FORMAT.md` — exists → skip download
-3. Check `specs/defiNNe_V_0-2-0_FORMAT.md` — exists → skip download
+1. Check `specs/business_V_1-0-0_NN.md` — exists → skip download
+2. Check `specs/NN_V_0-2-0_NN.md` — exists → skip download
+3. Check `specs/defiNNe_V_0-2-0_NN.md` — exists → skip download
 
 **Verification**: Zero HTTP requests made.
 
@@ -61,13 +61,13 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 **Input**: Model with `parent.name: "business_V_2-0-0"` (was `V_1-0-0`)
 
 **Expected behavior**:
-1. `specs/business_V_1-0-0_FORMAT.md` exists but `parent.name` says `V_2-0-0`
+1. `specs/business_V_1-0-0_NN.md` exists but `parent.name` says `V_2-0-0`
 2. Application detects mismatch (name differs)
-3. Download `business_V_2-0-0_FORMAT.md` from new URL
-4. Save as `specs/business_V_2-0-0_FORMAT.md` (new cache entry, old one preserved)
+3. Download `business_V_2-0-0_NN.md` from new URL
+4. Save as `specs/business_V_2-0-0_NN.md` (new cache entry, old one preserved)
 
 **Verification**:
-- Both `business_V_1-0-0_FORMAT.md` and `business_V_2-0-0_FORMAT.md` exist in `specs/`
+- Both `business_V_1-0-0_NN.md` and `business_V_2-0-0_NN.md` exist in `specs/`
 - Model now resolves through V_2-0-0 chain
 
 ### T4: Network Failure Graceful Degradation
@@ -82,14 +82,14 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 
 ### T5: Partial Cache (Some Levels Missing)
 
-**Input**: `specs/` contains `business_V_1-0-0_FORMAT.md` but not the others
+**Input**: `specs/` contains `business_V_1-0-0_NN.md` but not the others
 
 **Expected behavior**:
-1. `specs/business_V_1-0-0_FORMAT.md` found → skip download
-2. Read its `parent.url` → `specs/FORMAT_V_0-2-0_FORMAT.md` not found → download
-3. Read FORMAT's `parent.url` → `specs/defiNNe_V_0-2-0_FORMAT.md` not found → download
+1. `specs/business_V_1-0-0_NN.md` found → skip download
+2. Read its `parent.url` → `specs/NN_V_0-2-0_NN.md` not found → download
+3. Read FORMAT's `parent.url` → `specs/defiNNe_V_0-2-0_NN.md` not found → download
 
-**Verification**: Only 2 HTTP requests made (for FORMAT and defiNNe).
+**Verification**: Only 2 HTTP requests made (for NN and defiNNe).
 
 ### T6: Invalid parent.url (404)
 
@@ -112,7 +112,7 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 
 ### T8: Procedures Template Chain
 
-**Input**: A procedures model (e.g., `Onboarding_V_1-0-0_procedures_FORMAT.md`)
+**Input**: A procedures model (e.g., `Onboarding_V_1-0-0_procedures_NN.md`)
 
 **Expected behavior**: Same as T1, but chain resolves through `procedures_V_1-0-0` instead of `business_V_1-0-0`.
 
@@ -121,16 +121,16 @@ As defined in defiNNe Â§3, when an application loads a level 3 model:
 **Input**: TeamKB_V_1-0-0_kb/ (FOLDER mode model)
 
 **Expected behavior**:
-1. Read root `_FORMAT.md` → `parent` = `kb_V_1-0-0`
-2. Download `kb_V_1-0-0_FORMAT.md` → save to `specs/`
+1. Read root `_NN.md` → `parent` = `kb_V_1-0-0`
+2. Download `kb_V_1-0-0_NN.md` → save to `specs/`
 3. Continue chain until level 0
-4. FOLDER mode element `_FORMAT.md` files do NOT have `parent` — they inherit from root
+4. FOLDER mode element `_NN.md` files do NOT have `parent` — they inherit from root
 
 **Verification**:
-- Only the root `_FORMAT.md` triggers a chain resolution
-- Element `_FORMAT.md` files under `Alice/`, `MachineLearning/` etc. are NOT resolved independently
+- Only the root `_NN.md` triggers a chain resolution
+- Element `_NN.md` files under `Alice/`, `MachineLearning/` etc. are NOT resolved independently
 
-## Implementation Notes for `@cognnitive/format-core`
+## Implementation Notes for `@cognnitive/innfo-core`
 
 The resolver should provide these functions in `io/`:
 
@@ -158,7 +158,7 @@ interface SpecDocument {
 
 ### Cache Strategy
 
-- **File-based**: `specs/<name>_FORMAT.md` on disk
+- **File-based**: `specs/<name>_NN.md` on disk
 - **Freshness**: Only download if file doesn't exist or if parent name changed
 - **Concurrency**: LOCK files to prevent partial writes from concurrent loads
 - **Cleanup**: Optional command to purge `specs/` directory
