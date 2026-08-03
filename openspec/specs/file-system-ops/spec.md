@@ -6,24 +6,67 @@ Port file system operations from the predecessor apps: a `DirectoryPickerModal` 
 
 ## Requirements
 
-### R-FS-01: DirectoryPickerModal
+### R-FS-01: Directory Picker via File System Access API
 
-A new `DirectoryPickerModal.vue` component MUST provide a UI for opening a workspace directory via the File System Access API (`window.showDirectoryPicker`). The modal MUST:
+Opening a workspace directory MUST be provided via the File System Access API
+(`window.showDirectoryPicker`). The capability MUST:
 
-- Show a welcome screen with two options: "Open Local Folder" and "Load from URL"
-- "Open Local Folder" triggers `window.showDirectoryPicker()` and emits `open-handle` with the returned `FileSystemDirectoryHandle`
-- Show an error message if the File System Access API is not available (non-Chrome browsers, insecure context)
-- Provide a fallback text input for manual directory name entry (for development/testing)
-- Display a list of recently opened directories (loaded from IndexedDB via the session-persistence store)
-- Allow closing the modal via a cancel button or Escape key
+- Be reachable from the app's entry flow (`HomeView.vue`'s "Open Local Folder" action)
+  and from the workspace-creation flow (`SetupWizard.vue`'s folder picker/create steps)
+- Call `window.showDirectoryPicker()` and, on success, use the returned
+  `FileSystemDirectoryHandle` to open or create the workspace
+- Surface an error message when the File System Access API is not available (non-Chrome
+  browsers, insecure context), instead of throwing
+- Treat `AbortError` (user cancels the native picker) as a no-op, not an error
+- Use `useFileSystem.ts` (`isFileSystemAccessSupported`, `scanDirectory`,
+  `readFileContent`, `connectDirectory`) for capability detection and all post-handle
+  directory scanning, file reading, and permission verification, so this logic is not
+  duplicated per call site
 
-#### Scenario: DirectoryPickerModal opens native folder picker
+There is no dedicated `DirectoryPickerModal.vue` component. The directory-open UI is
+owned by the consuming views/components listed above, each invoking the browser API
+directly and delegating post-handle work to `useFileSystem.ts`.
+
+(Previously: required a dedicated `DirectoryPickerModal.vue` component, with a welcome
+screen offering "Open Local Folder" / "Load from URL", a manual-entry fallback input,
+and a recent-directories list loaded from IndexedDB. That component was never wired
+into any view or router and was deleted as dead code — confirmed via `rg
+"DirectoryPickerModal"` returning no matches under `src/` or `e2e/` — the
+welcome-screen/manual-entry/recent-list UI it described was never shipped through it.
+Its stale "DirectoryPickerModal guard" test block in
+`apps/innfo-editor/tests/unit/file-system-ops.test.ts`, which actually exercised
+`useFileSystem.ts` under a misleading name, was removed rather than rewritten. See
+`openspec/changes/archive/2026-08-03-refactor-editor-god-components/` for the full
+change record.)
+
+#### Scenario: HomeView opens a workspace via the native picker
 
 - GIVEN the browser supports the File System Access API
-- WHEN the user clicks "Open Local Folder"
+- WHEN the user triggers "Open Local Folder" on `HomeView.vue`
 - THEN `window.showDirectoryPicker()` is called
-- AND the modal emits `open-handle` with the handle
-- AND the modal closes
+- AND the returned handle is passed to `workspace.open(handle)`
+- AND the opened workspace is added to history
+
+#### Scenario: SetupWizard opens a folder via the native picker
+
+- GIVEN the browser supports the File System Access API
+- WHEN the user triggers the folder picker step in `SetupWizard.vue`
+- THEN `window.showDirectoryPicker()` is called
+- AND the returned handle populates `folderHandle` and `folderPath`
+
+#### Scenario: File System Access API unavailable
+
+- GIVEN the browser does not expose `window.showDirectoryPicker`
+- WHEN the user attempts to open or create a workspace folder
+- THEN an error message stating the API is unavailable is shown
+- AND no exception propagates uncaught
+
+#### Scenario: User cancels the native picker
+
+- GIVEN the browser supports the File System Access API
+- WHEN the user dismisses the native directory picker dialog
+- THEN the resulting `AbortError` is swallowed
+- AND no error message is shown
 
 ### R-FS-02: Auto-Backup on Save
 
