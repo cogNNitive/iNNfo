@@ -26,8 +26,3 @@ Model, edit, and query knowledge visually in your browser or conversationally wi
 2. **Prompt Your Agent**: Tell your agent: `I want to use https://cognnitive.com/use`
 3. **Create & Edit Models**: Ask OpenCode to create an iNNfo model or validate your documentation.
 
----
-
-## Misc Review (Removed Technical Details)
-
-The technical monorepo breakdown (`innfo-core`, `innfo-mcp`, `pipeline-gates`) has been moved to [Documentation](https://innfo.cognnitive.com/documentation/).

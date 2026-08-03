@@ -343,36 +343,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Misc Section (Temporary Technical Review) -->
-      <section class="misc-section">
-        <div class="container">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-            <span class="misc-tag">Misc Review</span>
-            <h3>Removed Technical Details (For User Review)</h3>
-          </div>
-          <p style="margin-bottom: 24px; font-size: 14px; color: var(--ink-muted);">
-            The technical monorepo breakdown and engine internals were removed from this landing page to keep it clean and user-friendly. They are preserved here for review and in full under <a href="documentation">Documentation (Docsify)</a>.
-          </p>
-
-          <details>
-            <summary>Monorepo Package Structure</summary>
-            <div class="misc-content">
-              <p><code>apps/innfo-editor</code>: Vue 3 workspace editor (iNNfo Modeler).</p>
-              <p><code>packages/innfo-core</code>: Framework-agnostic TypeScript parser, resolver, and validator.</p>
-              <p><code>packages/innfo-mcp</code>: Stdio MCP server exposing 7 semantic tools to AI agents.</p>
-              <p><code>packages/pipeline-gates</code>: Pipeline validation gates for iNNfo models.</p>
-            </div>
-          </details>
-
-          <details>
-            <summary>Browser File System Access API Details</summary>
-            <div class="misc-content">
-              <p>Uses Chromium File System Access API for local folder pickers. No local server required.</p>
-            </div>
-          </details>
-        </div>
-      </section>
     </main>
 
     <!-- Footer -->
