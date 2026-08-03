@@ -14,7 +14,7 @@ import { join, basename } from 'node:path'
 import { readFile, stat } from 'node:fs/promises'
 import { getTemplate as coreGetTemplate, getFormatSpec, parseFrontmatter } from '@cognnitive/innfo-core'
 import type { SpecDocument, SpecCache } from '@cognnitive/innfo-core'
-import { resolveParentChainNode } from './resolver-node.js'
+import { resolveParentChainNode, findCachedSpec } from './resolver-node.js'
 
 /**
  * Derive a chain-start name from a spec/template URL.
@@ -113,8 +113,9 @@ export async function getTemplateFromUrl(
     const template = coreGetTemplate(cache) ?? null
     if (template) return template
 
-    // Fallback: read the cached file directly and build a SpecDocument.
-    const content = await readFile(join(cacheDir, `${name}_NN.md`), 'utf-8').catch(() => null)
+    // Fallback: read the cached file directly (version-agnostic lookup) and build a SpecDocument.
+    const cachePath = await findCachedSpec(cacheDir, name)
+    const content = cachePath ? await readFile(cachePath, 'utf-8').catch(() => null) : null
     if (content) {
       const fm = parseFrontmatter(content)
       if (fm) {

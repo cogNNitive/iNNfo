@@ -40,16 +40,6 @@ async function getMarkdownFiles(dir: string): Promise<string[]> {
   return files
 }
 
-async function fileExists(path: string): Promise<boolean> {
-  try {
-    const { access } = await import('node:fs/promises')
-    await access(path)
-    return true
-  } catch {
-    return false
-  }
-}
-
 async function download(url: string, timeout: number): Promise<string> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeout)
@@ -62,37 +52,118 @@ async function download(url: string, timeout: number): Promise<string> {
   }
 }
 
-async function findLocalSpec(specsDir: string, reqName: string): Promise<string | null> {
-  const reqParsed = parseSpecName(reqName)
-  const localFiles = await getMarkdownFiles(specsDir)
+/** Normalized version (dots) declared by a spec document's own frontmatter, if any. */
+function versionFromFrontmatter(content: string): string | undefined {
+  const fm = parseFrontmatter(content)
+  const v = fm?.spec_version ?? fm?.specification_version
+  return v ? normalizeVersion(String(v)) : undefined
+}
 
-  for (const filePath of localFiles) {
-    const filename = basename(filePath)
-    const fileParsed = parseSpecName(filename)
+/**
+ * Canonical cache name for a downloaded document.
+ *
+ * The cache filename must reflect the document's OWN version, not the caller's
+ * request name. A request for `business` (from a `latest/` URL) must cache as
+ * `business_V_0-3-0_NN.md`, so the same spec is never duplicated under a
+ * versionless name and a versioned one. Falls back to the request name when the
+ * document declares no version.
+ */
+export function canonicalCacheName(requestName: string, content: string): string {
+  const reqParsed = parseSpecName(requestName)
+  const fmVersion = versionFromFrontmatter(content)
+  if (!fmVersion) return requestName
+  return `${reqParsed.base}_V_${fmVersion.replace(/\./g, '-')}`
+}
 
-    if (fileParsed.base === reqParsed.base) {
-      if (reqParsed.version) {
-        if (fileParsed.version && fileParsed.version === reqParsed.version) {
-          return filePath
-        }
-        if (!fileParsed.version) {
-          try {
-            const content = await readFile(filePath, 'utf-8')
-            const fm = parseFrontmatter(content)
-            const fmVer = fm?.spec_version ?? fm?.specification_version
-            if (fmVer && normalizeVersion(String(fmVer)) === reqParsed.version) {
-              return filePath
-            }
-          } catch {
-            // Read or parse error, skip to next file
-          }
-        }
-      } else {
-        return filePath
-      }
+function compareVersions(a: string, b: string): number {
+  const pa = a.split('.').map(Number)
+  const pb = b.split('.').map(Number)
+  const len = Math.max(pa.length, pb.length)
+  for (let i = 0; i < len; i++) {
+    const x = pa[i] ?? 0
+    const y = pb[i] ?? 0
+    if (x !== y) return x - y
+  }
+  return 0
+}
+
+async function matchSpecPath(
+  reqParsed: { base: string; version?: string },
+  filePath: string,
+): Promise<boolean> {
+  const fileParsed = parseSpecName(basename(filePath))
+  if (fileParsed.base !== reqParsed.base) return false
+  if (!reqParsed.version) return true
+  if (fileParsed.version) return fileParsed.version === reqParsed.version
+  // Unversioned filename: match via the document's own frontmatter version.
+  try {
+    const content = await readFile(filePath, 'utf-8')
+    const fmVersion = versionFromFrontmatter(content)
+    return fmVersion !== undefined && fmVersion === reqParsed.version
+  } catch {
+    return false
+  }
+}
+
+/** For unversioned requests, prefer the highest version among the matches. */
+async function preferHighestVersion(matches: string[]): Promise<string | null> {
+  if (matches.length === 0) return null
+  let best = matches[0]
+  let bestVersion: string | undefined
+  for (const m of matches) {
+    const nameVersion = parseSpecName(basename(m)).version
+    const v = nameVersion ?? versionFromFrontmatter(await readFile(m, 'utf-8').catch(() => ''))
+    if (!bestVersion && v) {
+      best = m
+      bestVersion = v
+      continue
+    }
+    if (bestVersion && v && compareVersions(v, bestVersion) > 0) {
+      best = m
+      bestVersion = v
     }
   }
-  return null
+  return best
+}
+
+async function findSpecInDirs(
+  dirs: string[],
+  reqName: string,
+  listFiles: (dir: string) => Promise<string[]>,
+): Promise<string | null> {
+  const reqParsed = parseSpecName(reqName)
+  const matches: string[] = []
+  for (const dir of dirs) {
+    for (const filePath of await listFiles(dir)) {
+      if (await matchSpecPath(reqParsed, filePath)) matches.push(filePath)
+    }
+  }
+  if (reqParsed.version) return matches[0] ?? null
+  return preferHighestVersion(matches)
+}
+
+async function findLocalSpec(specsDir: string, reqName: string): Promise<string | null> {
+  return findSpecInDirs([specsDir], reqName, getMarkdownFiles)
+}
+
+async function listCacheFiles(cacheDir: string): Promise<string[]> {
+  try {
+    const entries = await readdir(cacheDir, { withFileTypes: true })
+    return entries
+      .filter((e) => e.isFile() && /\.(md|markdown)$/i.test(e.name))
+      .map((e) => join(cacheDir, e.name))
+  } catch {
+    return []
+  }
+}
+
+/**
+ * Find a spec in the flat `.spec-cache` directory using the same
+ * base+version semantics as the local `specs/` lookup, so legacy
+ * unversioned cache files and canonical versioned files are interchangeable.
+ */
+export async function findCachedSpec(cacheDir: string, reqName: string): Promise<string | null> {
+  return findSpecInDirs([cacheDir], reqName, listCacheFiles)
 }
 
 export async function resolveParentChainNode(
@@ -126,19 +197,20 @@ export async function resolveParentChainNode(
       }
     }
 
-    // 2. Try cache directory
+    // 2. Try cache directory (version-agnostic lookup)
     if (content === null) {
-      const cachePath = join(cacheDir, `${currentName}_NN.md`)
-      if (await fileExists(cachePath)) {
+      const cachePath = await findCachedSpec(cacheDir, currentName)
+      if (cachePath) {
         content = await readFile(cachePath, 'utf-8')
       }
     }
 
-    // 3. Download from network and save to cache directory
+    // 3. Download from network and save to cache directory under the
+    //    document's canonical versioned name.
     if (content === null) {
       content = await download(currentUrl, timeout)
-      const cachePath = join(cacheDir, `${currentName}_NN.md`)
-      await writeFile(cachePath, content, 'utf-8')
+      const cacheName = canonicalCacheName(currentName, content)
+      await writeFile(join(cacheDir, `${cacheName}_NN.md`), content, 'utf-8')
     }
 
     const fm = parseFrontmatter(content) ?? ({} as SpecFrontmatter)
