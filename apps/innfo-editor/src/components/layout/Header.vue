@@ -72,9 +72,62 @@
 
     <!-- Right Section Actions -->
     <div class="flex items-center gap-2.5 shrink-0">
-
+      <!-- Search Toggle & Search Bar -->
+      <div v-if="hasRootNode" class="flex items-center gap-2">
+        <div
+          v-if="uiStore.isSearchOpen"
+          class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg px-2.5 py-1 border border-slate-200 dark:border-slate-700 shadow-xs"
+        >
+          <Search class="w-4 h-4 text-slate-400 shrink-0" />
+          <input
+            :value="uiStore.searchQuery"
+            @input="(e) => uiStore.setSearchQuery((e.target as HTMLInputElement).value)"
+            type="text"
+            placeholder="Buscar concepto o elemento..."
+            class="bg-transparent border-none text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none w-48 sm:w-64"
+            data-testid="header-search-input"
+          />
+          <!-- Concept Filter Dropdown -->
+          <select
+            :value="uiStore.searchConceptFilter"
+            @change="(e) => uiStore.setSearchConceptFilter((e.target as HTMLSelectElement).value)"
+            class="bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs border border-slate-200 dark:border-slate-600 rounded px-2 py-0.5 focus:outline-none shrink-0 cursor-pointer"
+            data-testid="header-concept-filter"
+          >
+            <option value="all">Todos los conceptos</option>
+            <option v-for="concept in availableConcepts" :key="concept" :value="concept">
+              {{ concept }}
+            </option>
+          </select>
+          <button
+            v-if="uiStore.searchQuery || uiStore.searchConceptFilter !== 'all'"
+            @click="uiStore.clearSearch()"
+            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
+            title="Limpiar búsqueda"
+          >
+            <X class="w-3.5 h-3.5" />
+          </button>
+          <button
+            @click="uiStore.toggleSearchOpen()"
+            class="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded cursor-pointer ml-1"
+            title="Cerrar búsqueda"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+        <button
+          v-else
+          @click="uiStore.toggleSearchOpen()"
+          class="p-1.5 rounded-md text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+          title="Buscar conceptos o elementos"
+          data-testid="header-search-button"
+        >
+          <Search class="w-4 h-4" />
+        </button>
+      </div>
 
       <!-- Use AI Button — opens unified modal -->
+
       <button
         @click="uiStore.setActiveView('ai-guide')"
         class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition-all cursor-pointer bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 ring-purple-300 dark:ring-purple-700/50 hover:bg-purple-50 dark:hover:bg-purple-950/30"
@@ -185,7 +238,10 @@ import {
   XCircle,
   Sparkles,
   Play,
+  Search,
+  X,
 } from 'lucide-vue-next'
+
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
@@ -264,6 +320,18 @@ const rootNode = computed(() => {
 })
 
 const hasRootNode = computed(() => rootNode.value !== null)
+
+const availableConcepts = computed(() => {
+  const concepts = new Set<string>()
+  for (const node of Object.values(modelStore.nodes)) {
+    const conceptName = node.conceptBinding?.name || (node.kind === 'concept' ? node.name : node.type)
+    if (conceptName && conceptName !== 'root') {
+      concepts.add(conceptName)
+    }
+  }
+  return Array.from(concepts).sort()
+})
+
 
 const filePath = computed(() => {
   const node = rootNode.value

@@ -57,24 +57,61 @@ export function extractMatrixDefs(root: ModelNode | null | undefined): any[] {
   return []
 }
 
-/** MatricesGrid strategy: both sources normalized, deduped by name, defs first. */
+/** MatricesGrid strategy: both sources normalized, deduped by name (case-insensitive), defs first. */
 export function mergeMatrixDefs(root: ModelNode | null | undefined): MatrixDef[] {
   const result: MatrixDef[] = []
   const seen = new Set<string>()
 
   for (const m of readMatrixDefsField(root)) {
-    if (!seen.has(m.name)) {
-      seen.add(m.name)
+    const key = String(m.name ?? '').toLowerCase()
+    if (!seen.has(key)) {
+      seen.add(key)
       result.push(normalizeMatrixDecl(m) as MatrixDef)
     }
   }
   for (const m of readRawMatricesField(root)) {
-    if (!seen.has(m.name)) {
-      seen.add(m.name)
+    const key = String(m.name ?? '').toLowerCase()
+    if (!seen.has(key)) {
+      seen.add(key)
       result.push(normalizeMatrixDecl(m) as MatrixDef)
     }
   }
   return result
+}
+
+/**
+ * The authoritative, merged matrix list across ALL workspace roots — the exact
+ * list `MatricesGrid.vue` renders. Any consumer that maps a matrix NAME (or a
+ * sidebar index) to the grid's index space MUST resolve against this list;
+ * otherwise selection drifts (clicking pill N shows matrix N-1 when a lower
+ * version/spec root declares matrices the sidebar hides).
+ */
+export function computeMergedMatrixDefs(rootIds: string[]): MatrixDef[] {
+  const modelStore = useModelStore()
+  const result: MatrixDef[] = []
+  const seen = new Set<string>()
+
+  for (const id of rootIds) {
+    const root = modelStore.getNode(id)
+    if (!root) continue
+    for (const d of mergeMatrixDefs(root)) {
+      const key = d.name.toLowerCase()
+      if (!seen.has(key)) {
+        seen.add(key)
+        result.push(d)
+      }
+    }
+  }
+  return result
+}
+
+/**
+ * Resolves a matrix name to its index in the authoritative merged list.
+ * Returns -1 when the matrix is not declared by any workspace root.
+ */
+export function resolveMatrixIndexByName(matrixName: string): number {
+  const modelStore = useModelStore()
+  return computeMergedMatrixDefs(modelStore.rootIds).findIndex((d) => d.name === matrixName)
 }
 
 export function useMatrixDefinitions(
@@ -85,16 +122,18 @@ export function useMatrixDefinitions(
   const strategy = opts?.strategy ?? 'fallback'
 
   const matrixDefs = computed<MatrixDef[]>(() => {
+    if (strategy === 'merge') return computeMergedMatrixDefs(rootIds.value)
     const result: MatrixDef[] = []
     const seen = new Set<string>()
 
     for (const id of rootIds.value) {
       const root = modelStore.getNode(id)
       if (!root) continue
-      const defs = strategy === 'merge' ? mergeMatrixDefs(root) : extractMatrixDefs(root)
+      const defs = extractMatrixDefs(root)
       for (const d of defs) {
-        if (!seen.has(d.name)) {
-          seen.add(d.name)
+        const key = String(d.name ?? '').toLowerCase()
+        if (!seen.has(key)) {
+          seen.add(key)
           result.push(d)
         }
       }

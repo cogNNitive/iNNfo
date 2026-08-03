@@ -429,9 +429,16 @@ const { expandedGeneration, expandedModels, expandAll, collapseAll, toggleModel 
 // Selected node for highlighting — driven by uiStore in Phase 6
 const selectedId = computed(() => uiStore.selectedNodeId)
 
-// Relations section
-const { matrixDefs, getMatrixValueCount } = useMatrixDefinitions(visibleRootIds, {
-  strategy: 'fallback',
+// Relations section.
+// IMPORTANT: the pills must list the SAME matrices (and in the SAME order) as
+// MatricesGrid renders, because uiStore.activeMatrixIndex is an index into this
+// list. Resolving against `modelStore.rootIds` + `merge` keeps the sidebar and
+// the grid on one shared index space; using the filtered `visibleRootIds` +
+// `fallback` made clicks drift to the previous matrix whenever a hidden
+// (lower-version / spec) root declared matrices.
+const rootIdsForMatrices = computed(() => modelStore.rootIds)
+const { matrixDefs, getMatrixValueCount } = useMatrixDefinitions(rootIdsForMatrices, {
+  strategy: 'merge',
 })
 
 /** The matrix currently shown in the matrices view. */

@@ -26,7 +26,7 @@ import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { getHexColor } from '../../composables/useConceptVisuals'
-import { readMatrixDefsField } from '../../composables/useMatrixDefinitions'
+import { readMatrixDefsField, resolveMatrixIndexByName } from '../../composables/useMatrixDefinitions'
 import type { MatrixDecl } from '@cognnitive/innfo-core'
 import MatrixPill from './MatrixPill.vue'
 
@@ -146,17 +146,10 @@ const chips = computed<MatrixChip[]>(() => {
 })
 
 function onSelectMatrix(matrixName: string): void {
-  const root = modelStore.getNode(props.rootNodeId)
-  if (!root) return
-
-  const defsField = readMatrixDefsField(root)
-  const rawMatrices = defsField.length > 0
-    ? defsField
-    : root.rawContent
-      ? (parseFrontmatter(root.rawContent) as any)?.matrices
-      : undefined
-  const matrices: MatrixDecl[] = Array.isArray(rawMatrices) ? (rawMatrices as MatrixDecl[]) : []
-  const idx = matrices.findIndex((m) => m.name === matrixName)
+  // Resolve against the authoritative merged list (same index space as
+  // MatricesGrid), NOT the root's raw defs/frontmatter — those lists can
+  // differ from what the grid renders, making the click show another matrix.
+  const idx = resolveMatrixIndexByName(matrixName)
   if (idx !== -1) {
     uiStore.setActiveMatrixIndex(idx)
     uiStore.setActiveView('matrices')

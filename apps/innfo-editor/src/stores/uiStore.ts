@@ -40,6 +40,9 @@ export const useUiStore = defineStore('ui', () => {
   const activeAiTab = ref<AiTab>('guide')
   const ghostFilterMode = ref<GhostFilterMode>('all')
   const explorerFilterMode = ref<ExplorerFilterMode>('all')
+  const isSearchOpen = ref(false)
+  const searchQuery = ref('')
+  const searchConceptFilter = ref('all')
 
   function setActiveModel(id: string | null): void {
     activeModelId.value = id
@@ -93,6 +96,35 @@ export const useUiStore = defineStore('ui', () => {
     activeAiTab.value = tab
   }
 
+  function toggleSearchOpen(): void {
+    isSearchOpen.value = !isSearchOpen.value
+    if (!isSearchOpen.value) {
+      searchQuery.value = ''
+      searchConceptFilter.value = 'all'
+    }
+  }
+
+  function setSearchOpen(val: boolean): void {
+    isSearchOpen.value = val
+    if (!val) {
+      searchQuery.value = ''
+      searchConceptFilter.value = 'all'
+    }
+  }
+
+  function setSearchQuery(query: string): void {
+    searchQuery.value = query
+  }
+
+  function setSearchConceptFilter(concept: string): void {
+    searchConceptFilter.value = concept
+  }
+
+  function clearSearch(): void {
+    searchQuery.value = ''
+    searchConceptFilter.value = 'all'
+  }
+
   return {
     activeModelId,
     activeConcept,
@@ -108,6 +140,9 @@ export const useUiStore = defineStore('ui', () => {
     activeAiTab,
     ghostFilterMode,
     explorerFilterMode,
+    isSearchOpen,
+    searchQuery,
+    searchConceptFilter,
     setActiveModel,
     setActiveConcept,
     setActivePerspective,
@@ -121,5 +156,11 @@ export const useUiStore = defineStore('ui', () => {
     setActiveAiTab,
     setGhostFilterMode,
     setExplorerFilterMode,
+    toggleSearchOpen,
+    setSearchOpen,
+    setSearchQuery,
+    setSearchConceptFilter,
+    clearSearch,
   }
 })
+

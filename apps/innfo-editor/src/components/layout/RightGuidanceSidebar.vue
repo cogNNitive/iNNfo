@@ -216,6 +216,7 @@ import { useUiStore } from '../../stores/uiStore'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { parseFormatFilename } from '../../utils/version'
+import { resolveMatrixIndexByName } from '../../composables/useMatrixDefinitions'
 import type { DocumentationEntry } from '../../utils/documentationParser'
 import type { MatrixDecl } from '@cognnitive/innfo-core'
 
@@ -397,13 +398,9 @@ onMounted(() => {
 
 /** Navigates to the matrices view and selects the given matrix by name. */
 function navigateToMatrix(matrixName: string): void {
-  const rootId = modelStore.rootIds[0]
-  if (!rootId) return
-  const root = modelStore.getNode(rootId)
-  if (!root?.rawContent) return
-  const fm = parseFrontmatter(root.rawContent)
-  const matrices = fm?.matrices ?? []
-  const idx = matrices.findIndex((m) => m.name === matrixName)
+  // Resolve against the authoritative merged list (the same index space
+  // MatricesGrid renders), not the raw frontmatter order of the first root.
+  const idx = resolveMatrixIndexByName(matrixName)
   if (idx >= 0) {
     uiStore.setActiveMatrixIndex(idx)
     uiStore.setActiveView('matrices')

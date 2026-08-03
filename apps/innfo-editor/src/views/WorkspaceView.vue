@@ -39,6 +39,10 @@ const AiWorkflowPanel = defineAsyncComponent(() => import('../components/editor/
 const GuidedProcedureView = defineAsyncComponent(
   () => import('../components/editor/GuidedProcedureView.vue'),
 )
+const SearchResultsView = defineAsyncComponent(
+  () => import('../components/editor/SearchResultsView.vue'),
+)
+
 
 
 const router = useRouter()
@@ -527,8 +531,14 @@ onUnmounted(() => {
       />
 
       <main class="flex-1 flex flex-col overflow-y-auto min-w-0">
+        <!-- ── Search Results View ── -->
+        <template v-if="uiStore.isSearchOpen">
+          <SearchResultsView @navigate-to-node="onNavigateToNode" />
+        </template>
+
         <!-- ── Editor View ── -->
-        <template v-if="uiStore.activeView === 'editor'">
+        <template v-else-if="uiStore.activeView === 'editor'">
+
           <div
             v-if="selectedNodeId && !uiStore.showValidationReport"
             class="flex-1 p-4 overflow-y-auto"
