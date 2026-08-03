@@ -28,7 +28,6 @@ function setCollapsed(nodeId: string, val: boolean): void {
 
 const matchingNodes = computed(() => {
   const query = uiStore.searchQuery.trim().toLowerCase()
-  const conceptFilter = uiStore.searchConceptFilter
 
   const results: ModelNode[] = []
 
@@ -39,7 +38,7 @@ const matchingNodes = computed(() => {
       node.conceptBinding?.name || (node.kind === 'concept' ? node.name : node.type) || ''
 
     // Apply Concept Filter
-    if (conceptFilter !== 'all' && conceptName.toLowerCase() !== conceptFilter.toLowerCase()) {
+    if (!uiStore.isConceptSelected(conceptName)) {
       continue
     }
 
@@ -114,10 +113,10 @@ function handleNavigate(nodeId: string) {
             para "{{ uiStore.searchQuery }}"
           </span>
           <span
-            v-if="uiStore.searchConceptFilter !== 'all'"
+            v-if="!uiStore.isAllConceptsSelected"
             class="font-mono text-xs px-2 py-0.5 rounded bg-primary/10 text-primary ml-1"
           >
-            Concepto: {{ uiStore.searchConceptFilter }}
+            Filtro: {{ uiStore.selectedConceptFilters.join(', ') }}
           </span>
         </h2>
       </div>

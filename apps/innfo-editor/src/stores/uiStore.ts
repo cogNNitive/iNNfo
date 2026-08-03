@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+
 
 export type ActiveView =
   | 'editor'
@@ -43,6 +44,55 @@ export const useUiStore = defineStore('ui', () => {
   const isSearchOpen = ref(false)
   const searchQuery = ref('')
   const searchConceptFilter = ref('all')
+  const selectedConceptFilters = ref<string[]>(['all'])
+
+  const isAllConceptsSelected = computed(() => {
+    return selectedConceptFilters.value.includes('all')
+  })
+
+
+  function isConceptSelected(conceptName: string): boolean {
+    if (isAllConceptsSelected.value) return true
+    return selectedConceptFilters.value.includes(conceptName)
+  }
+
+  function selectAllConcepts(): void {
+    selectedConceptFilters.value = ['all']
+    searchConceptFilter.value = 'all'
+  }
+
+  function deselectAllConcepts(): void {
+    selectedConceptFilters.value = []
+    searchConceptFilter.value = ''
+  }
+
+  function toggleConceptFilter(conceptName: string, availableConcepts?: string[]): void {
+    if (isAllConceptsSelected.value) {
+      selectedConceptFilters.value = [conceptName]
+      searchConceptFilter.value = conceptName
+      return
+    }
+
+    const current = [...selectedConceptFilters.value]
+    const idx = current.indexOf(conceptName)
+    if (idx >= 0) {
+      current.splice(idx, 1)
+    } else {
+      current.push(conceptName)
+    }
+
+    if (availableConcepts && availableConcepts.length > 0) {
+      const allSelected = availableConcepts.every((c) => current.includes(c))
+      if (allSelected) {
+        selectedConceptFilters.value = ['all']
+        searchConceptFilter.value = 'all'
+        return
+      }
+    }
+
+    selectedConceptFilters.value = current
+    searchConceptFilter.value = current.join(',')
+  }
 
   function setActiveModel(id: string | null): void {
     activeModelId.value = id
@@ -99,16 +149,14 @@ export const useUiStore = defineStore('ui', () => {
   function toggleSearchOpen(): void {
     isSearchOpen.value = !isSearchOpen.value
     if (!isSearchOpen.value) {
-      searchQuery.value = ''
-      searchConceptFilter.value = 'all'
+      clearSearch()
     }
   }
 
   function setSearchOpen(val: boolean): void {
     isSearchOpen.value = val
     if (!val) {
-      searchQuery.value = ''
-      searchConceptFilter.value = 'all'
+      clearSearch()
     }
   }
 
@@ -118,11 +166,17 @@ export const useUiStore = defineStore('ui', () => {
 
   function setSearchConceptFilter(concept: string): void {
     searchConceptFilter.value = concept
+    if (concept === 'all' || !concept) {
+      selectedConceptFilters.value = ['all']
+    } else {
+      selectedConceptFilters.value = [concept]
+    }
   }
 
   function clearSearch(): void {
     searchQuery.value = ''
     searchConceptFilter.value = 'all'
+    selectedConceptFilters.value = ['all']
   }
 
   return {
@@ -143,6 +197,12 @@ export const useUiStore = defineStore('ui', () => {
     isSearchOpen,
     searchQuery,
     searchConceptFilter,
+    selectedConceptFilters,
+    isAllConceptsSelected,
+    isConceptSelected,
+    selectAllConcepts,
+    deselectAllConcepts,
+    toggleConceptFilter,
     setActiveModel,
     setActiveConcept,
     setActivePerspective,
@@ -163,4 +223,5 @@ export const useUiStore = defineStore('ui', () => {
     clearSearch,
   }
 })
+
 

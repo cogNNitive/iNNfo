@@ -1,16 +1,16 @@
 <template>
   <div data-testid="matrices-grid" class="flex-1 flex flex-col min-h-0">
     <!-- Matrix Dropdown Selector Header -->
-    <div class="flex items-center justify-between gap-3 shrink-0 pb-2 mb-2">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Select Matrix:</span>
-        <div v-if="matrixDefs.length" ref="dropdownRef" class="relative">
+    <div class="flex items-center justify-between gap-3 shrink-0 pb-2 mb-2 w-full">
+      <div class="flex items-center gap-2 flex-1 min-w-0">
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">Select Matrix:</span>
+        <div v-if="matrixDefs.length" ref="dropdownRef" class="relative flex-1 min-w-0">
           <button
             @click="isOpen = !isOpen"
-            class="min-w-[200px] flex items-center justify-between gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs hover:border-slate-300 dark:hover:border-slate-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-all"
+            class="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs hover:border-slate-300 dark:hover:border-slate-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-all"
             data-testid="matrix-selector"
           >
-            <span class="truncate">{{ activeMatrix ? activeMatrix.name : 'Select Matrix' }}</span>
+            <span class="truncate min-w-0 flex-1 text-left">{{ activeMatrix ? activeMatrix.name : 'Select Matrix' }}</span>
             <ChevronDown
               class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200"
               :class="{ 'rotate-180': isOpen }"
@@ -20,7 +20,7 @@
           <!-- Dropdown Menu -->
           <div
             v-if="isOpen"
-            class="absolute left-0 z-20 mt-1 w-64 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-1 max-h-60 overflow-y-auto"
+            class="absolute left-0 right-0 z-20 mt-1 min-w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg py-1 max-h-60 overflow-y-auto"
           >
             <MatrixPill
               v-for="(matrix, idx) in matrixDefs"

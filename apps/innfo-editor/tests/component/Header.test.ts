@@ -67,4 +67,21 @@ describe('Header.vue', () => {
     const infoButton = wrapper.find('[data-testid="header-info-button"]')
     expect(infoButton.exists()).toBe(true)
   })
+
+  it('triggers 5-second blinking animation on validation icon when warnings or errors exist', () => {
+    const modelStore = useModelStore()
+    modelStore.rootIds = ['Root']
+    modelStore.nodes = {
+      Root: makeNode('Root', {}),
+    }
+    modelStore.validationReport = {
+      checks: [],
+      summary: { total: 1, passed: 0, errors: 1, warnings: 0 },
+    }
+
+    const wrapper = mount(Header)
+    const valButton = wrapper.find('button[title*="Model is incorrect"]')
+    expect(valButton.exists()).toBe(true)
+    expect(valButton.classes()).toContain('animate-header-blink')
+  })
 })

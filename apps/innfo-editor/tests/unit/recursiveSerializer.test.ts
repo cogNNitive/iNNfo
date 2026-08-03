@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { recursiveParse } from '../../src/model/recursiveParser'
 import { recursiveSerialize } from '../../src/model/recursiveSerializer'
 import { buildFakeTree, type FakeTree } from '../helpers/fakeFs'
@@ -132,4 +132,64 @@ describe('recursiveSerializer', () => {
 
     expect(idsAfter).toEqual(idsBefore)
   })
+
+  it('persists matrix cell edits from node.fields to serialized markdown and re-parses them', async () => {
+    const docWithMatrix = `---
+spec_version: "V_0-1-1"
+level: 3
+title: "Matrix Test"
+matrices:
+  - name: "Problems-Values Matrix"
+    source: "Problems"
+    target: "Values"
+---
+
+# NN index
+
+* [[Problems]]
+* [[Values]]
+
+# NN Problems
+
+## NN Problems: Problem 1
+
+# NN Values
+
+## NN Values: Value A
+`
+    const tree: FakeTree = { 'index.md': indexMd, 'Doc_NN.md': docWithMatrix }
+    const root = buildFakeTree('workspace', tree)
+    const parsed = await recursiveParse(root)
+
+    const docNode = Object.values(parsed.nodes).find((n) => n.name === 'Doc')!
+
+    // Simulate user editing a cell in MatricesGrid (writing to node.fields)
+    docNode.fields['Problems-Values Matrix||Problem 1||Value A'] = { value: 'X' }
+
+    let writtenContent: string | null = null
+    const capturingDriver: ModelDriver = {
+      readModel: async () => {
+        throw new Error('not expected')
+      },
+      writeModel: async (_uri: string, model: ParsedModel) => {
+        writtenContent = model.rawContent
+      },
+      listChildren: async () => [],
+      listAssets: async () => [],
+    }
+
+    await recursiveSerialize(parsed.nodes, new Set([docNode.id]), capturingDriver)
+    expect(writtenContent).not.toBeNull()
+    expect(writtenContent!).toContain('# NN matrices: Problems-Values Matrix')
+    expect(writtenContent!).toContain('| Problem 1 | X |')
+
+    // Re-parse the written content and verify the cell is restored into node.fields
+    const tree2: FakeTree = { 'index.md': indexMd, 'Doc_NN.md': writtenContent! }
+    const root2 = buildFakeTree('workspace', tree2)
+    const secondParse = await recursiveParse(root2)
+    const reparsedDocNode = Object.values(secondParse.nodes).find((n) => n.name === 'Doc')!
+
+    expect(reparsedDocNode.fields['Problems-Values Matrix||Problem 1||Value A']?.value).toBe('X')
+  })
 })
+

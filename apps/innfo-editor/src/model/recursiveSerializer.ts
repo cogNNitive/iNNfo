@@ -1,4 +1,4 @@
-﻿import { parseModel, serializeModel } from '@cognnitive/innfo-core'
+import { parseModel, serializeModel, type ParsedModel, type MatrixCell } from '@cognnitive/innfo-core'
 import type { ModelNode } from './types'
 import type { ModelDriver } from '@cognnitive/innfo-core'
 
@@ -6,6 +6,102 @@ export interface WriteReport {
   path: string
   fidelity: 'exact' | 'canonical'
   nodeId: string
+}
+
+/**
+ * Synchronizes matrix cell values stored in `node.fields` (key format: `matrixName||row||col`)
+ * into `parsed.matrices` so they are correctly serialized by `serializeModel`.
+ */
+export function syncMatrixFieldsToParsedModel(node: ModelNode, parsed: ParsedModel): void {
+  if (!node.fields) return
+
+  // Group matrix cell values by matrixName and track which matrices have keys in node.fields
+  const cellsByMatrix = new Map<string, Map<string, string>>()
+  const matrixKeysPresent = new Set<string>()
+
+  for (const [key, fv] of Object.entries(node.fields)) {
+    const parts = key.split('||')
+    if (parts.length === 3) {
+      const [matrixName, row, col] = parts
+      matrixKeysPresent.add(matrixName.toLowerCase())
+
+      const rawVal = (fv as any)?.value !== undefined ? (fv as any).value : fv
+      if (rawVal !== undefined && rawVal !== null && rawVal !== '' && rawVal !== false) {
+        if (!cellsByMatrix.has(matrixName)) {
+          cellsByMatrix.set(matrixName, new Map())
+        }
+        cellsByMatrix.get(matrixName)!.set(`${row}||${col}`, String(rawVal))
+      }
+    }
+  }
+
+  // If node.fields has no matrix cell keys at all, leave parsed.matrices untouched
+  if (matrixKeysPresent.size === 0) return
+
+  const fmMatrices = (parsed.frontmatter?.matrices as any[]) ?? []
+  const defsField = (node.fields['__matrix_defs'] as any)?.value ?? []
+  const allDecls = [...fmMatrices, ...defsField]
+
+  for (const matrix of parsed.matrices) {
+    const lowerName = matrix.name.toLowerCase()
+    if (!matrixKeysPresent.has(lowerName)) {
+      continue
+    }
+
+    let foundName: string | undefined
+    for (const k of cellsByMatrix.keys()) {
+      if (k.toLowerCase() === lowerName) {
+        foundName = k
+        break
+      }
+    }
+
+    const cellMap = foundName ? cellsByMatrix.get(foundName) : undefined
+    const existingKeys = new Set<string>()
+
+    // Update existing cells in-place
+    for (const cell of matrix.cells) {
+      const key = `${cell.row}||${cell.col}`
+      existingKeys.add(key)
+      if (cellMap && cellMap.has(key)) {
+        cell.value = cellMap.get(key)!
+      } else {
+        cell.value = '-'
+      }
+    }
+
+    // Add any new cells that were not in matrix.cells originally
+    if (cellMap) {
+      for (const [cellKey, val] of cellMap.entries()) {
+        if (!existingKeys.has(cellKey) && val !== '-') {
+          const [r, c] = cellKey.split('||')
+          matrix.cells.push({ row: r, col: c, value: val })
+        }
+      }
+    }
+  }
+
+  for (const [matrixName, cellMap] of cellsByMatrix.entries()) {
+    const alreadyParsed = parsed.matrices.some((m) => m.name.toLowerCase() === matrixName.toLowerCase())
+    if (!alreadyParsed && cellMap.size > 0) {
+      const decl = allDecls.find((d) => String(d.name).toLowerCase() === matrixName.toLowerCase())
+      const updatedCells: MatrixCell[] = []
+      for (const [cellKey, val] of cellMap.entries()) {
+        if (val !== '-') {
+          const [r, c] = cellKey.split('||')
+          updatedCells.push({ row: r, col: c, value: val })
+        }
+      }
+      if (updatedCells.length > 0) {
+        parsed.matrices.push({
+          name: matrixName,
+          source: decl?.source ?? '',
+          target: decl?.target ?? '',
+          cells: updatedCells,
+        })
+      }
+    }
+  }
 }
 
 /**
@@ -27,11 +123,16 @@ function serializeNodeContent(node: ModelNode): {
   if (node.rawSections && Object.keys(node.rawSections).length > 0) {
     parsed.rawSections = { ...(parsed.rawSections ?? {}), ...node.rawSections }
   }
+
+  // Apply matrix cell edits from node.fields into parsed.matrices
+  syncMatrixFieldsToParsedModel(node, parsed)
+
   const serialized = serializeModel(parsed)
   const fidelity: 'exact' | 'canonical' = serialized === node.rawContent ? 'exact' : 'canonical'
   if (fidelity === 'canonical') {
     console.warn(`[fidelity] Node "${node.id}" serialized through lossy canonical path`)
   }
+  node.rawContent = serialized
   return { content: serialized, fidelity }
 }
 
@@ -64,3 +165,4 @@ export async function recursiveSerialize(
 
   return report
 }
+

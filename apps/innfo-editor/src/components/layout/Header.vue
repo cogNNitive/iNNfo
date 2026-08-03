@@ -60,8 +60,11 @@
         <button
           v-if="hasRootNode"
           @click="openValidationReport"
-          class="inline-flex items-center gap-1 px-1.5 py-1 text-xs font-bold transition-all cursor-pointer"
-          :class="statusClass"
+          class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold transition-all cursor-pointer rounded-md border border-transparent"
+          :class="[
+            statusClass,
+            isBlinking ? 'animate-header-blink ring-2 ring-amber-400/80 dark:ring-amber-500/80 shadow-md scale-105' : ''
+          ]"
           :title="statusTitle"
         >
           <component :is="statusIcon" class="w-4 h-4" />
@@ -72,59 +75,116 @@
 
     <!-- Right Section Actions -->
     <div class="flex items-center gap-2.5 shrink-0">
-      <!-- Search Toggle & Search Bar -->
-      <div v-if="hasRootNode" class="flex items-center gap-2">
-        <div
-          v-if="uiStore.isSearchOpen"
-          class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 rounded-lg px-2.5 py-1 border border-slate-200 dark:border-slate-700 shadow-xs"
-        >
-          <Search class="w-4 h-4 text-slate-400 shrink-0" />
-          <input
-            :value="uiStore.searchQuery"
-            @input="(e) => uiStore.setSearchQuery((e.target as HTMLInputElement).value)"
-            type="text"
-            placeholder="Buscar concepto o elemento..."
-            class="bg-transparent border-none text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none w-48 sm:w-64"
-            data-testid="header-search-input"
-          />
-          <!-- Concept Filter Dropdown -->
-          <select
-            :value="uiStore.searchConceptFilter"
-            @change="(e) => uiStore.setSearchConceptFilter((e.target as HTMLSelectElement).value)"
-            class="bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs border border-slate-200 dark:border-slate-600 rounded px-2 py-0.5 focus:outline-none shrink-0 cursor-pointer"
-            data-testid="header-concept-filter"
-          >
-            <option value="all">Todos los conceptos</option>
-            <option v-for="concept in availableConcepts" :key="concept" :value="concept">
-              {{ concept }}
-            </option>
-          </select>
-          <button
-            v-if="uiStore.searchQuery || uiStore.searchConceptFilter !== 'all'"
-            @click="uiStore.clearSearch()"
-            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
-            title="Limpiar búsqueda"
-          >
-            <X class="w-3.5 h-3.5" />
-          </button>
-          <button
-            @click="uiStore.toggleSearchOpen()"
-            class="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded cursor-pointer ml-1"
-            title="Cerrar búsqueda"
-          >
-            <X class="w-4 h-4" />
-          </button>
-        </div>
+      <!-- Search Button & Floating Search Popup -->
+      <div v-if="hasRootNode" class="relative" ref="searchContainerRef">
         <button
-          v-else
           @click="uiStore.toggleSearchOpen()"
           class="p-1.5 rounded-md text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+          :class="uiStore.isSearchOpen ? 'bg-primary/10 text-primary ring-1 ring-primary/20' : ''"
           title="Buscar conceptos o elementos"
           data-testid="header-search-button"
         >
           <Search class="w-4 h-4" />
         </button>
+
+        <!-- Floating Search Popup Dropdown over Header -->
+        <div
+          v-if="uiStore.isSearchOpen"
+          class="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl rounded-xl p-3 z-[100] text-xs flex flex-col gap-2.5"
+          data-testid="header-search-popup"
+        >
+          <!-- Top Row: Input + Clear + Close -->
+          <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900/60 rounded-lg px-2.5 py-1.5 border border-slate-200/80 dark:border-slate-700/80">
+            <Search class="w-4 h-4 text-slate-400 shrink-0" />
+            <input
+              :value="uiStore.searchQuery"
+              @input="(e) => uiStore.setSearchQuery((e.target as HTMLInputElement).value)"
+              type="text"
+              placeholder="Buscar concepto, elemento o texto..."
+              class="bg-transparent border-none text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none flex-1 min-w-0"
+              data-testid="header-search-input"
+            />
+            <button
+              v-if="uiStore.searchQuery || !uiStore.isAllConceptsSelected"
+              @click="uiStore.clearSearch()"
+              class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer shrink-0"
+              title="Limpiar búsqueda"
+            >
+              <X class="w-3.5 h-3.5" />
+            </button>
+            <button
+              @click="uiStore.toggleSearchOpen()"
+              class="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded cursor-pointer shrink-0 ml-0.5"
+              title="Cerrar búsqueda"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <!-- Concept Picklist Header: Title + Select All / Deselect All -->
+          <div v-if="availableConcepts.length > 0" class="flex items-center justify-between px-0.5">
+            <span class="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              Conceptos ({{ selectedConceptCount }}/{{ availableConcepts.length }})
+            </span>
+            <div class="flex items-center gap-1.5">
+              <button
+                @click="uiStore.selectAllConcepts()"
+                class="text-2xs font-bold text-primary hover:underline px-1.5 py-0.5 rounded bg-primary/10 transition-colors cursor-pointer"
+                title="Seleccionar todos los conceptos"
+                data-testid="select-all-concepts-button"
+              >
+                Todas
+              </button>
+              <button
+                @click="uiStore.deselectAllConcepts()"
+                class="text-2xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 px-1.5 py-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                title="Deseleccionar todos los conceptos"
+                data-testid="deselect-all-concepts-button"
+              >
+                Ninguna
+              </button>
+            </div>
+          </div>
+
+          <!-- Vertical scrollable list of BlockPills -->
+          <div
+            v-if="availableConcepts.length > 0"
+            class="flex flex-col gap-1.5 max-h-60 overflow-y-auto pr-1 text-xs scrollbar-thin border-t border-slate-100 dark:border-slate-700/60 pt-2"
+            data-testid="header-concept-picklist"
+          >
+            <div
+              v-for="concept in availableConcepts"
+              :key="concept"
+              class="flex items-center gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+              @click="uiStore.toggleConceptFilter(concept, availableConcepts)"
+            >
+              <input
+                type="checkbox"
+                :checked="uiStore.isConceptSelected(concept)"
+                class="w-3.5 h-3.5 rounded text-primary border-slate-300 focus:ring-primary cursor-pointer shrink-0"
+                @click.stop="uiStore.toggleConceptFilter(concept, availableConcepts)"
+              />
+              <BlockPill
+                :name="concept"
+                :concept-type="concept"
+                kind="concept"
+                :node-id="conceptMetaMap[concept]?.nodeId"
+                :icon="conceptMetaMap[concept]?.icon"
+                :color="conceptMetaMap[concept]?.color"
+                :interactive="false"
+                :selected="uiStore.isConceptSelected(concept)"
+                class="pointer-events-none flex-1 min-w-0"
+                :class="{
+                  'opacity-40 grayscale': !uiStore.isConceptSelected(concept),
+                }"
+              />
+            </div>
+          </div>
+        </div>
       </div>
+
+
+
 
       <!-- Use AI Button — opens unified modal -->
 
@@ -226,7 +286,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import {
   Home,
   Save,
@@ -246,6 +306,10 @@ import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { useToast } from '../../shared/useToast'
+import BlockPill from '../editor/BlockPill.vue'
+import { getConceptMeta } from '../../composables/useConceptVisuals'
+
+
 import { extensionRegistry } from '../../extensions/registry'
 import {
   DEFAULT_INNFO_VERSION,
@@ -304,6 +368,29 @@ function openValidationReport(): void {
   uiStore.setShowValidationReport(true)
 }
 
+const isBlinking = ref(false)
+let blinkTimer: ReturnType<typeof setTimeout> | undefined
+
+function triggerBlink(): void {
+  if (hasErrors.value || hasWarnings.value) {
+    isBlinking.value = true
+    if (blinkTimer) clearTimeout(blinkTimer)
+    blinkTimer = setTimeout(() => {
+      isBlinking.value = false
+    }, 5000)
+  } else {
+    isBlinking.value = false
+  }
+}
+
+watch(
+  () => [workspaceStore.parseCount, modelStore.validationReport, modelStore.parseIssues.length],
+  () => {
+    triggerBlink()
+  },
+  { immediate: true }
+)
+
 const saveDropdownOpen = ref(false)
 const saveDropdownRef = ref<HTMLElement | null>(null)
 const bumpError = ref('')
@@ -331,6 +418,30 @@ const availableConcepts = computed(() => {
   }
   return Array.from(concepts).sort()
 })
+
+const conceptMetaMap = computed(() => {
+  const map: Record<string, { icon?: string; color?: string; nodeId?: string }> = {}
+  for (const concept of availableConcepts.value) {
+    const meta = getConceptMeta(concept)
+    const conceptNode = Object.values(modelStore.nodes).find(
+      (n) => n.name === concept || n.conceptBinding?.name === concept,
+    )
+    map[concept] = {
+      icon: meta.icon,
+      color: meta.color,
+      nodeId: conceptNode?.id,
+    }
+  }
+  return map
+})
+
+const selectedConceptCount = computed(() => {
+  if (uiStore.isAllConceptsSelected) return availableConcepts.value.length
+  return availableConcepts.value.filter((c) => uiStore.isConceptSelected(c)).length
+})
+
+const searchContainerRef = ref<HTMLElement | null>(null)
+
 
 
 const filePath = computed(() => {
@@ -459,6 +570,13 @@ function closeDropdown(e: MouseEvent): void {
   if (saveDropdownRef.value && !saveDropdownRef.value.contains(e.target as Node)) {
     saveDropdownOpen.value = false
   }
+  if (
+    uiStore.isSearchOpen &&
+    searchContainerRef.value &&
+    !searchContainerRef.value.contains(e.target as Node)
+  ) {
+    uiStore.setSearchOpen(false)
+  }
 }
 
 onMounted(() => {
@@ -466,8 +584,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (blinkTimer) clearTimeout(blinkTimer)
   window.removeEventListener('click', closeDropdown)
 })
+
 </script>
 
 <style scoped>
@@ -494,5 +614,20 @@ onUnmounted(() => {
 
 .animate-scale-in {
   animation: scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes header-blink {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.12);
+  }
+}
+
+.animate-header-blink {
+  animation: header-blink 0.8s ease-in-out infinite;
 }
 </style>

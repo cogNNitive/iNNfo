@@ -39,6 +39,38 @@ describe('uiStore search state and methods', () => {
     uiStore.clearSearch()
     expect(uiStore.searchQuery).toBe('')
     expect(uiStore.searchConceptFilter).toBe('all')
+    expect(uiStore.isAllConceptsSelected).toBe(true)
     expect(uiStore.isSearchOpen).toBe(true)
   })
+
+  it('supports selecting all and deselecting all concept pills', () => {
+    const uiStore = useUiStore()
+    expect(uiStore.isAllConceptsSelected).toBe(true)
+
+    uiStore.deselectAllConcepts()
+    expect(uiStore.isAllConceptsSelected).toBe(false)
+    expect(uiStore.isConceptSelected('Market')).toBe(false)
+
+    uiStore.selectAllConcepts()
+    expect(uiStore.isAllConceptsSelected).toBe(true)
+    expect(uiStore.isConceptSelected('Market')).toBe(true)
+  })
+
+  it('toggles concept selection individually', () => {
+    const uiStore = useUiStore()
+    const available = ['Market', 'Product', 'Feature']
+
+    // Clicking Market when all are selected narrows selection to Market
+    uiStore.toggleConceptFilter('Market', available)
+    expect(uiStore.isAllConceptsSelected).toBe(false)
+    expect(uiStore.isConceptSelected('Market')).toBe(true)
+    expect(uiStore.isConceptSelected('Product')).toBe(false)
+
+    // Toggle Product to include both Market and Product
+    uiStore.toggleConceptFilter('Product', available)
+    expect(uiStore.isConceptSelected('Market')).toBe(true)
+    expect(uiStore.isConceptSelected('Product')).toBe(true)
+    expect(uiStore.isConceptSelected('Feature')).toBe(false)
+  })
 })
+
