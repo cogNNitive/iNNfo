@@ -20,13 +20,28 @@ Model, edit, and query knowledge visually in your browser or conversationally wi
 
 ---
 
-## Information Lifecycle (4 Steps)
+## Information & Engine Architecture
 
 ```mermaid
-flowchart LR
-    S1["1. Ingestion\n(PDF, DOCX, Raw Notes)"] --> S2["2. Validation & Modeling\n(Structured _NN.md Models)"]
-    S2 --> S3["3. Delivery & Access\n(Web Modeler & AI Queries)"]
-    S3 --> S4["4. Artifact Generation\n(Reports, Scripts, Dashboards)"]
+flowchart TD
+    subgraph Step1["Step 1: Ingestion & Setup"]
+        U["👤 User in OpenCode"] -->|Bootstrap Prompt| Router["⚡ actioNN Skills (Router & traNNsform)"]
+        RawDocs["📄 Raw Documents (PDF, DOCX)"] --> Router
+    end
+
+    subgraph Step2["Step 2: Validation & Engine"]
+        Router --> Models["📘 Structured Models (_NN.md)"]
+        Models <--> MCP["⚙️ innfo-mcp Server + Core Engine"]
+    end
+
+    subgraph Step3["Step 3: Delivery & Access"]
+        MCP <--> Modeler["🛠️ iNNfo Modeler App (Web Editor)"]
+        MCP <--> AgentChat["💬 OpenCode Conversational Queries"]
+    end
+
+    subgraph Step4["Step 4: Artifact Generation"]
+        Modeler & AgentChat --> Artifacts["📊 Final Deliverables\n(Visual Dashboards, Exec Summaries, Scripts)"]
+    end
 ```
 
 ---

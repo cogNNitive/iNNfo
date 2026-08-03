@@ -178,7 +178,7 @@
         border: 1px solid var(--border);
         border-radius: var(--radius);
         padding: 32px;
-        max-width: 960px;
+        max-width: 900px;
         margin: 0 auto;
         overflow-x: auto;
       }
@@ -310,25 +310,44 @@
         </div>
       </section>
 
-      <!-- Information Lifecycle & Artifact Generation Diagram -->
+      <!-- Option 20 Master Diagram -->
       <section style="background: var(--canvas-inert);">
         <div class="container">
           <div class="section-title">
-            <h2>4-Step Information Lifecycle</h2>
-            <p>How iNNfo processes raw files into validated models and actionable artifacts.</p>
+            <h2>Information & Engine Architecture</h2>
+            <p>From ingestion to validation, interactive browser access, and artifact generation.</p>
           </div>
           <div class="diagram-card">
             <pre class="mermaid">
-flowchart LR
-    S1["1. Ingestion\n(PDF, DOCX, Raw Notes)"] --> S2["2. Validation & Modeling\n(Structured _NN.md Models)"]
-    S2 --> S3["3. Delivery & Access\n(Web Modeler & AI Queries)"]
-    S3 --> S4["4. Artifact Generation\n(Reports, Scripts, Dashboards)"]
+flowchart TD
+    subgraph Step1["Step 1: Ingestion & Setup"]
+        U["👤 User in OpenCode"] -->|Bootstrap Prompt| Router["⚡ actioNN Skills (Router & traNNsform)"]
+        RawDocs["📄 Raw Documents (PDF, DOCX)"] --> Router
+    end
 
-    classDef step fill:#FAFAFC,stroke:#4D0E4E,stroke-width:2px,color:#111112;
-    classDef finalStep fill:#4D0E4E,stroke:#4D0E4E,stroke-width:2px,color:#FFFFFF;
+    subgraph Step2["Step 2: Validation & Engine"]
+        Router --> Models["📘 Structured Models (_NN.md)"]
+        Models <--> MCP["⚙️ innfo-mcp Server + Core Engine"]
+    end
 
-    class S1,S2,S3 step;
-    class S4 finalStep;
+    subgraph Step3["Step 3: Delivery & Access"]
+        MCP <--> Modeler["🛠️ iNNfo Modeler App (Web Editor)"]
+        MCP <--> AgentChat["💬 OpenCode Conversational Queries"]
+    end
+
+    subgraph Step4["Step 4: Artifact Generation"]
+        Modeler & AgentChat --> Artifacts["📊 Final Deliverables\n(Visual Dashboards, Exec Summaries, Scripts)"]
+    end
+
+    classDef s1 fill:#FAFAFC,stroke:#636366,color:#111112;
+    classDef s2 fill:#F6EEF6,stroke:#4D0E4E,color:#4D0E4E;
+    classDef s3 fill:#FAFAFC,stroke:#6A1B6B,color:#111112;
+    classDef s4 fill:#4D0E4E,stroke:#4D0E4E,color:#FFFFFF;
+
+    class U,Router,RawDocs s1;
+    class Models,MCP s2;
+    class Modeler,AgentChat s3;
+    class Artifacts s4;
             </pre>
           </div>
         </div>
