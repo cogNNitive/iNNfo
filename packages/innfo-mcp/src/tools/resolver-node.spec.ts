@@ -180,4 +180,117 @@ describe('NodeSpecResolver', () => {
     const doc = result.specs.get('iNNfo_V_0-2-0')
     expect(doc?.frontmatter.title).toBe('Cached Spec')
   })
+
+  it('R-LSR-03: caches a downloaded spec under its canonical versioned name', async () => {
+    // Request comes from a `latest/` URL (unversioned basename), content declares V_0-3-0.
+    const remoteContent = [
+      '---',
+      'spec_version: "V_0-3-0"',
+      'level: 2',
+      'title: "Business Latest"',
+      '---',
+      'Canonical Content',
+    ].join('\n')
+    const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation(() =>
+      Promise.resolve({ ok: true, text: () => Promise.resolve(remoteContent) } as Response),
+    )
+
+    const result = await resolveParentChainNode(
+      rootDir,
+      'https://example.com/specs/latest/level2/business/business_NN.md',
+      'business',
+      cacheDir,
+    )
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
+    expect(result.specs.get('business')).toBeDefined()
+
+    // Cache is written with the document's own version, not the request name.
+    const cached = await readFile(join(cacheDir, 'business_V_0-3-0_NN.md'), 'utf-8')
+    expect(cached).toBe(remoteContent)
+    // No versionless duplicate is produced.
+    await expect(readFile(join(cacheDir, 'business_NN.md'), 'utf-8')).rejects.toThrow()
+  })
+
+  it('R-LSR-03: versioned request reuses the canonical cache without fetching', async () => {
+    const cachedContent = [
+      '---',
+      'spec_version: "V_0-3-0"',
+      'level: 2',
+      'title: "Business Latest"',
+      '---',
+      'Canonical Content',
+    ].join('\n')
+    await writeFile(join(cacheDir, 'business_V_0-3-0_NN.md'), cachedContent, 'utf-8')
+
+    const fetchSpy = vi.spyOn(global, 'fetch')
+
+    const result = await resolveParentChainNode(
+      rootDir,
+      'https://example.com/business_V_0-3-0_NN.md',
+      'business_V_0-3-0',
+      cacheDir,
+    )
+
+    expect(fetchSpy).not.toHaveBeenCalled()
+    expect(result.specs.get('business_V_0-3-0')?.frontmatter.title).toBe('Business Latest')
+  })
+
+  it('R-LSR-03: legacy unversioned cache file resolves for versioned and unversioned requests', async () => {
+    const legacyContent = [
+      '---',
+      'spec_version: "V_0-3-0"',
+      'level: 2',
+      'title: "Legacy Cache"',
+      '---',
+      'Legacy Content',
+    ].join('\n')
+    await writeFile(join(cacheDir, 'business_NN.md'), legacyContent, 'utf-8')
+
+    const fetchSpy = vi.spyOn(global, 'fetch')
+
+    const versioned = await resolveParentChainNode(
+      rootDir,
+      'https://example.com/business_V_0-3-0_NN.md',
+      'business_V_0-3-0',
+      cacheDir,
+    )
+    expect(fetchSpy).not.toHaveBeenCalled()
+    expect(versioned.specs.get('business_V_0-3-0')?.frontmatter.title).toBe('Legacy Cache')
+
+    fetchSpy.mockClear()
+    const unversioned = await resolveParentChainNode(
+      rootDir,
+      'https://example.com/specs/latest/level2/business/business_NN.md',
+      'business',
+      cacheDir,
+    )
+    expect(fetchSpy).not.toHaveBeenCalled()
+    expect(unversioned.specs.get('business')?.frontmatter.title).toBe('Legacy Cache')
+  })
+
+  it('R-LSR-03: unversioned local request prefers the highest matching version', async () => {
+    await writeFile(
+      join(specsDir, 'business_V_0-2-1_NN.md'),
+      ['---', 'spec_version: "V_0-2-1"', 'level: 2', 'title: "Old"', '---'].join('\n'),
+      'utf-8',
+    )
+    await writeFile(
+      join(specsDir, 'business_V_0-3-0_NN.md'),
+      ['---', 'spec_version: "V_0-3-0"', 'level: 2', 'title: "New"', '---'].join('\n'),
+      'utf-8',
+    )
+
+    const fetchSpy = vi.spyOn(global, 'fetch')
+
+    const result = await resolveParentChainNode(
+      rootDir,
+      'https://example.com/specs/latest/level2/business/business_NN.md',
+      'business',
+      cacheDir,
+    )
+
+    expect(fetchSpy).not.toHaveBeenCalled()
+    expect(result.specs.get('business')?.frontmatter.title).toBe('New')
+  })
 })

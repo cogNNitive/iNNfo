@@ -69,10 +69,14 @@ function versionFromFrontmatter(content: string): string | undefined {
  * document declares no version.
  */
 export function canonicalCacheName(requestName: string, content: string): string {
-  const reqParsed = parseSpecName(requestName)
   const fmVersion = versionFromFrontmatter(content)
   if (!fmVersion) return requestName
-  return `${reqParsed.base}_V_${fmVersion.replace(/\./g, '-')}`
+  // Preserve the request name's original case (iNNfo, defiNNe, cogNNitive...).
+  const base = requestName
+    .replace(/\.(md|markdown)$/i, '')
+    .replace(/_(NN|FORMAT)$/i, '')
+    .split(/_V_/i)[0]
+  return `${base}_V_${fmVersion.replace(/\./g, '-')}`
 }
 
 function compareVersions(a: string, b: string): number {
