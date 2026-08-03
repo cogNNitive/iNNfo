@@ -172,6 +172,18 @@
       .card h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
       .card p { font-size: 15px; color: var(--ink-muted); line-height: 1.5; }
 
+      /* Diagram Container */
+      .diagram-card {
+        background: var(--canvas-inert);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 32px;
+        max-width: 960px;
+        margin: 0 auto;
+        overflow-x: auto;
+      }
+      .mermaid { display: flex; justify-content: center; }
+
       /* App Showcase Box */
       .app-showcase {
         background: var(--canvas-inert);
@@ -224,19 +236,18 @@
         display: inline-block;
       }
 
-      /* Misc Section */
-      .misc-section { background: #FAF8FA; border-top: 2px dashed var(--brand); padding: 48px 0; }
-      .misc-tag { background: #E5D5E5; color: var(--brand); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-      details { background: var(--canvas); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 24px; margin-bottom: 16px; }
-      summary { font-weight: 700; cursor: pointer; color: var(--brand); font-size: 16px; }
-      .misc-content { margin-top: 16px; font-size: 14px; color: var(--ink-muted); }
-
       /* Footer */
       footer { padding: 48px 0; background: var(--canvas-inert); text-align: center; }
       footer p { font-size: 14px; color: var(--ink-muted); }
       footer a { color: var(--brand); text-decoration: none; }
       footer a:hover { text-decoration: underline; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        mermaid.initialize({ startOnLoad: true, theme: "neutral" });
+      });
+    </script>
   </head>
   <body>
 
@@ -299,8 +310,32 @@
         </div>
       </section>
 
-      <!-- App Showcase Section -->
+      <!-- Information Lifecycle & Artifact Generation Diagram -->
       <section style="background: var(--canvas-inert);">
+        <div class="container">
+          <div class="section-title">
+            <h2>4-Step Information Lifecycle</h2>
+            <p>How iNNfo processes raw files into validated models and actionable artifacts.</p>
+          </div>
+          <div class="diagram-card">
+            <pre class="mermaid">
+flowchart LR
+    S1["1. Ingestion\n(PDF, DOCX, Raw Notes)"] --> S2["2. Validation & Modeling\n(Structured _NN.md Models)"]
+    S2 --> S3["3. Delivery & Access\n(Web Modeler & AI Queries)"]
+    S3 --> S4["4. Artifact Generation\n(Reports, Scripts, Dashboards)"]
+
+    classDef step fill:#FAFAFC,stroke:#4D0E4E,stroke-width:2px,color:#111112;
+    classDef finalStep fill:#4D0E4E,stroke:#4D0E4E,stroke-width:2px,color:#FFFFFF;
+
+    class S1,S2,S3 step;
+    class S4 finalStep;
+            </pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- App Showcase Section -->
+      <section>
         <div class="container">
           <div class="app-showcase">
             <h3>iNNfo Modeler App</h3>
@@ -311,7 +346,7 @@
       </section>
 
       <!-- How to Use in OpenCode -->
-      <section>
+      <section style="background: var(--canvas-inert);">
         <div class="container">
           <div class="section-title">
             <h2>Use iNNfo Directly in OpenCode</h2>
