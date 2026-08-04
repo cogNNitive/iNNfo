@@ -27,7 +27,7 @@ import {
   getTemplateFromModel,
   deriveNameFromUrl,
 } from './tools/spec.js'
-import { validateModel, validateModelUrl, applyChange } from './tools/mutate.js'
+import { validateModel, validateModelUrl, applyChange, validateTemplate } from './tools/mutate.js'
 
 /** Root directory for model scanning (defaults to `models/` under CWD) */
 const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd()
@@ -171,6 +171,20 @@ const toolDefinitions: Tool[] = [
       required: ['model_url'],
     },
   },
+  {
+    name: 'validate_template',
+    description:
+      'Validate a Level 2 template against its Level 1 parent spec with frontmatter level-2 auto-detection and parent resolution failure diagnostics',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Template model id (reads from disk)' },
+        content: { type: 'string', description: 'Raw template content string (inline)' },
+        url: { type: 'string', description: 'Explicit parent spec URL override' },
+        root: { type: 'string', description: 'Optional models root directory override' },
+      },
+    },
+  },
 ]
 
 /* ── Tool call dispatcher ────────────────────────────────────── */
@@ -192,6 +206,8 @@ async function dispatchTool(name: string, args: Record<string, unknown>): Promis
         return await handleApplyChange(args)
       case 'validate_model_url':
         return await handleValidateModelUrl(args)
+      case 'validate_template':
+        return await handleValidateTemplate(args)
       default:
         return errorResult(`Unknown tool: ${name}`)
     }
@@ -270,6 +286,16 @@ async function handleApplyChange(args: Record<string, unknown>): Promise<CallToo
     return errorResult('Missing required arguments: id, op, args')
   }
   const result = await applyChange(ROOT_DIR, id, op, opArgs)
+  return textResult(JSON.stringify(result, null, 2))
+}
+
+async function handleValidateTemplate(args: Record<string, unknown>): Promise<CallToolResult> {
+  const id = args.id as string | undefined
+  const content = args.content as string | undefined
+  const url = args.url as string | undefined
+  if (!id && !content) return errorResult('Provide either id or content')
+  const root = (args.root as string) || ROOT_DIR
+  const result = await validateTemplate(root, id, content, url)
   return textResult(JSON.stringify(result, null, 2))
 }
 

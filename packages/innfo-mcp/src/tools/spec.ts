@@ -1,4 +1,4 @@
-﻿/**
+/**
  * get_spec and get_template tools.
  *
  * The MCP is publisher-agnostic: it never stores spec/template URLs or
@@ -26,12 +26,22 @@ export function deriveNameFromUrl(url: string): string {
     .replace(/_NN$/i, '')
 }
 
+import { normalizeId } from './list-read.js'
+
+export { normalizeId }
+
 /**
  * Locate a model file on disk by id.
  * Tries the id verbatim, then the `_NN.md` suffix.
  */
 export async function findModelFile(rootDir: string, id: string): Promise<string | null> {
-  const candidates = [join(rootDir, id), join(rootDir, `${id}_NN.md`)]
+  const cleanId = normalizeId(id)
+  const candidates = [
+    join(rootDir, `${cleanId}_NN.md`),
+    join(rootDir, `${cleanId}.md`),
+    join(rootDir, cleanId),
+    join(rootDir, id),
+  ]
   for (const fp of candidates) {
     try {
       await stat(fp)

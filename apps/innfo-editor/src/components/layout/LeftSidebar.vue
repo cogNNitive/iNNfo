@@ -105,6 +105,14 @@
           >
             <ChevronsUp class="w-3.5 h-3.5" />
           </button>
+          <button
+            @click.stop="navigateToConfig"
+            class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-400 hover:text-primary transition-colors cursor-pointer"
+            title="Metamatrix Config"
+            data-testid="metamatrix-config-button"
+          >
+            <Settings class="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
@@ -155,6 +163,39 @@
             >
               No nodes loaded
             </p>
+
+            <!-- Relations / Matrices intrinsic to this Model -->
+            <div
+              v-if="getMatricesForModel(rootId).length > 0"
+              class="pt-2 mt-2 border-t border-slate-200/60 dark:border-slate-700/60 space-y-1"
+            >
+              <div
+                class="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 select-none"
+              >
+                <Table2 class="w-3 h-3 text-slate-400 shrink-0" />
+                <span>Relations</span>
+              </div>
+              <div class="space-y-0.5 pl-1">
+                <MatrixPill
+                  v-for="matrix in getMatricesForModel(rootId)"
+                  :key="matrix.name"
+                  :name="matrix.name"
+                  :source="matrix.source"
+                  :target="matrix.target"
+                  :label="matrix.label"
+                  :value-count="getMatrixValueCount(matrix.name)"
+                  :selected="
+                    uiStore.activeMatrixIndex === resolveMatrixIndexByName(matrix.name) &&
+                    uiStore.activeView === 'matrices'
+                  "
+                  :full-width="true"
+                  interactive
+                  show-source-target
+                  as="button"
+                  @click="selectModelMatrix(rootId, matrix.name)"
+                />
+              </div>
+            </div>
           </div>
         </div>
         <p
@@ -163,107 +204,6 @@
         >
           No models loaded
         </p>
-      </div>
-
-      <!-- Relations Section -->
-      <div class="space-y-1">
-        <div class="flex items-center justify-between px-2 py-1">
-          <div class="flex items-center gap-1.5">
-            <Table2 class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-            <h2
-              class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
-            >
-              Relations
-            </h2>
-          </div>
-          <button
-            @click.stop="navigateToConfig"
-            class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-primary transition-colors cursor-pointer"
-            title="Metamatrix Config"
-          >
-            <Settings class="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div class="space-y-0.5 pl-1">
-          <MatrixPill
-            v-for="(matrix, idx) in matrixDefs"
-            :key="matrix.name"
-            :name="matrix.name"
-            :source="matrix.source"
-            :target="matrix.target"
-            :label="matrix.label"
-            :value-count="getMatrixValueCount(matrix.name)"
-            :selected="uiStore.activeMatrixIndex === idx && uiStore.activeView === 'matrices'"
-            :full-width="true"
-            interactive
-            show-source-target
-            as="button"
-            @click="selectMatrix(idx)"
-          />
-          <p
-            v-if="matrixDefs.length === 0"
-            class="px-3 py-2 text-xs text-slate-400 dark:text-slate-500 italic"
-          >
-            No relations defined.
-          </p>
-        </div>
-
-        <!-- Selected matrix details -->
-        <div
-          v-if="selectedMatrix"
-          class="mt-3 px-2.5 py-2.5 rounded-md bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-2"
-        >
-          <div class="flex items-center gap-1.5 flex-wrap text-xs">
-            <span
-              class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider"
-              >Matrix:</span
-            >
-            <BlockPill
-              kind="concept"
-              :concept-type="selectedMatrix.source"
-              :name="selectedMatrix.source"
-              :icon="getConceptMeta(selectedMatrix.source).icon"
-              :color="getConceptMeta(selectedMatrix.source).color"
-              hide-empty
-            />
-            <span class="text-slate-400 dark:text-slate-500">&rarr;</span>
-            <BlockPill
-              kind="concept"
-              :concept-type="selectedMatrix.target"
-              :name="selectedMatrix.target"
-              :icon="getConceptMeta(selectedMatrix.target).icon"
-              :color="getConceptMeta(selectedMatrix.target).color"
-              hide-empty
-            />
-            <span
-              class="inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400"
-            >
-              {{ selectedMatrix.widgetType }}
-            </span>
-          </div>
-
-          <div class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed" data-testid="selected-matrix-description">
-            {{ selectedMatrix.description }}
-          </div>
-
-          <div
-            v-if="Object.keys(selectedMatrixDistribution).length > 0"
-            class="flex items-center gap-1.5 flex-wrap text-xs"
-          >
-            <span
-              class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0"
-              >Values:</span
-            >
-            <span
-              v-for="(count, value) in selectedMatrixDistribution"
-              :key="value"
-              class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-bold border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-            >
-              {{ value === '-' ? '\u2014' : value }}: {{ count }}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   </aside>
@@ -290,7 +230,12 @@ import { useModelStore } from '../../stores/modelStore'
 import { useMetamodelStore } from '../../stores/metamodelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { useResizablePanel } from '../../composables/useResizablePanel'
-import { useMatrixDefinitions } from '../../composables/useMatrixDefinitions'
+import {
+  useMatrixDefinitions,
+  mergeMatrixDefs,
+  resolveMatrixIndexByName,
+  type MatrixDef,
+} from '../../composables/useMatrixDefinitions'
 import { getConceptMeta } from '../../composables/useConceptVisuals'
 import { useTreeExpansion } from '../../composables/useTreeExpansion'
 import ConceptTreeNode from './ConceptTreeNode.vue'
@@ -439,6 +384,29 @@ const selectedId = computed(() => uiStore.selectedNodeId)
 const rootIdsForMatrices = computed(() => modelStore.rootIds)
 const { matrixDefs, getMatrixValueCount } = useMatrixDefinitions(rootIdsForMatrices, {
   strategy: 'merge',
+})
+
+/** Returns matrix definitions belonging to a specific model node. */
+function getMatricesForModel(rootId: string): MatrixDef[] {
+  const rootNode = modelStore.getNode(rootId)
+  if (!rootNode) return []
+  return mergeMatrixDefs(rootNode)
+}
+
+/** Handles selection of a matrix pill belonging to a specific model. */
+function selectModelMatrix(rootId: string, matrixName: string): void {
+  if (rootId) uiStore.setActiveModel(rootId)
+  const idx = resolveMatrixIndexByName(matrixName)
+  if (idx !== -1) {
+    selectMatrix(idx)
+  }
+}
+
+/** Matrix definitions for the active model (or all workspace matrices as fallback). */
+const activeModelMatrices = computed(() => {
+  if (!activeModelId.value) return matrixDefs.value
+  const modelDefs = getMatricesForModel(activeModelId.value)
+  return modelDefs.length > 0 ? modelDefs : matrixDefs.value
 })
 
 /** The matrix currently shown in the matrices view. */

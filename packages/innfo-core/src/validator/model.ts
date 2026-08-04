@@ -16,11 +16,10 @@ export function validateModel(
 
   if (!fm.level) {
     errors.push({ path: 'frontmatter.level', message: 'Missing level', severity: 'error' })
-  }
-  if (fm.level !== 3) {
+  } else if (fm.level !== 3 && fm.level !== 2) {
     errors.push({
       path: 'frontmatter.level',
-      message: `Expected level 3 for model, got ${fm.level}`,
+      message: `Expected level 2 or 3 for model/template validation, got ${fm.level}`,
       severity: 'error',
     })
   }
@@ -31,12 +30,23 @@ export function validateModel(
       severity: 'error',
     })
   }
-  if (!fm.model_version) {
+  if (fm.level === 3 && !fm.model_version) {
     errors.push({
       path: 'frontmatter.model_version',
       message: 'Missing model_version',
       severity: 'error',
     })
+  }
+
+  // D4: Slug/name collisions are validation ERRORs per N1 specification (Identity & Naming)
+  if (model.slugCollisions && model.slugCollisions.length > 0) {
+    for (const col of model.slugCollisions) {
+      errors.push({
+        path: `elements.${col.concept}`,
+        message: `Slug collision: "${col.slug}" is shared by elements: ${col.elements.join(', ')}. Element names must be unique across the whole model`,
+        severity: 'error',
+      })
+    }
   }
 
   // R-MM-02: Reject reserved concept names in template
@@ -62,12 +72,12 @@ export function validateModel(
   }
 
   if (!template) {
-    warnings.push({
+    errors.push({
       path: 'parent',
-      message: 'Template not resolved — skipping template validation',
-      severity: 'warning',
+      message: '[PARENT_RESOLUTION_FAILED] Parent specification template could not be resolved or loaded',
+      severity: 'error',
     })
-    return { valid: errors.length === 0, errors, warnings }
+    return { valid: false, errors, warnings }
   }
 
   const templateFm = template.frontmatter
@@ -108,7 +118,7 @@ export function validateModel(
     if (!section) {
       warnings.push({
         path: `parent.concepts.${conceptName}`,
-        message: `Concept '${conceptName}' is undocumented in parent template`,
+        message: `Concept '${conceptName}' lacks optional guidance section '### ${conceptName}' in parent template`,
         severity: 'warning',
       })
     } else {
@@ -116,7 +126,7 @@ export function validateModel(
       if (missing.length > 0) {
         warnings.push({
           path: `parent.concepts.${conceptName}`,
-          message: `Concept '${conceptName}' has incomplete documentation in parent template`,
+          message: `Concept '${conceptName}' has incomplete documentation in parent template (missing: ${missing.join(', ')})`,
           severity: 'warning',
         })
       }

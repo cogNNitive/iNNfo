@@ -4,24 +4,26 @@ import { normalizeSource, WIKILINK_RE } from './markdown'
 export function parseIndexBlock(content: string): TaxonomyEdge[] {
   const edges: TaxonomyEdge[] = []
   const lines = normalizeSource(content).split('\n')
-  const stack: Array<{ name: string; depth: number }> = []
+  const stack: Array<{ name: string; indent: number }> = []
 
   for (const line of lines) {
     const trimmed = line.trim()
     if (!trimmed.startsWith('*') && !trimmed.startsWith('-')) continue
-    const depth = line.search(/\S/) / 2
+    const indent = line.search(/\S/)
 
-    // Index items use [[wikilinks]].
-    const wikiMatch = trimmed.match(WIKILINK_RE)
+    // Index items use [[wikilinks]]
+    const wikiMatch = /\[\[([^\]]+)\]\]/.exec(trimmed)
     if (!wikiMatch) continue
-    const name = wikiMatch[0].slice(2, -2)
+    const name = wikiMatch[1].trim()
 
-    while (stack.length > 0 && stack[stack.length - 1].depth >= depth) stack.pop()
+    while (stack.length > 0 && stack[stack.length - 1].indent >= indent) {
+      stack.pop()
+    }
 
-    if (stack.length > 0 && depth > (stack[stack.length - 1].depth ?? -1)) {
+    if (stack.length > 0 && indent > stack[stack.length - 1].indent) {
       edges.push({ parent: stack[stack.length - 1].name, child: name })
     }
-    stack.push({ name, depth })
+    stack.push({ name, indent })
   }
   return edges
 }

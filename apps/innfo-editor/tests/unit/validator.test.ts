@@ -25,7 +25,7 @@ type: "BusinessModel"
 const validModelNoType = `---
 spec_version: "V_0-2-0"
 spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/v0.1.1/specs/iNNfo_V_0-2-0_NN.md"
-level: 3
+level: 2
 parent_spec:
   name: "business_V_0-1-1"
   url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/v0.1.1/specs/business_V_0-1-1_FORMAT.md"
@@ -63,11 +63,13 @@ describe('validateFormatContent', () => {
     expect(ids).toContain('body-concept-sections')
     expect(ids).toContain('body-element-markers')
     expect(ids).toContain('conv-file-naming')
-    expect(ids).toContain('conv-type-field')
+    // conv-type-field applies to level 2 files
+    const level2Report = validateFormatContent(validModelNoType, 'template_NN.md')
+    expect(level2Report.checks.map((c) => c.id)).toContain('conv-type-field')
     // conv-wikilinks only fires when index has [[wikilinks]], which our test model doesn't use
     // body-numbered-list-markers fires when numbered lists are used
     // body-invalid-bullet-chars fires when invalid bullet chars are used
-    expect(ids.length).toBeGreaterThanOrEqual(13)
+    expect(ids.length).toBeGreaterThanOrEqual(12)
   })
 
   it('passes frontmatter checks for valid model', () => {

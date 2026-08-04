@@ -57,7 +57,7 @@ export function useNodeMediaScan() {
     scanError.value = ''
 
     try {
-      const assets = await scanNodeMedia(handle, slug)
+      const { assets } = await scanNodeMedia(handle, slug)
       scanCache.set(nodeId, assets)
       scannedAssets.value = assets
     } catch (err) {

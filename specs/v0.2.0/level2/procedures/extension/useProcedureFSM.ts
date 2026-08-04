@@ -142,7 +142,7 @@ export function useProcedureFSM(nodesRef: Ref<Record<string, ModelNodeLike>>) {
       }
     }
 
-    let startStep = rawSteps.find((s) => !targetedNexts.has(s.name)) || rawSteps[0]
+    const startStep = rawSteps.find((s) => !targetedNexts.has(s.name)) || rawSteps[0]
 
     const sorted: StepItem[] = []
     const visited = new Set<string>()

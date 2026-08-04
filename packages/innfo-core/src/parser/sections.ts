@@ -93,7 +93,7 @@ export function parseConceptSection(conceptName: string, content: string): Parse
   const lines = content.split('\n')
   let current: ElementNode | null = null
   let descriptionLines: string[] = []
-  let leadingLines: string[] = []
+  const leadingLines: string[] = []
   let seenElement = false
 
   const startElement = (name: string): ElementNode => {

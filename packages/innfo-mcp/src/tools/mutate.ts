@@ -1,4 +1,4 @@
-﻿/**
+/**
  * validate_model and apply_change tools.
  *
  * validate_model runs the innfo-core validator against the resolved template.
@@ -8,9 +8,9 @@
 
 import { readFile, writeFile } from 'node:fs/promises'
 import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation } from '@cognnitive/innfo-core'
-import type { SpecDocument, ValidationError } from '@cognnitive/innfo-core'
+import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/innfo-core'
 
-import { getTemplateFromUrl, findModelFile, deriveNameFromUrl } from './spec.js'
+import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec } from './spec.js'
 
 /* ── Types ───────────────────────────────────────────────────── */
 
@@ -92,6 +92,11 @@ export async function validateModel(
     }
   }
 
+  // D1: Auto-detect Level 2 templates and delegate to validateTemplate
+  if (model.frontmatter.level === 2) {
+    return validateTemplate(rootDir, id, content, templateUrl)
+  }
+
   // Resolve the template only from the model's parent_spec.url, or from an
   // explicit templateUrl supplied by the caller. Never from a constant.
   let template = await resolveTemplateForModel(rootDir, model)
@@ -109,7 +114,21 @@ export async function validateModel(
     })
   }
 
-  return { valid: result.valid, errors: result.errors, warnings }
+  // D8: Decorate errors and warnings with originating file path
+  const modelPath = id ? (await findModelFile(rootDir, id)) ?? id : 'inline'
+  const templatePath = template?.name ? `${template.name}_NN.md` : 'parent_spec'
+
+  const errors = result.errors.map((e) => ({
+    ...e,
+    filePath: e.path.startsWith('parent') ? templatePath : modelPath,
+  }))
+
+  const warningsWithFile = warnings.map((w) => ({
+    ...w,
+    filePath: w.path.startsWith('parent') ? templatePath : modelPath,
+  }))
+
+  return { valid: result.valid, errors, warnings: warningsWithFile }
 }
 
 /* ── apply_change ────────────────────────────────────────────── */
@@ -206,6 +225,119 @@ export async function validateModelUrl(
   }
 
   return validateModel(rootDir, undefined, content, templateUrl)
+}
+
+/* ── validate_template ──────────────────────────────────────── */
+
+/**
+ * Validate a Level 2 template against its Level 1 parent spec.
+ * Auto-detects frontmatter `level === 2` and resolves parent spec from parent_spec.url or explicit url.
+ * Emits [PARENT_RESOLUTION_FAILED] diagnostic error if the parent spec cannot be resolved.
+ *
+ * @param rootDir Workspace root directory
+ * @param id Template model id on disk
+ * @param content Raw template content string
+ * @param url Explicit parent spec URL override
+ */
+export async function validateTemplate(
+  rootDir: string,
+  id?: string,
+  content?: string,
+  url?: string,
+): Promise<{
+  valid: boolean
+  errors: ValidationError[]
+  warnings: ValidationError[]
+}> {
+  let templateContent: string
+  if (content) {
+    templateContent = content
+  } else if (id) {
+    const filePath = await findModelFile(rootDir, id)
+    if (!filePath) {
+      return {
+        valid: false,
+        errors: [{ path: '', message: `Template file not found: ${id}`, severity: 'error' }],
+        warnings: [],
+      }
+    }
+    templateContent = await readFile(filePath, 'utf-8').catch(() => '')
+    if (!templateContent) {
+      return {
+        valid: false,
+        errors: [{ path: '', message: `Failed to read template file: ${id}`, severity: 'error' }],
+        warnings: [],
+      }
+    }
+  } else {
+    return {
+      valid: false,
+      errors: [{ path: '', message: 'Provide either id or content', severity: 'error' }],
+      warnings: [],
+    }
+  }
+
+  const parsed = parseModel(templateContent)
+  const fm = parsed.frontmatter
+
+  const parentUrl = url ?? fm?.parent_spec?.url
+  if (!parentUrl) {
+    return {
+      valid: false,
+      errors: [
+        {
+          path: 'parent_spec',
+          message: '[PARENT_RESOLUTION_FAILED] Parent spec URL missing for level-2 template',
+          severity: 'error',
+        },
+      ],
+      warnings: [],
+    }
+  }
+
+  const { spec: parentSpec } = await getSpec(rootDir, { url: parentUrl })
+  if (!parentSpec) {
+    return {
+      valid: false,
+      errors: [
+        {
+          path: 'parent_spec',
+          message: `[PARENT_RESOLUTION_FAILED] Parent spec '${parentUrl}' could not be resolved`,
+          severity: 'error',
+        },
+      ],
+      warnings: [],
+    }
+  }
+
+  const errors: ValidationError[] = []
+  const warnings: ValidationError[] = []
+
+  if (fm?.level !== undefined && fm.level !== 2) {
+    errors.push({
+      path: 'frontmatter.level',
+      message: `Expected level 2 for template, got ${fm.level}`,
+      severity: 'error',
+    })
+  }
+
+  if (!fm?.title) {
+    errors.push({
+      path: 'frontmatter.title',
+      message: 'Missing title in template frontmatter',
+      severity: 'error',
+    })
+  }
+
+  const templatePath = id ? (await findModelFile(rootDir, id)) ?? id : 'inline'
+  const decoratedErrors = errors.map((e) => ({ ...e, filePath: templatePath }))
+  const decoratedWarnings = warnings.map((w) => ({ ...w, filePath: templatePath }))
+
+  return {
+    valid: errors.length === 0,
+    errors: decoratedErrors,
+    warnings: decoratedWarnings,
+  }
 }
 
 /* ── All mutation operations delegated to innfo-core engine ─── */

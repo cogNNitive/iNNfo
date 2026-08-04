@@ -231,23 +231,27 @@ export function validateFormatContent(
   const headingMarkers = [...body.matchAll(headingMarkerRe)]
   const totalMarkers = headingMarkers.length
 
+  const PROSE_SECTION_TITLES = new Set(['objectives', 'philosophy', 'guidance', 'overview', 'summary', 'introduction', 'documentation', 'rules', 'conventions', 'notes'])
   const suspectLines: string[] = []
   const lines = body.split('\n')
-  let inIndexSection = false
+  let currentSectionType: 'index' | 'concept' | 'prose' = 'prose'
   for (const line of lines) {
-    if (/^#\s+NN\s+index\s*$/im.test(line.trim())) {
-      inIndexSection = true
+    const trimmed = line.trim()
+    if (/^#\s+/i.test(trimmed)) {
+      const headerTitle = trimmed.replace(/^#+\s*(NN\s+)?/i, '').trim().toLowerCase()
+      if (headerTitle === 'index') {
+        currentSectionType = 'index'
+      } else if (PROSE_SECTION_TITLES.has(headerTitle) || !trimmed.startsWith('# NN ')) {
+        currentSectionType = 'prose'
+      } else {
+        currentSectionType = 'concept'
+      }
       continue
     }
-    if (inIndexSection) {
-      if (/^#\s/.test(line.trim())) inIndexSection = false
-      else continue
-    }
-    const trimmed = line.trim()
-    // A bullet inside a concept section that is not an index item looks like
-    // a misplaced element — elements MUST be `## NN Concept: Name` headings.
-    if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
-      suspectLines.push(trimmed.substring(0, 60))
+    if (currentSectionType === 'concept') {
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+        suspectLines.push(trimmed.substring(0, 60))
+      }
     }
   }
 
@@ -282,8 +286,8 @@ export function validateFormatContent(
     message: namingOk ? undefined : `"${fileName}" does not end with _NN.md`,
   })
 
-  // 12. Type field for distributed _NN.md files (§5.1.2)
-  if (fileName.endsWith('_NN.md')) {
+  // 12. Type field for distributed _NN.md files (§5.1.2) - applies to N2 templates / OKF packages, excluded for canonical N3 models
+  if (fileName.endsWith('_NN.md') && fm.level !== 3) {
     const typeOk = typeof fm.type === 'string' && fm.type.length > 0
     checks.push({
       id: 'conv-type-field',

@@ -1728,7 +1728,7 @@ describe('FOLDER mode rejection (FR-007)', () => {
 
     const productWarning = result.warnings.find((w) => w.message.includes('Product'))
     expect(productWarning).toBeDefined()
-    expect(productWarning!.message).toContain('is undocumented in parent template')
+    expect(productWarning!.message).toContain('lacks optional guidance section')
   })
 })
 

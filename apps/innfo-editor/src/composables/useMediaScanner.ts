@@ -1,4 +1,4 @@
-﻿/**
+/**
  * useMediaScanner — scans element folders for media files (images, video, audio,
  * markdown, pdf, etc.) and returns discovered assets for display in BlockPill,
  * NodeMedia, and BlockSheet.
@@ -18,10 +18,26 @@ export interface ScannedAsset {
   type: 'image' | 'video' | 'audio' | 'markdown' | 'pdf' | 'file'
 }
 
+export interface ScanResult {
+  assets: ScannedAsset[]
+  warnings: string[]
+}
+
 const VIDEO_EXTS = new Set(['mp4', 'webm', 'mov', 'avi', 'mkv', 'flv'])
 const AUDIO_EXTS = new Set(['mp3', 'wav', 'm4a', 'ogg', 'flac', 'aac'])
-const MARKDOWN_EXTS = new Set(['md', 'txt'])
+const MARKDOWN_EXTS = new Set(['md'])
 const PDF_EXTS = new Set(['pdf'])
+const DOC_EXTS = new Set(['xls', 'xlsx', 'docx'])
+
+function isSupportedExtension(cleanExt: string): boolean {
+  if (isImageExtension(cleanExt)) return true
+  if (VIDEO_EXTS.has(cleanExt)) return true
+  if (AUDIO_EXTS.has(cleanExt)) return true
+  if (MARKDOWN_EXTS.has(cleanExt)) return true
+  if (PDF_EXTS.has(cleanExt)) return true
+  if (DOC_EXTS.has(cleanExt)) return true
+  return false
+}
 
 function classifyFile(ext: string): ScannedAsset['type'] {
   const clean = ext.toLowerCase().replace(/^\./, '')
@@ -36,8 +52,9 @@ function classifyFile(ext: string): ScannedAsset['type'] {
 /**
  * Scans a directory for media files and classifies them.
  */
-async function scanDir(dir: DirectoryHandleLike): Promise<ScannedAsset[]> {
-  const results: ScannedAsset[] = []
+async function scanDir(dir: DirectoryHandleLike): Promise<ScanResult> {
+  const assets: ScannedAsset[] = []
+  const warnings: string[] = []
 
   for await (const [name, entry] of dir.entries()) {
     if (entry.kind !== 'file') continue
@@ -45,9 +62,16 @@ async function scanDir(dir: DirectoryHandleLike): Promise<ScannedAsset[]> {
     if (name.startsWith('.') || name.endsWith('_NN.md') || name === 'index.md') continue
 
     const ext = name.split('.').pop() ?? ''
+    const cleanExt = ext.toLowerCase()
+
+    if (!isSupportedExtension(cleanExt)) {
+      warnings.push(`Omitted unsupported file "${name}" (.${cleanExt})`)
+      continue
+    }
+
     const type = classifyFile(ext)
 
-    results.push({
+    assets.push({
       filename: name,
       relativePath: name,
       type,
@@ -55,14 +79,14 @@ async function scanDir(dir: DirectoryHandleLike): Promise<ScannedAsset[]> {
   }
 
   // Sort: images first, then alphabetical
-  results.sort((a, b) => {
+  assets.sort((a, b) => {
     const order = { image: 0, video: 1, audio: 2, markdown: 3, pdf: 4, file: 5 }
     const diff = (order[a.type] ?? 9) - (order[b.type] ?? 9)
     if (diff !== 0) return diff
     return a.filename.localeCompare(b.filename)
   })
 
-  return results
+  return { assets, warnings }
 }
 
 /**
@@ -70,23 +94,26 @@ async function scanDir(dir: DirectoryHandleLike): Promise<ScannedAsset[]> {
  *
  * @param rootHandle  The workspace root DirectoryHandleLike
  * @param slug        Element slug or name (for folder resolution)
- * @returns           Array of discovered ScannedAsset items
+ * @returns           ScanResult with assets and omission warnings
  */
 export async function scanNodeMedia(
   rootHandle: DirectoryHandleLike,
   slug: string,
-): Promise<ScannedAsset[]> {
+): Promise<ScanResult> {
   const cleanSlug = slug.toLowerCase().replace(/[^a-z0-9-]/g, '_')
 
   // Try per-element folder first: {slug}/
   try {
     const elDir = await rootHandle.getDirectoryHandle(cleanSlug)
-    const assets = await scanDir(elDir)
-    if (assets.length > 0) {
-      return assets.map((a) => ({
-        ...a,
-        relativePath: `${cleanSlug}/${a.filename}`,
-      }))
+    const result = await scanDir(elDir)
+    if (result.assets.length > 0 || result.warnings.length > 0) {
+      return {
+        assets: result.assets.map((a) => ({
+          ...a,
+          relativePath: `${cleanSlug}/${a.filename}`,
+        })),
+        warnings: result.warnings,
+      }
     }
   } catch {
     // No per-element folder, try centralized
@@ -95,7 +122,8 @@ export async function scanNodeMedia(
   // Try centralized assets/ folder: assets/{slug}_*
   try {
     const assetsDir = await rootHandle.getDirectoryHandle('assets')
-    const results: ScannedAsset[] = []
+    const assets: ScannedAsset[] = []
+    const warnings: string[] = []
     const prefix = `${cleanSlug}_`
 
     for await (const [name, entry] of assetsDir.entries()) {
@@ -105,24 +133,31 @@ export async function scanNodeMedia(
       if (!name.startsWith(prefix)) continue
 
       const ext = name.split('.').pop() ?? ''
+      const cleanExt = ext.toLowerCase()
+
+      if (!isSupportedExtension(cleanExt)) {
+        warnings.push(`Omitted unsupported file "${name}" (.${cleanExt})`)
+        continue
+      }
+
       const type = classifyFile(ext)
 
-      results.push({
+      assets.push({
         filename: name,
         relativePath: `assets/${name}`,
         type,
       })
     }
 
-    results.sort((a, b) => {
+    assets.sort((a, b) => {
       const order = { image: 0, video: 1, audio: 2, markdown: 3, pdf: 4, file: 5 }
       const diff = (order[a.type] ?? 9) - (order[b.type] ?? 9)
       if (diff !== 0) return diff
       return a.filename.localeCompare(b.filename)
     })
 
-    return results
+    return { assets, warnings }
   } catch {
-    return []
+    return { assets: [], warnings: [] }
   }
 }

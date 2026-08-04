@@ -1,7 +1,31 @@
-﻿import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
-import { join, basename } from 'node:path'
+import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
+import { join, basename, isAbsolute } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import type { SpecCache, SpecDocument, SpecFrontmatter, ResolverOptions } from '@cognnitive/innfo-core'
+
+export function isLocalPath(url: string): boolean {
+  if (!url) return false
+  if (url.startsWith('http://') || url.startsWith('https://')) return false
+  if (url.startsWith('file://')) return true
+  if (isAbsolute(url)) return true
+  if (/^[a-zA-Z]:[/\\]/.test(url)) return true
+  if (url.startsWith('.') || url.endsWith('.md') || url.includes('/') || url.includes('\\')) return true
+  return false
+}
+
+export function toLocalFilePath(url: string, rootDir?: string): string {
+  if (url.startsWith('file://')) {
+    return fileURLToPath(url)
+  }
+  if (isAbsolute(url) || /^[a-zA-Z]:[/\\]/.test(url)) {
+    return url
+  }
+  if (rootDir) {
+    return join(rootDir, url)
+  }
+  return url
+}
 
 const MAX_DEPTH_DEFAULT = 10
 
@@ -192,12 +216,24 @@ export async function resolveParentChainNode(
   while (currentUrl && currentName && depth < maxDepth) {
     let content: string | null = null
 
-    // 1. Try local specs/ or .specs/ directory recursively
-    for (const dir of specsDirs) {
-      const localPath = await findLocalSpec(dir, currentName)
-      if (localPath) {
+    // 0. If currentUrl is a local file path or file:// URI, read directly via readFile
+    if (isLocalPath(currentUrl)) {
+      const localPath = toLocalFilePath(currentUrl, rootDir)
+      try {
         content = await readFile(localPath, 'utf-8')
-        break
+      } catch {
+        content = null
+      }
+    }
+
+    // 1. Try local specs/ or .specs/ directory recursively
+    if (content === null) {
+      for (const dir of specsDirs) {
+        const localPath = await findLocalSpec(dir, currentName)
+        if (localPath) {
+          content = await readFile(localPath, 'utf-8')
+          break
+        }
       }
     }
 

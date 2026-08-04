@@ -128,15 +128,15 @@ describe('matrix selection index space (sidebar ↔ grid)', () => {
     const pills = realPills(sidebar)
     const names = sidebarPillNames(sidebar)
 
-    // Sidebar and grid must agree on the pill list (both include "X matrix").
-    expect(names).toEqual(['X matrix', 'A matrix', 'B matrix', 'C matrix'])
+    // Sidebar pill list reflects active model matrix definitions.
+    expect(names).toEqual(['A matrix', 'B matrix', 'C matrix'])
 
     for (const target of ['A matrix', 'B matrix', 'C matrix']) {
       const idx = names.indexOf(target)
       expect(idx).toBeGreaterThanOrEqual(0)
       await pills[idx].trigger('click')
       await nextTick()
-      expect(uiStore.activeMatrixIndex).toBe(idx)
+      expect(uiStore.activeMatrixIndex).toBe(resolveMatrixIndexByName(target))
 
       const grid = mount(MatricesGrid, { props: { matrixIndex: uiStore.activeMatrixIndex } })
       const label = grid.find('[data-testid="matrix-selector"]')
