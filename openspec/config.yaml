@@ -26,7 +26,7 @@ testing:
       tool: 'Playwright'
   coverage:
     available: true
-    command: 'npm run test -- --coverage'
+    command: 'npm run test:coverage'
   quality:
     linter:
       available: true
@@ -50,3 +50,20 @@ rules:
   tasks:
     - Break down tasks by package/app (e.g., packages/innfo-core first, then apps/innfo-editor).
     - Include lint, typecheck, format, and test verification tasks at each step.
+
+sdd_gate:
+  # Tamaño o riesgo NUNCA disparan por sí solos el ciclo completo. Solo
+  # ambigüedad real de diseño lo hace. strict_tdd sigue aplicando siempre,
+  # independientemente de esta gate — esto solo decide si se generan
+  # proposal/spec/design/tasks/verify-report, no si se escriben tests.
+  full_cycle_required_when:
+    - "El cambio introduce o modifica una decisión de arquitectura (patrón nuevo, límite de paquete, contrato público)."
+    - "Hay ambigüedad real: más de un approach viable y no está claro cuál conviene."
+    - "El cambio afecta contratos externos (MCP tools, spec/template schema, API pública de innfo-core)."
+  full_cycle_skippable_when:
+    - "Refactor mecánico sin cambio de comportamiento, ya cubierto por tests existentes."
+    - "Fix puntual con causa raíz clara."
+    - "Cambio de una sola capa, ya entendido, sin decisión de diseño pendiente."
+  low_risk_route:
+    process: "direct inline o delegated direct — sin proposal/spec/design/tasks."
+    verification: "tests + typecheck + lint pasando reemplaza el verify-report formal; sin hash pinning ni fases documentadas."
