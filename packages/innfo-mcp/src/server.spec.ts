@@ -237,16 +237,16 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
       expect(parsed.frontmatter.title).toBe('Local Business Template')
     })
 
-    it('returns an isError result when the template cannot be resolved', async () => {
+    it('returns an isError result with the resolution detail when the template cannot be resolved', async () => {
       vi.spyOn(global, 'fetch').mockRejectedValue(new Error('network unreachable'))
       const result = await client.callTool({
         name: 'get_template',
         arguments: { url: 'https://example.com/missing_NN.md' },
       })
       expect(result.isError).toBe(true)
-      expect(textOf(result as CallToolResult)).toBe(
-        'Template could not be resolved from the provided url/model_id',
-      )
+      const text = textOf(result as CallToolResult)
+      expect(text).toContain('Failed to resolve parent')
+      expect(text).toContain('Attempted')
     })
   })
 

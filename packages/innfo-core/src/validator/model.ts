@@ -1,6 +1,7 @@
 import { ParsedModel, SpecDocument, ValidationResult, ValidationError } from '../types'
 import { parseModel } from '../parser'
 import { extractTemplateSchema } from '../schema'
+import { validateReferences, validateElementFieldReferences } from './references'
 
 /**
  * Validates model contents against template specification (level 2).
@@ -215,6 +216,23 @@ export function validateModel(
         })
       }
     }
+  }
+
+  // R-IE-04: reference-typed element fields must resolve to element names
+  // model-wide, respecting each field's `target_concepts` when declared.
+  for (const diag of validateElementFieldReferences(model, templateConcepts)) {
+    ;(diag.severity === 'error' ? errors : warnings).push(diag)
+  }
+
+  // R-IE-04: matrix cell row/col labels must resolve to element names.
+  // Reported as WARNINGS here (not errors): real V_0-3-0 fixtures use matrix
+  // labels that are numbered/abbreviated variants of element names (e.g.
+  // `## NN Journey: 1. Paranormal Incident` with row `Paranormal Incident`,
+  // or row `Open PR` vs element `Open Pull Request`), so failing hard would
+  // reject legitimate published templates. Field-level references above are
+  // the hard errors; matrix label drift stays visible but non-blocking.
+  for (const diag of validateReferences(model)) {
+    warnings.push(diag)
   }
 
   return { valid: errors.length === 0, errors, warnings }

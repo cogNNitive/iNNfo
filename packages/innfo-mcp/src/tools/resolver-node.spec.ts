@@ -293,4 +293,25 @@ describe('NodeSpecResolver', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
     expect(result.specs.get('business')?.frontmatter.title).toBe('New')
   })
+
+  it('R-LSR-04: throws SpecResolutionError listing the searched directories when all resolution steps fail', async () => {
+    vi.spyOn(global, 'fetch').mockRejectedValue(new Error('network disabled'))
+
+    const error = await resolveParentChainNode(
+      rootDir,
+      'https://example.com/business_V_9-9-9_NN.md',
+      'business_V_9-9-9',
+      cacheDir,
+    ).then(
+      () => null,
+      (e) => e,
+    )
+
+    expect(error).toBeInstanceOf(Error)
+    expect(error.message).toContain('business_V_9-9-9')
+    expect(error.message).toContain('Attempted')
+    expect(error.message).toContain(specsDir)
+    expect(error.message).toContain(cacheDir)
+    expect(error.message).toContain('network url')
+  })
 })

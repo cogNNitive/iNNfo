@@ -1,7 +1,7 @@
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join, basename, isAbsolute } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { parseFrontmatter } from '@cognnitive/innfo-core'
+import { parseFrontmatter, SpecResolutionError } from '@cognnitive/innfo-core'
 import type { SpecCache, SpecDocument, SpecFrontmatter, ResolverOptions } from '@cognnitive/innfo-core'
 
 export function isLocalPath(url: string): boolean {
@@ -215,10 +215,12 @@ export async function resolveParentChainNode(
 
   while (currentUrl && currentName && depth < maxDepth) {
     let content: string | null = null
+    const attempted: string[] = []
 
     // 0. If currentUrl is a local file path or file:// URI, read directly via readFile
     if (isLocalPath(currentUrl)) {
       const localPath = toLocalFilePath(currentUrl, rootDir)
+      attempted.push(`local path "${localPath}"`)
       try {
         content = await readFile(localPath, 'utf-8')
         // Cache local resolutions like http downloads so a later run resolves
@@ -233,6 +235,7 @@ export async function resolveParentChainNode(
     // 1. Try local specs/ or .specs/ directory recursively
     if (content === null) {
       for (const dir of specsDirs) {
+        attempted.push(`specs dir "${dir}"`)
         const localPath = await findLocalSpec(dir, currentName)
         if (localPath) {
           content = await readFile(localPath, 'utf-8')
@@ -243,6 +246,7 @@ export async function resolveParentChainNode(
 
     // 2. Try cache directory (version-agnostic lookup)
     if (content === null) {
+      attempted.push(`cache dir "${cacheDir}"`)
       const cachePath = await findCachedSpec(cacheDir, currentName)
       if (cachePath) {
         content = await readFile(cachePath, 'utf-8')
@@ -252,9 +256,21 @@ export async function resolveParentChainNode(
     // 3. Download from network and save to cache directory under the
     //    document's canonical versioned name.
     if (content === null) {
-      content = await download(currentUrl, timeout)
-      const cacheName = canonicalCacheName(currentName, content)
-      await writeFile(join(cacheDir, `${cacheName}_NN.md`), content, 'utf-8')
+      attempted.push(`network url "${currentUrl}"`)
+      try {
+        content = await download(currentUrl, timeout)
+        const cacheName = canonicalCacheName(currentName, content)
+        await writeFile(join(cacheDir, `${cacheName}_NN.md`), content, 'utf-8')
+      } catch {
+        content = null
+      }
+    }
+
+    if (content === null) {
+      throw new SpecResolutionError(
+        `Failed to resolve parent "${currentName}" from "${currentUrl}". Attempted: ${attempted.join('; ')}`,
+        currentUrl,
+      )
     }
 
     const fm = parseFrontmatter(content) ?? ({} as SpecFrontmatter)

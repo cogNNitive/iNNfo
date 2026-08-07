@@ -116,6 +116,18 @@ describe('mutate tools', () => {
       expect(result.warnings.some((w) => /no template resolved/i.test(w.message))).toBe(false)
     })
 
+    it('lists the searched directories in the PARENT_RESOLUTION_FAILED message', async () => {
+      const result = await validateModel(rootDir, undefined, MUTABLE_MODEL_CONTENT)
+      expect(result.valid).toBe(false)
+      const err = result.errors.find((e) => /business_V_0-2-0/.test(e.message))
+      expect(err).toBeDefined()
+      expect(err!.message).toContain('(searched:')
+      expect(err!.message).toContain('specs')
+      expect(err!.message).toContain('.spec-cache')
+      expect(err!.message).toContain('direct relative path')
+      expect(err!.message).toContain('network')
+    })
+
     it('validates a model loaded from disk by id', async () => {
       await writeFile(join(rootDir, 'OnDisk_NN.md'), MUTABLE_MODEL_CONTENT, 'utf-8')
       const result = await validateModel(rootDir, 'OnDisk')
@@ -260,6 +272,95 @@ describe('mutate tools', () => {
 
       expect(result.success).toBe(false)
       expect(result.errors?.some((e) => /not defined in template/.test(e.message))).toBe(true)
+      const onDisk = await readFile(filePath, 'utf-8')
+      expect(onDisk).toBe(MUTABLE_MODEL_CONTENT)
+    })
+
+    it('bump_version with an explicit version renames the file and updates frontmatter', async () => {
+      await stubBusinessTemplate()
+      const oldPath = join(rootDir, 'Versioned_V_0-0-1_NN.md')
+      await writeFile(oldPath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Versioned_V_0-0-1', 'bump_version', {
+        version: 'V_0-5-0',
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.model?.frontmatter.model_version).toBe('V_0-5-0')
+      expect(result.newPath).toBe(join(rootDir, 'Versioned_V_0-5-0_NN.md'))
+
+      // Old file removed, new file carries the bumped frontmatter.
+      await expect(readFile(oldPath, 'utf-8')).rejects.toThrow()
+      const newContent = await readFile(result.newPath!, 'utf-8')
+      expect(newContent).toContain('model_version: "V_0-5-0"')
+    })
+
+    it('bump_version increments patch by default when no bump level is given', async () => {
+      await stubBusinessTemplate()
+      const oldPath = join(rootDir, 'Versioned_V_0-0-1_NN.md')
+      await writeFile(oldPath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Versioned_V_0-0-1', 'bump_version', {})
+
+      expect(result.success).toBe(true)
+      expect(result.model?.frontmatter.model_version).toBe('V_0-0-2')
+      expect(result.newPath).toBe(join(rootDir, 'Versioned_V_0-0-2_NN.md'))
+    })
+
+    it('bump_version with bump minor increments the minor part', async () => {
+      await stubBusinessTemplate()
+      const oldPath = join(rootDir, 'Versioned_V_0-0-1_NN.md')
+      await writeFile(oldPath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Versioned_V_0-0-1', 'bump_version', {
+        bump: 'minor',
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.model?.frontmatter.model_version).toBe('V_0-1-1')
+      expect(result.newPath).toBe(join(rootDir, 'Versioned_V_0-1-1_NN.md'))
+    })
+
+    it('bump_version rewrites in place when the filename has no version segment', async () => {
+      await stubBusinessTemplate()
+      const filePath = join(rootDir, 'Mutable_NN.md')
+      await writeFile(filePath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Mutable', 'bump_version', { bump: 'minor' })
+
+      expect(result.success).toBe(true)
+      expect(result.model?.frontmatter.model_version).toBe('V_0-1-1')
+      expect(result.newPath).toBe(filePath)
+      const onDisk = await readFile(filePath, 'utf-8')
+      expect(onDisk).toContain('model_version: "V_0-1-1"')
+    })
+
+    it('bump_version rejects an invalid version without touching the file', async () => {
+      await stubBusinessTemplate()
+      const filePath = join(rootDir, 'Versioned_V_0-0-1_NN.md')
+      await writeFile(filePath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Versioned_V_0-0-1', 'bump_version', {
+        version: 'banana',
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.errors?.[0].message).toMatch(/Invalid version args/)
+      const onDisk = await readFile(filePath, 'utf-8')
+      expect(onDisk).toBe(MUTABLE_MODEL_CONTENT)
+    })
+
+    it('bump_version rejects an unknown bump level without touching the file', async () => {
+      await stubBusinessTemplate()
+      const filePath = join(rootDir, 'Versioned_V_0-0-1_NN.md')
+      await writeFile(filePath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Versioned_V_0-0-1', 'bump_version', {
+        bump: 'hotfix',
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.errors?.[0].message).toMatch(/Invalid version args/)
       const onDisk = await readFile(filePath, 'utf-8')
       expect(onDisk).toBe(MUTABLE_MODEL_CONTENT)
     })

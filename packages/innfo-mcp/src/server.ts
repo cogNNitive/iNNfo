@@ -143,11 +143,13 @@ const toolDefinitions: Tool[] = [
             'remove_element',
             'rename_concept',
             'rename_element',
+            'bump_version',
           ],
         },
         args: {
           type: 'object',
-          description: 'Operation-specific arguments',
+          description:
+            'Operation-specific arguments. For bump_version: { version: "V_0-5-0" } (explicit) or { bump: "major" | "minor" | "patch" } (increment from the current model_version, default patch).',
         },
       },
       required: ['id', 'op', 'args'],

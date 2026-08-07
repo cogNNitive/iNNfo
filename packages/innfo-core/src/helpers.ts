@@ -36,27 +36,41 @@ export interface ModelInfo {
 
 const MD_FILE_RE = /\.md$/i
 
-/**
- * Scan a root directory for iNNfo model files (`*.md`).
- * Returns an array of `ModelInfo` sorted by id.
- */
-export async function listModels(rootDir: string): Promise<ModelInfo[]> {
-  const models: ModelInfo[] = []
+/** Directories that must never be scanned for model files. */
+const IGNORED_DIRS = new Set(['backups', 'archive', 'specs', '.spec-cache', 'node_modules', '.git'])
 
-  const entries = await readdir(rootDir, { withFileTypes: true }).catch(() => [])
+function isIgnoredDir(name: string): boolean {
+  return name.startsWith('.') || IGNORED_DIRS.has(name.toLowerCase())
+}
 
+async function collectModels(dir: string, models: ModelInfo[]): Promise<void> {
+  const entries = await readdir(dir, { withFileTypes: true }).catch(() => [])
   for (const entry of entries) {
+    if (entry.isDirectory()) {
+      if (isIgnoredDir(entry.name)) continue
+      await collectModels(join(dir, entry.name), models)
+      continue
+    }
     if (!entry.isFile()) continue
     if (!MD_FILE_RE.test(entry.name)) continue
     if (entry.name.toLowerCase() === 'index.md') continue
 
-    const filePath = join(rootDir, entry.name)
+    const filePath = join(dir, entry.name)
     const id = entry.name.replace(MD_FILE_RE, '')
     const version = resolveSpecVersionFromFilename(entry.name)
 
     models.push({ id, path: filePath, version })
   }
+}
 
+/**
+ * Scan a root directory (recursively) for iNNfo model files (`*.md`).
+ * Skips `backups`, `archive`, `specs`, `.spec-cache`, `node_modules`, `.git`,
+ * and any dot-directory. Returns an array of `ModelInfo` sorted by id.
+ */
+export async function listModels(rootDir: string): Promise<ModelInfo[]> {
+  const models: ModelInfo[] = []
+  await collectModels(rootDir, models)
   models.sort((a, b) => a.id.localeCompare(b.id))
   return models
 }

@@ -6,8 +6,9 @@
  * On validation failure, the file is NOT written (reject-without-writing).
  */
 
-import { readFile, writeFile } from 'node:fs/promises'
-import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation } from '@cognnitive/innfo-core'
+import { readFile, writeFile, rm } from 'node:fs/promises'
+import { basename, dirname, join } from 'node:path'
+import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation, SpecResolutionError } from '@cognnitive/innfo-core'
 import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/innfo-core'
 
 import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec } from './spec.js'
@@ -17,6 +18,7 @@ import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec } from '.
 export interface ApplyChangeResult {
   success: boolean
   model?: ParsedModel
+  newPath?: string
   errors?: Array<{ path: string; message: string }>
   warnings?: Array<{ path: string; message: string }>
 }
@@ -99,9 +101,15 @@ export async function validateModel(
 
   // Resolve the template only from the model's parent_spec.url, or from an
   // explicit templateUrl supplied by the caller. Never from a constant.
-  let template = await resolveTemplateForModel(rootDir, model)
-  if (!template && templateUrl) {
-    template = await getTemplateFromUrl(rootDir, templateUrl, deriveNameFromUrl(templateUrl))
+  let template: SpecDocument | null = null
+  let resolutionDetail: string | null = null
+  try {
+    template = await resolveTemplateForModel(rootDir, model)
+    if (!template && templateUrl) {
+      template = await getTemplateFromUrl(rootDir, templateUrl, deriveNameFromUrl(templateUrl))
+    }
+  } catch (err) {
+    if (err instanceof SpecResolutionError) resolutionDetail = err.message
   }
 
   const result = coreValidate(model, template, null)
@@ -111,10 +119,13 @@ export async function validateModel(
     if (parentUrl) {
       // The model declares a parent that could not be resolved — this is a
       // hard error, not a structural-only warning. coreValidate already emits
-      // [PARENT_RESOLUTION_FAILED]; surface the offending URL explicitly.
+      // [PARENT_RESOLUTION_FAILED]; surface the offending URL explicitly,
+      // the directories searched, and the per-link resolution attempts.
+      const searchedSuffix = ` (searched: ${rootDir}/specs, ${rootDir}/.specs, ${rootDir}/.spec-cache, direct relative path, network)`
+      const detailSuffix = resolutionDetail ? ` Detail: ${resolutionDetail}` : ''
       result.errors.push({
         path: 'parent_spec',
-        message: `[PARENT_RESOLUTION_FAILED] Parent template could not be resolved from parent_spec.url "${parentUrl}"`,
+        message: `[PARENT_RESOLUTION_FAILED] Parent template could not be resolved from parent_spec.url "${parentUrl}"${searchedSuffix}${detailSuffix}`,
         severity: 'error',
       })
     } else {
@@ -145,6 +156,125 @@ export async function validateModel(
 
 /* ── apply_change ────────────────────────────────────────────── */
 
+/** Matches the `_V_<major>-<minor>-<patch>_` segment in iNNfo filenames. */
+const VERSION_FILENAME_RE = /_V_\d+-\d+-\d+_/
+
+interface VersionParts {
+  major: number
+  minor: number
+  patch: number
+}
+
+/** Parse `V_0-4-0`, `V_0.4.0`, `0-4-0`, ... into numeric parts. */
+function parseVersion(v: string): VersionParts | null {
+  const m = v.trim().match(/^V?_?(\d+)[-.](\d+)[-.](\d+)$/i)
+  if (!m) return null
+  return { major: parseInt(m[1], 10), minor: parseInt(m[2], 10), patch: parseInt(m[3], 10) }
+}
+
+function formatVersion(p: VersionParts): string {
+  return `V_${p.major}-${p.minor}-${p.patch}`
+}
+
+/**
+ * Compute the new model version from bump_version args.
+ * Either an explicit `version` ("V_0-5-0") or a `bump` of
+ * "major" | "minor" | "patch" (default patch) applied to the current
+ * `model_version` frontmatter. Returns null when the args are invalid.
+ */
+function computeNewVersion(
+  current: string | undefined,
+  args: Record<string, unknown>,
+): { version: string } | null {
+  if (typeof args.version === 'string' && args.version.trim() !== '') {
+    const parsed = parseVersion(args.version)
+    if (!parsed) return null
+    return { version: formatVersion(parsed) }
+  }
+
+  const bump = typeof args.bump === 'string' && args.bump.trim() !== '' ? args.bump.trim() : 'patch'
+  if (!['major', 'minor', 'patch'].includes(bump)) return null
+  if (!current) return null
+  const parts = parseVersion(current)
+  if (!parts) return null
+  if (bump === 'major') parts.major += 1
+  else if (bump === 'minor') parts.minor += 1
+  else parts.patch += 1
+  return { version: formatVersion(parts) }
+}
+
+/**
+ * Apply the `bump_version` operation: set `frontmatter.model_version`, rename
+ * the file to the canonical `_V_<version>_` filename, validate BEFORE writing,
+ * and reject-without-writing on any failure.
+ */
+async function bumpVersion(
+  rootDir: string,
+  filePath: string,
+  model: ParsedModel,
+  args: Record<string, unknown>,
+): Promise<ApplyChangeResult> {
+  const next = computeNewVersion(model.frontmatter.model_version, args)
+  if (!next) {
+    return {
+      success: false,
+      errors: [
+        {
+          path: 'frontmatter.model_version',
+          message:
+            'Invalid version args for bump_version: provide { version: "V_x-y-z" } or { bump: "major" | "minor" | "patch" } against a valid model_version frontmatter',
+        },
+      ],
+    }
+  }
+
+  model.frontmatter.model_version = next.version
+
+  const dir = dirname(filePath)
+  const base = basename(filePath)
+  const versionSegment = next.version.replace(/^V_/i, '')
+  const newBase = base.replace(VERSION_FILENAME_RE, `_V_${versionSegment}_`)
+  const newPath = join(dir, newBase)
+
+  // Validate BEFORE writing/deleting anything.
+  let template: SpecDocument | null
+  try {
+    template = await resolveTemplateForModel(rootDir, model)
+  } catch (err) {
+    return {
+      success: false,
+      errors: [{ path: 'parent_spec', message: err instanceof Error ? err.message : String(err) }],
+    }
+  }
+  const validationResult = coreValidate(model, template, null)
+  if (!validationResult.valid) {
+    return {
+      success: false,
+      errors: validationResult.errors,
+      warnings: validationResult.warnings,
+    }
+  }
+
+  // Write the new versioned file (or rewrite in place), then remove the old.
+  try {
+    if (newPath === filePath) {
+      await saveModel(filePath, model)
+    } else {
+      await saveModel(newPath, model)
+      await rm(filePath, { force: true })
+    }
+  } catch (err) {
+    return { success: false, errors: [{ path: '', message: `Failed to write model: ${err}` }] }
+  }
+
+  return {
+    success: true,
+    model,
+    newPath,
+    warnings: validationResult.warnings,
+  }
+}
+
 /**
  * Apply an intent-level change to a model.
  * Semantics: parse → mutate → serialize → validate.
@@ -168,6 +298,10 @@ export async function applyChange(
     return { success: false, errors: [{ path: '', message: `Failed to load model: ${err}` }] }
   }
 
+  if (op === 'bump_version') {
+    return bumpVersion(rootDir, filePath, model, args)
+  }
+
   // Apply the mutation via the core enforcement engine (R-IE-01)
   const mutationResult = coreApplyMutation(model, op, args as unknown as Record<string, unknown>)
   if (!mutationResult.success) {
@@ -175,7 +309,15 @@ export async function applyChange(
   }
 
   // Validate after mutation — template resolved only from parent_spec.url.
-  const template = await resolveTemplateForModel(rootDir, model)
+  let template: SpecDocument | null
+  try {
+    template = await resolveTemplateForModel(rootDir, model)
+  } catch (err) {
+    return {
+      success: false,
+      errors: [{ path: 'parent_spec', message: err instanceof Error ? err.message : String(err) }],
+    }
+  }
   const validationResult = coreValidate(model, template, null)
 
   if (!validationResult.valid) {

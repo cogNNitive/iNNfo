@@ -12,7 +12,7 @@
 
 import { join, basename } from 'node:path'
 import { readFile, stat } from 'node:fs/promises'
-import { getTemplate as coreGetTemplate, getFormatSpec, parseFrontmatter } from '@cognnitive/innfo-core'
+import { getTemplate as coreGetTemplate, getFormatSpec, parseFrontmatter, SpecResolutionError } from '@cognnitive/innfo-core'
 import type { SpecDocument, SpecCache } from '@cognnitive/innfo-core'
 import { resolveParentChainNode, findCachedSpec } from './resolver-node.js'
 
@@ -152,7 +152,11 @@ export async function getTemplateFromUrl(
       }
     }
     return null
-  } catch {
+  } catch (err) {
+    // Surface the actionable resolution detail (searched locations) to the
+    // caller so validate_model output can include it; other failures keep the
+    // null fallback behavior.
+    if (err instanceof SpecResolutionError) throw err
     return null
   }
 }

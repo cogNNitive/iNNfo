@@ -1052,6 +1052,203 @@ describe('validateReferences (R-IE-04)', () => {
   })
 })
 
+describe('reference-typed element fields via validateModel (R-IE-04)', () => {
+  function buildTemplate(targetConcepts?: string[]): {
+    name: string
+    level: 2
+    parentName: string
+    frontmatter: { spec_version: string; spec_url: string; level: 2 }
+    rawContent: string
+  } {
+    const fieldDef = targetConcepts
+      ? `type:: reference
+target_concepts:: [${targetConcepts.join(', ')}]`
+      : 'type:: reference'
+    return {
+      name: 'ref_V_1-0-0',
+      level: 2,
+      parentName: 'iNNfo_V_0-3-0',
+      frontmatter: {
+        spec_version: 'V_0-3-0',
+        spec_url: 'https://example.com/ref',
+        level: 2,
+      },
+      rawContent: [
+        '# NN Concept Definition',
+        '',
+        '## NN Concept Definition: Work',
+        'type:: list',
+        '',
+        '## NN Concept Definition: Gardens',
+        'type:: list',
+        '',
+        '# NN Field Definition',
+        '',
+        '## NN Field Definition: location',
+        'concept:: Work',
+        fieldDef,
+        '',
+      ].join('\n'),
+    }
+  }
+
+  function buildModel(locationValue?: string, withGardenElement = false): ReturnType<typeof parseModel> {
+    const gardenSection = withGardenElement
+      ? '# NN Gardens\n\n## NN Gardens: Jardín Exterior\n  A garden.\n'
+      : ''
+    return parseModel(
+      [
+        '---',
+        'spec_version: "V_0-3-0"',
+        'level: 3',
+        'model_version: "V_1-0-0"',
+        'title: "Ref Model"',
+        'parent_spec:',
+        '  name: "ref_V_1-0-0"',
+        '  url: "https://example.com/ref_V_1-0-0_NN.md"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Patio]]',
+        '',
+        '# NN Work',
+        '## NN Work: Patio',
+        locationValue !== undefined ? `location:: ${locationValue}` : '',
+        '  A patio.',
+        '',
+        gardenSection,
+      ].join('\n'),
+    )
+  }
+
+  it('passes when a reference field value resolves to an existing element', () => {
+    const result = validateModel(buildModel('Jardín Exterior', true), buildTemplate() as any, null)
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects a dangling reference field value (location:: Jardín Exterior)', () => {
+    const result = validateModel(buildModel('Jardín Exterior', false), buildTemplate() as any, null)
+    expect(result.valid).toBe(false)
+    const err = result.errors.find((e) => e.message.includes('does not match any element name'))
+    expect(err).toBeDefined()
+    expect(err!.path).toBe('elements.Work.Patio.fields.location')
+    expect(err!.message).toContain('"location"')
+    expect(err!.message).toContain('Jardín Exterior')
+  })
+
+  it('passes when the resolved element belongs to an allowed target_concept', () => {
+    const model = buildModel('Jardín Exterior', true)
+    const result = validateModel(model, buildTemplate(['Gardens']) as any, null)
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('rejects a reference resolving to an element outside the field target_concepts', () => {
+    const model = parseModel(
+      [
+        '---',
+        'spec_version: "V_0-3-0"',
+        'level: 3',
+        'model_version: "V_1-0-0"',
+        'title: "Ref Model"',
+        'parent_spec:',
+        '  name: "ref_V_1-0-0"',
+        '  url: "https://example.com/ref_V_1-0-0_NN.md"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Patio]]',
+        '* [[Workspace]]',
+        '',
+        '# NN Work',
+        '## NN Work: Patio',
+        'location:: Workspace',
+        '  A patio.',
+        '## NN Work: Workspace',
+        '  A work space.',
+        '',
+      ].join('\n'),
+    )
+    const result = validateModel(model, buildTemplate(['Gardens']) as any, null)
+    expect(result.valid).toBe(false)
+    const err = result.errors.find((e) => e.message.includes('target_concepts'))
+    expect(err).toBeDefined()
+    expect(err!.message).toContain('"Workspace"')
+    expect(err!.message).toContain('belongs to concept(s) "Work"')
+    expect(err!.message).toContain('not in target_concepts')
+  })
+
+  it('reports a matrix row/col that does not resolve to an element as a WARNING via validateModel', () => {
+    const template = {
+      name: 'mx_V_1-0-0',
+      level: 2 as const,
+      parentName: 'iNNfo_V_0-3-0',
+      frontmatter: {
+        spec_version: 'V_0-3-0',
+        spec_url: 'https://example.com/mx',
+        level: 2 as const,
+      },
+      rawContent: [
+        '# NN Concept Definition',
+        '',
+        '## NN Concept Definition: Work',
+        'type:: list',
+        '',
+        '## NN Concept Definition: Roles',
+        'type:: list',
+        '',
+        '# NN Matrix Definition',
+        '',
+        '## NN Matrix Definition: work-roles matrix',
+        'source:: Work',
+        'target:: Roles',
+        '',
+      ].join('\n'),
+    }
+    const model = parseModel(
+      [
+        '---',
+        'spec_version: "V_0-3-0"',
+        'level: 3',
+        'model_version: "V_1-0-0"',
+        'title: "Matrix Ref Model"',
+        'parent_spec:',
+        '  name: "mx_V_1-0-0"',
+        '  url: "https://example.com/mx_V_1-0-0_NN.md"',
+        'matrices:',
+        '  - name: "work-roles matrix"',
+        '    source: "Work"',
+        '    target: "Roles"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Open PR]]',
+        '* [[Reviewer]]',
+        '',
+        '# NN Work',
+        '## NN Work: Open PR',
+        '',
+        '# NN Roles',
+        '## NN Roles: Reviewer',
+        '',
+        '# NN matrices: work-roles matrix',
+        '| Work \\ Roles | Reviewer |',
+        '| :--- | :---: |',
+        '| Open PR | ✅ |',
+        '| NonExistent | ✅ |',
+        '',
+      ].join('\n'),
+    )
+    const result = validateModel(model, template as any, null)
+    // Matrix label drift is advisory (WARNING): real V_0-3-0 fixtures use
+    // numbered/abbreviated labels, so it must not invalidate the model.
+    expect(result.valid).toBe(true)
+    expect(result.warnings.some((w) => w.message.includes('NonExistent'))).toBe(true)
+    expect(result.errors.some((e) => e.message.includes('NonExistent'))).toBe(false)
+  })
+})
+
 describe('legacy params → values reader tolerance (4.5)', () => {
   it('converts semicolon-delimited params to values array', () => {
     const content = [

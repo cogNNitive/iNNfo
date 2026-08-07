@@ -32,7 +32,13 @@ export {
 } from './resolver'
 export type { SpecResolver } from './resolver'
 
-export { validateModel, validateFormatContent, validateFormatSyntax, validateReferences } from './validator'
+export {
+  validateModel,
+  validateFormatContent,
+  validateFormatSyntax,
+  validateReferences,
+  validateElementFieldReferences,
+} from './validator'
 export type { ReferenceDiagnostic } from './validator'
 
 export * from './identity'
