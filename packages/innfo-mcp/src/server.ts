@@ -15,6 +15,7 @@
  *   apply_change  — apply an intent operation and re-validate
  */
 
+import { pathToFileURL } from 'node:url'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js'
@@ -32,7 +33,7 @@ import { validateModel, validateModelUrl, applyChange, validateTemplate } from '
 /** Root directory for model scanning (defaults to `models/` under CWD) */
 const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd()
 
-const server = new Server({ name: 'innfo-mcp', version: '0.2.1' }, { capabilities: { tools: {} } })
+export const server = new Server({ name: 'innfo-mcp', version: '0.2.1' }, { capabilities: { tools: {} } })
 
 /* ── Tool definitions ───────────────────────────────────────── */
 
@@ -327,7 +328,13 @@ async function main() {
   await server.connect(transport)
 }
 
-main().catch((err) => {
-  console.error('Fatal error starting innfo-mcp:', err)
-  process.exit(1)
-})
+// Only auto-start the stdio transport when this file is run directly
+// (e.g. `node dist/server.js`), never when imported by tests or other modules.
+const isDirectRun = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error('Fatal error starting innfo-mcp:', err)
+    process.exit(1)
+  })
+}

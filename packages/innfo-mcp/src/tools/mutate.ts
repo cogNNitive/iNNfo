@@ -107,11 +107,23 @@ export async function validateModel(
   const result = coreValidate(model, template, null)
   const warnings: ValidationError[] = [...result.warnings]
   if (!template) {
-    warnings.push({
-      path: 'parent_spec',
-      message: 'No template resolved; structural validation only',
-      severity: 'warning',
-    })
+    const parentUrl = (model.frontmatter as any)?.parent_spec?.url
+    if (parentUrl) {
+      // The model declares a parent that could not be resolved — this is a
+      // hard error, not a structural-only warning. coreValidate already emits
+      // [PARENT_RESOLUTION_FAILED]; surface the offending URL explicitly.
+      result.errors.push({
+        path: 'parent_spec',
+        message: `[PARENT_RESOLUTION_FAILED] Parent template could not be resolved from parent_spec.url "${parentUrl}"`,
+        severity: 'error',
+      })
+    } else {
+      warnings.push({
+        path: 'parent_spec',
+        message: 'No template resolved; structural validation only',
+        severity: 'warning',
+      })
+    }
   }
 
   // D8: Decorate errors and warnings with originating file path

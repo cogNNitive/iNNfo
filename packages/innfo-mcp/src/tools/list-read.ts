@@ -41,16 +41,21 @@ export async function listModels(rootDir: string): Promise<ModelInfo[]> {
  * The id is the filename stem (e.g. `Ghostbusters_V_0-1-2_business`
  * resolves to `Ghostbusters_V_0-1-2_business_NN.md`).
  *
+ * Searches the root and the conventional `models/` subdirectory, trying
+ * `<cleanId>_NN.md`, `<cleanId>.md`, `<cleanId>`, `<id>` and `<id>.md`.
+ *
  * Returns null if the file doesn't exist or can't be parsed.
  */
 export async function readModel(rootDir: string, id: string): Promise<ParsedModel | null> {
   const cleanId = normalizeId(id)
-  const candidates = [
-    join(rootDir, `${cleanId}_NN.md`),
-    join(rootDir, `${cleanId}.md`),
-    join(rootDir, cleanId),
-    join(rootDir, id),
-  ]
+  const searchDirs = [rootDir, join(rootDir, 'models')]
+  const candidates = searchDirs.flatMap((dir) => [
+    join(dir, `${cleanId}_NN.md`),
+    join(dir, `${cleanId}.md`),
+    join(dir, cleanId),
+    join(dir, id),
+    join(dir, `${id}.md`),
+  ])
 
   for (const filePath of candidates) {
     try {

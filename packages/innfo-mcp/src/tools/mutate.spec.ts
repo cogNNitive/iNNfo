@@ -1,0 +1,376 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { join } from 'node:path'
+import { rm, mkdir, writeFile, readFile } from 'node:fs/promises'
+import { validateModel, validateModelUrl, applyChange, validateTemplate } from './mutate'
+
+const rootDir = join(import.meta.dirname!, '..', '..', 'temp-test-mutate')
+const specsDir = join(rootDir, 'specs')
+const cacheDir = join(rootDir, '.spec-cache')
+
+/** Write the level-1 + level-0 spec chain locally so resolution never hits the network. */
+async function stubSpecChain() {
+  await writeFile(
+    join(specsDir, 'iNNfo_V_0-1-0_NN.md'),
+    [
+      '---',
+      'spec_version: "V_0-1-0"',
+      'level: 1',
+      'title: "Local iNNfo Spec"',
+      'parent_spec:',
+      '  name: "defiNNe_V_0-1-0"',
+      '  url: "https://example.com/defiNNe_V_0-1-0_NN.md"',
+      '---',
+    ].join('\n'),
+    'utf-8',
+  )
+  await writeFile(
+    join(specsDir, 'defiNNe_V_0-1-0_NN.md'),
+    ['---', 'spec_version: "V_0-1-0"', 'level: 0', 'title: "Local defiNNe Spec"', '---'].join('\n'),
+    'utf-8',
+  )
+}
+
+/** Write a level-2 business template (declaring a "Work" list concept) resolving
+ * up to the stubbed level-1 spec chain — fully resolvable locally, no network. */
+async function stubBusinessTemplate() {
+  await writeFile(
+    join(specsDir, 'business_V_0-2-0_NN.md'),
+    [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 2',
+      'title: "Local Business Template"',
+      'parent_spec:',
+      '  name: "iNNfo_V_0-1-0"',
+      '  url: "https://example.com/iNNfo_V_0-1-0_NN.md"',
+      '---',
+      '',
+      '# NN Concept Definition',
+      '',
+      '## NN Concept Definition: Work',
+      'type:: list',
+      '',
+    ].join('\n'),
+    'utf-8',
+  )
+  await stubSpecChain()
+}
+
+/** A minimal, valid iNNfo model instantiating the "Work" concept from
+ * `stubBusinessTemplate()`. `parent_spec` points at `business_V_0-2-0`: when
+ * `stubBusinessTemplate()` has been called first, resolution succeeds locally;
+ * otherwise (default fetch-reject mock, no local stub) it resolves to null. */
+const MUTABLE_MODEL_CONTENT = [
+  '---',
+  'spec_version: "V_0-2-0"',
+  'level: 3',
+  'model_version: "V_0-0-1"',
+  'title: "Test"',
+  'parent_spec:',
+  '  name: "business_V_0-2-0"',
+  '  url: "https://example.com/business_V_0-2-0_NN.md"',
+  '---',
+  '',
+  '# NN index',
+  '* [[Work]]',
+  '',
+  '# NN Work',
+  '## NN Work: Triage',
+  '  First element.',
+  '',
+].join('\n')
+
+describe('mutate tools', () => {
+  beforeEach(async () => {
+    await rm(rootDir, { recursive: true, force: true })
+    await mkdir(specsDir, { recursive: true })
+    await mkdir(cacheDir, { recursive: true })
+    vi.restoreAllMocks()
+    // Default: no real network I/O in tests. Individual tests override this
+    // spy when they need to exercise a specific fetch outcome.
+    vi.spyOn(global, 'fetch').mockRejectedValue(new Error('network disabled in tests'))
+  })
+
+  afterEach(async () => {
+    await rm(rootDir, { recursive: true, force: true })
+  })
+
+  describe('validateModel', () => {
+    it('rejects when neither id nor content is provided', async () => {
+      const result = await validateModel(rootDir)
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toBe('Provide either id or content')
+    })
+
+    it('reports a model-not-found error in id mode', async () => {
+      const result = await validateModel(rootDir, 'DoesNotExist')
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toBe('Model not found: DoesNotExist')
+    })
+
+    it('reports a clear PARENT_RESOLUTION_FAILED error when the declared parent_spec.url cannot be resolved', async () => {
+      const result = await validateModel(rootDir, undefined, MUTABLE_MODEL_CONTENT)
+      expect(result.valid).toBe(false)
+      expect(result.errors.some((e) => /PARENT_RESOLUTION_FAILED/.test(e.message))).toBe(true)
+      expect(result.errors.some((e) => /business_V_0-2-0/.test(e.message))).toBe(true)
+      expect(result.warnings.some((w) => /no template resolved/i.test(w.message))).toBe(false)
+    })
+
+    it('validates a model loaded from disk by id', async () => {
+      await writeFile(join(rootDir, 'OnDisk_NN.md'), MUTABLE_MODEL_CONTENT, 'utf-8')
+      const result = await validateModel(rootDir, 'OnDisk')
+      expect(result.valid).toBe(false)
+      expect(result.errors.some((e) => /PARENT_RESOLUTION_FAILED/.test(e.message))).toBe(true)
+      expect(result.errors.every((e) => 'filePath' in e)).toBe(true)
+    })
+
+    it('validates a model successfully against its resolved template', async () => {
+      await stubBusinessTemplate()
+      await writeFile(join(rootDir, 'OnDisk_NN.md'), MUTABLE_MODEL_CONTENT, 'utf-8')
+      const result = await validateModel(rootDir, 'OnDisk')
+      expect(result.valid).toBe(true)
+      expect(result.errors).toEqual([])
+    })
+
+    it('delegates level-2 content to validateTemplate (D1 auto-detection)', async () => {
+      // Level 2 with no parent_spec.url triggers the PARENT_RESOLUTION_FAILED diagnostic
+      // that is specific to validateTemplate — this only fires if validateModel truly
+      // delegated, since plain model validation reports "Missing parent_spec" instead.
+      const level2Content = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 2',
+        'title: "A Template"',
+        '---',
+      ].join('\n')
+      const result = await validateModel(rootDir, undefined, level2Content)
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toMatch(/PARENT_RESOLUTION_FAILED/)
+    })
+  })
+
+  describe('validateModelUrl', () => {
+    it('fetches model content from the URL and validates it', async () => {
+      // Only the model URL resolves; the subsequent parent_spec.url lookup for
+      // the template (a second, distinct fetch) is left rejected by the
+      // default mock so the declared parent template cannot be resolved — this
+      // is now a clear PARENT_RESOLUTION_FAILED error, not a warning.
+      vi.spyOn(global, 'fetch').mockImplementation((input) => {
+        const url = String(input)
+        if (url.includes('Mutable_NN.md')) {
+          return Promise.resolve({ ok: true, text: () => Promise.resolve(MUTABLE_MODEL_CONTENT) } as Response)
+        }
+        return Promise.reject(new Error('not stubbed'))
+      })
+
+      const result = await validateModelUrl(rootDir, 'https://example.com/Mutable_NN.md')
+      expect(result.valid).toBe(false)
+      expect(result.errors.some((e) => /PARENT_RESOLUTION_FAILED/.test(e.message))).toBe(true)
+      expect(result.warnings.some((w) => /no template resolved/i.test(w.message))).toBe(false)
+    })
+
+    it('reports an error when the fetch response is not ok', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      } as Response)
+
+      const result = await validateModelUrl(rootDir, 'https://example.com/missing_NN.md')
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toMatch(/Failed to fetch model URL: 404 Not Found/)
+    })
+
+    it('reports an error when the fetch itself throws', async () => {
+      vi.spyOn(global, 'fetch').mockRejectedValue(new Error('DNS failure'))
+
+      const result = await validateModelUrl(rootDir, 'https://example.com/unreachable_NN.md')
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toMatch(/Model URL unreachable/)
+    })
+  })
+
+  describe('applyChange', () => {
+    it('reports a model-not-found error', async () => {
+      const result = await applyChange(rootDir, 'Nope', 'add_element', {
+        conceptName: 'Work',
+        elementName: 'Review',
+      })
+      expect(result.success).toBe(false)
+      expect(result.errors?.[0].message).toBe('Model not found: Nope')
+    })
+
+    it('applies a valid mutation, validates against the resolved template, and writes back to disk', async () => {
+      await stubBusinessTemplate()
+      const filePath = join(rootDir, 'Mutable_NN.md')
+      await writeFile(filePath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Mutable', 'add_element', {
+        conceptName: 'Work',
+        elementName: 'Review',
+        description: 'Code review step.',
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.model?.elements.get('Work')?.some((e) => e.name === 'Review')).toBe(true)
+
+      const onDisk = await readFile(filePath, 'utf-8')
+      expect(onDisk).toContain('Work: Review')
+    })
+
+    it('rejects an invalid op without writing the file', async () => {
+      const filePath = join(rootDir, 'Mutable_NN.md')
+      await writeFile(filePath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Mutable', 'not_a_real_op', {})
+
+      expect(result.success).toBe(false)
+      expect(result.errors?.[0].message).toBe('Unknown operation: not_a_real_op')
+      const onDisk = await readFile(filePath, 'utf-8')
+      expect(onDisk).toBe(MUTABLE_MODEL_CONTENT)
+    })
+
+    it('rejects a duplicate element without writing the file (mutation-level reject-without-writing)', async () => {
+      const filePath = join(rootDir, 'Mutable_NN.md')
+      await writeFile(filePath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Mutable', 'add_element', {
+        conceptName: 'Work',
+        elementName: 'Triage',
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.errors?.length ?? 0).toBeGreaterThan(0)
+      const onDisk = await readFile(filePath, 'utf-8')
+      expect(onDisk).toBe(MUTABLE_MODEL_CONTENT)
+    })
+
+    it('rejects a mutation that succeeds structurally but fails post-mutation template validation (reject-without-writing)', async () => {
+      // add_concept declares a new ad-hoc "Concept Definition" section on the
+      // model itself — a concept name the resolved template never defines, so
+      // the post-mutation validate step rejects it and the file is left untouched.
+      await stubBusinessTemplate()
+      const filePath = join(rootDir, 'Mutable_NN.md')
+      await writeFile(filePath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const result = await applyChange(rootDir, 'Mutable', 'add_concept', {
+        conceptName: 'Steps',
+        type: 'list',
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.errors?.some((e) => /not defined in template/.test(e.message))).toBe(true)
+      const onDisk = await readFile(filePath, 'utf-8')
+      expect(onDisk).toBe(MUTABLE_MODEL_CONTENT)
+    })
+  })
+
+  describe('validateTemplate', () => {
+    it('rejects when neither id nor content is provided', async () => {
+      const result = await validateTemplate(rootDir)
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toBe('Provide either id or content')
+    })
+
+    it('reports a template-file-not-found error in id mode', async () => {
+      const result = await validateTemplate(rootDir, 'DoesNotExist')
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toBe('Template file not found: DoesNotExist')
+    })
+
+    it('reports PARENT_RESOLUTION_FAILED when parent_spec.url is missing', async () => {
+      const content = ['---', 'spec_version: "V_0-2-0"', 'level: 2', 'title: "No Parent"', '---'].join(
+        '\n',
+      )
+      const result = await validateTemplate(rootDir, undefined, content)
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toMatch(/PARENT_RESOLUTION_FAILED/)
+      expect(result.errors[0].message).toMatch(/Parent spec URL missing/)
+    })
+
+    it('reports PARENT_RESOLUTION_FAILED when the parent spec url cannot be resolved', async () => {
+      vi.spyOn(global, 'fetch').mockRejectedValue(new Error('network unreachable'))
+      const content = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 2',
+        'title: "Unresolvable Parent"',
+        'parent_spec:',
+        '  name: "iNNfo_V_9-9-9"',
+        '  url: "https://example.com/iNNfo_V_9-9-9_NN.md"',
+        '---',
+      ].join('\n')
+      const result = await validateTemplate(rootDir, undefined, content)
+      expect(result.valid).toBe(false)
+      expect(result.errors[0].message).toMatch(/PARENT_RESOLUTION_FAILED/)
+      expect(result.errors[0].message).toMatch(/could not be resolved/)
+    })
+
+    it('reports a level mismatch error for a resolvable template that is not level 2', async () => {
+      await stubSpecChain()
+      const content = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 3',
+        'title: "Wrong Level"',
+        'parent_spec:',
+        '  name: "iNNfo_V_0-1-0"',
+        '  url: "https://example.com/iNNfo_V_0-1-0_NN.md"',
+        '---',
+      ].join('\n')
+      const result = await validateTemplate(rootDir, undefined, content)
+      expect(result.valid).toBe(false)
+      expect(result.errors.some((e) => /Expected level 2/.test(e.message))).toBe(true)
+    })
+
+    it('reports a missing-title error', async () => {
+      await stubSpecChain()
+      const content = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 2',
+        'parent_spec:',
+        '  name: "iNNfo_V_0-1-0"',
+        '  url: "https://example.com/iNNfo_V_0-1-0_NN.md"',
+        '---',
+      ].join('\n')
+      const result = await validateTemplate(rootDir, undefined, content)
+      expect(result.valid).toBe(false)
+      expect(result.errors.some((e) => /Missing title/.test(e.message))).toBe(true)
+    })
+
+    it('validates a well-formed level-2 template against its resolved level-1 parent', async () => {
+      await stubSpecChain()
+      const content = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 2',
+        'title: "Business Template"',
+        'parent_spec:',
+        '  name: "iNNfo_V_0-1-0"',
+        '  url: "https://example.com/iNNfo_V_0-1-0_NN.md"',
+        '---',
+      ].join('\n')
+      const result = await validateTemplate(rootDir, undefined, content)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toEqual([])
+    })
+
+    it('validates a template loaded from disk by id', async () => {
+      await stubSpecChain()
+      const content = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 2',
+        'title: "Business Template"',
+        'parent_spec:',
+        '  name: "iNNfo_V_0-1-0"',
+        '  url: "https://example.com/iNNfo_V_0-1-0_NN.md"',
+        '---',
+      ].join('\n')
+      await writeFile(join(rootDir, 'Template_NN.md'), content, 'utf-8')
+      const result = await validateTemplate(rootDir, 'Template')
+      expect(result.valid).toBe(true)
+    })
+  })
+})

@@ -32,22 +32,34 @@ export { normalizeId }
 
 /**
  * Locate a model file on disk by id.
- * Tries the id verbatim, then the `_NN.md` suffix.
+ *
+ * Searches the root directory and the conventional `models/` subdirectory
+ * (iNNfo workspace layout). For each directory it tries, in order:
+ *   `<cleanId>_NN.md`, `<cleanId>.md`, `<cleanId>`, `<id>`, `<id>.md`.
+ *
+ * The `<id>.md` candidate is what makes ids that already end in `_NN`
+ * (e.g. `LC_programas_Tutorias_V_0-1-0_NN`) resolve to the exact file
+ * `LC_programas_Tutorias_V_0-1-0_NN.md` instead of failing with
+ * "Model not found".
  */
 export async function findModelFile(rootDir: string, id: string): Promise<string | null> {
   const cleanId = normalizeId(id)
-  const candidates = [
-    join(rootDir, `${cleanId}_NN.md`),
-    join(rootDir, `${cleanId}.md`),
-    join(rootDir, cleanId),
-    join(rootDir, id),
-  ]
-  for (const fp of candidates) {
-    try {
-      await stat(fp)
-      return fp
-    } catch {
-      continue
+  const searchDirs = [rootDir, join(rootDir, 'models')]
+  for (const dir of searchDirs) {
+    const candidates = [
+      join(dir, `${cleanId}_NN.md`),
+      join(dir, `${cleanId}.md`),
+      join(dir, cleanId),
+      join(dir, id),
+      join(dir, `${id}.md`),
+    ]
+    for (const fp of candidates) {
+      try {
+        await stat(fp)
+        return fp
+      } catch {
+        continue
+      }
     }
   }
   return null

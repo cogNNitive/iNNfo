@@ -221,6 +221,10 @@ export async function resolveParentChainNode(
       const localPath = toLocalFilePath(currentUrl, rootDir)
       try {
         content = await readFile(localPath, 'utf-8')
+        // Cache local resolutions like http downloads so a later run resolves
+        // from .spec-cache even if the absolute path moves or disappears.
+        const cacheName = canonicalCacheName(currentName, content)
+        await writeFile(join(cacheDir, `${cacheName}_NN.md`), content, 'utf-8').catch(() => {})
       } catch {
         content = null
       }
