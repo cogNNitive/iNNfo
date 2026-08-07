@@ -11,6 +11,7 @@ import SaveWorkspaceModal from '../components/layout/SaveWorkspaceModal.vue'
 import OnboardingDashboard from '../components/layout/OnboardingDashboard.vue'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import { useModelStore } from '../stores/modelStore'
+import { useConfirmStore } from '../stores/confirmStore'
 import { useUiStore, type ActiveView } from '../stores/uiStore'
 import { useMetamodelStore } from '../stores/metamodelStore'
 import { useToast } from '../shared/useToast'
@@ -48,6 +49,7 @@ const SearchResultsView = defineAsyncComponent(
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const modelStore = useModelStore()
+const confirmStore = useConfirmStore()
 const uiStore = useUiStore()
 const metamodelStore = useMetamodelStore()
 const { show } = useToast()
@@ -376,19 +378,36 @@ function onAddItem(): void {
 }
 
 /** Deletes the currently selected element (BlockFeed sheet delete button). */
-function onDeleteSelectedNode(): void {
+async function onDeleteSelectedNode(): Promise<void> {
   const node = selectedNode.value
   const id = selectedNodeId.value
   if (!node || !id) return
+  const isElement = node.kind === 'element'
+  const ok = await confirmStore.confirm({
+    title: isElement ? 'Delete element?' : 'Delete concept?',
+    message: isElement
+      ? 'This will permanently remove the element and all its content.'
+      : 'This will permanently remove the concept and all its content.',
+    confirmLabel: 'Delete',
+    danger: true,
+  })
+  if (!ok) return
   const parentId = node.parentId
   modelStore.removeNodeTree(id)
   uiStore.selectNode(parentId ?? modelStore.rootIds[0] ?? null)
 }
 
 /** Deletes one of the child elements rendered as instance sheets. */
-function onDeleteItem(index: number): void {
+async function onDeleteItem(index: number): Promise<void> {
   const item = childItems.value[index]
   if (!item) return
+  const ok = await confirmStore.confirm({
+    title: 'Delete element?',
+    message: 'This will permanently remove the element and all its content.',
+    confirmLabel: 'Delete',
+    danger: true,
+  })
+  if (!ok) return
   modelStore.removeNodeTree(item.id)
 }
 

@@ -135,6 +135,7 @@
 import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { ChevronUp, ChevronDown, Plus } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
+import { useConfirmStore } from '../../stores/confirmStore'
 import { useUiStore } from '../../stores/uiStore'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
 import BlockPill from './BlockPill.vue'
@@ -147,6 +148,7 @@ const props = defineProps<{
 }>()
 
 const modelStore = useModelStore()
+const confirmStore = useConfirmStore()
 const uiStore = useUiStore()
 
 const topScrollRef = ref<HTMLDivElement | null>(null)
@@ -260,7 +262,14 @@ function moveDown(childId: string): void {
   }
 }
 
-function deleteElement(childId: string): void {
+async function deleteElement(childId: string): Promise<void> {
+  const ok = await confirmStore.confirm({
+    title: 'Delete element?',
+    message: 'This will permanently remove the element and all its content.',
+    confirmLabel: 'Delete',
+    danger: true,
+  })
+  if (!ok) return
   modelStore.removeNodeTree(childId)
 }
 

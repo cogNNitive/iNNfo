@@ -74,6 +74,7 @@
 import { ref, computed, watch } from 'vue'
 import { FolderOpen } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
+import { useConfirmStore } from '../../stores/confirmStore'
 import { useMetamodelStore } from '../../stores/metamodelStore'
 import {
   getConceptFieldsForNode as getConceptFieldsForNodeHelper,
@@ -92,6 +93,7 @@ const _emit = defineEmits<{
 }>()
 
 const modelStore = useModelStore()
+const confirmStore = useConfirmStore()
 const metamodelStore = useMetamodelStore()
 
 const isCollapsed = ref(false)
@@ -161,12 +163,29 @@ const blockFromNode = (node: ModelNode) => {
 const childIcon = (_child: ModelNode) => ''
 const childColor = (_child: ModelNode) => ''
 
-const handleDelete = () => {
+const handleDelete = async (): Promise<void> => {
   if (!props.nodeId) return
+  const isElement = selectedNode.value?.kind === 'element'
+  const ok = await confirmStore.confirm({
+    title: isElement ? 'Delete element?' : 'Delete concept?',
+    message: isElement
+      ? 'This will permanently remove the element and all its content.'
+      : 'This will permanently remove the concept and all its content.',
+    confirmLabel: 'Delete',
+    danger: true,
+  })
+  if (!ok) return
   modelStore.removeNodeTree(props.nodeId)
 }
 
-const handleChildDelete = (childId: string) => {
+const handleChildDelete = async (childId: string): Promise<void> => {
+  const ok = await confirmStore.confirm({
+    title: 'Delete element?',
+    message: 'This will permanently remove the element and all its content.',
+    confirmLabel: 'Delete',
+    danger: true,
+  })
+  if (!ok) return
   modelStore.removeNodeTree(childId)
 }
 
