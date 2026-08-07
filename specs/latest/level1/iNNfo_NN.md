@@ -320,19 +320,27 @@ a Field. There is no parallel discovery mechanism.
 **Rename.** Renaming an Element changes its `{element-slug}`; the transactional rename
 MUST relocate the Element's `assets/{element-slug}/` folder accordingly.
 
-## Provenance & Traceability (source_ref)
+## Provenance & Traceability (sources)
 
-`source_ref` is an **optional** reserved property for Level 3 Elements that establishes traceability to source documents.
+`sources` is an **optional** reserved property for Level 3 Elements that establishes traceability to source documents.
 
-- **Optionality:** A Level 3 Model is syntactically valid with or without `source_ref::` properties. The parser and validator MUST NOT emit an error solely because `source_ref::` is omitted.
+- **Optionality:** A Level 3 Model is syntactically valid with or without `sources::` properties. The parser and validator MUST NOT emit an error solely because `sources::` is omitted.
 - **Location Convention:** Ingested source documents are stored under `sources/markdown/` (or relative subfolders within `sources/`).
-- **Syntax:** `source_ref:: sources/markdown/<filename>#L<start>-L<end>`
+- **Syntax:** `sources:: [sources/markdown/<filename>#L<start>-L<end>, ...]` (MUST always be formatted as a list enclosed in brackets `[...]`, even when referencing a single source document; no scalar string syntax or aliases are allowed).
 
-Example:
+Example (Single Source):
 
 ```markdown
 ## NN Stakeholders: Enterprise Clients
-source_ref:: sources/markdown/market_analysis.md#L45-L60
+sources:: [sources/markdown/market_analysis.md#L45-L60]
+relationship_model:: B2B Long-term
+```
+
+Example (Multiple Sources):
+
+```markdown
+## NN Stakeholders: Enterprise Clients
+sources:: [sources/markdown/market_analysis.md#L45-L60, sources/markdown/interview_transcript.md#L12-L25]
 relationship_model:: B2B Long-term
 ```
 
