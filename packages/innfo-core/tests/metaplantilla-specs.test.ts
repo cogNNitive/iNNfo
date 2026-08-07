@@ -109,6 +109,36 @@ describe('Metaplantilla Nivel 1 (specs/latest)', () => {
     ])
   })
 
+  it('projects template schema extracts concepts, fields, markers, matrices', () => {
+    const content = readLatest('level2/projects/projects_NN.md')
+    const schema = extractTemplateSchemaFromContent(content)
+    expect(schema.concepts.map((c) => c.name)).toEqual([
+      'Project',
+      'Milestone',
+      'Deliverable',
+      'Task',
+      'Risk',
+      'Roles',
+    ])
+    const task = schema.concepts.find((c) => c.name === 'Task')!
+    expect(task.fields!.map((f) => f.name)).toEqual([
+      'status',
+      'priority',
+      'depends_on',
+      'duration',
+      'start_date',
+      'due_date',
+      'milestone',
+      'deliverable',
+    ])
+    expect(schema.markers.map((m) => m.name)).toEqual(['health'])
+    expect(schema.matrices.map((m) => m.name)).toEqual([
+      'task-roles matrix',
+      'task-deliverables matrix',
+      'risks-milestones matrix',
+    ])
+  })
+
   it('validates a unified-syntax model against the migrated procedures template', () => {
     const templateContent = readLatest('level2/procedures/procedures_NN.md')
     const templateDoc: SpecDocument = {
@@ -166,6 +196,7 @@ Reviews the pull request.
       'level2/business/business_NN.md',
       'level2/organization/organization_NN.md',
       'level2/procedures/procedures_NN.md',
+      'level2/projects/projects_NN.md',
     ]) {
       const parsed = parseModel(readLatest(p))
       expect(parsed.elements.has('Concept Definition')).toBe(true)
@@ -189,6 +220,7 @@ Reviews the pull request.
       'level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
       'level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
       'level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
+      'level2/projects/samples/SoftwareReleaseProject_V_1-0-0_projects_NN.md',
     ]) {
       const content = readLatest(p)
       const body = content.replace(/^---[\s\S]*?---\n/, '')
@@ -230,5 +262,17 @@ Reviews the pull request.
     expect(roles).toHaveLength(3)
     expect(roles[0].fields['scope']).toBe('internal')
     expect(parsed.matrices.length).toBe(2)
+  })
+
+  it('parses the SoftwareReleaseProject sample with dependencies and RACI matrix', () => {
+    const content = readLatest('level2/projects/samples/SoftwareReleaseProject_V_1-0-0_projects_NN.md')
+    const parsed = parseModel(content)
+    const tasks = parsed.elements.get('Task')!
+    expect(tasks).toHaveLength(4)
+    const apiTask = tasks.find((t) => t.name === 'Implement Core API Endpoints')!
+    expect(apiTask.fields['depends_on']).toBe('Design Service Specs')
+    expect(apiTask.fields['duration']).toBe('10d')
+    expect(apiTask.fields['status']).toBe('in_progress')
+    expect(parsed.matrices).toHaveLength(3)
   })
 })
