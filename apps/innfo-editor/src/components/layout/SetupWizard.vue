@@ -212,9 +212,9 @@ async function finishWizard(): Promise<void> {
       const loader = useUrlDocLoader()
       const frontmatter = {
         spec_version: 'V_0-1-5',
-        model_version: 'V_1-0-0',
+        model_version: 'V_0-1-0',
         title: name,
-        template: { name: 'business', version: 'V_1-0-0' },
+        template: { name: 'business', version: 'V_0-1-0' },
         concepts: [{ name: 'Topic', type: 'topic', icon: 'wrench', color: '#059669' }],
         markers: [],
       }

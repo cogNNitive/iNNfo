@@ -48,6 +48,41 @@ async function findLocalSpecInHandle(
   return null
 }
 
+/** True when the parent reference is a network URL (http/https). */
+function isHttpUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url)
+}
+
+/** Last path segment of a URL/path (basename). */
+function basenameOfUrl(url: string): string {
+  const cleaned = url.split(/[?#]/)[0]
+  const parts = cleaned.replace(/\\/g, '/').split('/')
+  return parts[parts.length - 1] || cleaned
+}
+
+/** Strips file://, Windows drive prefixes and leading slashes from a local reference. */
+function stripLocalUrlPrefix(url: string): string {
+  let p = url
+  if (p.startsWith('file://')) p = p.replace(/^file:\/\//i, '')
+  p = p.replace(/^[a-zA-Z]:[\\/]/i, '')
+  p = p.replace(/^\/+/, '')
+  return p
+}
+
+/** Resolves a workspace-relative path to a file handle, segment by segment. */
+async function resolvePathInHandle(
+  root: DirectoryHandleLike,
+  relativePath: string,
+): Promise<FileHandleLike | null> {
+  const segments = relativePath.replace(/\\/g, '/').split('/').filter((s) => s && s !== '.')
+  if (segments.length === 0) return null
+  let current: DirectoryHandleLike = root
+  for (let i = 0; i < segments.length - 1; i++) {
+    current = await current.getDirectoryHandle(segments[i])
+  }
+  return current.getFileHandle(segments[segments.length - 1])
+}
+
 /**
  * Dev-only fallback: resolves a template from the repo's `specs/latest`
  * directory (served by vite at `/specs/latest`). `parentName` is a canonical
@@ -73,14 +108,24 @@ async function tryDevLocalTemplate(parentName: string): Promise<string | null> {
  * synthetic root nodes so concept colors can be located without relying on
  * co-location. Mutates `nodes`/`rootIds` in place.
  *
- * Resolution order per model: (1) local `.specs/` directory, (2) network fetch
- * of `parent_spec.url` (persisted back to `.specs/` when a handle is available).
- * Best-effort: network failures or missing templates degrade gracefully.
+ * Resolution order per model:
+ *   1. local workspace directories (`.specs/`, `.spec-cache/`, `specs/`) via
+ *      the folder handle — matching the parent name or the URL's basename;
+ *   2. the `parent_spec.url` itself when it is a local/relative path
+ *      (resolved against the workspace handle instead of fetch());
+ *   3. dev-only `specs/latest` fallback;
+ *   4. network fetch, ONLY for http(s) URLs.
+ *
+ * Locally-resolved and fetched templates are persisted back to `.specs/` when a
+ * handle is available. Best-effort: when the template cannot be resolved, a
+ * parse issue is recorded (surfaced as a warning) and the model's own
+ * `# NN matrices:` blocks keep the matrices visible in the tree.
  */
 export async function resolveParentSpecs(
   nodes: Record<string, ModelNode>,
   rootIds: string[],
   handle?: DirectoryHandleLike,
+  issues?: Array<{ path: string; message: string }>,
 ): Promise<void> {
   for (const rootId of rootIds) {
     const root = nodes[rootId]
@@ -107,16 +152,55 @@ export async function resolveParentSpecs(
 
     let text = ''
     let specFilename = ''
+
+    // 1. Local workspace directories (`.specs/`, `.spec-cache/`, `specs/`),
+    //    matched by parent name. `specs/` is normally ignored for parsing but
+    //    is a legitimate place for level-2 specialization templates.
     if (handle) {
+      for (const dirName of ['.specs', '.spec-cache', 'specs']) {
+        if (text) break
+        try {
+          const dirHandle = await handle.getDirectoryHandle(dirName)
+          const localResult = await findLocalSpecInHandle(dirHandle, parentName)
+          if (localResult) {
+            text = localResult.content
+            specFilename = `${dirName}/${localResult.filename}`
+          }
+        } catch {
+          // directory not present — try the next one
+        }
+      }
+    }
+
+    // 2. The URL itself when it is a local/relative path — resolve it against
+    //    the workspace handle instead of fetch() (which fails for local paths).
+    if (!text && handle && !isHttpUrl(parentUrl)) {
+      const urlName = basenameOfUrl(parentUrl)
+      const relative = stripLocalUrlPrefix(parentUrl)
       try {
-        const specsDir = await handle.getDirectoryHandle('.specs')
-        const localResult = await findLocalSpecInHandle(specsDir, parentName)
-        if (localResult) {
-          text = localResult.content
-          specFilename = `.specs/${localResult.filename}`
+        const direct = await resolvePathInHandle(handle, relative)
+        if (direct) {
+          const file = await direct.getFile()
+          text = await file.text()
+          specFilename = relative
         }
       } catch {
-        // specs directory not found or error accessing it
+        // direct path not present — fall through to the basename directory search
+      }
+      if (!text) {
+        for (const dirName of ['', '.specs', '.spec-cache', 'specs']) {
+          if (text) break
+          try {
+            const base = dirName ? await handle.getDirectoryHandle(dirName) : handle
+            const byName = await findLocalSpecInHandle(base, urlName)
+            if (byName) {
+              text = byName.content
+              specFilename = dirName ? `${dirName}/${byName.filename}` : byName.filename
+            }
+          } catch {
+            // directory not present
+          }
+        }
       }
     }
 
@@ -128,33 +212,45 @@ export async function resolveParentSpecs(
       }
     }
 
-    if (!text) {
+    if (!text && isHttpUrl(parentUrl)) {
       try {
         const resp = await fetch(parentUrl)
-        if (!resp.ok) continue
-        text = await resp.text()
-        // Persist to .specs/ when handle is available
-        if (handle) {
-          specFilename = `.specs/${parentName.replace(/\.md$/i, '')}${parentName.endsWith('_NN') ? '' : '_NN'}.md`
-          try {
-            const specsDir = await handle.getDirectoryHandle('.specs', { create: true })
-            const fileHandle = await specsDir.getFileHandle(specFilename.replace('.specs/', ''), {
-              create: true,
-            })
-            if (fileHandle.createWritable) {
-              const w = await fileHandle.createWritable()
-              await w.write(text)
-              await w.close()
-            }
-          } catch (e) {
-            console.warn(`[template] Could not persist spec to .specs/:`, e)
-          }
+        if (!resp.ok) {
+          console.warn(`[template] Failed to fetch parent spec "${parentUrl}": HTTP ${resp.status}`)
+        } else {
+          text = await resp.text()
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
         console.warn(`[template] Failed to resolve parent spec "${parentUrl}": ${message}`)
-        continue
       }
+    }
+
+    // Persist resolved templates to .specs/ when a handle is available
+    if (text && handle && specFilename && !specFilename.startsWith('spec:')) {
+      const persistName = parentName.replace(/\.md$/i, '').replace(/_NN$/, '')
+      const filename = `${persistName}_NN.md`
+      try {
+        const specsDir = await handle.getDirectoryHandle('.specs', { create: true })
+        const fileHandle = await specsDir.getFileHandle(filename, { create: true })
+        if (fileHandle.createWritable) {
+          const w = await fileHandle.createWritable()
+          await w.write(text)
+          await w.close()
+        }
+      } catch (e) {
+        console.warn(`[template] Could not persist spec to .specs/:`, e)
+      }
+    }
+
+    if (!text) {
+      issues?.push({
+        path: root.source?.path || root.name,
+        message:
+          `[PARENT_RESOLUTION_FAILED] Template "${parentName}" could not be resolved from ` +
+          `parent_spec.url "${parentUrl}" — matrices (if any) render from model data with empty source/target`,
+      })
+      continue
     }
 
     try {
@@ -164,14 +260,25 @@ export async function resolveParentSpecs(
       const schema = extractTemplateSchemaFromContent(text)
       if (!schema.concepts.length && !schema.matrices.length) continue
 
-      // Propagate template matrix declarations to the model root node
-      if (schema.matrices.length > 0 && !root.fields[MATRIX_DEFS_KEY]) {
-        root.fields[MATRIX_DEFS_KEY] = {
-          value: schema.matrices.map((m) => normalizeMatrixDecl(m as unknown as Record<string, unknown>)),
-          provenance: {
-            author: { kind: 'system', id: 'parser' },
-            timestamp: new Date().toISOString(),
-          },
+      // Propagate template matrix declarations to the model root node. Template
+      // declarations are authoritative: when the model already carries defs
+      // derived from its own `# NN matrices:` body blocks (empty source/target
+      // because the template was unresolved at parse time), upgrade them with
+      // the template's source/target instead of skipping.
+      if (schema.matrices.length > 0) {
+        const existingDefs = root.fields[MATRIX_DEFS_KEY]?.value
+        const needsTemplateDefs =
+          !Array.isArray(existingDefs) ||
+          existingDefs.length === 0 ||
+          existingDefs.some((d: any) => !d?.source || !d?.target)
+        if (needsTemplateDefs) {
+          root.fields[MATRIX_DEFS_KEY] = {
+            value: schema.matrices.map((m) => normalizeMatrixDecl(m as unknown as Record<string, unknown>)),
+            provenance: {
+              author: { kind: 'system', id: 'parser' },
+              timestamp: new Date().toISOString(),
+            },
+          }
         }
       }
 

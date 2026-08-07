@@ -7,11 +7,6 @@ export interface ExtensionManifestView {
   targetConcept?: string
 }
 
-export interface ExtensionManifestWidget {
-  targetField: string
-  component: string
-}
-
 export interface ExtensionManifest {
   id: string
   name: string
@@ -19,7 +14,6 @@ export interface ExtensionManifest {
   template: string
   description?: string
   views?: ExtensionManifestView[]
-  widgets?: ExtensionManifestWidget[]
 }
 
 export interface ExtensionContext {
@@ -27,10 +21,4 @@ export interface ExtensionContext {
   selectNode?: (nodeId: string) => void
   readOnly?: boolean
   standalone?: boolean
-  activeProcedureName?: string
-}
-
-export interface TemplateExtension {
-  manifest: ExtensionManifest
-  views: Record<string, any>
 }

@@ -1,17 +1,18 @@
 <template>
   <div
     data-testid="block-sheet"
-    class="rounded-lg bg-slate-50 dark:bg-slate-800/50 transition-all duration-200 flex flex-col relative border border-slate-200 dark:border-slate-700"
+    class="rounded-lg bg-slate-50 dark:bg-slate-800/50 transition-all duration-200 flex flex-col relative border border-slate-200 dark:border-slate-700 overflow-hidden"
   >
     <!-- Header: concept label + markers + controls -->
     <div
-      class="flex items-center rounded-lg px-3 py-2.5 transition-all duration-150 gap-2 select-none text-slate-700 dark:text-slate-300"
+      class="flex items-center rounded-t-lg px-3 py-2.5 transition-all duration-150 gap-2 select-none border-b"
+      :class="[palette.bg, palette.border, palette.text]"
     >
       <!-- Title: icon + name(s) -->
       <div class="flex items-center gap-1.5 min-w-0 flex-1">
         <template v-if="kind === 'concept'">
           <IconRenderer
-            :icon="conceptIcon || 'layers'"
+            :icon="resolvedIcon"
             custom-class="w-5 h-5 shrink-0"
             :class="[palette.text]"
           />
@@ -25,22 +26,23 @@
           <span v-else class="font-bold text-2xl truncate" :class="[palette.text]">{{
             cleanConceptName
           }}</span>
-          <span class="font-normal text-sm text-slate-500 dark:text-slate-400 shrink-0"
+          <span class="font-normal text-sm opacity-80 shrink-0"
             >({{ conceptType }})</span
           >
         </template>
         <template v-else>
           <IconRenderer
-            :icon="conceptIcon || 'layers'"
+            :icon="resolvedIcon"
             custom-class="w-4 h-4 shrink-0"
             :class="[palette.text]"
           />
           <span class="font-bold text-sm" :class="[palette.text]">{{ cleanConceptName }}</span>
-          <span class="text-slate-300 dark:text-slate-600 mx-0.5">:</span>
+          <span class="opacity-40 mx-0.5">:</span>
           <button
             v-if="!isEditing"
             @click.stop="navigateToInstance"
-            class="font-semibold text-2xl text-slate-800 dark:text-slate-200 hover:text-primary hover:underline transition-colors cursor-pointer text-left truncate min-w-0"
+            class="font-semibold text-2xl hover:underline transition-colors cursor-pointer text-left truncate min-w-0"
+            :class="[palette.text]"
             :title="block.name || '(Empty)'"
           >
             {{ block.name || '(Empty)' }}
@@ -136,7 +138,7 @@
         <button
           @click.stop="$emit('edit-toggle')"
           aria-label="Edit"
-          class="p-0.5 hover:bg-current/10 rounded transition-all cursor-pointer flex items-center justify-center shrink-0 text-current/60"
+          class="p-0.5 hover:bg-current/10 rounded transition-all cursor-pointer flex items-center justify-center shrink-0 opacity-80"
         >
           <Pencil class="w-3.5 h-3.5" />
         </button>
@@ -146,7 +148,7 @@
           v-if="showDelete"
           @click.stop="$emit('delete')"
           aria-label="Delete"
-          class="p-0.5 text-current/50 hover:text-rose-600 hover:scale-105 active:scale-95 rounded transition-all cursor-pointer flex items-center justify-center shrink-0"
+          class="p-0.5 opacity-70 hover:text-rose-600 hover:scale-105 active:scale-95 rounded transition-all cursor-pointer flex items-center justify-center shrink-0"
         >
           <Trash2 class="w-3.5 h-3.5" />
         </button>
@@ -163,37 +165,6 @@
           class="w-3.5 h-3.5 transition-transform duration-200"
           :class="{ '-rotate-90': collapsed }"
         />
-      </button>
-    </div>
-
-    <!-- Tree path breadcrumb -->
-    <div
-      v-if="treePath.length > 0 && !collapsed && !isEditing"
-      class="flex items-center flex-wrap gap-x-1 gap-y-0.5 px-3 pb-1 text-2xs text-slate-400 dark:text-slate-500 select-none"
-    >
-      <template v-for="(seg, i) in treePath" :key="i">
-        <span v-if="i > 0" class="text-slate-300 dark:text-slate-600 mx-0.5">&rsaquo;</span>
-        <span>{{ seg }}</span>
-      </template>
-    </div>
-
-    <!-- Tab bar (read mode only, when expanded and showTabs enabled) -->
-    <div
-      v-if="showTabs && !collapsed && !isEditing"
-      class="flex items-center gap-1 px-3 border-b border-slate-200 dark:border-slate-700 select-none"
-    >
-      <button
-        v-for="tab in tabDefs"
-        :key="tab.id"
-        @click="activeTab = tab.id"
-        class="px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer -mb-px"
-        :class="
-          activeTab === tab.id
-            ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500'
-            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-        "
-      >
-        {{ tab.label }}
       </button>
     </div>
 
@@ -237,10 +208,10 @@
           </div>
         </template>
 
-        <!-- Read-mode tabbed content -->
+        <!-- Read-mode layout -->
         <template v-else>
-          <!-- ═══ Table Tab (default for concepts) ═══ -->
-          <div v-if="resolvedTab === 'table'" class="space-y-6">
+          <!-- ═══ Concept Layout ═══ -->
+          <div v-if="isConcept" class="space-y-6">
             <ConceptTableView
               v-if="block.id"
               :node-id="block.id"
@@ -268,7 +239,7 @@
                 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
               >
                 <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Fields
+                Fields Schema
               </div>
               <div
                 v-if="conceptFields && conceptFields.length > 0"
@@ -279,36 +250,25 @@
               <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No fields defined</div>
             </div>
 
-            <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
+            <!-- Unified Connections & Relationships -->
+            <div
+              v-if="hasRelationships || (hasMatrices && block.id)"
+              class="border-t border-slate-200 dark:border-slate-700 pt-5"
+            >
               <div
                 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
               >
-                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Relationships
+                <span class="w-1.5 h-4 rounded-full bg-indigo-500 shrink-0"></span>
+                Concept Connections &amp; Matrices
               </div>
-              <div
-                v-if="hasRelationships"
-                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
-              >
-                <BlockRelationships :relationships="relationshipsList" :on-navigate="navigateToNode" />
-              </div>
-              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No relationships</div>
-            </div>
-
-            <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
-              <div
-                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
-              >
-                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Relations
-              </div>
-              <div
-                v-if="hasMatrices && block.id"
-                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
-              >
-                <BlockMatrixSummary :root-node-id="rootNodeId" :node-concept="conceptType" :node-id="block.id" />
-              </div>
-              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No relations participation</div>
+              <BlockConnections
+                :root-node-id="rootNodeId"
+                :node-concept="conceptName || conceptType"
+                :node-id="block.id"
+                :is-concept="true"
+                :relationships="relationshipsList"
+                :on-navigate="navigateToNode"
+              />
             </div>
 
             <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
@@ -322,8 +282,8 @@
             </div>
           </div>
 
-          <!-- ═══ View Tab ═══ -->
-          <div v-else-if="resolvedTab === 'view'" class="space-y-6">
+          <!-- ═══ Element (Instance) Layout ═══ -->
+          <div v-else class="space-y-6">
             <div
               v-if="renderedDescription"
               class="border-t border-slate-200 dark:border-slate-700 pt-5"
@@ -370,45 +330,25 @@
               </div>
             </div>
 
+            <!-- Unified Connections & Relationships -->
             <div
-              v-if="hasRelationships"
+              v-if="hasRelationships || (hasMatrices && block.id)"
               class="border-t border-slate-200 dark:border-slate-700 pt-5"
             >
               <div
                 class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
               >
-                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Relationships
+                <span class="w-1.5 h-4 rounded-full bg-indigo-500 shrink-0"></span>
+                Connections &amp; Relationships
               </div>
-              <div
-                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
-              >
-                <BlockRelationships
-                  :relationships="relationshipsList"
-                  :on-navigate="navigateToNode"
-                />
-              </div>
-            </div>
-
-            <div
-              v-if="hasMatrices && block.id"
-              class="border-t border-slate-200 dark:border-slate-700 pt-5"
-            >
-              <div
-                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
-              >
-                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Relations
-              </div>
-              <div
-                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
-              >
-                <BlockMatrixSummary
-                  :root-node-id="rootNodeId"
-                  :node-concept="conceptType"
-                  :node-id="block.id"
-                />
-              </div>
+              <BlockConnections
+                :root-node-id="rootNodeId"
+                :node-concept="conceptType"
+                :node-id="block.id"
+                :is-concept="false"
+                :relationships="relationshipsList"
+                :on-navigate="navigateToNode"
+              />
             </div>
 
             <div v-if="block.id" class="border-t border-slate-200 dark:border-slate-700 pt-5">
@@ -419,21 +359,6 @@
                 Media &amp; Attachments
               </div>
               <NodeMedia :assets="resolvedAssetItems" />
-            </div>
-          </div>
-
-          <!-- ═══ Code Tab ═══ -->
-          <div v-else-if="resolvedTab === 'code'" class="space-y-6">
-            <div class="border-t border-slate-200 dark:border-slate-700 pt-5">
-              <div
-                class="text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2"
-              >
-                <span class="w-1.5 h-4 rounded-full bg-slate-400 shrink-0"></span>
-                Raw Markdown
-              </div>
-              <pre
-                class="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4 overflow-x-auto text-xs leading-relaxed font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap"
-              ><code>{{ rawMarkdown || 'No source available' }}</code></pre>
             </div>
           </div>
         </template>
@@ -456,16 +381,17 @@ import { useNodeMediaScan } from '../../composables/useNodeMediaScan'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { getColorClasses } from '../../utils/colors'
 import type { BlockKind } from '../../utils/conceptVisuals'
+import { useConceptVisuals, getConceptMeta } from '../../composables/useConceptVisuals'
 
 // Tab dependencies
 import FieldViewer from './FieldViewer.vue'
+import BlockConnections from './BlockConnections.vue'
 import BlockRelationships from './BlockRelationships.vue'
 import BlockMatrixSummary from './BlockMatrixSummary.vue'
 import NodeMedia from './NodeMedia.vue'
 import ConceptTableView from './ConceptTableView.vue'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { readMatrixDefsField } from '../../composables/useMatrixDefinitions'
-import { useBlockRawMarkdown } from './composables/useBlockRawMarkdown'
 import { useBlockAssets } from './composables/useBlockAssets'
 
 const props = withDefaults(
@@ -479,7 +405,6 @@ const props = withDefaults(
     conceptIcon?: string
     collapsed: boolean
     isEditing: boolean
-    showTabs?: boolean
     disableExpand?: boolean
     hasMarkers?: boolean
     showDelete?: boolean
@@ -492,7 +417,6 @@ const props = withDefaults(
     conceptFields: () => [],
     conceptColor: '',
     conceptIcon: '',
-    showTabs: true,
     disableExpand: false,
     hasMarkers: false,
     showDelete: false,
@@ -517,58 +441,41 @@ const emit = defineEmits<{
 }>()
 
 const modelStore = useModelStore()
-
-// ── Tab state ───────────────────────────────────────────────────
+const conceptVisuals = useConceptVisuals()
 
 const isConcept = computed(() => props.kind === 'concept')
 
-const tabDefs = computed(() => {
-  const tabs: { id: string; label: string }[] = []
-  if (isConcept.value) {
-    tabs.push({ id: 'table', label: 'Table' })
+// ── Palette & Visual Resolution ─────────────────────────────────
+
+const effectiveColorName = computed(() => {
+  if (props.conceptColor) return props.conceptColor
+  if (props.block.id) {
+    const node = modelStore.getNode(props.block.id)
+    if (node) return conceptVisuals.resolveColorName(node)
   }
-  tabs.push({ id: 'view', label: 'View' })
-  tabs.push({ id: 'code', label: 'Code' })
-  return tabs
-})
-
-const activeTab = ref(isConcept.value ? 'table' : 'view')
-
-/** When showTabs is disabled or current activeTab is invalid for tabDefs, force the effective tab to 'view'. */
-const resolvedTab = computed(() => {
-  if (!props.showTabs) return 'view'
-  const isValid = tabDefs.value.some((t) => t.id === activeTab.value)
-  return isValid ? activeTab.value : 'view'
-})
-
-// ── Palette ─────────────────────────────────────────────────────
-
-const palette = computed(() => getColorClasses(props.conceptColor))
-
-// ── Tree path breadcrumb ─────────────────────────────────────────
-
-const treePath = computed(() => {
-  if (!props.block.id) return []
-  const segments: string[] = []
-  let current = modelStore.getNode(props.block.id)
-  while (current) {
-    segments.unshift(current.name)
-    if (!current.parentId) break
-    current = modelStore.getNode(current.parentId)
+  const targetConcept = props.conceptName || props.conceptType
+  if (targetConcept) {
+    const meta = getConceptMeta(targetConcept)
+    if (meta.color) return meta.color
   }
-  return segments
+  return ''
 })
 
-const treeSiblings = computed(() => {
-  if (!props.block.id) return []
-  const node = modelStore.getNode(props.block.id)
-  if (!node?.parentId) return []
-  const parent = modelStore.getNode(node.parentId)
-  if (!parent) return []
-  return parent.childIds
-    .map((id) => modelStore.getNode(id)?.name)
-    .filter((n): n is string => !!n && n !== node.name)
+const resolvedIcon = computed(() => {
+  if (props.conceptIcon) return props.conceptIcon
+  if (props.block.id) {
+    const node = modelStore.getNode(props.block.id)
+    if (node) return conceptVisuals.resolveIcon(node)
+  }
+  const targetConcept = props.conceptName || props.conceptType
+  if (targetConcept) {
+    const meta = getConceptMeta(targetConcept)
+    if (meta.icon) return meta.icon
+  }
+  return 'layers'
 })
+
+const palette = computed(() => getColorClasses(effectiveColorName.value))
 
 // ── Markers ─────────────────────────────────────────────────────
 
@@ -597,22 +504,6 @@ const renderedDescription = computed(() => {
       ? stripBlockDefinitions(props.block.description)
       : props.block.description
   return renderMarkdown(text)
-})
-
-// ── Raw markdown source for Code tab ──────────────────────────
-
-const blockIdRef = computed(() => props.block.id ?? '')
-const kindRef = computed(() => props.kind)
-const conceptNameRef = computed(() => props.conceptName)
-const conceptTypeRef = computed(() => props.conceptType)
-const blockRef = computed(() => props.block)
-
-const { rawMarkdown } = useBlockRawMarkdown({
-  blockId: blockIdRef,
-  kind: kindRef,
-  conceptName: conceptNameRef,
-  conceptType: conceptTypeRef,
-  block: blockRef,
 })
 
 // ── Node from store (full model data) ───────────────────────────
@@ -727,23 +618,6 @@ const onConceptNameInput = (event: Event) => {
 // ── Input handlers ──────────────────────────────────────────────
 
 const onDescriptionUpdate = (val: string) => {
-  props.block.description = val
-  if (props.block.id) {
-    const node = modelStore.getNode(props.block.id)
-    if (node) {
-      modelStore.upsertNode({
-        ...node,
-        rawSections: { ...node.rawSections, description: val },
-      })
-    }
-  }
-  modelStore.markDirty(props.block.id || '')
-  emit('change')
-}
-
-const onInput = (event: Event) => {
-  const textarea = event.target as HTMLTextAreaElement
-  const val = textarea.value
   props.block.description = val
   if (props.block.id) {
     const node = modelStore.getNode(props.block.id)

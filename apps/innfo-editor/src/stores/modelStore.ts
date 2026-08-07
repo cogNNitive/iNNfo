@@ -129,8 +129,8 @@ export const useModelStore = defineStore('model', {
      */
     async parseFromHandle(handle: DirectoryHandleLike, driver?: ModelDriver): Promise<void> {
       const result = await recursiveParse(handle, driver)
+      await resolveParentSpecs(result.nodes, result.rootIds, handle, result.issues)
       this.parseIssues = result.issues
-      await resolveParentSpecs(result.nodes, result.rootIds, handle)
       this.setGraph(result.nodes, result.rootIds)
     },
 

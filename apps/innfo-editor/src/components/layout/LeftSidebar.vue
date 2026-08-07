@@ -175,6 +175,13 @@
                 <Table2 class="w-3 h-3 text-slate-400 shrink-0" />
                 <span>Relations</span>
               </div>
+              <p
+                v-if="hasUnresolvedMatrixDefs(rootId)"
+                class="px-1.5 text-[10px] leading-snug text-amber-600 dark:text-amber-400"
+                title="Template not resolved — matrices render from model data with empty source/target"
+              >
+                Template not resolved — matrices shown from model data (source/target empty)
+              </p>
               <div class="space-y-0.5 pl-1">
                 <MatrixPill
                   v-for="matrix in getMatricesForModel(rootId)"
@@ -391,6 +398,13 @@ function getMatricesForModel(rootId: string): MatrixDef[] {
   const rootNode = modelStore.getNode(rootId)
   if (!rootNode) return []
   return mergeMatrixDefs(rootNode)
+}
+
+/** True when a model's matrices have no source/target — template unresolved, defs came from model blocks. */
+function hasUnresolvedMatrixDefs(rootId: string): boolean {
+  const rootNode = modelStore.getNode(rootId)
+  if (!rootNode) return false
+  return mergeMatrixDefs(rootNode).some((d) => !d.source || !d.target)
 }
 
 /** Handles selection of a matrix pill belonging to a specific model. */

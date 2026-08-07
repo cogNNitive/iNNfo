@@ -282,12 +282,16 @@ const visuals = useBlockVisuals({
 // ── Empty state ─────────────────────────────────────────────────
 const isEmpty = computed(() => {
   if (props.hideEmpty) return false
-  const hasDescription = !!props.description && props.description.trim().length > 0
+  const node = props.blockId ? modelStore.getNode(props.blockId) : null
+  const desc = props.description ?? (node as any)?.description ?? node?.rawContent ?? ''
+  const fieldsObj = props.fields ?? node?.fields
+  const hasDescription = !!desc && desc.trim().length > 0
   const hasFields =
-    !!props.fields &&
-    Object.values(props.fields).some(
-      (v) => v !== undefined && v !== null && v !== '' && v !== false,
-    )
+    !!fieldsObj &&
+    Object.values(fieldsObj).some((v: any) => {
+      const val = typeof v === 'object' && v !== null && 'value' in v ? v.value : v
+      return val !== undefined && val !== null && val !== '' && val !== false
+    })
   const hasInstances = (props.instanceCount ?? 0) > 0
   return !hasDescription && !hasFields && !hasInstances
 })

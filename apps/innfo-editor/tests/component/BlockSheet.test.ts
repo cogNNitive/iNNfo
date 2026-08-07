@@ -5,12 +5,6 @@ import BlockSheet from '../../src/components/editor/BlockSheet.vue'
 import { useModelStore } from '../../src/stores/modelStore'
 import type { ModelNode } from '../../src/model/types'
 
-/**
- * Approval tests pinning BlockSheet.vue's CURRENT `rawMarkdown` and
- * `assetItems` behavior before extracting them into
- * `useBlockRawMarkdown.ts` / `useBlockAssets.ts` (Phase 6). Zero prior
- * Vitest coverage existed for this component.
- */
 function makeNode(id: string, overrides: Partial<ModelNode> = {}): ModelNode {
   return {
     id,
@@ -27,52 +21,48 @@ function makeNode(id: string, overrides: Partial<ModelNode> = {}): ModelNode {
   }
 }
 
-describe('BlockSheet.vue — rawMarkdown + assetItems (pinning current behavior)', () => {
+describe('BlockSheet.vue — Redesigned layout & assets', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
 
-  describe('rawMarkdown (Code tab)', () => {
-    it('returns the full raw source when the block node has rawContent', async () => {
+  describe('Header and Layout', () => {
+    it('renders element title with concept name and element name without tabs', async () => {
       const modelStore = useModelStore()
-      const rawContent = '---\nspec_version: V_0-1-5\n---\n\n# _F Root\n'
-      modelStore.setGraph({ Root: makeNode('Root', { rawContent }) }, ['Root'])
+      const root = makeNode('Root', { rawContent: '---\nspec_version: V_0-1-5\n---\n' })
+      const element = makeNode('Root/Task1', {
+        name: 'Task1',
+        parentId: 'Root',
+        type: 'Task',
+      })
+      modelStore.setGraph({ Root: root, 'Root/Task1': element }, ['Root'])
 
       const wrapper = mount(BlockSheet, {
         props: {
-          block: { id: 'Root', name: 'Root', description: '' },
+          block: { id: 'Root/Task1', name: 'Task1', description: 'Sample description' },
           kind: 'instance',
-          conceptType: 'Root',
-          conceptName: 'Root',
+          conceptType: 'Task',
+          conceptName: 'Task',
           collapsed: false,
           isEditing: false,
         },
       })
 
-      const codeTabBtn = wrapper.findAll('button').find((b) => b.text() === 'Code')!
-      await codeTabBtn.trigger('click')
-
-      expect(wrapper.find('pre code').element.textContent).toBe(rawContent)
+      expect(wrapper.text()).toContain('Task')
+      expect(wrapper.text()).toContain('Task1')
+      expect(wrapper.text()).toContain('Sample description')
+      // Ensure tab buttons are removed
+      expect(wrapper.find('button[class*="border-b-2"]').exists()).toBe(false)
     })
 
-    it('reconstructs a "* _NN Type: Name" marker line with YAML fields for element nodes without rawContent', async () => {
+    it('renders unified connections section when node has relationships', async () => {
       const modelStore = useModelStore()
-      const root = makeNode('Root', {
-        rawContent: '---\nspec_version: V_0-1-5\n---\n\n# _F Root\n',
-      })
+      const root = makeNode('Root', { rawContent: '---\nspec_version: V_0-1-5\n---\n' })
       const element = makeNode('Root/Task1', {
         name: 'Task1',
         parentId: 'Root',
         type: 'Task',
-        fields: {
-          priority: {
-            value: 'high',
-            provenance: {
-              author: { kind: 'system', id: 'test' },
-              timestamp: '2024-01-01T00:00:00.000Z',
-            },
-          },
-        },
+        relationships: [{ label: 'depends_on', targetId: 'Root/Task2' }],
       })
       modelStore.setGraph({ Root: root, 'Root/Task1': element }, ['Root'])
 
@@ -87,13 +77,9 @@ describe('BlockSheet.vue — rawMarkdown + assetItems (pinning current behavior)
         },
       })
 
-      const codeTabBtn = wrapper.findAll('button').find((b) => b.text() === 'Code')!
-      await codeTabBtn.trigger('click')
-
-      const codeText = wrapper.find('pre code').text()
-      expect(codeText).toContain('* _NN Task: Task1')
-      expect(codeText).toContain('```yaml')
-      expect(codeText).toContain('priority: "high"')
+      expect(wrapper.text()).toContain('Connections & Relationships')
+      expect(wrapper.text()).toContain('depends_on')
+      expect(wrapper.text()).toContain('Task2')
     })
   })
 

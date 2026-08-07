@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div
     data-testid="right-guidance-sidebar"
     class="relative flex shrink-0"
@@ -231,6 +231,16 @@ const uiStore = useUiStore()
 const workspaceStore = useWorkspaceStore()
 
 const isCollapsed = ref(false)
+
+watch(
+  () => uiStore.activeView,
+  (newView) => {
+    if (newView === 'matrices') {
+      isCollapsed.value = true
+    }
+  },
+  { immediate: true },
+)
 const guidance = ref<DocumentationEntry | null>(null)
 const loading = ref(false)
 

@@ -1,71 +1,51 @@
 <template>
-  <div class="flex flex-col gap-3">
-    <!-- Action Bar -->
-    <div class="flex items-center justify-between">
-      <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-        {{ conceptType || 'Elements' }} List
-      </h3>
-      <div class="flex items-center gap-3">
-        <!-- View/Edit mode switcher -->
-        <div class="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
-          <button
-            @click="isEditMode = false"
-            class="inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-semibold rounded-md transition-all cursor-pointer border border-transparent"
-            :class="
-              !isEditMode
-                ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-            "
-          >
-            <Eye class="w-3 h-3" />
-            <span>View</span>
-          </button>
-          <button
-            @click="isEditMode = true"
-            class="inline-flex items-center gap-1 px-2.5 py-1 text-2xs font-semibold rounded-md transition-all cursor-pointer border border-transparent"
-            :class="
-              isEditMode
-                ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-            "
-          >
-            <Pencil class="w-3 h-3" />
-            <span>Edit</span>
-          </button>
-        </div>
-
-        <button
-          @click="addElement"
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md border border-indigo-500 bg-indigo-500 text-white hover:bg-indigo-600 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-xs"
-          data-testid="add-element-btn"
-        >
-          <Plus class="w-3.5 h-3.5" />
-          Add {{ conceptType || 'Element' }}
-        </button>
-      </div>
+  <div class="flex flex-col gap-1">
+    <!-- Top Horizontal Scrollbar Container -->
+    <div
+      ref="topScrollRef"
+      @scroll="syncTopScroll"
+      class="overflow-x-auto overflow-y-hidden rounded-t-lg bg-slate-100 dark:bg-slate-800/80 border border-b-0 border-slate-200 dark:border-slate-700 h-3"
+    >
+      <div :style="{ width: tableWidth + 'px' }" class="h-px"></div>
     </div>
 
     <!-- Table Container -->
     <div
-      class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+      ref="tableContainerRef"
+      @scroll="syncTableScroll"
+      class="overflow-x-auto rounded-b-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
     >
-      <table class="w-full caption-bottom text-sm border-separate border-spacing-0 min-w-[600px]">
-        <thead class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800/95">
+      <table
+        ref="tableRef"
+        class="w-full caption-bottom text-sm border-separate border-spacing-0 min-w-[600px]"
+      >
+        <thead class="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800/95 shadow-2xs">
           <tr>
             <th
-              class="sticky left-0 z-20 bg-slate-50 dark:bg-slate-800/95 text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 min-w-[200px]"
+              class="sticky left-0 top-0 z-30 bg-slate-50 dark:bg-slate-800/95 text-left px-3 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 min-w-[280px]"
             >
-              Element
+              <div class="flex items-center gap-2">
+                <span>Element</span>
+                <button
+                  @click="addElement"
+                  class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-xs hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+                  title="Add element"
+                  aria-label="Add element"
+                  data-testid="add-element-btn"
+                >
+                  <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
+                </button>
+              </div>
             </th>
             <th
               v-for="field in conceptFields"
               :key="field.name"
-              class="text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 min-w-[140px]"
+              class="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800/95 text-left px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 min-w-[140px]"
             >
               {{ field.name.replace(/_/g, ' ') }}
             </th>
             <th
-              class="text-center px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 min-w-[100px] w-[100px]"
+              class="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800/95 text-center px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700 min-w-[80px] w-[80px]"
             >
               Order
             </th>
@@ -80,7 +60,7 @@
             :class="idx === children.length - 1 ? 'border-b-0' : ''"
           >
             <td
-              class="sticky left-0 z-10 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30 px-2 py-1 border-r border-slate-100 dark:border-slate-700/50"
+              class="sticky left-0 z-10 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30 px-2 py-1 border-r border-slate-100 dark:border-slate-700/50 min-w-[280px]"
             >
               <BlockPill
                 kind="instance"
@@ -107,7 +87,7 @@
                 :field-key="field.name"
                 :widget-type="field.type || 'string'"
                 :field-definition="field"
-                :readonly="!isEditMode"
+                readonly
               />
             </td>
             <td class="px-3 py-2 text-sm text-slate-700 dark:text-slate-300 text-center">
@@ -127,14 +107,6 @@
                   title="Move down"
                 >
                   <ChevronDown class="w-3.5 h-3.5" />
-                </button>
-                <span class="w-px h-3.5 bg-slate-200 dark:bg-slate-700 mx-0.5"></span>
-                <button
-                  @click.stop="deleteElement(child.id)"
-                  class="p-1 rounded hover:bg-rose-50 dark:hover:bg-rose-900/30 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer flex items-center justify-center"
-                  title="Delete element"
-                >
-                  <Trash2 class="w-3.5 h-3.5" />
                 </button>
               </div>
             </td>
@@ -160,13 +132,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ChevronUp, ChevronDown, Plus, Eye, Pencil, Trash2 } from 'lucide-vue-next'
+import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ChevronUp, ChevronDown, Plus } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
-
-const isEditMode = ref(false)
 import BlockPill from './BlockPill.vue'
 import type { FieldValue } from '@cognnitive/innfo-core'
 
@@ -178,6 +148,59 @@ const props = defineProps<{
 
 const modelStore = useModelStore()
 const uiStore = useUiStore()
+
+const topScrollRef = ref<HTMLDivElement | null>(null)
+const tableContainerRef = ref<HTMLDivElement | null>(null)
+const tableRef = ref<HTMLTableElement | null>(null)
+const tableWidth = ref(600)
+
+let isSyncing = false
+
+function syncTopScroll(e: Event): void {
+  if (isSyncing) return
+  isSyncing = true
+  if (tableContainerRef.value && topScrollRef.value) {
+    tableContainerRef.value.scrollLeft = (e.target as HTMLElement).scrollLeft
+  }
+  requestAnimationFrame(() => {
+    isSyncing = false
+  })
+}
+
+function syncTableScroll(e: Event): void {
+  if (isSyncing) return
+  isSyncing = true
+  if (topScrollRef.value && tableContainerRef.value) {
+    topScrollRef.value.scrollLeft = (e.target as HTMLElement).scrollLeft
+  }
+  requestAnimationFrame(() => {
+    isSyncing = false
+  })
+}
+
+function updateTableWidth(): void {
+  if (tableRef.value) {
+    tableWidth.value = tableRef.value.scrollWidth
+  }
+}
+
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  nextTick(() => {
+    updateTableWidth()
+    if (tableRef.value && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => updateTableWidth())
+      resizeObserver.observe(tableRef.value)
+    }
+  })
+})
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
+})
 
 function getRawFields(child: { fields?: Record<string, FieldValue | unknown> }): Record<string, unknown> {
   if (!child.fields) return {}

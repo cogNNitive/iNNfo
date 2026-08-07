@@ -16,7 +16,7 @@
         @click="onSelectMatrix(chip.matrixName)"
       />
     </template>
-    <p v-else class="text-xs text-slate-400 dark:text-slate-500 italic">No relations participation.</p>
+    <p v-else class="text-xs text-slate-400 dark:text-slate-500 italic">No matrix connections.</p>
   </div>
 </template>
 
@@ -30,11 +30,17 @@ import { readMatrixDefsField, resolveMatrixIndexByName } from '../../composables
 import type { MatrixDecl } from '@cognnitive/innfo-core'
 import MatrixPill from './MatrixPill.vue'
 
-const props = defineProps<{
-  rootNodeId: string
-  nodeConcept: string
-  nodeId: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    rootNodeId: string
+    nodeConcept: string
+    nodeId: string
+    isConcept?: boolean
+  }>(),
+  {
+    isConcept: false,
+  },
+)
 
 const modelStore = useModelStore()
 const uiStore = useUiStore()
@@ -47,6 +53,16 @@ interface MatrixChip {
   position: 'row' | 'col'
   count: number
   accentColor: string
+}
+
+function normalizeConcept(name: string): string {
+  const lower = (name || '').trim().toLowerCase()
+  return lower.endsWith('s') ? lower.slice(0, -1) : lower
+}
+
+function matchesConcept(a: string, b: string): boolean {
+  if (!a || !b) return false
+  return normalizeConcept(a) === normalizeConcept(b)
 }
 
 const chips = computed<MatrixChip[]>(() => {
@@ -68,7 +84,6 @@ const chips = computed<MatrixChip[]>(() => {
 
   // Helper: count non-dash/empty cells for a matrix + concept instance
   // Cell keys are formatted as `{matrixName}||{rowInstance}||{colInstance}`.
-  // The node can appear as a row (parts[1]) or column (parts[2]) participant.
   function countNonDashCells(
     matrixName: string,
     rootNodeId: string,
@@ -81,7 +96,6 @@ const chips = computed<MatrixChip[]>(() => {
     for (const [key, fv] of Object.entries(rn.fields)) {
       const parts = key.split('||')
       if (parts.length >= 3 && parts[0] === matrixName) {
-        // Row: matrix||nodeName||*   Col: matrix||*||nodeName
         if (parts[1] === conceptInstanceName || parts[2] === conceptInstanceName) {
           const val = (fv as any)?.value
           if (val !== undefined && val !== null && val !== '' && val !== '-' && val !== false) {
@@ -93,27 +107,47 @@ const chips = computed<MatrixChip[]>(() => {
     return count
   }
 
+  function countTotalMatrixCells(matrixName: string, rootNodeId: string): number {
+    const rn = modelStore.getNode(rootNodeId)
+    if (!rn?.fields) return 0
+    let count = 0
+    for (const [key, fv] of Object.entries(rn.fields)) {
+      const parts = key.split('||')
+      if (parts.length >= 3 && parts[0] === matrixName) {
+        const val = (fv as any)?.value
+        if (val !== undefined && val !== null && val !== '' && val !== '-' && val !== false) {
+          count++
+        }
+      }
+    }
+    return count
+  }
+
   for (const m of matrices) {
-    const node = modelStore.getNode(props.nodeId)
-    if (!node) continue
+    const conceptTarget = props.nodeConcept
+    const isSource = matchesConcept(m.source, conceptTarget)
+    const isTarget = matchesConcept(m.target, conceptTarget)
+
+    if (!isSource && !isTarget) continue
 
     // Resolve concept color for accent
     const conceptColor = (() => {
-      // Look up concept definition from metamodel or use node's type
       const rootNode = modelStore.getNode(props.rootNodeId)
       if (rootNode?.rawContent) {
         const fmData = parseFrontmatter(rootNode.rawContent)
         const concepts: Array<{ name: string; color?: string }> = (fmData as any)?.concepts ?? []
-        const found = concepts.find((c) => c.name === props.nodeConcept)
+        const found = concepts.find((c) => matchesConcept(c.name, conceptTarget))
         if (found?.color) return getHexColor(found.color)
       }
-      // Fall back to the node's type-based color
       return getHexColor(undefined)
     })()
 
-    if (m.source === props.nodeConcept) {
-      // Node is a row participant
-      const count = countNonDashCells(m.name, props.rootNodeId, node.name)
+    const node = modelStore.getNode(props.nodeId)
+    const count = props.isConcept || !node
+      ? countTotalMatrixCells(m.name, props.rootNodeId)
+      : countNonDashCells(m.name, props.rootNodeId, node.name)
+
+    if (isSource) {
       result.push({
         matrixName: m.name,
         source: m.source,
@@ -125,20 +159,16 @@ const chips = computed<MatrixChip[]>(() => {
       })
     }
 
-    if (m.target === props.nodeConcept) {
-      // Node is a column participant
-      const count = countNonDashCells(m.name, props.rootNodeId, node.name)
-      if (!result.some((r) => r.matrixName === m.name && r.position === 'row')) {
-        result.push({
-          matrixName: m.name,
-          source: m.source,
-          target: m.target,
-          label: m.label,
-          position: 'col',
-          count,
-          accentColor: conceptColor,
-        })
-      }
+    if (isTarget && !result.some((r) => r.matrixName === m.name && r.position === 'row')) {
+      result.push({
+        matrixName: m.name,
+        source: m.source,
+        target: m.target,
+        label: m.label,
+        position: 'col',
+        count,
+        accentColor: conceptColor,
+      })
     }
   }
 
