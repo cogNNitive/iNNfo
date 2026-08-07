@@ -19,6 +19,8 @@ e2e-reports/
 e2e-fixtures/
 # Local AI runtime state
 .atl/
+# Local Engram persistent-memory state (machine-specific)
+.engram/
 # Backup
 specs.bak/
 # Generated exports (AI agent output)
