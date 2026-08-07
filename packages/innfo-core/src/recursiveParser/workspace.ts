@@ -1,5 +1,5 @@
 import type { DirectoryHandleLike, FileHandleLike } from '../fs-types'
-import type { ModelDriver } from '../driver'
+import type { ModelDriver } from '../types'
 import { IdentityRegistry } from '../identity'
 import type { ParseContext, RecursiveParseResult } from './types'
 import { stripMdSuffix } from './paths'

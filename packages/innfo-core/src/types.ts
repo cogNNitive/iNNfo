@@ -153,34 +153,6 @@ export class ElementsMap {
   }
 }
 
-/** Hierarchical tree node built from taxonomy + hierarchy matrices */
-export interface TreeNode {
-  id: string
-  name: string
-  type: string
-  description: string
-  fields: Record<string, unknown>
-  markers: Record<string, number | string>
-  children: TreeNode[]
-}
-
-/** A relationship extracted from wikilinks or graph_edges */
-export interface Relationship {
-  sourceId: string
-  targetId: string
-  label: string
-  value?: string | number
-}
-
-/** An analysis/evaluation score entry */
-export interface AnalysisEntry {
-  timestamp: string
-  evaluator: string
-  evaluatorType: 'human' | 'ai'
-  score: number
-  comment: string
-}
-
 /** Raw section content preserved for round-trip fidelity */
 export interface RawSection {
   rawTitle: string
@@ -194,12 +166,6 @@ export interface ParsedModel {
   matrices: MatrixData[]
   nodeMarkers: Record<string, Record<string, number | string>>
   rawContent: string
-  /** Optional: hierarchy tree built from taxonomy + hierarchy matrices */
-  tree?: TreeNode[]
-  /** Optional: relationships from graph_edges + wikilinks */
-  relationships?: Relationship[]
-  /** Optional: analysis/evaluation entries */
-  analysis?: AnalysisEntry[]
   /** Optional: raw body text per concept for round-trip fidelity */
   rawSections?: Record<string, string>
   /** Slug collisions detected during parsing (FR-002). */
@@ -268,6 +234,20 @@ export interface SyntaxCheck {
 
 export interface FileDriverOptions {
   encoding?: string
+}
+
+export interface ModelEntry {
+  name: string
+  uri: string
+  kind: 'element' | 'asset' | 'concept'
+}
+
+/** Structural contract for pluggable model read/write backends (e.g. a caller-supplied write target). */
+export interface ModelDriver {
+  readModel(uri: string): Promise<ParsedModel>
+  writeModel(uri: string, model: ParsedModel): Promise<void>
+  listChildren(uri: string): Promise<ModelEntry[]>
+  listAssets(uri: string): Promise<string[]>
 }
 
 export interface ResolverOptions {

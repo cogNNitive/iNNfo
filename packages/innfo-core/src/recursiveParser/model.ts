@@ -100,11 +100,23 @@ export function normalizeSingleModel(
     }
   }
 
-  // Store matrix definitions as __matrix_defs for UI components
+  // Store matrix definitions as __matrix_defs for UI components.
+  // Priority: frontmatter `matrices` first (explicit declarations), then the
+  // model's own `# NN matrices:` body blocks. The body-block fallback keeps the
+  // matrices visible in the navigation tree even when the parent template could
+  // not be resolved (source/target then come from the blocks or stay empty) —
+  // the app renders them from model data with a warning instead of hiding them.
   const fmMatrices = (parsed.frontmatter as any)?.matrices
   if (Array.isArray(fmMatrices) && fmMatrices.length > 0) {
     rootNode.fields['__matrix_defs'] = {
       value: fmMatrices.map((m: any) => normalizeMatrixDecl(m)),
+      provenance: { author: { kind: 'system', id: 'parser' }, timestamp: nowIso() },
+    }
+  } else if (parsed.matrices.length > 0) {
+    rootNode.fields['__matrix_defs'] = {
+      value: parsed.matrices.map((m) =>
+        normalizeMatrixDecl({ name: m.name, source: m.source, target: m.target }),
+      ),
       provenance: { author: { kind: 'system', id: 'parser' }, timestamp: nowIso() },
     }
   }

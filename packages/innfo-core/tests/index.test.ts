@@ -6,9 +6,6 @@ import {
   parseFrontmatter,
   validateModel,
   validateFormatContent,
-  buildHierarchyTree,
-  extractRelationships,
-  extractAnalysis,
   slugify,
   deriveElementSlugs,
   IdentityRegistry,
@@ -872,64 +869,6 @@ describe('CRLF line-ending handling', () => {
     expect(model.elements.size).toBeGreaterThan(1)
     expect(model.elements.has('Stakeholders')).toBe(true)
     expect(model.elements.get('Stakeholders')!.length).toBeGreaterThanOrEqual(7)
-  })
-})
-
-describe('extended parser features', () => {
-  const modelContent = [
-    '---',
-    'spec_version: "V_0-2-0"',
-    'level: 3',
-    'model_version: "V_0-1-2"',
-    'title: "Inline Test"',
-    'mode: "FILE"',
-    'parent_spec:',
-    '  name: "test_V_0-1-1"',
-    '  url: "https://example.com/test"',
-    '---',
-    '',
-    '# NN index',
-    '',
-    '* [[Market]]',
-    '  * [[Segments]]',
-    '* [[Stakeholders]]',
-    '* [[Problems]]',
-    '',
-    '# NN Stakeholders',
-    '## NN Stakeholders: S1',
-    '## NN Stakeholders: S2',
-    '## NN Stakeholders: S3',
-    '## NN Stakeholders: S4',
-    '## NN Stakeholders: S5',
-    '## NN Stakeholders: S6',
-    '## NN Stakeholders: S7',
-    '',
-    '# NN Problems',
-    '## NN Problems: P1',
-    '## NN Problems: P2',
-    '',
-  ].join('\n')
-  const model = parseModel(modelContent)
-
-  it('buildHierarchyTree returns tree from taxonomy', () => {
-    const tree = buildHierarchyTree(model.taxonomy, model.elements, model.matrices)
-    expect(Array.isArray(tree)).toBe(true)
-    expect(tree.length).toBeGreaterThan(0)
-  })
-
-  it('extractRelationships finds wikilink refs', () => {
-    const rels = extractRelationships(model.frontmatter, model.elements)
-    expect(Array.isArray(rels)).toBe(true)
-    // The Ghostbusters model currently defines no wikilinks in element descriptions
-    // nor graph_edges in frontmatter, so extractRelationships must return an empty array.
-    // This is the real contract — if relationships are added to the fixture, this test
-    // will fail and must be bumped to the new expected count (not a >= 0 tautology).
-    expect(rels.length).toBe(0)
-  })
-
-  it('extractAnalysis returns array', () => {
-    const analysis = extractAnalysis(modelContent)
-    expect(Array.isArray(analysis)).toBe(true)
   })
 })
 

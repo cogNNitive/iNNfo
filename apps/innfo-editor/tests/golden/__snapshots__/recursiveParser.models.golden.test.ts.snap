@@ -70,6 +70,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses FORMAT_V_0-1-
     {
       "childCount": 131,
       "fieldKeys": [
+        "__matrix_defs",
         "activities-resources matrix||Business Template Cloud Development||AI Agent Skills",
         "activities-resources matrix||Business Template Cloud Development||Business Template (especificación + docs)",
         "activities-resources matrix||Business Template Cloud Development||FORMAT Engine (open source)",
@@ -2008,6 +2009,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses Ghostbusters_
     {
       "childCount": 38,
       "fieldKeys": [
+        "__matrix_defs",
         "last_saved",
         "level",
         "mode",
@@ -2417,6 +2419,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses iNNv0_Innovat
     {
       "childCount": 24,
       "fieldKeys": [
+        "__matrix_defs",
         "level",
         "mode",
         "model_version",
@@ -2670,6 +2673,7 @@ exports[`recursiveParser golden: frozen models/* fixtures > parses mini-file_V_0
     {
       "childCount": 4,
       "fieldKeys": [
+        "__matrix_defs",
         "level",
         "mode",
         "model_version",

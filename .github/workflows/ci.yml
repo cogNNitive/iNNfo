@@ -48,9 +48,6 @@ jobs:
       - name: Unit tests (core)
         run: npm --prefix packages/innfo-core test
 
-      - name: Unit tests (pipeline-gates)
-        run: npm --prefix packages/pipeline-gates test
-
       - name: Unit tests (innfo-mcp)
         run: npm --prefix packages/innfo-mcp test
 

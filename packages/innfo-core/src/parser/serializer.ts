@@ -144,7 +144,9 @@ export function serializeModel(model: ParsedModel): string {
   }
 
   for (const matrix of model.matrices) {
-    if (matrix.cells.length === 0) continue
+    // Preserve declaration-only matrices (no cells) too: a `# NN matrices:`
+    // block that only declares the matrix must not silently vanish on
+    // round-trip, otherwise the tree loses the matrix entirely.
     lines.push(`# NN matrices: ${matrix.name}`)
     const colSet = new Set(matrix.cells.map((c) => c.col))
     const rowSet = new Set(matrix.cells.map((c) => c.row))
@@ -152,7 +154,7 @@ export function serializeModel(model: ParsedModel): string {
     const rows = Array.from(rowSet)
     const cellMap = new Map(matrix.cells.map((c) => [`${c.row}||${c.col}`, c.value]))
 
-    const headerLine = `| ${matrix.source} \\ ${matrix.target} | ${cols.join(' | ')} |`
+    const headerLine = `| ${matrix.source || 'Row'} \\ ${matrix.target || 'Col'} | ${cols.join(' | ')} |`
     const sepLine = `| :--- | ${cols.map(() => ':---:').join(' | ')} |`
     lines.push(headerLine)
     lines.push(sepLine)

@@ -13,6 +13,5 @@ export {
   parseMatrixSection,
   getSectionType,
 } from './sections'
-export { buildHierarchyTree, extractRelationships, extractAnalysis } from './graph'
 export { serializeModel } from './serializer'
 export { parseModel, deriveElementSlugs } from './core'

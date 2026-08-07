@@ -7,9 +7,6 @@ export {
   parseIndexBlock,
   parseMarkdownTable,
   getSectionType,
-  buildHierarchyTree,
-  extractRelationships,
-  extractAnalysis,
 } from './parser'
 export {
   CONCEPT_DEFINITION,
@@ -36,11 +33,6 @@ export {
   type ParseIssue,
   type RecursiveParseResult,
 } from './recursiveParser'
-// Browser-safe driver stub (Node.js driver implementations are excluded
-// as they depend on node:fs/promises)
-export { createDriver } from './driver-browser'
-export type { ModelDriver, ModelEntry } from './driver-browser'
-
 export {
   getSpecForLevel,
   getTemplate,
