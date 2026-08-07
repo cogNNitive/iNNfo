@@ -63,5 +63,28 @@ export default defineConfig({
     // Without this exclude, Vitest tries to collect them and fails on the
     // '@playwright/test' import.
     exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        'e2e/**',
+        'tests/**',
+        '**/*.spec.ts',
+        '**/*.test.ts',
+        '**/*.d.ts',
+        '*.config.ts',
+      ],
+      // Ratchet thresholds: set a few points below the measured baseline
+      // (2026-08-07: lines 73.1%, branches 74.12%, funcs 57.31%, stmts 73.1%)
+      // so CI fails on regression, not on first run.
+      thresholds: {
+        lines: 70,
+        branches: 70,
+        functions: 55,
+        statements: 70,
+      },
+    },
   },
 })
