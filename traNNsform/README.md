@@ -1,6 +1,9 @@
-# traNNsform â€” iNNfo Model â†’ HTML Visualizer
+# traNNsform — iNNfo Model → HTML Visualizer
 
-**âš ï¸ Si `AGENT.md` no existe en este directorio, usÃ¡ ESTE archivo como entry point.** TenÃ©s que leerlo completo y seguirlo como protocolo. Si un paso referencia a `AGENT.md`, ignorÃ¡ esa referencia â€” este archivo es suficiente.
+> [!WARNING]
+> **DEPRECATED**: La lógica ejecutable activa y actualizada de ingestión, normalización y transformación vive exclusivamente en la skill **`actioNN/skills/nn-trannsform`**. Este directorio se mantiene únicamente por compatibilidad con plantillas heredadas.
+
+**⚠️ Si `AGENT.md` no existe en este directorio, usá ESTE archivo como entry point.** Tenés que leerlo completo y seguirlo como protocolo. Si un paso referencia a `AGENT.md`, ignorá esa referencia — este archivo es suficiente.
 
 Instrucciones maestras para el agente. Cuando el usuario pase un modelo iNNfo (`.md`) y pida transformarlo, seguÃ­ este protocolo.
 

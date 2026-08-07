@@ -127,7 +127,7 @@ output: "<template-type>"
 2. Follow the naming convention from defiNNe (Â§6 â€” File Naming Convention):
    `<Model>_V_x-y-z_<Template>_NN.md`
    â†’ https://raw.githubusercontent.com/cogNNitive/cogNNitive/main/specs/latest/level0/defiNNe_NN.md
-3. Apply standard version `V_1-0-0` for new models
+3. Apply standard version `V_0-1-0` for new models
 4. Generate appropriate frontmatter YAML with:
    - `parent_spec` referencing the matching template spec URL
    - Model `title` based on content domain
@@ -139,7 +139,7 @@ output: "<template-type>"
 skill: "nn-trannsform"
 template: "templates/<detected>.md"
 input: "traNNsform/input/md/<normalized>.md"
-output: "<Model>_V_1-0-0_<Template>_NN.md"
+output: "<Model>_V_0-1-0_<Template>_NN.md"
 ```
 
 ---
@@ -180,7 +180,7 @@ output: "validation-status"
 **Goal**: Confirm the import result and suggest follow-up actions.
 
 **Steps**:
-1. Report the saved model path: âœ… `<Model>_V_1-0-0_<Template>_NN.md`
+1. Report the saved model path: âœ… `<Model>_V_0-1-0_<Template>_NN.md`
 2. If validation passed: "The model is valid and ready to use."
 3. If validation had warnings: "The model was created with warnings (see above). You may want to review specific sections."
 4. Ask: "Would you like to add more source documents, or start working with the model in the editor?"

@@ -62,7 +62,7 @@
           <div style="max-width: 720px; margin: 0 auto">
             <h2 style="font-size: 22px; margin-bottom: var(--space-md)">Architecture</h2>
             <p style="margin-bottom: var(--space-lg)">
-              iNNfo is organized as an npm workspaces monorepo — one editor app, three shared
+              iNNfo is organized as an npm workspaces monorepo — one editor app, two shared
               packages, the spec chain, and an agent-driven pipeline:
             </p>
 
@@ -89,13 +89,9 @@
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// TS parser, resolver, validator</span
               ><br />
-              │&nbsp;&nbsp; ├── innfo-mcp/ &nbsp;&nbsp;&nbsp;&nbsp;<span
+              │&nbsp;&nbsp; └── innfo-mcp/ &nbsp;&nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
                 >// MCP server for AI agents</span
-              ><br />
-              │&nbsp;&nbsp; └── pipeline-gates/ <span
-                style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
-                >// Validation &amp; integration gates</span
               ><br />
               ├── specs/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
                 style="color: var(--ink-muted); font-family: var(--sans); font-size: 12px"
@@ -153,15 +149,6 @@
                 <code>validate_model_url</code> — so any MCP-capable AI agent can read, validate, and
                 safely mutate iNNfo models. Spec and template resolution follow the model's parent
                 chain, with no hardcoded URLs.
-              </p>
-            </div>
-
-            <div class="card" style="margin-bottom: var(--space-md)">
-              <span class="card-tag">@cognnitive/pipeline-gates</span>
-              <h3 style="margin-top: var(--space-sm)">pipeline-gates</h3>
-              <p>
-                Validation and integration gates for iNNfo model pipelines — the dev-tooling layer
-                that validates, integrates, and versions models in CI so a broken model never ships.
               </p>
             </div>
 

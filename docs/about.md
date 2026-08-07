@@ -11,7 +11,7 @@ The monorepo that ties the iNNfo ecosystem together.
 
 ## Architecture
 
-npm workspaces monorepo — one editor app, three shared packages, the spec chain, and an agent-driven pipeline:
+npm workspaces monorepo — one editor app, two shared packages, the spec chain, and an agent-driven pipeline:
 
 ```
 iNNfo/
@@ -19,8 +19,7 @@ iNNfo/
 â”‚   â””â”€â”€ innfo-editor/     â† Vue 3 workspace editor (the iNNfo Modeler)
 â”œâ”€â”€ packages/
 â”‚   â”œâ”€â”€ innfo-core/       â† TS parser, resolver, validator
-â”‚   â”œâ”€â”€ innfo-mcp/        â† MCP server for AI agents
-â”‚   â””â”€â”€ pipeline-gates/   â† Validation & integration gates
+â”‚   â””â”€â”€ innfo-mcp/        â† MCP server for AI agents
 â”œâ”€â”€ specs/                â† defiNNe, iNNfo, templates, samples
 â”œâ”€â”€ traNNsform/           â† Agent-driven import/export pipeline
 â””â”€â”€ docs/                 â† This website
@@ -46,8 +45,6 @@ iNNfo/
 - Parent-spec-chain resolver
 
 **@cognnitive/innfo-mcp** — a Model Context Protocol server (stdio) wrapping innfo-core. Exposes seven semantic tools — `list_models`, `read_model`, `get_spec`, `get_template`, `validate_model`, `apply_change`, `validate_model_url` — so any MCP-capable AI agent can read, validate, and safely mutate iNNfo models.
-
-**@cognnitive/pipeline-gates** — validation and integration gates for iNNfo model pipelines; the dev-tooling layer that validates, integrates, and versions models in CI.
 
 ## Specifications
 
