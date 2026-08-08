@@ -9,6 +9,7 @@
 import { ref, computed } from 'vue'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
+import BlockPill from '../../components/editor/BlockPill.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -27,6 +28,33 @@ const modelStore = useModelStore()
 const uiStore = useUiStore()
 const showDropdown = ref(false)
 const query = ref(props.modelValue || '')
+
+const cleanQuery = computed(() => {
+  const val = props.modelValue || query.value || ''
+  if (typeof val !== 'string') return ''
+  return val.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '').trim()
+})
+
+const refNode = computed(() => {
+  const name = cleanQuery.value
+  if (!name) return null
+  if (modelStore.nodes[name]) {
+    return modelStore.nodes[name]
+  }
+  return Object.values(modelStore.nodes).find(
+    (n) => n.name.toLowerCase() === name.toLowerCase()
+  ) || null
+})
+
+const getConceptFields = (typeName: string | undefined) => {
+  if (!typeName) return []
+  const rootId = modelStore.rootIds[0]
+  if (!rootId) return []
+  const root = modelStore.getNode(rootId)
+  return root?.localMetamodel?.concepts?.find(
+    (c) => c.name.toLowerCase() === typeName.toLowerCase(),
+  )?.fields ?? []
+}
 
 const placeholderText = computed(() => {
   const targets = props.fieldDefinition?.target_concepts || []
@@ -102,7 +130,30 @@ function onBlur(): void {
 
 <template>
   <div class="field-reference-container">
-    <span v-if="readonly" class="field-reference-readonly">{{ query || '—' }}</span>
+    <template v-if="readonly">
+      <BlockPill
+        v-if="refNode"
+        :node-id="refNode.id"
+        :name="refNode.name"
+        :kind="refNode.conceptBinding?.name ? 'instance' : 'concept'"
+        :concept-type="refNode.type"
+        :block-id="refNode.id"
+        :description="refNode.rawContent || refNode.rawSections?.description || ''"
+        :fields="refNode.fields"
+        :concept-fields="getConceptFields(refNode.type)"
+        interactive
+        class="cursor-pointer"
+        @click="uiStore.selectNode(refNode.id)"
+      />
+      <span
+        v-else-if="cleanQuery"
+        class="text-slate-400 dark:text-slate-500 italic underline decoration-dotted cursor-help"
+        title="Referenced node not found in this model"
+      >
+        [[{{ cleanQuery }}]]
+      </span>
+      <span v-else class="field-reference-readonly">—</span>
+    </template>
     <input
       v-else
       type="text"

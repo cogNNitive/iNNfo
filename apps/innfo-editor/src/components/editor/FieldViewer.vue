@@ -61,7 +61,7 @@
               class="text-slate-400 dark:text-slate-500 italic underline decoration-dotted cursor-help"
               title="Referenced node not found in this model"
             >
-              [[{{ entry.displayValue }}]]
+              [[{{ cleanReferenceName(entry.displayValue) }}]]
             </span>
           </template>
           <template v-else-if="entry.def.type === 'boolean'">
@@ -106,6 +106,11 @@ import BlockPill from './BlockPill.vue'
 import SourceRefPill from './SourceRefPill.vue'
 import { parseSourceRef } from '../../utils/sourceRef'
 import { isImageFieldValue } from '../../utils/imageDetection'
+
+function cleanReferenceName(val: unknown): string {
+  if (typeof val !== 'string') return ''
+  return val.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '').trim()
+}
 
 function isSourceRef(val: unknown): boolean {
   if (typeof val !== 'string') return false
@@ -187,7 +192,7 @@ const fieldEntries = computed<FieldEntry[]>(() => {
 
     let refNode = null
     if (def.type === 'reference' && hasValue && typeof rawValue === 'string') {
-      const cleanName = rawValue.trim()
+      const cleanName = cleanReferenceName(rawValue)
       if (modelStore.nodes[cleanName]) {
         refNode = modelStore.nodes[cleanName]
       } else {

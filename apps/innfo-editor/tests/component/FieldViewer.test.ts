@@ -154,4 +154,30 @@ describe('FieldViewer.vue — R-SC-06', () => {
     // Select values render as badge chips in read mode
     expect(wrapper.text()).toContain('active')
   })
+
+  it('resolves reference fields with WikiLink syntax to BlockPill', () => {
+    const modelStore = useModelStore()
+    const targetNode = makeNode('Salón-Comedor', {})
+    targetNode.name = 'Salón-Comedor'
+    targetNode.type = 'Component'
+    modelStore.setGraph(
+      {
+        Root: makeNode('Root', { location: '[[Salón-Comedor]]' }),
+        'Salón-Comedor': targetNode,
+      },
+      ['Root', 'Salón-Comedor'],
+    )
+
+    const wrapper = mount(FieldViewer, {
+      props: {
+        nodeId: 'Root',
+        fieldDefinitions: [{ name: 'location', type: 'reference', target_concepts: ['Component'] }],
+        readonly: true,
+      },
+    })
+
+    // Should resolve the node and render BlockPill with name 'Salón-Comedor'
+    expect(wrapper.findComponent({ name: 'BlockPill' }).exists()).toBe(true)
+    expect(wrapper.text()).toContain('Salón-Comedor')
+  })
 })

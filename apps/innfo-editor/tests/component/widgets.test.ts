@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createPinia } from 'pinia'
+import { createPinia, setActivePinia } from 'pinia'
 import TextWidget from '../../src/shared/widgets/TextWidget.vue'
 import WeightWidget from '../../src/shared/widgets/WeightWidget.vue'
 import CategoryWidget from '../../src/shared/widgets/CategoryWidget.vue'
@@ -171,6 +171,42 @@ describe('FieldNumber (field-type widget for number fields)', () => {
     input.element.innerHTML = ''
     // The onInput handler converts '' to 0
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
+})
+
+import FieldReference from '../../src/shared/widgets/FieldReference.vue'
+import { useModelStore } from '../../src/stores/modelStore'
+
+describe('FieldReference (field-type widget for reference fields)', () => {
+  it('renders BlockPill in readonly mode when target node exists with WikiLink syntax', () => {
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const modelStore = useModelStore()
+    modelStore.setGraph(
+      {
+        'Salón-Comedor': {
+          id: 'Salón-Comedor',
+          name: 'Salón-Comedor',
+          parentId: null,
+          childIds: [],
+          type: 'Component',
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          source: { path: 'Salón-Comedor' },
+        },
+      },
+      ['Salón-Comedor'],
+    )
+
+    const wrapper = mount(FieldReference, {
+      props: { modelValue: '[[Salón-Comedor]]', readonly: true },
+      global: { plugins: [pinia] },
+    })
+
+    expect(wrapper.findComponent({ name: 'BlockPill' }).exists()).toBe(true)
+    expect(wrapper.text()).toContain('Salón-Comedor')
   })
 })
 
