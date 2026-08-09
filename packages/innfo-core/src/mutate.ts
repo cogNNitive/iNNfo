@@ -1,10 +1,11 @@
-import type { ParsedModel, ElementNode } from './types'
+import type { ParsedModel, ElementNode, TaxonomyEdge } from './types'
 import {
   CONCEPT_DEFINITION,
   FIELD_DEFINITION,
   MARKER_DEFINITION,
   MATRIX_DEFINITION,
 } from './schema'
+import { slugify } from './parser/slug'
 
 export interface MutationResult {
   success: boolean
@@ -83,6 +84,8 @@ export function applyMutation(
         return renameConcept(model, args)
       case 'rename_element':
         return renameElement(model, args)
+      case 'generate_index':
+        return generateIndex(model, args)
       default:
         return { success: false, errors: [{ path: '', message: `Unknown operation: ${op}` }] }
     }
@@ -296,6 +299,66 @@ function renameConcept(model: ParsedModel, args: Record<string, unknown>): Mutat
   return { success: true }
 }
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+export function updateReferenceString(text: string, oldName: string, newName: string): string {
+  if (!text || typeof text !== 'string') return text
+  const oldSlug = slugify(oldName)
+
+  // Case 1: Exact match (scalar reference field value without wikilink brackets)
+  if (!text.trim().startsWith('[[') && !text.trim().endsWith(']]')) {
+    if (slugify(text.trim()) === oldSlug) {
+      const leadingSpaces = text.match(/^\s*/)?.[0] || ''
+      const trailingSpaces = text.match(/\s*$/)?.[0] || ''
+      return `${leadingSpaces}${newName}${trailingSpaces}`
+    }
+  }
+
+  // Case 2: Qualified scalar string, e.g. "[Model] OldName" or "Model :: OldName"
+  if (!text.trim().startsWith('[[') && !text.trim().endsWith(']]')) {
+    const qualifiedBracketRegex = new RegExp(`^(\\s*\\[[^\\]]+\\]\\s*)(.+)$`, 'i')
+    const matchBracket = text.match(qualifiedBracketRegex)
+    if (matchBracket && slugify(matchBracket[2].trim()) === oldSlug) {
+      const trailingSpaces = matchBracket[2].match(/\s*$/)?.[0] || ''
+      return `${matchBracket[1]}${newName}${trailingSpaces}`
+    }
+
+    const qualifiedColonRegex = new RegExp(`^(\\s*[^:]+::\\s*)(.+)$`, 'i')
+    const matchColon = text.match(qualifiedColonRegex)
+    if (matchColon && slugify(matchColon[2].trim()) === oldSlug) {
+      const trailingSpaces = matchColon[2].match(/\s*$/)?.[0] || ''
+      return `${matchColon[1]}${newName}${trailingSpaces}`
+    }
+  }
+
+  // Case 3: Embedded wikilinks: [[Target]] or [[Target|Alias]] or [[Qualified Target]]
+  return text.replace(/\[\[\s*([^\|]+?)(\s*\|[^\]]+)?\s*\]\]/gi, (match, target, alias) => {
+    const trimmedTarget = target.trim()
+
+    // Direct match inside wikilink
+    if (slugify(trimmedTarget) === oldSlug) {
+      return `[[${newName}${alias ?? ''}]]`
+    }
+
+    // Qualified match inside wikilink: e.g. "[Model] OldName" or "Model :: OldName"
+    const qBracket = new RegExp(`^(\\[[^\\]]+\\]\\s*)(.+)$`, 'i')
+    const mBracket = trimmedTarget.match(qBracket)
+    if (mBracket && slugify(mBracket[2]) === oldSlug) {
+      return `[[${mBracket[1]}${newName}${alias ?? ''}]]`
+    }
+
+    const qColon = new RegExp(`^(.*::\\s*)(.+)$`, 'i')
+    const mColon = trimmedTarget.match(qColon)
+    if (mColon && slugify(mColon[2]) === oldSlug) {
+      return `[[${mColon[1]}${newName}${alias ?? ''}]]`
+    }
+
+    return match
+  })
+}
+
 function renameElement(model: ParsedModel, args: Record<string, unknown>): MutationResult {
   const req = requireArgs(args, ['conceptName', 'elementName', 'newName'])
   if (!req.ok) return req.result
@@ -344,6 +407,106 @@ function renameElement(model: ParsedModel, args: Record<string, unknown>): Mutat
     }
   }
 
+  // Rewrite references in element fields, description, and relationships
+  for (const [, elements] of model.elements.entries()) {
+    for (const el of elements) {
+      // 1. Fields
+      if (el.fields) {
+        for (const [fKey, fVal] of Object.entries(el.fields)) {
+          if (typeof fVal === 'string') {
+            el.fields[fKey] = updateReferenceString(fVal, elementName, newName)
+          } else if (Array.isArray(fVal)) {
+            el.fields[fKey] = fVal.map((item) =>
+              typeof item === 'string' ? updateReferenceString(item, elementName, newName) : item,
+            )
+          }
+        }
+      }
+
+      // 2. Description
+      if (el.description && typeof el.description === 'string') {
+        el.description = updateReferenceString(el.description, elementName, newName)
+      }
+
+      // 3. Relationships array (if present)
+      if (Array.isArray((el as any).relationships)) {
+        for (const rel of (el as any).relationships) {
+          if (rel && typeof rel.target === 'string' && rel.target.toLowerCase() === lowerOld) {
+            rel.target = newName
+          }
+        }
+      }
+    }
+  }
+
+  // 4. Model rawSections (if present)
+  if (model.rawSections) {
+    for (const [sKey, sVal] of Object.entries(model.rawSections)) {
+      if (typeof sVal === 'string') {
+        model.rawSections[sKey] = updateReferenceString(sVal, elementName, newName)
+      }
+    }
+  }
+
   model.elements.set(conceptName, existingElements)
+  return { success: true }
+}
+
+function generateIndex(model: ParsedModel, args: Record<string, unknown>): MutationResult {
+  const templateTaxonomy = args.taxonomy as Array<{ parent: string; child: string }> | undefined
+
+  // Collect all concepts present in the model
+  const presentConcepts = new Set<string>()
+  for (const c of model.elements.keys()) {
+    if (
+      c.toLowerCase() !== 'concept definition' &&
+      c.toLowerCase() !== 'field definition' &&
+      c.toLowerCase() !== 'marker definition' &&
+      c.toLowerCase() !== 'matrix definition'
+    ) {
+      presentConcepts.add(c)
+    }
+  }
+  if (model.rawSections) {
+    for (const c of Object.keys(model.rawSections)) {
+      if (c.toLowerCase() !== 'index') {
+        presentConcepts.add(c)
+      }
+    }
+  }
+
+  // Also include template concepts if declared as Concept Definition elements
+  const conceptDefs = model.elements.get(CONCEPT_DEFINITION)
+  if (conceptDefs) {
+    for (const cd of conceptDefs) {
+      presentConcepts.add(cd.name)
+    }
+  }
+
+  let finalEdges: TaxonomyEdge[] = []
+
+  if (templateTaxonomy && Array.isArray(templateTaxonomy) && templateTaxonomy.length > 0) {
+    // Keep edges where both parent and child are present
+    const edgesToKeep = templateTaxonomy.filter(
+      (edge) => presentConcepts.has(edge.parent) && presentConcepts.has(edge.child)
+    )
+
+    // For any present concept, check if it has a parent in the kept edges
+    const childNodesInKept = new Set(edgesToKeep.map((e) => e.child))
+
+    for (const concept of presentConcepts) {
+      if (!childNodesInKept.has(concept)) {
+        edgesToKeep.push({ parent: '', child: concept })
+      }
+    }
+    finalEdges = edgesToKeep
+  } else {
+    // Fallback: list all present concepts flatly as root-level nodes
+    for (const concept of presentConcepts) {
+      finalEdges.push({ parent: '', child: concept })
+    }
+  }
+
+  model.taxonomy = finalEdges
   return { success: true }
 }
