@@ -1,6 +1,8 @@
-import { parseModel, serializeModel, type ParsedModel, type MatrixCell } from '@cognnitive/innfo-core'
+import { parseModel, serializeModel, type ParsedModel, type MatrixCell, type ElementNode } from '@cognnitive/innfo-core'
 import type { ModelNode } from './types'
 import type { ModelDriver } from '@cognnitive/innfo-core'
+import { useModelStore } from '../stores/modelStore'
+import { getActivePinia } from 'pinia'
 
 export interface WriteReport {
   path: string
@@ -118,6 +120,80 @@ function serializeNodeContent(node: ModelNode): {
     throw new Error(`Node "${node.id}" has no rawContent to serialize from`)
   }
   const parsed = parseModel(node.rawContent)
+
+  // Synchronize memory-modified child elements of the root node
+  const childElements: ModelNode[] = []
+
+  if (getActivePinia()) {
+    const modelStore = useModelStore()
+
+    function collectElements(id: string) {
+      const curr = modelStore.getNode(id)
+      if (!curr) return
+      if (curr.kind === 'element') {
+        childElements.push(curr)
+      }
+      for (const cid of curr.childIds) {
+        collectElements(cid)
+      }
+    }
+
+    collectElements(node.id)
+
+    const elementsMap = new Map<string, ElementNode[]>()
+    for (const child of childElements) {
+      const conceptName = child.type
+      if (!elementsMap.has(conceptName)) {
+        elementsMap.set(conceptName, [])
+      }
+      const elFields: Record<string, unknown> = {}
+      if (child.fields) {
+        for (const [key, fVal] of Object.entries(child.fields)) {
+          elFields[key] = (fVal as any)?.value !== undefined ? (fVal as any).value : fVal
+        }
+      }
+      elementsMap.get(conceptName)!.push({
+        type: child.type,
+        name: child.name,
+        description: child.rawSections?.description || child.description || '',
+        fields: elFields,
+        slug: child.slug,
+      })
+    }
+    parsed.elements = elementsMap
+
+    // Synchronize hierarchy taxonomy
+    const elementNames = new Set(childElements.map((c) => c.name))
+    const conceptEdges = parsed.taxonomy.filter((edge) => !elementNames.has(edge.child))
+    
+    const elementEdges: Array<{ parent: string; child: string }> = []
+    for (const child of childElements) {
+      let parentName = ''
+      if (child.parentId) {
+        if (child.parentId.startsWith('virtual:')) {
+          const parts = child.parentId.split(':')
+          parentName = parts[2] || ''
+        } else {
+          const parentNode = modelStore.getNode(child.parentId)
+          if (parentNode && parentNode.kind === 'element') {
+            parentName = parentNode.name
+          }
+        }
+      }
+      elementEdges.push({ parent: parentName, child: child.name })
+    }
+    parsed.taxonomy = [...conceptEdges, ...elementEdges]
+
+    // Synchronize item node markers
+    const nodeMarkers: Record<string, Record<string, number | string>> = {}
+    for (const child of childElements) {
+      if (child.markers && Object.keys(child.markers).length > 0) {
+        nodeMarkers[child.name] = { ...child.markers }
+      }
+    }
+    parsed.nodeMarkers = nodeMarkers
+  }
+
   // Apply any edited `text`-concept sections (rawSections) onto the parsed
   // model so they round-trip back to disk.
   if (node.rawSections && Object.keys(node.rawSections).length > 0) {

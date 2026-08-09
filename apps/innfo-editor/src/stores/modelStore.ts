@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { ModelNode } from '../model/types'
 import type { DirectoryHandleLike } from '../model/fs-types'
 import { recursiveParse } from '../model/recursiveParser'
-import { validateFormatContent } from '@cognnitive/innfo-core'
+import { validateFormatContent, updateReferenceString } from '@cognnitive/innfo-core'
 import type { ModelDriver, ParseIssue, ValidationReport } from '@cognnitive/innfo-core'
 import { resolveParentSpecs } from '../services/SpecResolverService'
 
@@ -107,6 +107,10 @@ export const useModelStore = defineStore('model', {
 
     markDirty(id: string): void {
       this.dirtyIds.add(id)
+      const rootId = this.getModelRootForNode(id)
+      if (rootId) {
+        this.dirtyIds.add(rootId)
+      }
     },
 
     clearDirty(id: string): void {
@@ -254,6 +258,121 @@ export const useModelStore = defineStore('model', {
       }
       delete this.nodes[nodeId]
       this.dirtyIds.add(nodeId)
+    },
+
+    /**
+     * Renames an element node in the graph and propagates the rename
+     * to all referencing fields, wikilinks, and relationships across all nodes.
+     */
+    renameElementNode(nodeId: string, newName: string): void {
+      const node = this.nodes[nodeId]
+      if (!node || !newName || node.name === newName) return
+
+      const oldName = node.name
+      const lowerOld = oldName.toLowerCase()
+      const lowerNew = newName.toLowerCase()
+
+      // Update target node properties
+      node.name = newName
+      node.slug = lowerNew.replace(/[^a-z0-9-]/g, '_')
+
+      // Handle ID re-keying if ID is path-based (e.g. parentId/oldName)
+      let currentId = nodeId
+      if (node.parentId && nodeId === `${node.parentId}/${oldName}`) {
+        const newId = `${node.parentId}/${newName}`
+        if (!this.nodes[newId]) {
+          // Update parent's childIds
+          const parent = this.nodes[node.parentId]
+          if (parent) {
+            parent.childIds = parent.childIds.map((id) => (id === nodeId ? newId : id))
+            this.markDirty(parent.id)
+          }
+
+          // Update node's children parentId
+          for (const childId of node.childIds) {
+            const child = this.nodes[childId]
+            if (child) child.parentId = newId
+          }
+
+          node.id = newId
+          delete this.nodes[nodeId]
+          this.nodes[newId] = node
+          this.dirtyIds.delete(nodeId)
+          this.dirtyIds.add(newId)
+          currentId = newId
+        }
+      }
+
+      this.markDirty(currentId)
+
+      // Propagate rename across ALL graph nodes
+      for (const otherNode of Object.values(this.nodes)) {
+        let nodeModified = false
+
+        // 1. Fields
+        if (otherNode.fields) {
+          for (const [fKey, fVal] of Object.entries(otherNode.fields)) {
+            if (typeof fVal === 'string') {
+              const updated = updateReferenceString(fVal, oldName, newName)
+              if (updated !== fVal) {
+                otherNode.fields[fKey] = updated
+                nodeModified = true
+              }
+            } else if (Array.isArray(fVal)) {
+              let arrayModified = false
+              const updatedArray = fVal.map((item) => {
+                if (typeof item === 'string') {
+                  const updated = updateReferenceString(item, oldName, newName)
+                  if (updated !== item) arrayModified = true
+                  return updated
+                }
+                return item
+              })
+              if (arrayModified) {
+                otherNode.fields[fKey] = updatedArray
+                nodeModified = true
+              }
+            }
+          }
+        }
+
+        // 2. rawSections & description
+        if (otherNode.rawSections) {
+          for (const [sKey, sVal] of Object.entries(otherNode.rawSections)) {
+            if (typeof sVal === 'string') {
+              const updated = updateReferenceString(sVal, oldName, newName)
+              if (updated !== sVal) {
+                otherNode.rawSections[sKey] = updated
+                nodeModified = true
+              }
+            }
+          }
+        }
+
+        if (otherNode.description && typeof otherNode.description === 'string') {
+          const updated = updateReferenceString(otherNode.description, oldName, newName)
+          if (updated !== otherNode.description) {
+            otherNode.description = updated
+            nodeModified = true
+          }
+        }
+
+        // 3. Relationships array
+        if (otherNode.relationships && Array.isArray(otherNode.relationships)) {
+          for (const rel of otherNode.relationships) {
+            if (rel && typeof rel.target === 'string' && rel.target.toLowerCase() === lowerOld) {
+              rel.target = newName
+              nodeModified = true
+            }
+          }
+        }
+
+        if (nodeModified) {
+          this.markDirty(otherNode.id)
+        }
+      }
+
+      this.validateModel()
     },
   },
 })

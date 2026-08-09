@@ -49,8 +49,11 @@
           </button>
           <input
             v-else
-            :value="block.name"
+            :value="localBlockName"
             @input="onNameInput"
+            @change="onNameChange"
+            @blur="onNameChange"
+            @keydown.enter="onNameChange"
             class="flex-1 border border-slate-200 dark:border-slate-600 rounded-md p-1 text-sm focus:ring-1 focus:ring-indigo-500 outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 min-w-0"
             placeholder="Enter block name"
           />
@@ -617,6 +620,15 @@ const onConceptNameInput = (event: Event) => {
 
 // ── Input handlers ──────────────────────────────────────────────
 
+const localBlockName = ref(props.block.name)
+
+watch(
+  () => props.block.name,
+  (newVal) => {
+    localBlockName.value = newVal
+  },
+)
+
 const onDescriptionUpdate = (val: string) => {
   props.block.description = val
   if (props.block.id) {
@@ -632,16 +644,31 @@ const onDescriptionUpdate = (val: string) => {
   emit('change')
 }
 
-const onNameInput = (event: Event) => {
-  const newName = (event.target as HTMLInputElement).value
+const onNameChange = () => {
+  const newName = localBlockName.value.trim()
+  if (!newName) {
+    localBlockName.value = props.block.name
+    return
+  }
+  if (newName === props.block.name) return
+
   props.block.name = newName
   if (props.block.id) {
-    const existing = modelStore.getNode(props.block.id)
-    if (existing) {
-      modelStore.upsertNode({ ...existing, name: newName })
-    }
+    modelStore.renameElementNode(props.block.id, newName)
   }
-  modelStore.markDirty(props.block.id || '')
   emit('change')
 }
+
+const onNameInput = (event: Event) => {
+  localBlockName.value = (event.target as HTMLInputElement).value
+}
+
+watch(
+  () => props.isEditing,
+  (newVal, oldVal) => {
+    if (oldVal === true && newVal === false) {
+      onNameChange()
+    }
+  },
+)
 </script>
