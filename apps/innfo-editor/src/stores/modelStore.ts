@@ -300,6 +300,11 @@ export const useModelStore = defineStore('model', {
           this.dirtyIds.delete(nodeId)
           this.dirtyIds.add(newId)
           currentId = newId
+
+          const uiStore = useUiStore()
+          if (uiStore.selectedNodeId === nodeId) {
+            uiStore.selectNode(newId)
+          }
         }
       }
 

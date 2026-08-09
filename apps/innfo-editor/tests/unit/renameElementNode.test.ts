@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useModelStore } from '../../src/stores/modelStore'
+import { useUiStore } from '../../src/stores/uiStore'
 
 describe('modelStore.renameElementNode propagation', () => {
   beforeEach(() => {
@@ -108,5 +109,52 @@ describe('modelStore.renameElementNode propagation', () => {
     const rootNode = store.getNode(rootId)
     expect(rootNode?.rawContent).toContain('Task Gamma')
     expect(rootNode?.rawContent).not.toContain('Task Beta')
+  })
+
+  it('updates selectedNodeId in uiStore if the renamed node is currently selected', () => {
+    const store = useModelStore()
+    const uiStore = useUiStore()
+    
+    const rootId = 'doc'
+    store.setGraph(
+      {
+        [rootId]: {
+          id: rootId,
+          name: 'doc',
+          type: 'document',
+          parentId: null,
+          childIds: ['doc/Task Beta'],
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          source: { path: 'doc.md' },
+        },
+        'doc/Task Beta': {
+          id: 'doc/Task Beta',
+          name: 'Task Beta',
+          type: 'Problems',
+          parentId: rootId,
+          childIds: [],
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          source: { path: 'doc.md' },
+          kind: 'element',
+        },
+      },
+      [rootId],
+    )
+
+    // Select the node
+    uiStore.selectNode('doc/Task Beta')
+    expect(uiStore.selectedNodeId).toBe('doc/Task Beta')
+
+    // Rename the node
+    store.renameElementNode('doc/Task Beta', 'Task Gamma')
+
+    // Expect selection to have updated to the new ID
+    expect(uiStore.selectedNodeId).toBe('doc/Task Gamma')
   })
 })
