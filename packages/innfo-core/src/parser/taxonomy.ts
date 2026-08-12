@@ -22,6 +22,8 @@ export function parseIndexBlock(content: string): TaxonomyEdge[] {
 
     if (stack.length > 0 && indent > stack[stack.length - 1].indent) {
       edges.push({ parent: stack[stack.length - 1].name, child: name })
+    } else {
+      edges.push({ parent: '', child: name })
     }
     stack.push({ name, indent })
   }
@@ -34,8 +36,10 @@ export function printTaxonomyNode(
   lines: string[],
   depth: number,
 ): void {
-  const indent = '  '.repeat(depth)
-  lines.push(`${indent}* [[${name}]]`)
+  if (name !== '') {
+    const indent = '  '.repeat(depth)
+    lines.push(`${indent}* [[${name}]]`)
+  }
   const children = allEdges.filter((e) => e.parent === name)
   for (const child of children) {
     printTaxonomyNode(child.child, allEdges, lines, depth + 1)

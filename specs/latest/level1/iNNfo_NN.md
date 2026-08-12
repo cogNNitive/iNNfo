@@ -127,6 +127,9 @@ type:: select
 options:: [Ideation, MVP, Validation]
 ```
 
+**Reference Fields (`type:: reference`).** Property values for fields declared with `type:: reference` MUST be formatted using WikiLink syntax `[[Target Element]]` (e.g. `location:: [[Salón-Comedor]]`). Bare string values without WikiLink delimiters are not parsed as active element-to-element graph references.
+
+
 ### Marker Definition
 
 Declares an evaluative Marker scored per Element or Concept via the reserved `item-markers matrix`. The Element name is the Marker name. Allowed properties:
@@ -378,8 +381,8 @@ Hierarchy is expressed **only** through the index block. There is no hierarchy m
 > This is an **iNNfo document**...
 ```
 
-**Index Block.** The index block defines the taxonomy hierarchy via nested Markdown
-lists. Each list item identifies a Concept or Element using **WikiLink syntax**
+**Index Block.** The index block defines the taxonomy hierarchy of **Concepts** via
+nested Markdown lists. Each list item identifies a **Concept** using **WikiLink syntax**
 `[[Name]]`:
 
 ```markdown
@@ -390,12 +393,18 @@ lists. Each list item identifies a Concept or Element using **WikiLink syntax**
 * [[Another Root Concept]]
 ```
 
-- Nesting depth indicates parent-child relationships.
+- Nesting depth indicates parent-child relationships between Concepts.
 - The index block is identified by the name `index`.
-- Every reference MUST resolve to a name defined in the model; unresolvable references
-  are reported as dangling references.
+- Every reference MUST resolve to a Concept name defined in the model; unresolvable
+  references are reported as dangling references.
 - List items MUST use `*` or `-` as the bullet character. Numbered lists are not
   supported. The valid-item pattern is `/^\s*[*\-]\s+/`.
+
+**Elements MUST NOT appear in the index block.** Elements are declared within their
+Concept sections using `## NN <Concept>: <Element>` headings. The relationship between
+Elements and Concepts is established by the section structure (the Element heading
+declares which Concept it belongs to) and by reference-typed fields (e.g.
+`location:: [[Element Name]]`), NOT by nesting in the index.
 
 The index block is the single mechanism for hierarchy.
 

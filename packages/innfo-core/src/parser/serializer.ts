@@ -4,6 +4,19 @@ import { printTaxonomyNode } from './taxonomy'
 
 /** Serializes a property value into the unified `key:: value` form. */
 function serializePropertyValue(value: unknown): string {
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    // WikiLinks [[Name]]
+    if (trimmed.startsWith('[[') && trimmed.endsWith(']]')) {
+      return trimmed
+    }
+  } else if (Array.isArray(value)) {
+    // If it contains a WikiLink, serialize elements individually
+    const hasWikiLink = value.some((v) => typeof v === 'string' && v.trim().startsWith('[[') && v.trim().endsWith(']]'))
+    if (hasWikiLink) {
+      return `[${value.map(serializePropertyValue).join(', ')}]`
+    }
+  }
   return JSON.stringify(value)
 }
 
@@ -104,11 +117,16 @@ export function serializeModel(model: ParsedModel): string {
 
   if (model.taxonomy.length > 0) {
     lines.push('# NN index')
-    const allParents = new Set(model.taxonomy.map((e) => e.parent))
-    const allChildren = new Set(model.taxonomy.map((e) => e.child))
-    const rootNames = [...allParents].filter((p) => !allChildren.has(p))
-    for (const rootName of rootNames) {
-      printTaxonomyNode(rootName, model.taxonomy, lines, 0)
+    const hasEmptyParent = model.taxonomy.some((e) => e.parent === '')
+    if (hasEmptyParent) {
+      printTaxonomyNode('', model.taxonomy, lines, -1)
+    } else {
+      const allParents = new Set(model.taxonomy.map((e) => e.parent))
+      const allChildren = new Set(model.taxonomy.map((e) => e.child))
+      const rootNames = [...allParents].filter((p) => !allChildren.has(p))
+      for (const rootName of rootNames) {
+        printTaxonomyNode(rootName, model.taxonomy, lines, 0)
+      }
     }
     lines.push('')
   }

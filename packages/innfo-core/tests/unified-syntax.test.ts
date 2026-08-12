@@ -256,6 +256,110 @@ describe('validateFormatContent with unified syntax', () => {
   })
 })
 
+describe('validateFormatContent index block elements check', () => {
+  it('passes when index contains only Concepts', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-3-0"',
+      'level: 3',
+      'model_version: "V_0-1-0"',
+      'title: "Test Model"',
+      'parent_spec:',
+      '  name: "business_V_0-3-0"',
+      '  url: "https://example.com/business"',
+      '---',
+      '',
+      '# NN index',
+      '* [[Stakeholders]]',
+      '* [[Problems]]',
+      '',
+      '# NN Stakeholders',
+      '## NN Stakeholders: Customer',
+      '',
+      '# NN Problems',
+      '## NN Problems: Pain Point',
+      '',
+    ].join('\n')
+
+    const report = validateFormatContent(content, 'test_NN.md')
+    const check = report.checks.find((c) => c.id === 'index-no-elements')
+    expect(check).toBeDefined()
+    expect(check!.passed).toBe(true)
+  })
+
+  it('warns when index contains Elements', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-3-0"',
+      'level: 3',
+      'model_version: "V_0-1-0"',
+      'title: "Test Model"',
+      'parent_spec:',
+      '  name: "business_V_0-3-0"',
+      '  url: "https://example.com/business"',
+      '---',
+      '',
+      '# NN index',
+      '* [[Stakeholders]]',
+      '  * [[Customer]]',
+      '* [[Problems]]',
+      '  * [[Pain Point]]',
+      '',
+      '# NN Stakeholders',
+      '## NN Stakeholders: Customer',
+      '',
+      '# NN Problems',
+      '## NN Problems: Pain Point',
+      '',
+    ].join('\n')
+
+    const report = validateFormatContent(content, 'test_NN.md')
+    const check = report.checks.find((c) => c.id === 'index-no-elements')
+    expect(check).toBeDefined()
+    expect(check!.passed).toBe(false)
+    expect(check!.message).toContain('Element')
+    expect(check!.message).toContain('customer')
+  })
+  it('handles field definitions with duplicate names scoped to different concepts without slug collisions', () => {
+    const specContent = [
+      '# NN Concept Definition',
+      '## NN Concept Definition: Fotos',
+      'icon:: camera',
+      'type:: weight',
+      'color:: cyan',
+      'weight:: 50',
+      '',
+      '## NN Concept Definition: Components',
+      'type:: list',
+      '',
+      '# NN Field Definition',
+      '## NN Field Definition: description',
+      'concept:: Fotos',
+      'type:: markdown_inline',
+      '',
+      '## NN Field Definition: description',
+      'concept:: Components',
+      'type:: markdown_inline',
+    ].join('\n')
+
+    const parsed = parseModel(specContent)
+    expect(parsed.slugCollisions).toBeUndefined()
+
+    const schema = extractTemplateSchema(parsed)
+    expect(schema.concepts).toHaveLength(2)
+
+    const fotos = schema.concepts.find((c) => c.name === 'Fotos')
+    expect(fotos).toBeDefined()
+    expect(fotos!.fields).toHaveLength(1)
+    expect(fotos!.fields![0].name).toBe('description')
+
+    const components = schema.concepts.find((c) => c.name === 'Components')
+    expect(components).toBeDefined()
+    expect(components!.fields).toHaveLength(1)
+    expect(components!.fields![0].name).toBe('description')
+  })
+})
+
 describe('applyMutation on a metaplantilla document', () => {
   it('adds a Concept Definition element when no frontmatter concepts block exists', () => {
     const model = parseModel(miniTemplate)

@@ -332,6 +332,39 @@ export function validateFormatContent(
     })
   }
 
+  // 14. Index block MUST NOT contain Elements (only Concepts)
+  // Check for index block in content (independent of hasIndex which requires edges)
+  const indexSectionMatch = content.match(/# NN index\s*\n([\s\S]*?)(?=\n# |\n*$)/i)
+  if (indexSectionMatch) {
+    // Collect all element names from the model
+    const elementNames = new Set<string>()
+    for (const [, elements] of parsed.elements) {
+      for (const el of elements) {
+        elementNames.add(el.name.toLowerCase())
+      }
+    }
+
+    const indexContent = indexSectionMatch[1]
+    const indexWikilinks = [...indexContent.matchAll(WIKILINK_RE)].map((m) =>
+      m[1].trim().toLowerCase(),
+    )
+    const elementsInIndex = indexWikilinks.filter((w) => elementNames.has(w))
+
+    checks.push({
+      id: 'index-no-elements',
+      label: 'Index block contains only Concepts',
+      description:
+        'The # NN index block MUST list only Concepts, not Elements. Elements are declared within their Concept sections using ## NN headings.',
+      category: 'body',
+      severity: 'warning',
+      passed: elementsInIndex.length === 0,
+      message:
+        elementsInIndex.length > 0
+          ? `${elementsInIndex.length} Element(s) found in index block: ${elementsInIndex.slice(0, 5).join(', ')}${elementsInIndex.length > 5 ? '…' : ''}. Elements should NOT appear in the index — they are discovered within their Concept sections.`
+          : undefined,
+    })
+  }
+
   // ── Summary ────────────────────────────────────────────────────
 
   const errors = checks.filter((c) => !c.passed && c.severity === 'error').length

@@ -74,42 +74,68 @@ export function validateElementFieldReferences(
   const diagnostics: ReferenceDiagnostic[] = []
   const elementNames = collectElementNames(model)
   const conceptsByElement = conceptsByElementName(model)
+  const IMPLICIT_REF_FIELDS = new Set(['location', 'room', 'component', 'parent_component'])
 
   for (const [conceptName, elements] of model.elements.entries()) {
     const conceptDef = templateConcepts.find(
       (c) => c.name.toLowerCase() === conceptName.toLowerCase(),
     )
-    if (!conceptDef?.fields) continue
+    const fieldDefs = conceptDef?.fields ?? []
 
-    for (const fieldDef of conceptDef.fields) {
-      if (fieldDef.type !== 'reference') continue
+    for (const el of elements) {
+      for (const fieldName of Object.keys(el.fields)) {
+        const fieldDef = fieldDefs.find(
+          (f) => f.name.toLowerCase() === fieldName.toLowerCase(),
+        )
 
-      for (const el of elements) {
-        const raw = el.fields[fieldDef.name]
+        const isRef =
+          (fieldDef && fieldDef.type === 'reference') ||
+          IMPLICIT_REF_FIELDS.has(fieldName.toLowerCase())
+        if (!isRef) continue
+
+        const raw = el.fields[fieldName]
         if (raw === undefined || raw === null || raw === '') continue
 
         const refs = Array.isArray(raw) ? raw.map(String) : [String(raw)]
         for (const ref of refs) {
-          const value = ref.trim()
-          if (!value) continue
+          const rawValue = ref.trim()
+          if (!rawValue) continue
+
+          // Clean reference syntax: [[Name]] -> Name. Skip qualified cross-model references.
+          let value = rawValue
+          if (value.startsWith('[[') && value.endsWith(']]')) {
+            value = value.slice(2, -2).trim()
+          }
+
+          let isCrossModel = false
+          if (value.startsWith('[') && value.includes(']')) {
+            isCrossModel = true
+          } else if (value.includes('::')) {
+            isCrossModel = true
+          }
+
+          if (isCrossModel) {
+            // Bypass validation for cross-model references as they reside outside the current model
+            continue
+          }
 
           if (!elementNames.has(value.toLowerCase())) {
             diagnostics.push({
-              path: `elements.${conceptName}.${el.name}.fields.${fieldDef.name}`,
-              message: `Dangling reference: field "${fieldDef.name}" value "${value}" does not match any element name`,
+              path: `elements.${conceptName}.${el.name}.fields.${fieldDef?.name ?? fieldName}`,
+              message: `Dangling reference: field "${fieldDef?.name ?? fieldName}" value "${rawValue}" does not match any element name`,
               severity: 'error',
             })
             continue
           }
 
-          if (fieldDef.target_concepts && fieldDef.target_concepts.length > 0) {
+          if (fieldDef?.target_concepts && fieldDef.target_concepts.length > 0) {
             const owningConcepts = conceptsByElement.get(value.toLowerCase()) ?? new Set<string>()
             const allowed = fieldDef.target_concepts.map((c) => c.toLowerCase())
             const allowedMatch = [...owningConcepts].some((c) => allowed.includes(c.toLowerCase()))
             if (!allowedMatch) {
               diagnostics.push({
                 path: `elements.${conceptName}.${el.name}.fields.${fieldDef.name}`,
-                message: `Reference "${value}" in field "${fieldDef.name}" resolves to element "${value}" but that element belongs to concept(s) "${[...owningConcepts].join(', ')}" which is not in target_concepts of the field`,
+                message: `Reference "${rawValue}" in field "${fieldDef.name}" resolves to element "${value}" but that element belongs to concept(s) "${[...owningConcepts].join(', ')}" which is not in target_concepts of the field`,
                 severity: 'error',
               })
             }

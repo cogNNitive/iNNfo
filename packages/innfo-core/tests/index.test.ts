@@ -2079,3 +2079,131 @@ describe('matrix metadata serializer round-trip', () => {
     expect(m.values).toEqual(['Low', 'Medium', 'High'])
   })
 })
+
+describe('implicit and explicit reference validation (P1)', () => {
+  function buildTemplate(): any {
+    return {
+      name: 'ref_V_1-0-0',
+      level: 2,
+      parentName: 'iNNfo_V_0-3-0',
+      frontmatter: {
+        spec_version: 'V_0-3-0',
+        spec_url: 'https://example.com/ref',
+        level: 2,
+      },
+      rawContent: [
+        '# NN Concept Definition',
+        '',
+        '## NN Concept Definition: Components',
+        'type:: list',
+        '',
+        '## NN Concept Definition: Items',
+        'type:: list',
+        '',
+        '# NN Field Definition',
+        '',
+        '## NN Field Definition: custom_ref',
+        'concept:: Items',
+        'type:: reference',
+        'target_concepts:: [Components]',
+        '',
+      ].join('\n'),
+    }
+  }
+
+  it('flags dangling implicit reference (location:: Jardín Exterior)', () => {
+    const model = parseModel(
+      [
+        '---',
+        'spec_version: "V_0-3-0"',
+        'level: 3',
+        'model_version: "V_1-0-0"',
+        'title: "Ref Model"',
+        'parent_spec:',
+        '  name: "ref_V_1-0-0"',
+        '  url: "https://example.com/ref_V_1-0-0_NN.md"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Items]]',
+        '',
+        '# NN Items',
+        '## NN Items: Sombrilla',
+        'location:: Jardín Exterior',
+        '',
+      ].join('\n'),
+    )
+
+    const result = validateModel(model, buildTemplate(), null)
+    expect(result.valid).toBe(false)
+    const err = result.errors.find((e) => e.path.includes('location'))
+    expect(err).toBeDefined()
+    expect(err!.message).toContain('Dangling reference')
+    expect(err!.message).toContain('Jardín Exterior')
+  })
+
+  it('passes valid implicit reference (location:: Jardín)', () => {
+    const model = parseModel(
+      [
+        '---',
+        'spec_version: "V_0-3-0"',
+        'level: 3',
+        'model_version: "V_1-0-0"',
+        'title: "Ref Model"',
+        'parent_spec:',
+        '  name: "ref_V_1-0-0"',
+        '  url: "https://example.com/ref_V_1-0-0_NN.md"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Items]]',
+        '* [[Components]]',
+        '',
+        '# NN Items',
+        '## NN Items: Sombrilla',
+        'location:: Jardín',
+        '',
+        '# NN Components',
+        '## NN Components: Jardín',
+        '',
+      ].join('\n'),
+    )
+
+    const result = validateModel(model, buildTemplate(), null)
+    expect(result.valid).toBe(true)
+    expect(result.errors).toHaveLength(0)
+  })
+
+  it('flags target_concepts mismatch on custom_ref', () => {
+    const model = parseModel(
+      [
+        '---',
+        'spec_version: "V_0-3-0"',
+        'level: 3',
+        'model_version: "V_1-0-0"',
+        'title: "Ref Model"',
+        'parent_spec:',
+        '  name: "ref_V_1-0-0"',
+        '  url: "https://example.com/ref_V_1-0-0_NN.md"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Items]]',
+        '',
+        '# NN Items',
+        '## NN Items: Sombrilla',
+        '## NN Items: Mesa de jardín',
+        'custom_ref:: Mesa de jardín',
+        '',
+      ].join('\n'),
+    )
+
+    const result = validateModel(model, buildTemplate(), null)
+    expect(result.valid).toBe(false)
+    const err = result.errors.find((e) => e.path.includes('custom_ref'))
+    expect(err).toBeDefined()
+    expect(err!.message).toContain('target_concepts')
+    expect(err!.message).toContain('Mesa de jardín')
+  })
+})
+

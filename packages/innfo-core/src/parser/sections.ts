@@ -60,6 +60,10 @@ export function parsePropertyValue(raw: string): unknown {
   ) {
     return value.slice(1, -1)
   }
+  // WikiLinks [[Name]] or [[Name1, Name2]] — return as-is (reference fields)
+  if (value.startsWith('[[') && value.endsWith(']]')) {
+    return value
+  }
   if (value.startsWith('[') && value.endsWith(']')) {
     const inner = value.slice(1, -1).trim()
     if (inner === '') return []

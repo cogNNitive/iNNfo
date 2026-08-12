@@ -19,7 +19,11 @@ export function deriveElementSlugs(
   for (const [conceptName, elementNodes] of elements.entries()) {
     for (const el of elementNodes) {
       if (el.slug === undefined) {
-        el.slug = slugify(el.name)
+        const ownerConcept =
+          typeof el.fields['concept'] === 'string' && el.fields['concept'].trim() !== ''
+            ? el.fields['concept'].trim()
+            : undefined
+        el.slug = ownerConcept ? slugify(`${ownerConcept}.${el.name}`) : slugify(el.name)
       }
       const existing = usedSlugs.get(el.slug!)
       if (existing) {
