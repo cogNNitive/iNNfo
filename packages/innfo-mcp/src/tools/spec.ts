@@ -115,7 +115,13 @@ export async function getSpec(
     // falling back to the requested document when no level-1 is present.
     const spec = getFormatSpec(cache) ?? cache.specs.get(name) ?? null
     return { spec, specCache: cache }
-  } catch {
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      (err.name === 'SpecResolutionError' || err instanceof SpecResolutionError)
+    ) {
+      throw err
+    }
     return { spec: null, specCache: null }
   }
 }
@@ -156,7 +162,12 @@ export async function getTemplateFromUrl(
     // Surface the actionable resolution detail (searched locations) to the
     // caller so validate_model output can include it; other failures keep the
     // null fallback behavior.
-    if (err instanceof SpecResolutionError) throw err
+    if (
+      err instanceof Error &&
+      (err.name === 'SpecResolutionError' || err instanceof SpecResolutionError)
+    ) {
+      throw err
+    }
     return null
   }
 }

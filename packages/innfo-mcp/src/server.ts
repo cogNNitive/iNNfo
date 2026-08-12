@@ -28,7 +28,7 @@ import {
   getTemplateFromModel,
   deriveNameFromUrl,
 } from './tools/spec.js'
-import { validateModel, validateModelUrl, applyChange, validateTemplate } from './tools/mutate.js'
+import { validateModel, validateModelUrl, applyChange, validateTemplate, initModel } from './tools/mutate.js'
 
 /** Root directory for model scanning (defaults to `models/` under CWD) */
 const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd()
@@ -188,6 +188,22 @@ const toolDefinitions: Tool[] = [
       },
     },
   },
+  {
+    name: 'init_model',
+    description: 'Initialize or repair a model file with missing or corrupt frontmatter by writing a standard YAML frontmatter block',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', description: 'Model ID/filename stem (e.g. arenzano_V_0-1-0_cogNNitive)' },
+        template_url: { type: 'string', description: 'Immutable URL of the parent template' },
+        template_name: { type: 'string', description: 'Name of the parent template (e.g. cogNNitive_V_0-1-0)' },
+        title: { type: 'string', description: 'Logical title of the model (defaults to ID)' },
+        model_version: { type: 'string', description: 'Initial version of the model (e.g. V_0-1-0, defaults to V_0-1-0)' },
+        root: { type: 'string', description: 'Optional models root directory override' },
+      },
+      required: ['id', 'template_url', 'template_name'],
+    },
+  },
 ]
 
 /* ── Tool call dispatcher ────────────────────────────────────── */
@@ -211,6 +227,8 @@ async function dispatchTool(name: string, args: Record<string, unknown>): Promis
         return await handleValidateModelUrl(args)
       case 'validate_template':
         return await handleValidateTemplate(args)
+      case 'init_model':
+        return await handleInitModel(args)
       default:
         return errorResult(`Unknown tool: ${name}`)
     }
@@ -299,6 +317,20 @@ async function handleValidateTemplate(args: Record<string, unknown>): Promise<Ca
   if (!id && !content) return errorResult('Provide either id or content')
   const root = (args.root as string) || ROOT_DIR
   const result = await validateTemplate(root, id, content, url)
+  return textResult(JSON.stringify(result, null, 2))
+}
+
+async function handleInitModel(args: Record<string, unknown>): Promise<CallToolResult> {
+  const id = args.id as string
+  const template_url = args.template_url as string
+  const template_name = args.template_name as string
+  const title = args.title as string | undefined
+  const model_version = args.model_version as string | undefined
+  const root = (args.root as string) || ROOT_DIR
+  if (!id || !template_url || !template_name) {
+    return errorResult('Missing required arguments: id, template_url, template_name')
+  }
+  const result = await initModel(root, id, { template_url, template_name, title, model_version })
   return textResult(JSON.stringify(result, null, 2))
 }
 

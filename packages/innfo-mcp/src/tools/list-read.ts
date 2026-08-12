@@ -33,7 +33,24 @@ export function normalizeId(id: string): string {
  * Scan a directory for iNNfo models.
  */
 export async function listModels(rootDir: string): Promise<ModelInfo[]> {
-  return coreListModels(rootDir)
+  const rootModels = await coreListModels(rootDir)
+  const modelsDir = join(rootDir, 'models')
+  try {
+    const { stat } = await import('node:fs/promises')
+    const st = await stat(modelsDir)
+    if (st.isDirectory()) {
+      const subModels = await coreListModels(modelsDir)
+      for (const m of subModels) {
+        if (!rootModels.some((rm) => rm.path === m.path)) {
+          rootModels.push(m)
+        }
+      }
+    }
+  } catch {
+    // Ignore error if models/ does not exist
+  }
+  rootModels.sort((a, b) => a.id.localeCompare(b.id))
+  return rootModels
 }
 
 /**

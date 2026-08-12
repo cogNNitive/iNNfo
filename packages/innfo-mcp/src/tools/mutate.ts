@@ -6,12 +6,13 @@
  * On validation failure, the file is NOT written (reject-without-writing).
  */
 
-import { readFile, writeFile, rm } from 'node:fs/promises'
+import { readFile, writeFile, rm, stat, rename } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation, SpecResolutionError } from '@cognnitive/innfo-core'
 import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/innfo-core'
 
-import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec } from './spec.js'
+import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec, normalizeId } from './spec.js'
+import { isLocalPath, toLocalFilePath } from './resolver-node.js'
 
 /* ── Types ───────────────────────────────────────────────────── */
 
@@ -109,7 +110,12 @@ export async function validateModel(
       template = await getTemplateFromUrl(rootDir, templateUrl, deriveNameFromUrl(templateUrl))
     }
   } catch (err) {
-    if (err instanceof SpecResolutionError) resolutionDetail = err.message
+    if (
+      err instanceof Error &&
+      (err.name === 'SpecResolutionError' || err instanceof SpecResolutionError)
+    ) {
+      resolutionDetail = err.message
+    }
   }
 
   const result = coreValidate(model, template, null)
@@ -236,6 +242,61 @@ async function bumpVersion(
   const newBase = base.replace(VERSION_FILENAME_RE, `_V_${versionSegment}_`)
   const newPath = join(dir, newBase)
 
+  // If parent_version is provided, rename/bump the parent spec (template) as well!
+  let oldParentPath: string | null = null
+  let newParentPath: string | null = null
+  let parentContent: string | null = null
+  let newParentName: string | null = null
+
+  if (model.frontmatter.parent_spec && typeof args.parent_version === 'string') {
+    const parentVer = args.parent_version.trim()
+    const parentVerSegment = parentVer.replace(/^V_/i, '').replace(/\./g, '-')
+    const parentVerString = `V_${parentVerSegment}`
+
+    const currentParentUrl = model.frontmatter.parent_spec.url
+    if (currentParentUrl && isLocalPath(currentParentUrl)) {
+      const localParentPath = toLocalFilePath(currentParentUrl, rootDir)
+      try {
+        await stat(localParentPath)
+        oldParentPath = localParentPath
+
+        // Compute new parent file name and path
+        const parentDir = dirname(localParentPath)
+        const parentBase = basename(localParentPath)
+        const newParentBase = parentBase.replace(VERSION_FILENAME_RE, `_V_${parentVerSegment}_`)
+        newParentPath = join(parentDir, newParentBase)
+
+        // Compute new parent spec name
+        const currentParentName = model.frontmatter.parent_spec.name
+        newParentName = currentParentName.replace(
+          /_V_\d+-\d+-\d+$/,
+          `_V_${parentVerSegment}`,
+        )
+
+        // Read and update the template file's frontmatter
+        const rawParentContent = await readFile(localParentPath, 'utf-8')
+        const parentModel = parseModel(rawParentContent)
+        if (parentModel.frontmatter.level === 2) {
+          parentModel.frontmatter.spec_version = parentVerString
+        }
+        parentContent = serializeModel(parentModel)
+      } catch (err) {
+        // Parent spec not found locally, skip template renaming but still update references
+      }
+    }
+
+    // Update parent_spec in model frontmatter
+    if (model.frontmatter.parent_spec.name && newParentName) {
+      model.frontmatter.parent_spec.name = newParentName
+    }
+    if (model.frontmatter.parent_spec.url) {
+      model.frontmatter.parent_spec.url = model.frontmatter.parent_spec.url.replace(
+        VERSION_FILENAME_RE,
+        `_V_${parentVerSegment}_`,
+      )
+    }
+  }
+
   // Validate BEFORE writing/deleting anything.
   let template: SpecDocument | null
   try {
@@ -255,13 +316,57 @@ async function bumpVersion(
     }
   }
 
-  // Write the new versioned file (or rewrite in place), then remove the old.
+  // Write the new versioned files (or rewrite in place), then remove the old.
   try {
+    // 1. If parent template was bumped:
+    if (oldParentPath && newParentPath && parentContent && newParentName) {
+      if (newParentPath === oldParentPath) {
+        await writeFile(oldParentPath, parentContent, 'utf-8')
+      } else {
+        await writeFile(newParentPath, parentContent, 'utf-8')
+        await rm(oldParentPath, { force: true })
+      }
+
+      // Sync to .spec-cache
+      const cacheDir = join(rootDir, '.spec-cache')
+      await mkdir(cacheDir, { recursive: true })
+      const cachePath = join(cacheDir, `${newParentName}_NN.md`)
+      await writeFile(cachePath, parentContent, 'utf-8')
+    }
+
+    // 2. Write model file
     if (newPath === filePath) {
       await saveModel(filePath, model)
     } else {
       await saveModel(newPath, model)
       await rm(filePath, { force: true })
+    }
+
+    // 3. Update references in workspace index.md
+    const indexPath = join(rootDir, 'index.md')
+    try {
+      let indexContent = await readFile(indexPath, 'utf-8')
+      const oldRelPath = basename(filePath)
+      const newRelPath = basename(newPath)
+
+      const oldModelRel = join('models', oldRelPath).replace(/\\/g, '/')
+      const newModelRel = join('models', newRelPath).replace(/\\/g, '/')
+
+      let replaced = false
+      if (indexContent.includes(oldRelPath)) {
+        indexContent = indexContent.replaceAll(oldRelPath, newRelPath)
+        replaced = true
+      }
+      if (indexContent.includes(oldModelRel)) {
+        indexContent = indexContent.replaceAll(oldModelRel, newModelRel)
+        replaced = true
+      }
+
+      if (replaced) {
+        await writeFile(indexPath, indexContent, 'utf-8')
+      }
+    } catch {
+      // index.md might not exist or be readable, ignore
     }
   } catch (err) {
     return { success: false, errors: [{ path: '', message: `Failed to write model: ${err}` }] }
@@ -302,6 +407,17 @@ export async function applyChange(
     return bumpVersion(rootDir, filePath, model, args)
   }
 
+  if (op === 'generate_index') {
+    let template: SpecDocument | null = null
+    try {
+      template = await resolveTemplateForModel(rootDir, model)
+    } catch {}
+    if (template) {
+      const parsedTemplate = parseModel(template.rawContent)
+      args.taxonomy = parsedTemplate.taxonomy
+    }
+  }
+
   // Apply the mutation via the core enforcement engine (R-IE-01)
   const mutationResult = coreApplyMutation(model, op, args as unknown as Record<string, unknown>)
   if (!mutationResult.success) {
@@ -332,6 +448,21 @@ export async function applyChange(
   // Write updated model
   try {
     await saveModel(filePath, model)
+    if (op === 'rename_element' && typeof args.elementName === 'string' && typeof args.newName === 'string') {
+      try {
+        const modelDir = dirname(filePath)
+        const oldSlug = args.elementName.toLowerCase().replace(/[^a-z0-9-]/g, '_')
+        const newSlug = args.newName.toLowerCase().replace(/[^a-z0-9-]/g, '_')
+        const oldAssetDir = join(modelDir, 'assets', oldSlug)
+        const newAssetDir = join(modelDir, 'assets', newSlug)
+        const st = await stat(oldAssetDir).catch(() => null)
+        if (st && st.isDirectory()) {
+          await rename(oldAssetDir, newAssetDir)
+        }
+      } catch {
+        // Asset directory rename is best effort
+      }
+    }
   } catch (err) {
     return { success: false, errors: [{ path: '', message: `Failed to write model: ${err}` }] }
   }
@@ -449,14 +580,27 @@ export async function validateTemplate(
     }
   }
 
-  const { spec: parentSpec } = await getSpec(rootDir, { url: parentUrl })
+  let parentSpec = null
+  let resolutionDetail: string | null = null
+  try {
+    const result = await getSpec(rootDir, { url: parentUrl })
+    parentSpec = result.spec
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      (err.name === 'SpecResolutionError' || err instanceof SpecResolutionError)
+    ) {
+      resolutionDetail = err.message
+    }
+  }
   if (!parentSpec) {
+    const detailSuffix = resolutionDetail ? ` Detail: ${resolutionDetail}` : ''
     return {
       valid: false,
       errors: [
         {
           path: 'parent_spec',
-          message: `[PARENT_RESOLUTION_FAILED] Parent spec '${parentUrl}' could not be resolved`,
+          message: `[PARENT_RESOLUTION_FAILED] Parent spec '${parentUrl}' could not be resolved${detailSuffix}`,
           severity: 'error',
         },
       ],
@@ -495,3 +639,65 @@ export async function validateTemplate(
 }
 
 /* ── All mutation operations delegated to innfo-core engine ─── */
+
+export async function initModel(
+  rootDir: string,
+  id: string,
+  args: {
+    template_url: string
+    template_name: string
+    title?: string
+    model_version?: string
+  }
+): Promise<{ success: boolean; filePath: string; content: string }> {
+  const cleanId = normalizeId(id)
+  let filePath = await findModelFile(rootDir, id)
+  
+  if (!filePath) {
+    const modelsDir = join(rootDir, 'models')
+    let useModelsDir = false
+    try {
+      const st = await stat(modelsDir)
+      if (st.isDirectory()) {
+        useModelsDir = true
+      }
+    } catch {}
+    filePath = useModelsDir ? join(modelsDir, `${cleanId}_NN.md`) : join(rootDir, `${cleanId}_NN.md`)
+  }
+
+  let body = ''
+  try {
+    const currentContent = await readFile(filePath, 'utf-8')
+    body = currentContent.replace(/^---[\s\S]*?---\n?/, '').trim()
+  } catch {}
+
+  const notice = `> [!NOTE]
+> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).`
+
+  if (!body.includes('> [!NOTE]')) {
+    body = body ? notice + '\n\n' + body : notice
+  }
+
+  const modelVersion = args.model_version || 'V_0-1-0'
+  const title = args.title || cleanId
+
+  const frontmatter = `---
+specification_version: "V_0-3-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/latest/level1/iNNfo_NN.md"
+level: 3
+parent_spec:
+  name: "${args.template_name}"
+  url: "${args.template_url}"
+model_version: "${modelVersion}"
+title: "${title}"
+---`
+
+  const newContent = frontmatter + '\n\n' + body + '\n'
+  await writeFile(filePath, newContent, 'utf-8')
+
+  return {
+    success: true,
+    filePath,
+    content: newContent
+  }
+}

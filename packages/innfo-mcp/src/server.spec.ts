@@ -122,7 +122,7 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
     await rm(rootDir, { recursive: true, force: true })
   })
 
-  it('lists all 8 tools with names matching the dispatcher', async () => {
+  it('lists all 9 tools with names matching the dispatcher', async () => {
     const { tools } = await client.listTools()
     const names = tools.map((t) => t.name).sort()
     expect(names).toEqual(
@@ -130,6 +130,7 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
         'apply_change',
         'get_spec',
         'get_template',
+        'init_model',
         'list_models',
         'read_model',
         'validate_model',
@@ -406,6 +407,30 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
       expect(result.isError).toBeFalsy()
       const parsed = JSON.parse(textOf(result as CallToolResult))
       expect(parsed.valid).toBe(true)
+    })
+  })
+
+  describe('init_model', () => {
+    it('returns an isError result when required arguments are missing', async () => {
+      const result = await client.callTool({ name: 'init_model', arguments: { id: 'test' } })
+      expect(result.isError).toBe(true)
+      expect(textOf(result as CallToolResult)).toContain('Missing required arguments')
+    })
+
+    it('initializes a model file successfully', async () => {
+      const result = await client.callTool({
+        name: 'init_model',
+        arguments: {
+          id: 'test_model',
+          template_name: 'test_template',
+          template_url: 'https://example.com/spec_NN.md',
+          root: rootDir
+        }
+      })
+      expect(result.isError).toBeFalsy()
+      const parsed = JSON.parse(textOf(result as CallToolResult))
+      expect(parsed.success).toBe(true)
+      expect(parsed.filePath).toContain('test_model_NN.md')
     })
   })
 })
