@@ -1,4 +1,4 @@
-﻿# Design: Spec Foundation Hardening
+# Design: Spec Foundation Hardening
 
 ## Technical Approach
 

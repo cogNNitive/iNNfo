@@ -2,7 +2,7 @@
 
 ## Intent
 
-Unify the iNNfo skill ecosystem after a major refactoring session that applied the "writing-great-skills" framework. Already-implemented skills changes (router creation, skill splits, merges, refactors) now need the UI, prompts, workflow files, and agent entry points to match â€” so the whole system works as a coherent whole triggered by the single keyword "innfo".
+Unify the iNNfo skill ecosystem after a major refactoring session that applied the "writing-great-skills" framework. Already-implemented skills changes (router creation, skill splits, merges, refactors) now need the UI, prompts, workflow files, and agent entry points to match — so the whole system works as a coherent whole triggered by the single keyword "innfo".
 
 ## Scope
 
@@ -35,13 +35,13 @@ Unify the iNNfo skill ecosystem after a major refactoring session that applied t
 
 ### Modified Capabilities
 
-- `export-panel`: Copiable prompt changes â€” uses `innfo:` prefix, references `source.path` and `workflows/export.workflow.md` instead of `AGENT.md` + skill name
-- `import-panel`: Copiable prompt changes â€” references `workflows/import.workflow.md` instead of `AGENT.md`
+- `export-panel`: Copiable prompt changes — uses `innfo:` prefix, references `source.path` and `workflows/export.workflow.md` instead of `AGENT.md` + skill name
+- `import-panel`: Copiable prompt changes — references `workflows/import.workflow.md` instead of `AGENT.md`
 - `traNNsform-folder`: AGENT.md simplified to pointer; adds `workflows/` subdirectory containing pipeline definitions
 
 ## Approach
 
-Apply changes across 3 layers in parallel: (1) actioNN router metadata, (2) iNNfo Vue/TS prompt sources, (3) traNNsform workflow + AGENT.md files. No structural refactors needed â€” each affected file has a targeted string replacement or addition.
+Apply changes across 3 layers in parallel: (1) actioNN router metadata, (2) iNNfo Vue/TS prompt sources, (3) traNNsform workflow + AGENT.md files. No structural refactors needed — each affected file has a targeted string replacement or addition.
 
 ## Affected Areas
 
@@ -54,7 +54,7 @@ Apply changes across 3 layers in parallel: (1) actioNN router metadata, (2) iNNf
 | `apps/innfo-editor/src/ai-guide/guide.ts` | Modified | 3 prompt templates use `innfo:` prefix |
 | `apps/innfo-editor/src/ai-guide/procedure_NN.md` | Modified | Instruction text updated |
 | `apps/innfo-editor/src/components/layout/SetupWizard.vue` | Modified | Downloads workflow files |
-| `apps/innfo-editor/src/views/WorkspaceView.vue` | Modified | 3 buttons â†’ 1 button + new modal |
+| `apps/innfo-editor/src/views/WorkspaceView.vue` | Modified | 3 buttons → 1 button + new modal |
 | `apps/innfo-editor/src/components/editor/AIGuidePanel.vue` | Modified | Extends into unified modal |
 | `traNNsform/AGENT.md` | Modified | Simplified to pointer |
 | `traNNsform/workflows/export.workflow.md` | New | Export pipeline stages |

@@ -1,4 +1,4 @@
-﻿# Exploration: Spec Foundation Hardening
+# Exploration: Spec Foundation Hardening
 
 Turning the iNNfo/defiNNe specs into solid reference specs. This document captures
 the current-state analysis, cross-checked against the real parser/validator code,

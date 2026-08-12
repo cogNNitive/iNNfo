@@ -1,4 +1,4 @@
-﻿# Delta for identity-enforcement
+# Delta for identity-enforcement
 
 Software behavior that enforces the identity, uniqueness, and rename rules once, so
 the UI and the MCP obey the same contract.

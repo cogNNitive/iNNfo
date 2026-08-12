@@ -12,7 +12,6 @@ docs/app/
 !/archive/specs/
 /archive/specs/*
 !/archive/specs/FORMAT_V_0-1-0_FORMAT.md
-openspec/changes/archive/
 test-results/
 e2e-reports/
 # Generated Playwright screenshots / aria snapshots (test output)
