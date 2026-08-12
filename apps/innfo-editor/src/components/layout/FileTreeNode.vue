@@ -61,7 +61,10 @@
       </span>
 
       <!-- Eye-Catching Badges -->
-      <div class="flex items-center gap-1 shrink-0">
+      <div
+        class="flex items-center gap-1 shrink-0"
+        :class="{ 'group-hover:hidden': item.kind === 'file' }"
+      >
         <!-- Innfo Model Badge -->
         <span
           v-if="isModel"
@@ -87,6 +90,24 @@
           ART
         </span>
       </div>
+
+      <!-- Hover Actions -->
+      <div v-if="item.kind === 'file'" class="hidden group-hover:flex items-center gap-1 shrink-0 ml-1.5">
+        <button
+          @click.stop="$emit('view-file', item)"
+          class="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+          title="Ver trazabilidad / contenido"
+        >
+          <Eye class="w-3.5 h-3.5" />
+        </button>
+        <button
+          @click.stop="$emit('download-file', item)"
+          class="p-0.5 rounded hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+          title="Descargar archivo"
+        >
+          <Download class="w-3.5 h-3.5" />
+        </button>
+      </div>
     </div>
 
     <!-- Recursive Children for Directories -->
@@ -99,6 +120,8 @@
         :filter-mode="filterMode"
         :search-query="searchQuery"
         @select-file="$emit('select-file', $event)"
+        @view-file="$emit('view-file', $event)"
+        @download-file="$emit('download-file', $event)"
       />
     </div>
   </div>
@@ -114,6 +137,8 @@ import {
   Sparkles,
   FileOutput,
   FileCode,
+  Eye,
+  Download,
 } from 'lucide-vue-next'
 import type { ExplorerFilterMode } from '../../stores/uiStore'
 
@@ -140,6 +165,8 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'select-file', item: FileItem): void
+  (e: 'view-file', item: FileItem): void
+  (e: 'download-file', item: FileItem): void
 }>()
 
 const isOpen = ref(true)
@@ -155,66 +182,19 @@ function pathHasDir(normPath: string, dirNames: string[]): boolean {
 
 function checkIsModel(item: FileItem): boolean {
   if (item.kind !== 'file') return false
-  const name = item.name.toLowerCase()
-  return (
-    name.endsWith('_nn.md') ||
-    name.endsWith('.innfo') ||
-    name === 'model.md' ||
-    name.endsWith('_model.md') ||
-    (name.endsWith('.md') && (name.includes('_v_') || name.endsWith('_f.md') || name.endsWith('_p.md')))
-  )
+  return item.name.endsWith('_NN.md') || item.name.endsWith('_nn.md')
 }
 
 function checkIsArtifact(item: FileItem): boolean {
   if (item.kind !== 'file') return false
-  if (checkIsModel(item)) return false
-
   const normPath = normalizePath(item.path)
-  const name = item.name.toLowerCase()
-
-  if (pathHasDir(normPath, ['artifacts', 'artifact', 'exports', 'export', 'outputs', 'output', 'dist', 'out'])) {
-    return true
-  }
-
-  return (
-    name.endsWith('.spec.json') ||
-    name.endsWith('.spec.md') ||
-    name.endsWith('.schema.json') ||
-    name.endsWith('.report.md') ||
-    name.endsWith('.svg') ||
-    name.endsWith('.png') ||
-    name.endsWith('.pdf')
-  )
+  return normPath.startsWith('artifacts/')
 }
 
 function checkIsSource(item: FileItem): boolean {
   if (item.kind !== 'file') return false
-  if (checkIsModel(item) || checkIsArtifact(item)) return false
-
   const normPath = normalizePath(item.path)
-  const name = item.name.toLowerCase()
-
-  if (pathHasDir(normPath, ['sources', 'source', 'original', 'raw', 'inputs', 'input', 'src', 'data'])) {
-    return true
-  }
-
-  return (
-    name.endsWith('.md') ||
-    name.endsWith('.json') ||
-    name.endsWith('.yaml') ||
-    name.endsWith('.yml') ||
-    name.endsWith('.csv') ||
-    name.endsWith('.tsv') ||
-    name.endsWith('.txt') ||
-    name.endsWith('.xml') ||
-    name.endsWith('.html') ||
-    name.endsWith('.doc') ||
-    name.endsWith('.docx') ||
-    name.endsWith('.pdf') ||
-    name.endsWith('.py') ||
-    name.endsWith('.js') ||
-    name.endsWith('.ts')
-  )
+  return normPath.startsWith('sources/')
 }
 
 // Helper classification functions for reactive template

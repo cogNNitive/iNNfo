@@ -44,9 +44,68 @@ export function useBlockAssets(
     const handle = ws.handle
     if (!handle) return relativePath
 
+    const n = node.value
+    const modelPath = n?.source?.path || ''
+
+    // Auto-derive slug
+    let slug = ''
+    if (n) {
+      slug =
+        n.slug ||
+        n.name
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .trim()
+          .replace(/[\s_]+/g, '-')
+          .replace(/[^a-z0-9-]/g, '')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '')
+    }
+
+    async function getModelDirectoryHandle(rootHandle: any, modelFile: string): Promise<any> {
+      const parts = modelFile.replace(/\\/g, '/').split('/').filter(Boolean)
+      parts.pop()
+      let current = rootHandle
+      for (const part of parts) {
+        current = await current.getDirectoryHandle(part)
+      }
+      return current
+    }
+
     try {
+      const modelDirHandle = modelPath ? await getModelDirectoryHandle(handle, modelPath) : handle
+
+      // Fallback for simple filenames (no path segments) from image fields
+      if (!relativePath.includes('/') && !relativePath.includes('\\')) {
+        if (slug) {
+          try {
+            const assetsDir = await modelDirHandle.getDirectoryHandle('assets')
+            const slugDir = await assetsDir.getDirectoryHandle(slug)
+            const fh = await slugDir.getFileHandle(relativePath)
+            const file = await fh.getFile()
+            const url = URL.createObjectURL(file)
+            blobUrlCache.set(relativePath, url)
+            return url
+          } catch {
+            // fallback
+          }
+        }
+
+        try {
+          const assetsDir = await modelDirHandle.getDirectoryHandle('assets')
+          const fh = await assetsDir.getFileHandle(relativePath)
+          const file = await fh.getFile()
+          const url = URL.createObjectURL(file)
+          blobUrlCache.set(relativePath, url)
+          return url
+        } catch {
+          // fallback
+        }
+      }
+
       const parts = relativePath.split('/').filter(Boolean)
-      let current: any = handle
+      let current: any = modelDirHandle
       for (let i = 0; i < parts.length - 1; i++) {
         current = await current.getDirectoryHandle(parts[i])
       }

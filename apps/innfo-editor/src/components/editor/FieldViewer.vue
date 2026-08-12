@@ -192,14 +192,27 @@ const fieldEntries = computed<FieldEntry[]>(() => {
 
     let refNode = null
     if (def.type === 'reference' && hasValue && typeof rawValue === 'string') {
-      const cleanName = cleanReferenceName(rawValue)
-      if (modelStore.nodes[cleanName]) {
-        refNode = modelStore.nodes[cleanName]
-      } else {
-        refNode = Object.values(modelStore.nodes).find(
-          (n) => n.name.toLowerCase() === cleanName.toLowerCase()
-        ) || null
+      let name = rawValue.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '').trim()
+      if (name.startsWith('[[') && name.endsWith(']]')) {
+        name = name.slice(2, -2).trim()
       }
+
+      let modelPrefix = ''
+      if (name.startsWith('[') && name.includes(']')) {
+        const closingBracket = name.indexOf(']')
+        modelPrefix = name.slice(1, closingBracket).trim().toLowerCase()
+        name = name.slice(closingBracket + 1).trim()
+      }
+
+      refNode = Object.values(modelStore.nodes).find((n) => {
+        if (modelPrefix) {
+          const path = n.source?.path || ''
+          const modelFileName = path.split('/').pop()?.split('\\').pop() || ''
+          const modelBaseName = modelFileName.replace(/\.md$/i, '').replace(/_NN$/i, '').toLowerCase()
+          return n.name.toLowerCase() === name.toLowerCase() && modelBaseName === modelPrefix
+        }
+        return n.name.toLowerCase() === name.toLowerCase()
+      }) || null
     }
 
     return {

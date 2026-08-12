@@ -37,7 +37,10 @@ export const useMetamodelStore = defineStore('metamodel', () => {
   const uiStore = useUiStore()
 
   const rootId = computed(() => {
-    const selected = uiStore.selectedNodeId
+    let selected = uiStore.selectedNodeId
+    if (selected?.startsWith('virtual:')) {
+      selected = selected.split(':')[1]
+    }
     if (selected) {
       let curr = modelStore.getNode(selected)
       while (curr?.parentId) {

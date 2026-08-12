@@ -73,8 +73,18 @@
         :filter-mode="uiStore.explorerFilterMode"
         :search-query="searchQuery"
         @select-file="handleSelectFile"
+        @view-file="handleViewFile"
+        @download-file="handleDownloadFile"
       />
     </div>
+
+    <!-- File Content Viewer Modal -->
+    <SourceRefModal
+      v-if="showFileModal && activeFileForModal"
+      :is-open="showFileModal"
+      :parsed="activeFileForModal"
+      @close="showFileModal = false"
+    />
   </div>
 </template>
 
@@ -82,6 +92,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { FolderTree, Search, RotateCw, Loader, X } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
+import SourceRefModal from '../editor/SourceRefModal.vue'
+import type { ParsedSourceRef } from '../../utils/sourceRef'
 import { useUiStore, type ExplorerFilterMode } from '../../stores/uiStore'
 import { useModelStore } from '../../stores/modelStore'
 import FileTreeNode, { type FileItem } from './FileTreeNode.vue'
@@ -227,6 +239,52 @@ async function refreshTree(): Promise<void> {
   }
 }
 
+const activeFileForModal = ref<ParsedSourceRef | null>(null)
+const showFileModal = ref(false)
+
+function handleViewFile(item: FileItem): void {
+  activeFileForModal.value = {
+    filePath: item.path,
+    fileName: item.name,
+    isValid: true,
+  }
+  showFileModal.value = true
+}
+
+async function handleDownloadFile(item: FileItem): Promise<void> {
+  try {
+    const handle = workspaceStore.handle
+    let fileBlob: Blob
+
+    if (handle) {
+      const parts = item.path.split(/[/\\]/).filter(Boolean)
+      let current: any = handle
+      for (let i = 0; i < parts.length - 1; i++) {
+        current = await current.getDirectoryHandle(parts[i])
+      }
+      const fileHandle = await current.getFileHandle(parts[parts.length - 1])
+      fileBlob = await fileHandle.getFile()
+    } else {
+      // Fallback for virtual tree
+      const resp = await fetch(item.path)
+      if (!resp.ok) throw new Error(`HTTP error ${resp.status}`)
+      fileBlob = await resp.blob()
+    }
+
+    const objectUrl = URL.createObjectURL(fileBlob)
+    const a = document.createElement('a')
+    a.href = objectUrl
+    a.download = item.name
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(objectUrl)
+  } catch (err) {
+    console.error('[WorkspaceExplorer] Failed to download file:', err)
+    alert(`No se pudo descargar el archivo: ${err instanceof Error ? err.message : String(err)}`)
+  }
+}
+
 function handleSelectFile(item: FileItem): void {
   const matchingNode = Object.values(modelStore.nodes).find(
     (n) => n.source?.path === item.path || n.source?.path?.endsWith(item.name),
@@ -235,6 +293,8 @@ function handleSelectFile(item: FileItem): void {
   if (matchingNode) {
     uiStore.selectNode(matchingNode.id)
     uiStore.setActiveView('editor')
+  } else {
+    handleViewFile(item)
   }
 }
 

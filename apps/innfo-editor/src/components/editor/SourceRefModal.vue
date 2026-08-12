@@ -34,6 +34,24 @@
                 {{ parsed.filePath }}
               </p>
             </div>
+
+            <!-- Toggle Mode (only if Markdown) -->
+            <div v-if="isMarkdown" class="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-2xs ml-4 shrink-0">
+              <button
+                @click="viewMode = 'preview'"
+                class="px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer"
+                :class="viewMode === 'preview' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-2xs font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+              >
+                Vista Previa
+              </button>
+              <button
+                @click="viewMode = 'code'"
+                class="px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer"
+                :class="viewMode === 'code' ? 'bg-white dark:bg-slate-700 text-slate-850 dark:text-white shadow-2xs font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+              >
+                Código
+              </button>
+            </div>
           </div>
           <button
             @click="close"
@@ -102,7 +120,14 @@
         </div>
 
         <!-- File Content Display Area -->
-        <div class="flex-1 overflow-y-auto p-6 font-mono text-xs leading-relaxed bg-slate-900 text-slate-100 dark:bg-slate-950">
+        <div
+          class="flex-1 overflow-y-auto p-6 transition-all"
+          :class="[
+            viewMode === 'preview' && isMarkdown
+              ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-8 max-w-none'
+              : 'font-mono text-xs leading-relaxed bg-slate-900 text-slate-100 dark:bg-slate-950'
+          ]"
+        >
           <div v-if="loading" class="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
             <div class="w-7 h-7 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
             <span>Cargando contenido de la fuente...</span>
@@ -116,6 +141,20 @@
             <p class="mt-1 font-mono text-slate-400">{{ error }}</p>
           </div>
 
+          <!-- Preview Mode for Images -->
+          <div v-else-if="viewMode === 'preview' && isImage" class="flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-900 rounded-xl h-[60vh] overflow-auto">
+            <img :src="objectUrl" class="max-w-full max-h-full object-contain rounded-lg shadow-md border border-slate-200 dark:border-slate-800" :alt="parsed.fileName" />
+          </div>
+
+          <!-- Preview Mode for PDFs -->
+          <div v-else-if="viewMode === 'preview' && isPdf" class="w-full h-[60vh] bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden">
+            <iframe :src="objectUrl" class="w-full h-full border-0 rounded-xl"></iframe>
+          </div>
+
+          <!-- Preview Mode for Markdown -->
+          <div v-else-if="viewMode === 'preview' && isMarkdown" class="markdown-body" v-html="formattedHtml"></div>
+
+          <!-- Code / Text Line-by-Line Mode -->
           <div v-else class="space-y-1">
             <div
               v-for="(line, idx) in lines"
@@ -160,6 +199,7 @@ import { Link, X, FileText, Hash, HardDrive, Clock, CheckCircle2, ExternalLink }
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import type { ParsedSourceRef } from '../../utils/sourceRef'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
+import { renderMarkdown } from '../../utils/markdown'
 
 const props = defineProps<{
   isOpen: boolean
@@ -182,6 +222,19 @@ const metadata = ref<{
   normalized_at?: string
 }>({})
 const openOriginalError = ref<string | null>(null)
+
+const viewMode = ref<'preview' | 'code'>('preview')
+const objectUrl = ref('')
+
+const extension = computed(() => {
+  const parts = props.parsed.fileName.split('.')
+  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : ''
+})
+
+const isMarkdown = computed(() => extension.value === 'md')
+const isImage = computed(() => ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(extension.value))
+const isPdf = computed(() => extension.value === 'pdf')
+const formattedHtml = computed(() => renderMarkdown(rawContent.value))
 
 const lines = computed(() => rawContent.value.split('\n'))
 
@@ -212,15 +265,42 @@ function formatDate(dateStr?: string): string {
   }
 }
 
+function cleanupObjectUrl(): void {
+  if (objectUrl.value && objectUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(objectUrl.value)
+    objectUrl.value = ''
+  }
+}
+
 async function loadSourceContent(): Promise<void> {
   if (!props.parsed.filePath) return
   loading.value = true
   error.value = null
   rawContent.value = ''
   metadata.value = {}
+  cleanupObjectUrl()
 
   try {
     const handle = workspaceStore.handle
+
+    if (isImage.value || isPdf.value) {
+      if (handle) {
+        const parts = props.parsed.filePath.split(/[/\\]/).filter(Boolean)
+        let current: any = handle
+        for (let i = 0; i < parts.length - 1; i++) {
+          current = await current.getDirectoryHandle(parts[i])
+        }
+        const fileHandle = await current.getFileHandle(parts[parts.length - 1])
+        const file = await fileHandle.getFile()
+        objectUrl.value = URL.createObjectURL(file)
+      } else {
+        // Fallback: use filePath directly
+        objectUrl.value = props.parsed.filePath
+      }
+      loading.value = false
+      return
+    }
+
     let textContent = ''
 
     if (handle) {
@@ -301,7 +381,14 @@ watch(
   () => props.isOpen,
   (val) => {
     if (val) {
+      if (props.parsed.startLine) {
+        viewMode.value = 'code'
+      } else {
+        viewMode.value = (isMarkdown.value || isImage.value || isPdf.value) ? 'preview' : 'code'
+      }
       loadSourceContent()
+    } else {
+      cleanupObjectUrl()
     }
   },
   { immediate: true },
@@ -319,4 +406,26 @@ watch(
 }
 .animate-fade-in { animation: fade-in 0.15s ease-out forwards; }
 .animate-scale-in { animation: scale-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* Sleek minimal styles for markdown preview inside modal */
+.markdown-body :deep(h1) { font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem; }
+.markdown-body :deep(h2) { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+.markdown-body :deep(h3) { font-size: 1.1rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+.markdown-body :deep(p) { margin-bottom: 0.75rem; line-height: 1.6; }
+.markdown-body :deep(ul) { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.markdown-body :deep(ol) { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.markdown-body :deep(li) { margin-bottom: 0.25rem; }
+.markdown-body :deep(code) { font-family: monospace; font-size: 0.85em; background-color: #f1f5f9; padding: 0.15rem 0.3rem; border-radius: 0.25rem; }
+.dark .markdown-body :deep(code) { background-color: #1e293b; color: #f1f5f9; }
+.markdown-body :deep(pre) { background-color: #f8fafc; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
+.dark .markdown-body :deep(pre) { background-color: #0f172a; }
+.markdown-body :deep(pre code) { background-color: transparent; padding: 0; }
+.markdown-body :deep(a) { color: #6366f1; text-decoration: underline; }
+.markdown-body :deep(blockquote) { border-left: 4px solid #e2e8f0; padding-left: 1rem; color: #64748b; font-style: italic; margin-bottom: 1rem; }
+.dark .markdown-body :deep(blockquote) { border-left-color: #334155; color: #94a3b8; }
+.markdown-body :deep(table) { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+.markdown-body :deep(th), .markdown-body :deep(td) { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: left; }
+.dark .markdown-body :deep(th), .dark .markdown-body :deep(td) { border-color: #334155; }
+.markdown-body :deep(th) { background-color: #f8fafc; }
+.dark .markdown-body :deep(th) { background-color: #1e293b; }
 </style>

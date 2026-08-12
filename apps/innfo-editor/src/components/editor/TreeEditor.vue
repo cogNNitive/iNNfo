@@ -151,7 +151,6 @@ const activeConceptFields = computed(() => {
 
 // Build a BlockData-compatible object from a ModelNode
 const blockFromNode = (node: ModelNode) => {
-  console.log('[DEBUG] blockFromNode node:', JSON.stringify(node))
   return {
     id: node.id,
     name: node.name,

@@ -83,6 +83,57 @@ describe('BlockSheet.vue — Redesigned layout & assets', () => {
     })
   })
 
+  describe('Fields Schema (concept layout)', () => {
+    it('renders field metadata (type badge, options, targets) in the Fields Schema section', async () => {
+      const modelStore = useModelStore()
+      const root = makeNode('Root', { rawContent: '---\nspec_version: V_0-1-5\n---\n' })
+      modelStore.setGraph({ Root: root }, ['Root'])
+
+      const wrapper = mount(BlockSheet, {
+        props: {
+          block: { id: '', name: 'Topic', description: '' },
+          kind: 'concept',
+          conceptType: 'topic',
+          conceptName: 'Topic',
+          conceptFields: [
+            { name: 'status', type: 'select', options: ['active', 'inactive'] },
+            { name: 'owner', type: 'reference', target_concepts: ['Persona'] },
+          ],
+          collapsed: false,
+          isEditing: false,
+        },
+      })
+
+      expect(wrapper.text()).toContain('Fields Schema')
+      expect(wrapper.find('[data-testid="field-schema-view"]').exists()).toBe(true)
+      expect(wrapper.findAll('[data-testid="field-type-badge"]')).toHaveLength(2)
+      expect(wrapper.text()).toContain('active')
+      expect(wrapper.text()).toContain('inactive')
+      expect(wrapper.text()).toContain('Persona')
+    })
+
+    it('shows "No fields defined" when the concept declares no fields', async () => {
+      const modelStore = useModelStore()
+      const root = makeNode('Root', { rawContent: '---\nspec_version: V_0-1-5\n---\n' })
+      modelStore.setGraph({ Root: root }, ['Root'])
+
+      const wrapper = mount(BlockSheet, {
+        props: {
+          block: { id: '', name: 'Topic', description: '' },
+          kind: 'concept',
+          conceptType: 'topic',
+          conceptName: 'Topic',
+          conceptFields: [],
+          collapsed: false,
+          isEditing: false,
+        },
+      })
+
+      expect(wrapper.text()).toContain('Fields Schema')
+      expect(wrapper.text()).toContain('No fields defined')
+    })
+  })
+
   describe('assetItems (Media & Attachments)', () => {
     it('renders declared node.assets as attachment items in NodeMedia', async () => {
       const modelStore = useModelStore()

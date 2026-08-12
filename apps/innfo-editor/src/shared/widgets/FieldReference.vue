@@ -6,7 +6,7 @@
  * Uses v-model contract: modelValue / update:modelValue.
  * Supports Qualified Cross-Model References (Idea 1).
  */
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import BlockPill from '../../components/editor/BlockPill.vue'
@@ -29,21 +29,45 @@ const uiStore = useUiStore()
 const showDropdown = ref(false)
 const query = ref(props.modelValue || '')
 
+watch(() => props.modelValue, (newVal) => {
+  query.value = newVal || ''
+})
+
 const cleanQuery = computed(() => {
   const val = props.modelValue || query.value || ''
   if (typeof val !== 'string') return ''
-  return val.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '').trim()
+  let name = val.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '').trim()
+  if (name.startsWith('[[') && name.endsWith(']]')) {
+    name = name.slice(2, -2).trim()
+  }
+  return name
 })
 
 const refNode = computed(() => {
-  const name = cleanQuery.value
-  if (!name) return null
-  if (modelStore.nodes[name]) {
-    return modelStore.nodes[name]
+  const val = props.modelValue || query.value || ''
+  if (!val || typeof val !== 'string') return null
+
+  let name = val.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '').trim()
+  if (name.startsWith('[[') && name.endsWith(']]')) {
+    name = name.slice(2, -2).trim()
   }
-  return Object.values(modelStore.nodes).find(
-    (n) => n.name.toLowerCase() === name.toLowerCase()
-  ) || null
+
+  let modelPrefix = ''
+  if (name.startsWith('[') && name.includes(']')) {
+    const closingBracket = name.indexOf(']')
+    modelPrefix = name.slice(1, closingBracket).trim().toLowerCase()
+    name = name.slice(closingBracket + 1).trim()
+  }
+
+  return Object.values(modelStore.nodes).find((n) => {
+    if (modelPrefix) {
+      const path = n.source?.path || ''
+      const modelFileName = path.split('/').pop()?.split('\\').pop() || ''
+      const modelBaseName = modelFileName.replace(/\.md$/i, '').replace(/_NN$/i, '').toLowerCase()
+      return n.name.toLowerCase() === name.toLowerCase() && modelBaseName === modelPrefix
+    }
+    return n.name.toLowerCase() === name.toLowerCase()
+  }) || null
 })
 
 const getConceptFields = (typeName: string | undefined) => {
@@ -106,6 +130,25 @@ const filteredSuggestions = computed<ReferenceSuggestion[]>(() => {
   return matches
 })
 
+function emitValue(val: string) {
+  let trimmed = val.trim()
+  if (!trimmed) {
+    emit('update:modelValue', '')
+    return
+  }
+
+  if (trimmed.startsWith('[[') && trimmed.endsWith(']]')) {
+    emit('update:modelValue', trimmed)
+    return
+  }
+
+  if (trimmed.startsWith('[') && trimmed.includes(']')) {
+    emit('update:modelValue', `[[${trimmed}]]`)
+  } else {
+    emit('update:modelValue', `[[${trimmed}]]`)
+  }
+}
+
 function onInput(event: Event): void {
   query.value = (event.target as HTMLInputElement).value
   showDropdown.value = true
@@ -114,17 +157,29 @@ function onInput(event: Event): void {
   }
 }
 
+function formatWikiLink(name: string, isCrossModel: boolean, modelBaseName?: string): string {
+  if (isCrossModel && modelBaseName) {
+    const cleanModel = modelBaseName.replace(/\.md$/i, '').replace(/_NN$/i, '')
+    return `[[[${cleanModel}] ${name}]]`
+  }
+  return `[[${name}]]`
+}
+
 function selectSuggestion(suggestion: ReferenceSuggestion): void {
-  const selectedVal = suggestion.isCrossModel ? suggestion.qualifiedName : suggestion.name
-  query.value = selectedVal
+  const modelBase = suggestion.modelName.replace(/\.md$/i, '').replace(/_NN$/i, '')
+  const formattedVal = formatWikiLink(suggestion.name, suggestion.isCrossModel, modelBase)
+  query.value = formattedVal
   showDropdown.value = false
-  emit('update:modelValue', selectedVal)
+  emit('update:modelValue', formattedVal)
 }
 
 function onBlur(): void {
   setTimeout(() => {
     showDropdown.value = false
-  }, 100)
+    if (query.value) {
+      emitValue(query.value)
+    }
+  }, 150)
 }
 </script>
 

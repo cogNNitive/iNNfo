@@ -8,7 +8,8 @@ import RightGuidanceSidebar from '../components/layout/RightGuidanceSidebar.vue'
 import ValidationReport from '../components/ValidationReport.vue'
 import ToastMessage from '../components/ToastMessage.vue'
 import SaveWorkspaceModal from '../components/layout/SaveWorkspaceModal.vue'
-import OnboardingDashboard from '../components/layout/OnboardingDashboard.vue'
+import WorkspaceDashboard from '../components/layout/WorkspaceDashboard.vue'
+import ModelDashboard from '../components/editor/ModelDashboard.vue'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import { useModelStore } from '../stores/modelStore'
 import { useConfirmStore } from '../stores/confirmStore'
@@ -39,6 +40,9 @@ const ModelInfoPanel = defineAsyncComponent(() => import('../components/editor/M
 const AiWorkflowPanel = defineAsyncComponent(() => import('../components/editor/AiWorkflowPanel.vue'))
 const GuidedProcedureView = defineAsyncComponent(
   () => import('../components/editor/GuidedProcedureView.vue'),
+)
+const ProjectGanttView = defineAsyncComponent(
+  () => import('../components/editor/ProjectGanttView.vue'),
 )
 const SearchResultsView = defineAsyncComponent(
   () => import('../components/editor/SearchResultsView.vue'),
@@ -118,6 +122,8 @@ const rootNode = computed(() => {
   const ids = modelStore.rootIds
   return ids.length > 0 ? modelStore.getNode(ids[0]) : null
 })
+
+const isRootNode = computed(() => selectedNode.value?.kind === 'root')
 
 /** Determines which editor sub-view to render based on node characteristics. */
 const isConceptLike = (node: { kind?: string }) => node.kind === 'concept' || node.kind === 'root'
@@ -334,6 +340,9 @@ function onSelectNode(nodeId: string): void {
   ) {
     uiStore.setActiveView('editor')
   }
+  // Selecting a node in the sidebar must show it in the central panel
+  // immediately, even if the validation report overlay is open.
+  uiStore.setShowValidationReport(false)
 }
 
 function onEditorChange(): void {
@@ -562,7 +571,12 @@ onUnmounted(() => {
             v-if="selectedNodeId && !uiStore.showValidationReport"
             class="flex-1 p-4 overflow-y-auto"
           >
+            <ModelDashboard
+              v-if="isRootNode"
+              :root-node-id="selectedNodeId"
+            />
             <component
+              v-else
               :is="activeEditorComponent"
               :key="selectedNodeId"
               v-bind="activeEditorProps"
@@ -586,7 +600,7 @@ onUnmounted(() => {
             <ValidationReport :report="validationReport" />
           </div>
 
-          <OnboardingDashboard v-else />
+          <WorkspaceDashboard v-else />
         </template>
 
         <!-- ── Graph View ── -->
@@ -635,6 +649,13 @@ onUnmounted(() => {
         <template v-else-if="uiStore.activeView === 'guided-procedure'">
           <div class="flex-1 flex flex-col min-h-0">
             <GuidedProcedureView />
+          </div>
+        </template>
+
+        <!-- ── Gantt Chart View (Projects Extension) ── -->
+        <template v-else-if="uiStore.activeView === 'gantt-chart'">
+          <div class="flex-1 flex flex-col min-h-0">
+            <ProjectGanttView />
           </div>
         </template>
       </main>

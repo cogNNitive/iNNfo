@@ -124,9 +124,17 @@ function serializeNodeContent(node: ModelNode): {
   // Synchronize memory-modified child elements of the root node
   const childElements: ModelNode[] = []
 
-  if (getActivePinia()) {
-    const modelStore = useModelStore()
+  let modelStore: any = null
+  try {
+    const pinia = getActivePinia()
+    if (pinia) {
+      modelStore = useModelStore(pinia)
+    }
+  } catch {
+    // Pinia not active
+  }
 
+  if (modelStore) {
     function collectElements(id: string) {
       const curr = modelStore.getNode(id)
       if (!curr) return

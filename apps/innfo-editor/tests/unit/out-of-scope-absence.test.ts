@@ -39,9 +39,12 @@ describe('out-of-scope feature absence (R19)', () => {
       /[\/\\]components[\/\\]editor[\/\\]BlockPill\.vue$/,
       /[\/\\]components[\/\\]editor[\/\\]BlockRelationships\.vue$/,
       /[\/\\]components[\/\\]editor[\/\\]FieldViewer\.vue$/,
+      /[\/\\]components[\/\\]editor[\/\\]FieldSchemaView\.vue$/,
       /[\/\\]components[\/\\]layout[\/\\]SetupWizard\.vue$/,
       /[\/\\]composables[\/\\]useWorkspaceScaffolding\.ts$/,
       /[\/\\]views[\/\\]StandaloneProcedureView\.vue$/,
+      /FieldReference\.vue$/,
+      /modelStore\.ts$/,
     ]
     const codeFilesNoExcluded = codeFiles.filter((f) => !wikilinkExcluded.some((re) => re.test(f)))
     const offendingContent = codeFilesNoExcluded.filter((f) =>

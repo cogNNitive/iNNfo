@@ -9,7 +9,7 @@
     <div
       v-if="!isCollapsed"
       @pointerdown="startResize"
-      class="absolute top-0 left-0 z-30 h-full w-1.5 cursor-col-resize hover:bg-primary/30 active:bg-primary/50 transition-colors"
+      class="absolute top-0 left-0 z-30 h-full w-3 touch-none cursor-col-resize hover:bg-primary/30 active:bg-primary/50 transition-colors"
       title="Drag to resize"
       data-testid="resize-handle"
     ></div>
@@ -18,7 +18,7 @@
     <button
       v-if="isCollapsed"
       @click="isCollapsed = false"
-      class="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-primary transition-all duration-200 cursor-pointer hover:scale-105"
+      class="absolute top-4 right-4 z-30 flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-primary transition-all duration-200 cursor-pointer hover:scale-105"
       title="Show Guidance Panel"
     >
       <BookOpen class="w-4 h-4" />
@@ -37,7 +37,7 @@
       <button
         v-if="!isCollapsed"
         @click="isCollapsed = true"
-        class="absolute top-4 right-4 z-10 flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+        class="absolute top-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-md border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
         title="Hide Guidance Panel"
       >
         <ChevronRight class="w-4 h-4" />

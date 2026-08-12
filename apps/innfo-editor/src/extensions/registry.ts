@@ -1,6 +1,7 @@
 import { defineAsyncComponent, type Component } from 'vue'
 import type { ExtensionManifest, ExtensionContext } from './types'
 import proceduresManifest from '../../../../specs/v0.2.0/level2/procedures/extension/manifest.json'
+import projectsManifest from '../../../../specs/latest/level2/projects/extension/manifest.json'
 
 export interface RegisteredExtension {
   manifest: ExtensionManifest
@@ -12,6 +13,7 @@ class ExtensionRegistry {
 
   constructor() {
     this.registerProceduresExtension()
+    this.registerProjectsExtension()
   }
 
   private registerProceduresExtension() {
@@ -25,6 +27,17 @@ class ExtensionRegistry {
     })
     // Also alias by short name
     this.extensions.set('procedures', this.extensions.get('procedures_V_0-2-0')!)
+  }
+
+  private registerProjectsExtension() {
+    this.extensions.set('projects', {
+      manifest: projectsManifest as ExtensionManifest,
+      views: {
+        'gantt-chart': defineAsyncComponent(
+          () => import('../components/editor/ProjectGanttView.vue'),
+        ),
+      },
+    })
   }
 
   public getExtension(templateName: string): RegisteredExtension | undefined {

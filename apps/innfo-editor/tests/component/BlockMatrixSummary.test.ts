@@ -154,7 +154,7 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('No relations participation.')
+    expect(wrapper.text()).toContain('No matrix connections.')
   })
 
   it('shows empty state when root node has no matrix definitions', () => {
@@ -171,7 +171,7 @@ describe('BlockMatrixSummary.vue — R-SC-04', () => {
       },
     })
 
-    expect(wrapper.text()).toContain('No relations participation.')
+    expect(wrapper.text()).toContain('No matrix connections.')
   })
 
   it('handles multiple matrices with different concept participation', () => {

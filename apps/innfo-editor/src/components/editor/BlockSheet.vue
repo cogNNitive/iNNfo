@@ -248,9 +248,11 @@
                 v-if="conceptFields && conceptFields.length > 0"
                 class="bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 p-4"
               >
-                <FieldViewer :node-id="blockIdForFields" :field-definitions="conceptFields" readonly />
+                <FieldSchemaView :field-definitions="conceptFields" />
               </div>
-              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">No fields defined</div>
+              <div v-else class="text-sm text-slate-400 dark:text-slate-500 italic">
+                No fields defined
+              </div>
             </div>
 
             <!-- Unified Connections & Relationships -->
@@ -388,6 +390,7 @@ import { useConceptVisuals, getConceptMeta } from '../../composables/useConceptV
 
 // Tab dependencies
 import FieldViewer from './FieldViewer.vue'
+import FieldSchemaView from './FieldSchemaView.vue'
 import BlockConnections from './BlockConnections.vue'
 import BlockRelationships from './BlockRelationships.vue'
 import BlockMatrixSummary from './BlockMatrixSummary.vue'

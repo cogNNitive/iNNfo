@@ -12,6 +12,7 @@ export type ActiveView =
   | 'import'
   | 'export'
   | 'guided-procedure'
+  | 'gantt-chart'
 
 export type AiTab = 'guide' | 'import' | 'export'
 

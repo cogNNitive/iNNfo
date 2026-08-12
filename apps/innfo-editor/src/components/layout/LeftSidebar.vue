@@ -7,7 +7,7 @@
     <!-- Resize handle (right edge) -->
     <div
       @pointerdown="startResize"
-      class="absolute top-0 right-0 z-30 h-full w-1.5 cursor-col-resize hover:bg-primary/30 active:bg-primary/50 transition-colors"
+      class="absolute top-0 right-0 z-30 h-full w-3 touch-none cursor-col-resize hover:bg-primary/30 active:bg-primary/50 transition-colors"
       title="Drag to resize"
       data-testid="resize-handle"
     ></div>
@@ -353,6 +353,7 @@ const activeModelId = computed(() => uiStore.activeModelId || visibleRootIds.val
 
 function selectModelHeader(rootId: string): void {
   uiStore.setActiveModel(rootId)
+  uiStore.selectNode(rootId)
   toggleModel(rootId)
 }
 

@@ -102,10 +102,31 @@ watch(
 
     console.log('[FieldAsset] resolving:', { path, nodeId: props.nodeId, nodeName: node?.name, slug })
 
+    // Resolve directory containing the model file relative to workspace root
+    async function getModelDirectoryHandle(rootHandle: any, modelPath: string): Promise<any> {
+      const parts = modelPath.replace(/\\/g, '/').split('/').filter(Boolean)
+      parts.pop() // Drop the filename segment
+      let current = rootHandle
+      for (const part of parts) {
+        current = await current.getDirectoryHandle(part)
+      }
+      return current
+    }
+
+    let modelDirHandle = handle
+    const modelPath = node?.source?.path || ''
+    if (modelPath) {
+      try {
+        modelDirHandle = await getModelDirectoryHandle(handle, modelPath)
+      } catch (err) {
+        console.warn('[FieldAsset] Failed to resolve model directory handle for:', modelPath, err)
+      }
+    }
+
     // 1. Try canonical per-element assets: assets/{slug}/{filename}
     if (slug) {
       try {
-        const assetsDir = await handle.getDirectoryHandle('assets')
+        const assetsDir = await modelDirHandle.getDirectoryHandle('assets')
         const slugDir = await assetsDir.getDirectoryHandle(slug)
         const fh = await slugDir.getFileHandle(path)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,7 +144,7 @@ watch(
 
     // 2. Try centralized assets: assets/{filename}
     try {
-      const assetsDir = await handle.getDirectoryHandle('assets')
+      const assetsDir = await modelDirHandle.getDirectoryHandle('assets')
       const fh = await assetsDir.getFileHandle(path)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const file = (await fh.getFile()) as any
@@ -141,7 +162,7 @@ watch(
     try {
       const parts = path.split('/').filter(Boolean)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let current: any = handle
+      let current: any = modelDirHandle
       for (let i = 0; i < parts.length - 1; i++) {
         current = await current.getDirectoryHandle(parts[i])
       }
