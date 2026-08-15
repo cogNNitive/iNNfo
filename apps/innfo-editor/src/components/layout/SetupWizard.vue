@@ -432,10 +432,7 @@ const stepTitles = [
             <code>.specs/</code>
             <span>Template specifications downloaded automatically</span>
           </div>
-          <div class="wizard__file">
-            <code>traNNsform/</code>
-            <span>AI-powered transformation tools for import and export</span>
-          </div>
+
         </div>
 
         <div class="wizard__actions">

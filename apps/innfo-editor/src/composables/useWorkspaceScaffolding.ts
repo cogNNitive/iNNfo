@@ -15,49 +15,7 @@ export async function initWorkspaceStructure(
   // Create dot-directories (application-managed)
   await handle.getDirectoryHandle('.specs', { create: true })
 
-  // Create traNNsform/ (visible) with subdirectories
-  const traNNsformDir = await handle.getDirectoryHandle('traNNsform', { create: true })
-  await traNNsformDir.getDirectoryHandle('input', { create: true })
-  await traNNsformDir.getDirectoryHandle('output', { create: true })
-  const templatesDir = await traNNsformDir.getDirectoryHandle('templates', { create: true })
-  const snippetsDir = await traNNsformDir.getDirectoryHandle('snippets', { create: true })
-  const workflowsDir = await traNNsformDir.getDirectoryHandle('workflows', { create: true })
 
-  // Download traNNsform files from GitHub (non-blocking — log on failure)
-  const TRANSFORM_BASE_URL = 'https://raw.githubusercontent.com/iNNfo/iNNfo/main/traNNsform'
-  const transformFiles = [
-    { path: '', name: 'AGENT.md' },
-    { path: '', name: 'README.md' },
-    { path: 'templates', name: 'business.md' },
-    { path: 'templates', name: 'procedures.md' },
-    { path: 'templates', name: 'organization.md' },
-    { path: 'templates', name: 'catalog.md' },
-    { path: 'templates', name: '_generic.md' },
-    { path: 'snippets', name: 'chart-patterns.md' },
-    { path: 'workflows', name: 'export.workflow.md' },
-    { path: 'workflows', name: 'import.workflow.md' },
-  ]
-
-  for (const file of transformFiles) {
-    try {
-      const url = `${TRANSFORM_BASE_URL}/${file.path}/${file.name}`
-      const resp = await fetch(url)
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`)
-      const text = await resp.text()
-
-      const dir =
-        file.path === '' ? traNNsformDir : file.path === 'templates' ? templatesDir : file.path === 'snippets' ? snippetsDir : workflowsDir
-
-      const fileHandle = await dir.getFileHandle(file.name, { create: true })
-      if (fileHandle.createWritable) {
-        const w = await fileHandle.createWritable()
-        await w.write(text)
-        await w.close()
-      }
-    } catch (err) {
-      console.warn(`[iNNfo] Failed to download traNNsform/${file.path}/${file.name}:`, err)
-    }
-  }
 
   // Create README
   const readmeContent = `# ${modelName}
@@ -74,7 +32,6 @@ This workspace was created by iNNfo — a structured knowledge model editor for 
 | \`AGENTS.md\` | AI agent entry point — skill and MCP setup instructions |
 | \`.specs/\` | Template specifications (auto-managed) |
 | \`.backups/\` | Auto-save history (auto-managed) |
-| \`traNNsform/\` | AI-powered transformation tools for import and export |
 
 ## How to edit
 
@@ -115,7 +72,6 @@ git clone https://github.com/iNNfo/actioNN.git
 | Trigger | Skill |
 |---------|-------|
 | Editing \`*_NN.md\` files | \`nn-innfo\` |
-| Document ingestion, normalization, transformation | \`nn-trannsform\` |
 | Web design, branding, analytics | \`nn-web-design-guide\` |
 | Workflow orchestration across skills | \`nn-workflow-orchestrator\` |
 | Model cost and tier evaluation | \`nn-opencode-model-router\` |
@@ -172,7 +128,6 @@ On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`com
 | \`*_NN.md\` | iNNfo model files |
 | \`index.md\` | Entry point with [[wikilinks]] to models |
 | \`.specs/\` | Spec chain cache (auto-managed) |
-| \`traNNsform/\` | AI-powered transform pipeline (import/export) |
 | \`README.md\` | Workspace overview |
 `
   const agentsHandle = await handle.getFileHandle('AGENTS.md', { create: true })

@@ -9,12 +9,8 @@ export type ActiveView =
   | 'matrices'
   | 'info'
   | 'ai-guide'
-  | 'import'
-  | 'export'
   | 'guided-procedure'
   | 'gantt-chart'
-
-export type AiTab = 'guide' | 'import' | 'export'
 
 export type GhostFilterMode = 'model' | 'all'
 
@@ -39,7 +35,6 @@ export const useUiStore = defineStore('ui', () => {
   const showMetamatrixConfig = ref(false)
   const showSaveWorkspaceModal = ref(false)
   const showAiModal = ref(false)
-  const activeAiTab = ref<AiTab>('guide')
   const ghostFilterMode = ref<GhostFilterMode>('all')
   const explorerFilterMode = ref<ExplorerFilterMode>('all')
   const isSearchOpen = ref(false)
@@ -143,9 +138,7 @@ export const useUiStore = defineStore('ui', () => {
     showAiModal.value = val
   }
 
-  function setActiveAiTab(tab: AiTab): void {
-    activeAiTab.value = tab
-  }
+
 
   function toggleSearchOpen(): void {
     isSearchOpen.value = !isSearchOpen.value
@@ -192,7 +185,6 @@ export const useUiStore = defineStore('ui', () => {
     showMetamatrixConfig,
     showSaveWorkspaceModal,
     showAiModal,
-    activeAiTab,
     ghostFilterMode,
     explorerFilterMode,
     isSearchOpen,
@@ -214,7 +206,6 @@ export const useUiStore = defineStore('ui', () => {
     setShowValidationReport,
     setShowSaveWorkspaceModal,
     setShowAiModal,
-    setActiveAiTab,
     setGhostFilterMode,
     setExplorerFilterMode,
     toggleSearchOpen,

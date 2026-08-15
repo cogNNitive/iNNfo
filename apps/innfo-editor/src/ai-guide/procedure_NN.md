@@ -55,24 +55,7 @@ title: "Use iNNfo with AI"
   tool: "OpenCode Desktop"
   ```
   Tell OpenCode Desktop what you want to do including a reference to the skill you need, for example: *"innfo: Load the nn-innfo skill — I need to edit the business model and add a new concept"*. The skill reference in your message helps OpenCode Desktop discover and activate the right skill automatically. The skill provides model validation, MCP activation, and change workflows.
-* _NN Work: Import documents into iNNfo models
-  ```yaml
-  parent: "Use iNNfo with AI"
-  step_type: task
-  input: "Source Documents"
-  output: "iNNfo Models"
-  tool: "OpenCode Desktop"
-  ```
-  Place the documents you want to transform in **traNNsform/input/**. Then go to the **Import** panel in iNNfo and copy the generated prompt — it tells OpenCode Desktop exactly what to do. The **nn-trannsform** skill handles document ingestion, normalization, and conversion.
-* _NN Work: Export models as HTML visualizers
-  ```yaml
-  parent: "Use iNNfo with AI"
-  step_type: task
-  input: "Model File"
-  output: "HTML Visualizer"
-  tool: "OpenCode Desktop"
-  ```
-  Open the model you want to visualize, then go to the **Export** panel in iNNfo and copy the generated prompt. It includes the model name and instructions for OpenCode Desktop. The **nn-innfo** skill handles visualizer generation. Results appear in **traNNsform/output/**. Tell OpenCode Desktop: *"innfo: Load the nn-innfo skill — I need to generate an HTML visualizer following traNNsform/AGENT.md"*.
+
 * _NN Work: Use the suggested prompts
   ```yaml
   parent: "Use iNNfo with AI"

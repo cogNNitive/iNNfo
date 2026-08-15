@@ -39,7 +39,6 @@ function selectModel(modelId: string): void {
 }
 
 function selectAIGuide(): void {
-  uiStore.setActiveAiTab('guide')
   uiStore.setActiveView('ai-guide')
 }
 </script>

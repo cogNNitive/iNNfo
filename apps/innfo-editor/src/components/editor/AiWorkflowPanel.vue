@@ -10,50 +10,14 @@
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="flex border-b border-slate-200 dark:border-slate-700 px-6 shrink-0">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        @click="switchTab(tab.id)"
-        class="flex items-center gap-1.5 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer -mb-px"
-        :class="
-          uiStore.activeAiTab === tab.id
-            ? 'border-purple-500 text-purple-700 dark:text-purple-300'
-            : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
-        "
-      >
-        <component :is="tab.icon" class="w-3.5 h-3.5" />
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <!-- Tab Content -->
+    <!-- Content -->
     <div class="flex-1 overflow-y-auto min-h-0">
-      <AIGuidePanel v-if="uiStore.activeAiTab === 'guide'" />
-      <ImportPanel v-else-if="uiStore.activeAiTab === 'import'" />
-      <ExportPanel v-else-if="uiStore.activeAiTab === 'export'" />
+      <AIGuidePanel />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Sparkles, BookOpen, FileDown, FileUp } from 'lucide-vue-next'
-import { useUiStore, type AiTab } from '../../stores/uiStore'
+import { Sparkles } from 'lucide-vue-next'
 import AIGuidePanel from './AIGuidePanel.vue'
-import ImportPanel from './ImportPanel.vue'
-import ExportPanel from './ExportPanel.vue'
-
-const uiStore = useUiStore()
-
-const tabs = computed<Array<{ id: AiTab; label: string; icon: any }>>(() => [
-  { id: 'guide', label: 'Guide', icon: BookOpen },
-  { id: 'import', label: 'Import', icon: FileDown },
-  { id: 'export', label: 'Export', icon: FileUp },
-])
-
-function switchTab(tab: AiTab): void {
-  uiStore.setActiveAiTab(tab)
-}
 </script>
