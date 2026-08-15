@@ -1,9 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { validateModel } from '../src/tools/mutate.js'
 import { isLocalPath, toLocalFilePath } from '../src/tools/resolver-node.js'
 import { parseModel, validateFormatContent, validateModel as coreValidate } from '../../innfo-core/src/index.ts'
 
 describe('Defects D1–D9 Regression Test Suite', () => {
+  beforeEach(() => {
+    vi.spyOn(global, 'fetch').mockRejectedValue(new Error('network unreachable'))
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('D1: validateModel auto-detects level-2 template content and delegates to validateTemplate', async () => {
     const templateContent = `---
 specification_version: "V_0-1-0"

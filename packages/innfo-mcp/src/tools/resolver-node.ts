@@ -1,8 +1,9 @@
-import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readdir, readFile, mkdir } from 'node:fs/promises'
 import { join, basename, isAbsolute } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseFrontmatter, SpecResolutionError } from '@cognnitive/innfo-core'
 import type { SpecCache, SpecDocument, SpecFrontmatter, ResolverOptions } from '@cognnitive/innfo-core'
+import { writeSpecToCache, isCacheEntryValid } from './cache-manifest.js'
 
 export function isLocalPath(url: string): boolean {
   if (!url) return false
@@ -226,7 +227,7 @@ export async function resolveParentChainNode(
         // Cache local resolutions like http downloads so a later run resolves
         // from .spec-cache even if the absolute path moves or disappears.
         const cacheName = canonicalCacheName(currentName, content)
-        await writeFile(join(cacheDir, `${cacheName}_NN.md`), content, 'utf-8').catch(() => {})
+        await writeSpecToCache(cacheDir, `${cacheName}_NN.md`, content, currentUrl).catch(() => {})
       } catch {
         content = null
       }
@@ -244,12 +245,22 @@ export async function resolveParentChainNode(
       }
     }
 
-    // 2. Try cache directory (version-agnostic lookup)
+    // 2. Try cache directory (version-agnostic lookup). A cache hit is only
+    //    served when the manifest's recorded sha256 still matches the file's
+    //    current on-disk content, and the content parses as valid
+    //    frontmatter. Either failure means the cache entry is stale/corrupt
+    //    and must be treated as a MISS — falling through to network fetch —
+    //    rather than served (fixes silent staleness/corruption).
     if (content === null) {
       attempted.push(`cache dir "${cacheDir}"`)
       const cachePath = await findCachedSpec(cacheDir, currentName)
       if (cachePath) {
-        content = await readFile(cachePath, 'utf-8')
+        const cachedContent = await readFile(cachePath, 'utf-8')
+        const cacheFilename = basename(cachePath)
+        const validEntry = await isCacheEntryValid(cacheDir, cacheFilename, cachedContent)
+        if (validEntry && parseFrontmatter(cachedContent) !== null) {
+          content = cachedContent
+        }
       }
     }
 
@@ -260,7 +271,7 @@ export async function resolveParentChainNode(
       try {
         content = await download(currentUrl, timeout)
         const cacheName = canonicalCacheName(currentName, content)
-        await writeFile(join(cacheDir, `${cacheName}_NN.md`), content, 'utf-8')
+        await writeSpecToCache(cacheDir, `${cacheName}_NN.md`, content, currentUrl)
       } catch {
         content = null
       }

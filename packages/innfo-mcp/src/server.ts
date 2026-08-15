@@ -29,9 +29,17 @@ import {
   deriveNameFromUrl,
 } from './tools/spec.js'
 import { validateModel, validateModelUrl, applyChange, validateTemplate, initModel } from './tools/mutate.js'
+import { findRepoRoot } from './tools/repo-root.js'
 
-/** Root directory for model scanning (defaults to `models/` under CWD) */
-const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? process.cwd()
+/**
+ * Root directory for model scanning and `.spec-cache/` placement.
+ *
+ * Defaults to the repo root found by walking up from `process.cwd()` (so
+ * `.spec-cache/` always lands inside the repo, not in some ambiguous
+ * sibling/parent directory when the server is started from an unexpected
+ * cwd), falling back to `process.cwd()` itself when no `.git` is found.
+ */
+const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? findRepoRoot(process.cwd()) ?? process.cwd()
 
 export const server = new Server({ name: 'innfo-mcp', version: '0.2.1' }, { capabilities: { tools: {} } })
 

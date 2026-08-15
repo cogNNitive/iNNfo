@@ -20,6 +20,8 @@ e2e-fixtures/
 .atl/
 # Local Engram persistent-memory state (machine-specific)
 .engram/
+# Disposable resolver cache (innfo-mcp .spec-cache/ resolver), regenerated on demand
+.spec-cache/
 # Backup
 specs.bak/
 # Generated exports (AI agent output)

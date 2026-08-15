@@ -13,6 +13,7 @@ import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/inn
 
 import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec, normalizeId } from './spec.js'
 import { isLocalPath, toLocalFilePath } from './resolver-node.js'
+import { writeSpecToCache } from './cache-manifest.js'
 
 /* ── Types ───────────────────────────────────────────────────── */
 
@@ -327,11 +328,14 @@ async function bumpVersion(
         await rm(oldParentPath, { force: true })
       }
 
-      // Sync to .spec-cache
+      // Sync to .spec-cache (atomic write + manifest entry — see cache-manifest.ts)
       const cacheDir = join(rootDir, '.spec-cache')
-      await mkdir(cacheDir, { recursive: true })
-      const cachePath = join(cacheDir, `${newParentName}_NN.md`)
-      await writeFile(cachePath, parentContent, 'utf-8')
+      await writeSpecToCache(
+        cacheDir,
+        `${newParentName}_NN.md`,
+        parentContent,
+        model.frontmatter.parent_spec?.url ?? newParentPath,
+      )
     }
 
     // 2. Write model file

@@ -1,11 +1,33 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { join } from 'node:path'
-import { rm, mkdir, writeFile, readFile } from 'node:fs/promises'
+import { rm, mkdir, writeFile, readFile, readdir } from 'node:fs/promises'
 import { resolveParentChainNode } from './resolver-node'
+import { hashContent } from './cache-manifest'
 
 const rootDir = join(import.meta.dirname!, '..', '..', 'temp-test-resolver')
 const cacheDir = join(rootDir, '.spec-cache')
 const specsDir = join(rootDir, 'specs')
+
+/**
+ * Seed a `.spec-cache/` entry the way a real cache write would: the `.md`
+ * file plus a matching `.manifest.json` record. Since fix #1 (the local
+ * integrity manifest), a cache file with no manifest record is treated as a
+ * MISS, so tests that pre-populate the cache to assert "no network call"
+ * must seed both.
+ */
+async function seedCacheEntry(filename: string, content: string): Promise<void> {
+  await writeFile(join(cacheDir, filename), content, 'utf-8')
+  const manifestPath = join(cacheDir, '.manifest.json')
+  const existing = await readFile(manifestPath, 'utf-8')
+    .then((raw) => JSON.parse(raw))
+    .catch(() => ({}))
+  existing[filename] = {
+    sha256: hashContent(content),
+    sourceUrl: 'seeded-by-test',
+    fetchedAt: new Date().toISOString(),
+  }
+  await writeFile(manifestPath, JSON.stringify(existing), 'utf-8')
+}
 
 describe('NodeSpecResolver', () => {
   beforeEach(async () => {
@@ -165,7 +187,7 @@ describe('NodeSpecResolver', () => {
       'title: "Cached Spec"',
       '---',
     ].join('\n')
-    await writeFile(join(cacheDir, 'iNNfo_V_0-2-0_NN.md'), cachedContent, 'utf-8')
+    await seedCacheEntry('iNNfo_V_0-2-0_NN.md', cachedContent)
 
     const fetchSpy = vi.spyOn(global, 'fetch')
 
@@ -221,7 +243,7 @@ describe('NodeSpecResolver', () => {
       '---',
       'Canonical Content',
     ].join('\n')
-    await writeFile(join(cacheDir, 'business_V_0-3-0_NN.md'), cachedContent, 'utf-8')
+    await seedCacheEntry('business_V_0-3-0_NN.md', cachedContent)
 
     const fetchSpy = vi.spyOn(global, 'fetch')
 
@@ -245,7 +267,7 @@ describe('NodeSpecResolver', () => {
       '---',
       'Legacy Content',
     ].join('\n')
-    await writeFile(join(cacheDir, 'business_NN.md'), legacyContent, 'utf-8')
+    await seedCacheEntry('business_NN.md', legacyContent)
 
     const fetchSpy = vi.spyOn(global, 'fetch')
 
@@ -313,5 +335,192 @@ describe('NodeSpecResolver', () => {
     expect(error.message).toContain(specsDir)
     expect(error.message).toContain(cacheDir)
     expect(error.message).toContain('network url')
+  })
+
+  describe('cache integrity manifest', () => {
+    it('serves a .spec-cache entry whose manifest hash matches its on-disk content, without a network call', async () => {
+      const cachedContent = [
+        '---',
+        'spec_version: "V_0-5-0"',
+        'level: 2',
+        'title: "Manifest Verified"',
+        '---',
+      ].join('\n')
+      const filename = 'business_V_0-5-0_NN.md'
+      await writeFile(join(cacheDir, filename), cachedContent, 'utf-8')
+      await writeFile(
+        join(cacheDir, '.manifest.json'),
+        JSON.stringify({
+          [filename]: {
+            sha256: hashContent(cachedContent),
+            sourceUrl: 'https://example.com/business_V_0-5-0_NN.md',
+            fetchedAt: new Date().toISOString(),
+          },
+        }),
+        'utf-8',
+      )
+
+      const fetchSpy = vi.spyOn(global, 'fetch')
+
+      const result = await resolveParentChainNode(
+        rootDir,
+        'https://example.com/business_V_0-5-0_NN.md',
+        'business_V_0-5-0',
+        cacheDir,
+      )
+
+      expect(fetchSpy).not.toHaveBeenCalled()
+      expect(result.specs.get('business_V_0-5-0')?.frontmatter.title).toBe('Manifest Verified')
+    })
+
+    it('treats a .spec-cache entry with a stale/mismatched manifest hash as a miss and falls through to network fetch', async () => {
+      const staleContent = [
+        '---',
+        'spec_version: "V_0-5-0"',
+        'level: 2',
+        'title: "Stale Cached"',
+        '---',
+      ].join('\n')
+      const filename = 'business_V_0-5-0_NN.md'
+      await writeFile(join(cacheDir, filename), staleContent, 'utf-8')
+      // Manifest hash does not match the on-disk content (content changed
+      // without going through the cache writer) — this must be a MISS.
+      await writeFile(
+        join(cacheDir, '.manifest.json'),
+        JSON.stringify({
+          [filename]: {
+            sha256: 'deadbeef'.repeat(8),
+            sourceUrl: 'https://example.com/business_V_0-5-0_NN.md',
+            fetchedAt: new Date().toISOString(),
+          },
+        }),
+        'utf-8',
+      )
+
+      const freshContent = [
+        '---',
+        'spec_version: "V_0-5-0"',
+        'level: 2',
+        'title: "Fresh From Network"',
+        '---',
+      ].join('\n')
+      const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation(() =>
+        Promise.resolve({ ok: true, text: () => Promise.resolve(freshContent) } as Response),
+      )
+
+      const result = await resolveParentChainNode(
+        rootDir,
+        'https://example.com/business_V_0-5-0_NN.md',
+        'business_V_0-5-0',
+        cacheDir,
+      )
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1)
+      expect(result.specs.get('business_V_0-5-0')?.frontmatter.title).toBe('Fresh From Network')
+    })
+
+    it('treats a .spec-cache entry with no manifest record at all as a miss and falls through to network fetch', async () => {
+      const filename = 'business_V_0-6-0_NN.md'
+      await writeFile(
+        join(cacheDir, filename),
+        ['---', 'spec_version: "V_0-6-0"', 'level: 2', 'title: "Unrecorded"', '---'].join('\n'),
+        'utf-8',
+      )
+      // No .manifest.json at all in cacheDir.
+
+      const freshContent = [
+        '---',
+        'spec_version: "V_0-6-0"',
+        'level: 2',
+        'title: "From Network"',
+        '---',
+      ].join('\n')
+      const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation(() =>
+        Promise.resolve({ ok: true, text: () => Promise.resolve(freshContent) } as Response),
+      )
+
+      const result = await resolveParentChainNode(
+        rootDir,
+        'https://example.com/business_V_0-6-0_NN.md',
+        'business_V_0-6-0',
+        cacheDir,
+      )
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1)
+      expect(result.specs.get('business_V_0-6-0')?.frontmatter.title).toBe('From Network')
+    })
+
+    it('treats a corrupt cached file (no frontmatter) as a miss, not a valid empty-parent leaf', async () => {
+      const corruptContent = 'this file has no YAML frontmatter block at all, just prose.'
+      const filename = 'business_V_0-7-0_NN.md'
+      await writeFile(join(cacheDir, filename), corruptContent, 'utf-8')
+      // Manifest hash matches — the file is exactly what was written, it is
+      // simply corrupt/truncated content, not a staleness case.
+      await writeFile(
+        join(cacheDir, '.manifest.json'),
+        JSON.stringify({
+          [filename]: {
+            sha256: hashContent(corruptContent),
+            sourceUrl: 'https://example.com/business_V_0-7-0_NN.md',
+            fetchedAt: new Date().toISOString(),
+          },
+        }),
+        'utf-8',
+      )
+
+      // No parent_spec here: the request resolves in a single hop so the
+      // mock (which always returns this same content) doesn't cause the
+      // chain to loop back on itself.
+      const freshContent = [
+        '---',
+        'spec_version: "V_0-7-0"',
+        'level: 2',
+        'title: "Recovered From Network"',
+        '---',
+      ].join('\n')
+      const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation(() =>
+        Promise.resolve({ ok: true, text: () => Promise.resolve(freshContent) } as Response),
+      )
+
+      const result = await resolveParentChainNode(
+        rootDir,
+        'https://example.com/business_V_0-7-0_NN.md',
+        'business_V_0-7-0',
+        cacheDir,
+      )
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1)
+      const doc = result.specs.get('business_V_0-7-0')
+      // Had the corrupt cache content been silently accepted, `parseFrontmatter`
+      // would have returned null and the resolver would have coalesced it to
+      // an empty frontmatter object (a bogus level-0 leaf) instead of falling
+      // through to network and recovering the real title.
+      expect(doc?.frontmatter.title).toBe('Recovered From Network')
+    })
+
+    it('leaves no leftover .tmp-* files in .spec-cache after a network fetch writes to the cache', async () => {
+      const remoteContent = [
+        '---',
+        'spec_version: "V_0-8-0"',
+        'level: 2',
+        'title: "Atomic Write Check"',
+        '---',
+      ].join('\n')
+      vi.spyOn(global, 'fetch').mockImplementation(() =>
+        Promise.resolve({ ok: true, text: () => Promise.resolve(remoteContent) } as Response),
+      )
+
+      await resolveParentChainNode(
+        rootDir,
+        'https://example.com/business_V_0-8-0_NN.md',
+        'business_V_0-8-0',
+        cacheDir,
+      )
+
+      const entries = await readdir(cacheDir)
+      expect(entries.some((name) => name.includes('.tmp-'))).toBe(false)
+      expect(entries).toContain('business_V_0-8-0_NN.md')
+      expect(entries).toContain('.manifest.json')
+    })
   })
 })

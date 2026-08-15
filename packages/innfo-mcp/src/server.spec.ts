@@ -216,7 +216,7 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
         arguments: { url: 'https://example.com/does-not-exist_NN.md' },
       })
       expect(result.isError).toBe(true)
-      expect(textOf(result as CallToolResult)).toBe('Spec could not be resolved from the provided url/model_id')
+      expect(textOf(result as CallToolResult)).toContain('SpecResolutionError: Failed to resolve parent')
     })
   })
 
