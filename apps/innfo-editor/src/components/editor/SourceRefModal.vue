@@ -26,8 +26,8 @@
                 <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">
                   {{ parsed.fileName }}
                 </h2>
-                <span v-if="parsed.startLine" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                  Line {{ parsed.startLine }}<template v-if="parsed.endLine && parsed.endLine !== parsed.startLine">-{{ parsed.endLine }}</template>
+                <span v-if="parsed.slug" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  {{ resolvedSection ? resolvedSection.heading.text : parsed.slug }}
                 </span>
               </div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono truncate max-w-xl">
@@ -197,7 +197,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { Link, X, FileText, Hash, HardDrive, Clock, CheckCircle2, ExternalLink } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
-import type { ParsedSourceRef } from '../../utils/sourceRef'
+import { resolveHeadingSection, type ParsedSourceRef } from '../../utils/sourceRef'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { renderMarkdown } from '../../utils/markdown'
 
@@ -238,10 +238,16 @@ const formattedHtml = computed(() => renderMarkdown(rawContent.value))
 
 const lines = computed(() => rawContent.value.split('\n'))
 
+const resolvedSection = computed(() => {
+  if (!props.parsed.slug || !rawContent.value) return null
+  return resolveHeadingSection(rawContent.value, props.parsed.slug)
+})
+
 function isLineTargeted(lineNum: number): boolean {
-  if (!props.parsed.startLine) return false
-  const end = props.parsed.endLine || props.parsed.startLine
-  return lineNum >= props.parsed.startLine && lineNum <= end
+  const section = resolvedSection.value
+  if (!section) return false
+  // lineNum is 1-based; section.startLine/endLine are 0-based (endLine exclusive).
+  return lineNum >= section.startLine + 1 && lineNum <= section.endLine
 }
 
 function close(): void {
@@ -334,12 +340,15 @@ async function loadSourceContent(): Promise<void> {
       }
     }
 
-    // Auto-scroll to target line
-    if (props.parsed.startLine) {
-      await nextTick()
-      const targetEl = document.getElementById(`line-${props.parsed.startLine}`)
-      if (targetEl) {
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    // Auto-scroll to the target section's heading line
+    if (props.parsed.slug) {
+      const section = resolveHeadingSection(textContent, props.parsed.slug)
+      if (section) {
+        await nextTick()
+        const targetEl = document.getElementById(`line-${section.startLine + 1}`)
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
       }
     }
   } catch (err) {
@@ -381,7 +390,7 @@ watch(
   () => props.isOpen,
   (val) => {
     if (val) {
-      if (props.parsed.startLine) {
+      if (props.parsed.slug) {
         viewMode.value = 'code'
       } else {
         viewMode.value = (isMarkdown.value || isImage.value || isPdf.value) ? 'preview' : 'code'

@@ -2,48 +2,50 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
 import SourceRefPill from '../../src/components/editor/SourceRefPill.vue'
-import { parseSourceRef } from '../../src/utils/sourceRef'
+import { parseSourceRef, slugifyHeading, extractHeadings, resolveHeadingSection } from '../../src/utils/sourceRef'
 
-describe('parseSourceRef utility (sources/markdown/ path format)', () => {
-  it('parses canonical source reference string with line number', () => {
-    const res = parseSourceRef('sources/markdown/The_Goonies.md#L13')
+describe('parseSourceRef utility (sources/nn/ path format)', () => {
+  it('parses canonical source reference string with a heading-slug anchor', () => {
+    const res = parseSourceRef('sources/nn/The_Goonies.md#opening-scene')
     expect(res.isValid).toBe(true)
-    expect(res.filePath).toBe('sources/markdown/The_Goonies.md')
+    expect(res.filePath).toBe('sources/nn/The_Goonies.md')
     expect(res.fileName).toBe('The_Goonies.md')
-    expect(res.startLine).toBe(13)
-    expect(res.endLine).toBe(13)
+    expect(res.slug).toBe('opening-scene')
   })
 
-  it('parses canonical source reference string with accented unicode characters', () => {
-    const res = parseSourceRef('sources/markdown/Una_noche_en_la_ópera.md#L62')
+  it('parses canonical source reference string with accented unicode characters in the path', () => {
+    const res = parseSourceRef('sources/nn/Una_noche_en_la_ópera.md#overview')
     expect(res.isValid).toBe(true)
-    expect(res.filePath).toBe('sources/markdown/Una_noche_en_la_ópera.md')
+    expect(res.filePath).toBe('sources/nn/Una_noche_en_la_ópera.md')
     expect(res.fileName).toBe('Una_noche_en_la_ópera.md')
-    expect(res.startLine).toBe(62)
+    expect(res.slug).toBe('overview')
   })
 
-  it('parses canonical line range in source reference string', () => {
-    const res = parseSourceRef('sources/markdown/interviews/interview.md#L12-L45')
+  it('parses a multi-word heading-slug anchor', () => {
+    const res = parseSourceRef('sources/nn/interviews/interview.md#background-and-context')
     expect(res.isValid).toBe(true)
-    expect(res.filePath).toBe('sources/markdown/interviews/interview.md')
+    expect(res.filePath).toBe('sources/nn/interviews/interview.md')
     expect(res.fileName).toBe('interview.md')
-    expect(res.startLine).toBe(12)
-    expect(res.endLine).toBe(45)
+    expect(res.slug).toBe('background-and-context')
   })
 
-  it('parses a full-file reference with no line anchor', () => {
-    const res = parseSourceRef('sources/markdown/clientA/report.md')
+  it('parses a full-file reference with no anchor', () => {
+    const res = parseSourceRef('sources/nn/clientA/report.md')
     expect(res.isValid).toBe(true)
-    expect(res.filePath).toBe('sources/markdown/clientA/report.md')
+    expect(res.filePath).toBe('sources/nn/clientA/report.md')
     expect(res.fileName).toBe('report.md')
-    expect(res.startLine).toBeUndefined()
-    expect(res.endLine).toBeUndefined()
+    expect(res.slug).toBeUndefined()
   })
 
-  it('rejects strings that do not carry the sources/markdown/ prefix', () => {
+  it('rejects the legacy line-range anchor format', () => {
+    expect(parseSourceRef('sources/nn/The_Goonies.md#L13').isValid).toBe(false)
+    expect(parseSourceRef('sources/nn/interviews/interview.md#L12-L45').isValid).toBe(false)
+  })
+
+  it('rejects strings that do not carry the sources/nn/ prefix', () => {
     expect(parseSourceRef('Just plain text').isValid).toBe(false)
-    expect(parseSourceRef('The_Goonies.md#L13').isValid).toBe(false)
-    expect(parseSourceRef('src-003 (sources/markdown/The_Goonies.md#L13)').isValid).toBe(false)
+    expect(parseSourceRef('The_Goonies.md#opening-scene').isValid).toBe(false)
+    expect(parseSourceRef('src-003 (sources/nn/The_Goonies.md#opening-scene)').isValid).toBe(false)
     expect(parseSourceRef('sources/original/The_Goonies.docx').isValid).toBe(false)
   })
 
@@ -54,11 +56,57 @@ describe('parseSourceRef utility (sources/markdown/ path format)', () => {
   })
 })
 
+describe('slugifyHeading / heading resolution', () => {
+  it('slugifies a normal heading', () => {
+    expect(slugifyHeading('Market Overview')).toBe('market-overview')
+  })
+
+  it('strips punctuation and markdown formatting characters', () => {
+    expect(slugifyHeading('## **Q3 Results:** Revenue & Growth!')).toBe('q3-results-revenue-growth')
+    expect(slugifyHeading('_Background_ and `context`')).toBe('background-and-context')
+  })
+
+  it('disambiguates duplicate headings within the same document (-1, -2, ...)', () => {
+    const doc = ['# Overview', 'a', '## Overview', 'b', '## Overview', 'c'].join('\n')
+    const headings = extractHeadings(doc)
+    expect(headings.map((h) => h.slug)).toEqual(['overview', 'overview-1', 'overview-2'])
+  })
+
+  it('resolves a slug to the section from its heading up to the next same-or-higher-level heading', () => {
+    const doc = [
+      '# Report', // 0
+      'intro text', // 1
+      '## Market Overview', // 2
+      'market line 1', // 3
+      'market line 2', // 4
+      '## Methodology', // 5
+      'methodology text', // 6
+    ].join('\n')
+
+    const section = resolveHeadingSection(doc, 'market-overview')
+    expect(section).not.toBeNull()
+    expect(section?.startLine).toBe(2)
+    expect(section?.endLine).toBe(5)
+  })
+
+  it('extends the last section to the end of the document', () => {
+    const doc = ['# Report', '## Methodology', 'line a', 'line b'].join('\n')
+    const section = resolveHeadingSection(doc, 'methodology')
+    expect(section?.startLine).toBe(1)
+    expect(section?.endLine).toBe(4)
+  })
+
+  it('returns null when the slug has no matching heading', () => {
+    const doc = ['# Report', '## Overview'].join('\n')
+    expect(resolveHeadingSection(doc, 'missing-section')).toBeNull()
+  })
+})
+
 describe('SourceRefPill component', () => {
-  it('renders pill with link icon and file name (no synthetic id) when given valid canonical reference string', () => {
+  it('renders pill with link icon, file name, and section slug (no synthetic id) when given valid canonical reference string', () => {
     const wrapper = mount(SourceRefPill, {
       props: {
-        rawValue: 'sources/markdown/Una_noche_en_la_ópera.md#L62',
+        rawValue: 'sources/nn/Una_noche_en_la_ópera.md#overview',
       },
       global: {
         plugins: [createPinia()],
@@ -66,7 +114,7 @@ describe('SourceRefPill component', () => {
     })
 
     expect(wrapper.text()).toContain('Una_noche_en_la_ópera.md')
-    expect(wrapper.text()).toContain(':L62')
+    expect(wrapper.text()).toContain('#overview')
     expect(wrapper.text()).not.toContain('src-')
   })
 

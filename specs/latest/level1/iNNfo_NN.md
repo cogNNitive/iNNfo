@@ -328,14 +328,14 @@ MUST relocate the Element's `assets/{element-slug}/` folder accordingly.
 `sources` is an **optional** reserved property for Level 3 Elements that establishes traceability to source documents.
 
 - **Optionality:** A Level 3 Model is syntactically valid with or without `sources::` properties. The parser and validator MUST NOT emit an error solely because `sources::` is omitted.
-- **Location Convention:** Ingested source documents are stored under `sources/markdown/` (or relative subfolders within `sources/`).
-- **Syntax:** `sources:: [sources/markdown/<filename>#L<start>-L<end>, ...]` (MUST always be formatted as a list enclosed in brackets `[...]`, even when referencing a single source document; no scalar string syntax or aliases are allowed).
+- **Location Convention:** Ingested source documents are stored under `sources/nn/` (or relative subfolders within `sources/`).
+- **Syntax:** `sources:: [sources/nn/<filename>#<heading-slug>, ...]` (MUST always be formatted as a list enclosed in brackets `[...]`, even when referencing a single source document; no scalar string syntax or aliases are allowed). The anchor is a GitHub-style slug of the target document's heading, not a line range — it stays valid as long as the cited section isn't renamed or removed, regardless of reformatting elsewhere in the document.
 
 Example (Single Source):
 
 ```markdown
 ## NN Stakeholders: Enterprise Clients
-sources:: [sources/markdown/market_analysis.md#L45-L60]
+sources:: [sources/nn/market_analysis.md#enterprise-clients]
 relationship_model:: B2B Long-term
 ```
 
@@ -343,7 +343,7 @@ Example (Multiple Sources):
 
 ```markdown
 ## NN Stakeholders: Enterprise Clients
-sources:: [sources/markdown/market_analysis.md#L45-L60, sources/markdown/interview_transcript.md#L12-L25]
+sources:: [sources/nn/market_analysis.md#enterprise-clients, sources/nn/interview_transcript.md#stakeholder-feedback]
 relationship_model:: B2B Long-term
 ```
 

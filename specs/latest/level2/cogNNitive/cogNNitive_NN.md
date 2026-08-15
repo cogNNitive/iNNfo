@@ -62,7 +62,7 @@ weight:: 60
 ## NN Field Definition: raw_filename
 concept:: Sources
 type:: string
-description:: Original file name of the raw source, relative to the workspace (e.g. sources/raw/report.docx).
+description:: Original file name of the raw source, relative to the workspace (e.g. sources/nn/report.docx).
 
 ## NN Field Definition: raw_hash
 concept:: Sources
@@ -93,7 +93,7 @@ description:: Tool and version that produced the normalized content (e.g. traNNs
 ## NN Field Definition: normalized_content
 concept:: Sources
 type:: markdown_file
-description:: The normalized Markdown extracted from the raw file (stored under sources/md/). File-backed asset.
+description:: The normalized Markdown extracted from the raw file (stored under sources/nn/). File-backed asset.
 
 ## NN Field Definition: raw_file
 concept:: Sources
@@ -245,7 +245,7 @@ The derivation graph is a **DAG, not a fixed chain**: an Artifact may derive fro
 
 ### Element / claim-level provenance
 
-Provenance **within** a domain model (which Source backs a specific Element) is intentionally out of scope for this template, because a domain Element can only carry fields its own template declares. Fine-grained, claim-level provenance stays in the existing citation mechanism (`<!-- cite: src-NNN -->` + visible source) used in drafts and artifacts. A domain template MAY later opt in to a `source` reference field on its concepts.
+Provenance **within** a domain model (which Source backs a specific Element) is intentionally out of scope for this template, because a domain Element can only carry fields its own template declares. Fine-grained, claim-level provenance stays in the existing citation mechanism (`<!-- cite: sources/nn/file.md#heading-slug -->` + visible source) used in drafts and artifacts. A domain template MAY later opt in to a `source` reference field on its concepts.
 
 ### Markers
 
@@ -291,10 +291,9 @@ title: "<Workspace> Provenance"
 
 # NN Sources
 ## NN Sources: report.docx
-raw_filename:: sources/raw/report.docx
+raw_filename:: sources/nn/report.docx
 raw_hash:: sha256:1f3a...c9
 size:: 48213
-format:: docx
 source_format:: docx
 normalized_at:: 2026-08-01T10:12:00Z
 normalized_by:: traNNsform v1.5

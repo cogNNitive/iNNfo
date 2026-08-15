@@ -75,6 +75,14 @@
               {{ entry.displayValue ? 'Yes' : 'No' }}
             </span>
           </template>
+          <template v-else-if="Array.isArray(entry.displayValue)">
+            <div class="flex flex-wrap gap-1.5 items-center">
+              <template v-for="(item, idx) in entry.displayValue" :key="idx">
+                <SourceRefPill v-if="isSourceRef(item)" :raw-value="String(item)" />
+                <span v-else>{{ item }}</span>
+              </template>
+            </div>
+          </template>
           <template v-else-if="isSourceRef(entry.displayValue)">
             <SourceRefPill :raw-value="String(entry.displayValue)" />
           </template>

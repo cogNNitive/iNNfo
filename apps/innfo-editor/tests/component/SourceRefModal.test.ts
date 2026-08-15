@@ -35,7 +35,7 @@ describe('SourceRefModal', () => {
   it('does not render any sourceId badge (no synthetic id in the header)', async () => {
     const tree: FakeTree = {
       sources: {
-        markdown: {
+        nn: {
           'report.md': markdownWithFrontmatter,
         },
       },
@@ -44,7 +44,7 @@ describe('SourceRefModal', () => {
     const workspaceStore = useWorkspaceStore()
     workspaceStore.handle = handle
 
-    const parsed = parseSourceRef('sources/markdown/report.md')
+    const parsed = parseSourceRef('sources/nn/report.md')
     wrapper = mount(SourceRefModal, {
       props: { isOpen: true, parsed },
       attachTo: document.body,
@@ -69,7 +69,7 @@ describe('SourceRefModal', () => {
             'report.docx': 'binary-ish content',
           },
         },
-        markdown: {
+        nn: {
           'report.md': markdownWithFrontmatter,
         },
       },
@@ -84,7 +84,7 @@ describe('SourceRefModal', () => {
     ;(URL as any).createObjectURL = createObjectURLSpy
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
 
-    const parsed = parseSourceRef('sources/markdown/report.md')
+    const parsed = parseSourceRef('sources/nn/report.md')
     wrapper = mount(SourceRefModal, {
       props: { isOpen: true, parsed },
       attachTo: document.body,
