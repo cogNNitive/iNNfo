@@ -1,4 +1,4 @@
-import { parseModel, serializeModel, type ParsedModel, type MatrixCell, type ElementNode } from '@cognnitive/innfo-core'
+import { parseModel, serializeModel, type ParsedModel, type MatrixCell, type ElementNode, ElementsMap } from '@cognnitive/innfo-core'
 import type { ModelNode } from './types'
 import type { ModelDriver } from '@cognnitive/innfo-core'
 import { useModelStore } from '../stores/modelStore'
@@ -148,7 +148,7 @@ function serializeNodeContent(node: ModelNode): {
 
     collectElements(node.id)
 
-    const elementsMap = new Map<string, ElementNode[]>()
+    const elementsMap = new ElementsMap()
     for (const child of childElements) {
       const conceptName = child.type
       if (!elementsMap.has(conceptName)) {
@@ -163,8 +163,9 @@ function serializeNodeContent(node: ModelNode): {
       elementsMap.get(conceptName)!.push({
         type: child.type,
         name: child.name,
-        description: child.rawSections?.description || child.description || '',
+        description: child.rawSections?.description || '',
         fields: elFields,
+        markers: child.markers || {},
         slug: child.slug,
       })
     }

@@ -3,14 +3,18 @@
     <!-- Matrix Dropdown Selector Header -->
     <div class="flex items-center justify-between gap-3 shrink-0 pb-2 mb-2 w-full">
       <div class="flex items-center gap-2 flex-1 min-w-0">
-        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">Select Matrix:</span>
+        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0"
+          >Select Matrix:</span
+        >
         <div v-if="matrixDefs.length" ref="dropdownRef" class="relative flex-1 min-w-0">
           <button
             @click="isOpen = !isOpen"
             class="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-md text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs hover:border-slate-300 dark:hover:border-slate-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer transition-all"
             data-testid="matrix-selector"
           >
-            <span class="truncate min-w-0 flex-1 text-left">{{ activeMatrix ? activeMatrix.name : 'Select Matrix' }}</span>
+            <span class="truncate min-w-0 flex-1 text-left">{{
+              activeMatrix ? activeMatrix.name : 'Select Matrix'
+            }}</span>
             <ChevronDown
               class="w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-200"
               :class="{ 'rotate-180': isOpen }"
@@ -88,26 +92,55 @@
         >
           <!-- Corner cell -->
           <div
-            class="shrink-0 flex items-center gap-1 px-4 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-xs overflow-visible"
-            :style="{ width: FIRST_COL_WIDTH + 'px', minWidth: FIRST_COL_WIDTH + 'px', height: headerHeight + 'px' }"
+            class="shrink-0 relative border-r border-slate-200 dark:border-slate-700 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px] overflow-hidden bg-slate-50/40 dark:bg-slate-900/20"
+            :style="{
+              width: FIRST_COL_WIDTH + 'px',
+              minWidth: FIRST_COL_WIDTH + 'px',
+              height: headerHeight + 'px',
+            }"
           >
-            <BlockPill
-              kind="concept"
-              :concept-type="activeMatrix.source"
-              :name="activeMatrix.source"
-              :icon="getConceptMeta(activeMatrix.source).icon"
-              :color="getConceptMeta(activeMatrix.source).color"
-              hide-empty
-            />
-            <span class="text-slate-400 dark:text-slate-500 font-normal">\</span>
-            <BlockPill
-              kind="concept"
-              :concept-type="activeMatrix.target"
-              :name="activeMatrix.target"
-              :icon="getConceptMeta(activeMatrix.target).icon"
-              :color="getConceptMeta(activeMatrix.target).color"
-              hide-empty
-            />
+            <!-- Diagonal slash line -->
+            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <svg
+                class="w-full h-full text-slate-200 dark:text-slate-700/80"
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+              >
+                <line x1="0" y1="0" x2="100" y2="100" stroke="currentColor" stroke-width="0.75" />
+              </svg>
+            </div>
+
+            <!-- Top-Right: Columns (Target Concept) -->
+            <div
+              class="absolute top-2.5 right-3 flex items-center gap-1.5 max-w-[70%] justify-end select-none"
+            >
+              <span
+                class="truncate font-semibold tracking-wide text-slate-600 dark:text-slate-300"
+                >{{ activeMatrix.target }}</span
+              >
+              <IconRenderer
+                v-if="getConceptMeta(activeMatrix.target).icon"
+                :icon="getConceptMeta(activeMatrix.target).icon"
+                custom-class="shrink-0 w-3.5 h-3.5"
+                :style="{ color: getConceptMeta(activeMatrix.target).color }"
+              />
+            </div>
+
+            <!-- Bottom-Left: Rows (Source Concept) -->
+            <div
+              class="absolute bottom-2.5 left-3 flex items-center gap-1.5 max-w-[70%] select-none"
+            >
+              <IconRenderer
+                v-if="getConceptMeta(activeMatrix.source).icon"
+                :icon="getConceptMeta(activeMatrix.source).icon"
+                custom-class="shrink-0 w-3.5 h-3.5"
+                :style="{ color: getConceptMeta(activeMatrix.source).color }"
+              />
+              <span
+                class="truncate font-semibold tracking-wide text-slate-600 dark:text-slate-300"
+                >{{ activeMatrix.source }}</span
+              >
+            </div>
           </div>
           <!-- Column header virtual scroll overlay -->
           <div class="overflow-visible flex-1 relative" style="scrollbar-width: none">
@@ -131,8 +164,9 @@
                 }"
               >
                 <div
-                  class="absolute left-1 bottom-1 whitespace-nowrap"
+                  class="absolute bottom-2.5 whitespace-nowrap"
                   :style="{
+                    left: '50%',
                     transform: 'rotate(' + HEADER_LABEL_ROTATION + 'deg)',
                     transformOrigin: '0 100%',
                   }"
@@ -368,6 +402,7 @@ import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import BlockPill from './BlockPill.vue'
 import MatrixPill from './MatrixPill.vue'
+import IconRenderer from './IconRenderer.vue'
 import { extractMatrixDefs, useMatrixDefinitions } from '../../composables/useMatrixDefinitions'
 import { getConceptMeta } from '../../composables/useConceptVisuals'
 import { useMatrixCells } from './composables/useMatrixCells'
@@ -613,5 +648,4 @@ const getConceptFields = (conceptType: string): any[] => {
   }
   return []
 }
-
 </script>

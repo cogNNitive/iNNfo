@@ -35,6 +35,17 @@
                 >
                   <Plus class="w-3.5 h-3.5 stroke-[2.5]" />
                 </button>
+                <button
+                  @click="isEditMode = !isEditMode"
+                  class="inline-flex items-center justify-center w-5 h-5 rounded-full shadow-xs hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+                  :class="isEditMode ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'"
+                  :title="isEditMode ? 'Save changes' : 'Edit element fields'"
+                  aria-label="Toggle edit mode"
+                  data-testid="toggle-edit-btn"
+                >
+                  <Check v-if="isEditMode" class="w-3 h-3 stroke-[2.5]" />
+                  <Pencil v-else class="w-3 h-3 stroke-[2.5]" />
+                </button>
               </div>
             </th>
             <th
@@ -87,7 +98,7 @@
                 :field-key="field.name"
                 :widget-type="field.type || 'string'"
                 :field-definition="field"
-                readonly
+                :readonly="!isEditMode"
               />
             </td>
             <td class="px-3 py-2 text-sm text-slate-700 dark:text-slate-300 text-center">
@@ -133,7 +144,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { ChevronUp, ChevronDown, Plus } from 'lucide-vue-next'
+import { ChevronUp, ChevronDown, Plus, Pencil, Check } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useConfirmStore } from '../../stores/confirmStore'
 import { useUiStore } from '../../stores/uiStore'
@@ -150,6 +161,8 @@ const props = defineProps<{
 const modelStore = useModelStore()
 const confirmStore = useConfirmStore()
 const uiStore = useUiStore()
+
+const isEditMode = ref(false)
 
 const topScrollRef = ref<HTMLDivElement | null>(null)
 const tableContainerRef = ref<HTMLDivElement | null>(null)

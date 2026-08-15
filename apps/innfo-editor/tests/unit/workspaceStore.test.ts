@@ -149,4 +149,71 @@ describe('workspaceStore.open()', () => {
     expect(updatedRoot?.source.path).toBe('Test_V_1-0-1_business_NN.md')
     expect(updatedChild?.source.path).toBe('Test_V_1-0-1_business_NN.md')
   })
+
+  it('saveActiveFile writes dirty nodes back to handle when driver is null', async () => {
+    const workspaceStore = useWorkspaceStore()
+    const modelStore = useModelStore()
+
+    const rootId = 'Test_V_1-0-0_business_NN.md'
+    modelStore.setGraph(
+      {
+        [rootId]: {
+          id: rootId,
+          name: 'Test_V_1-0-0_business',
+          parentId: null,
+          childIds: ['child-1'],
+          kind: 'root',
+          type: 'document',
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          rawContent: '---\nspec_version: "V_0-1-1"\ntitle: "Test Model"\n---\n# NN Business\n',
+          source: { path: rootId },
+        },
+        'child-1': {
+          id: 'child-1',
+          name: 'Child 1',
+          parentId: rootId,
+          childIds: [],
+          kind: 'element',
+          type: 'Business',
+          fields: {
+            status: { value: 'Old Status', provenance: { author: { kind: 'user', id: 'test' }, timestamp: '' } }
+          },
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          source: { path: rootId },
+        },
+      },
+      [rootId],
+    )
+
+    const handle = buildFakeTree('workspace', {
+      [rootId]: '---\nspec_version: "V_0-1-1"\ntitle: "Test Model"\n---\n# NN Business\n',
+    })
+
+    workspaceStore.handle = handle
+
+    // Modify status field value on the child node
+    const child = modelStore.getNode('child-1')
+    if (child) {
+      child.fields['status'] = { value: 'New Status', provenance: { author: { kind: 'user', id: 'test' }, timestamp: '' } }
+    }
+    modelStore.markDirty('child-1') // This should also mark the root node dirty
+
+    expect(modelStore.dirtyIds.has(rootId)).toBe(true)
+
+    await workspaceStore.saveActiveFile()
+
+    // Retrieve file content from handle to assert it was saved
+    const fileHandle = await handle.getFileHandle(rootId)
+    const file = await fileHandle.getFile()
+    const text = await file.text()
+
+    expect(text).toContain('New Status')
+    expect(text).not.toContain('Old Status')
+    expect(modelStore.dirtyIds.has(rootId)).toBe(false)
+  })
 })

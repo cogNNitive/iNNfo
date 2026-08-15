@@ -179,8 +179,16 @@
       <div class="px-3 pb-4 pt-2 space-y-6 flex flex-col">
         <!-- Edit-mode field inputs -->
         <template v-if="isEditing">
+          <!-- Warning banner for concepts -->
           <div
-            v-if="conceptFields && conceptFields.length"
+            v-if="isConcept"
+            class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 text-sm font-medium"
+          >
+            Estos campos son heredados de la plantilla y deben ser editados en la plantilla.
+          </div>
+
+          <div
+            v-else-if="conceptFields && conceptFields.length"
             class="grid grid-cols-1 md:grid-cols-2 gap-3"
           >
             <div v-for="field in conceptFields" :key="field.name" class="flex flex-col gap-1">

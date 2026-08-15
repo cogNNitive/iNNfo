@@ -14,6 +14,7 @@ export interface ModelState {
   dirtyIds: Set<string>
   parseIssues: ParseIssue[]
   validationReport: ValidationReport | null
+  validationReports: Record<string, ValidationReport>
 }
 
 /**
@@ -28,6 +29,7 @@ export const useModelStore = defineStore('model', {
     dirtyIds: new Set<string>(),
     parseIssues: [],
     validationReport: null,
+    validationReports: {},
   }),
   getters: {
     getNode:
@@ -72,10 +74,12 @@ export const useModelStore = defineStore('model', {
       const nonTemplateRoots = this.rootIds.filter((id) => !id.startsWith('spec:') && this.nodes[id])
       if (nonTemplateRoots.length === 0) {
         this.validationReport = null
+        this.validationReports = {}
         return
       }
 
       let combinedReport: ValidationReport | null = null
+      const reports: Record<string, ValidationReport> = {}
 
       for (const rootId of nonTemplateRoots) {
         const rootNode = this.nodes[rootId]
@@ -83,6 +87,8 @@ export const useModelStore = defineStore('model', {
         const path = rootNode.source?.path ?? ''
         const fileName = path.split('/').pop() || path || 'unknown.md'
         const report = validateFormatContent(rootNode.rawContent, fileName)
+
+        reports[rootId] = report
 
         if (!combinedReport) {
           combinedReport = {
@@ -99,6 +105,7 @@ export const useModelStore = defineStore('model', {
       }
 
       this.validationReport = combinedReport
+      this.validationReports = reports
     },
 
     upsertNode(node: ModelNode): void {
@@ -317,15 +324,15 @@ export const useModelStore = defineStore('model', {
         // 1. Fields
         if (otherNode.fields) {
           for (const [fKey, fVal] of Object.entries(otherNode.fields)) {
-            if (typeof fVal === 'string') {
-              const updated = updateReferenceString(fVal, oldName, newName)
-              if (updated !== fVal) {
-                otherNode.fields[fKey] = updated
+            if (fVal && typeof fVal.value === 'string') {
+              const updated = updateReferenceString(fVal.value, oldName, newName)
+              if (updated !== fVal.value) {
+                fVal.value = updated
                 nodeModified = true
               }
-            } else if (Array.isArray(fVal)) {
+            } else if (fVal && Array.isArray(fVal.value)) {
               let arrayModified = false
-              const updatedArray = fVal.map((item) => {
+              const updatedArray = fVal.value.map((item) => {
                 if (typeof item === 'string') {
                   const updated = updateReferenceString(item, oldName, newName)
                   if (updated !== item) arrayModified = true
@@ -334,14 +341,14 @@ export const useModelStore = defineStore('model', {
                 return item
               })
               if (arrayModified) {
-                otherNode.fields[fKey] = updatedArray
+                fVal.value = updatedArray
                 nodeModified = true
               }
             }
           }
         }
 
-        // 2. rawSections & description
+        // 2. rawSections
         if (otherNode.rawSections) {
           for (const [sKey, sVal] of Object.entries(otherNode.rawSections)) {
             if (typeof sVal === 'string') {
@@ -354,20 +361,17 @@ export const useModelStore = defineStore('model', {
           }
         }
 
-        if (otherNode.description && typeof otherNode.description === 'string') {
-          const updated = updateReferenceString(otherNode.description, oldName, newName)
-          if (updated !== otherNode.description) {
-            otherNode.description = updated
-            nodeModified = true
-          }
-        }
-
         // 3. Relationships array
         if (otherNode.relationships && Array.isArray(otherNode.relationships)) {
           for (const rel of otherNode.relationships) {
-            if (rel && typeof rel.target === 'string' && rel.target.toLowerCase() === lowerOld) {
-              rel.target = newName
-              nodeModified = true
+            if (rel && typeof rel.targetId === 'string') {
+              const parts = rel.targetId.split('/')
+              const lastSegment = parts[parts.length - 1] || ''
+              if (lastSegment.toLowerCase() === lowerOld) {
+                parts[parts.length - 1] = newName
+                rel.targetId = parts.join('/')
+                nodeModified = true
+              }
             }
           }
         }

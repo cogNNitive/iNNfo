@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, defineAsyncComponent, type Component } from 'vue'
+import { ref, computed, onMounted, onUnmounted, defineAsyncComponent, type Component, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '../components/layout/Header.vue'
 import SampleBanner from '../components/layout/SampleBanner.vue'
@@ -75,7 +75,13 @@ const validating = ref(false)
 // Validation report is set silently on import (auto-run in setGraph → validateModel).
 // The overlay only opens on explicit Validate button click (runValidation).
 
+const isEditingTable = ref(false)
+
 const selectedNodeId = computed(() => uiStore.selectedNodeId)
+
+watch(selectedNodeId, () => {
+  isEditingTable.value = false
+})
 
 const selectedNode = computed(() => {
   const id = selectedNodeId.value
@@ -164,11 +170,15 @@ const inferTypeFromValue = (key: string, val: any): string => {
 }
 
 const getConceptFieldsForNode = (node: ModelNode) => {
-  const conceptName = node.conceptBinding?.name ?? node.name ?? node.type
-  const metamodelFields =
-    metamodelStore.getConceptFields(conceptName) ??
-    metamodelStore.getConceptFields(node.type) ??
-    []
+  const isElement = node.kind === 'element' || (node.kind !== 'concept' && node.kind !== 'root')
+  const conceptName = isElement ? node.type : (node.conceptBinding?.name ?? node.name)
+  let metamodelFields = metamodelStore.getConceptFields(conceptName)
+  if ((!metamodelFields || metamodelFields.length === 0) && node.type && node.type !== conceptName) {
+    metamodelFields = metamodelStore.getConceptFields(node.type)
+  }
+  if (!metamodelFields) {
+    metamodelFields = []
+  }
   const fieldsMap = new Map<string, { name: string; type: string; [key: string]: any }>()
 
   for (const f of metamodelFields) {
@@ -210,7 +220,15 @@ const activeConceptFields = computed(() => {
 const conceptBlock = computed(() => {
   const node = selectedNode.value
   if (!node) return { id: '', name: '', description: '' }
-  const metamodelFields = metamodelStore.getConceptFields(node.type) ?? []
+  const isElement = node.kind === 'element' || (node.kind !== 'concept' && node.kind !== 'root')
+  const conceptName = isElement ? node.type : (node.conceptBinding?.name ?? node.name)
+  let metamodelFields = metamodelStore.getConceptFields(conceptName)
+  if ((!metamodelFields || metamodelFields.length === 0) && node.type && node.type !== conceptName) {
+    metamodelFields = metamodelStore.getConceptFields(node.type)
+  }
+  if (!metamodelFields) {
+    metamodelFields = []
+  }
   const fields: Record<string, any> = {}
 
   for (const f of metamodelFields) {
@@ -284,7 +302,7 @@ const activeEditorProps = computed(() => {
       conceptName: selectedNodeName.value,
       conceptFields: activeConceptFields.value,
       collapsed: false,
-      isEditing: false,
+      isEditing: isEditingTable.value,
     }
   }
   return {
@@ -315,6 +333,9 @@ const activeEditorEvents = computed(() => {
       change: onEditorChange,
       'navigate-to-node': onNavigateToNode,
       'update:concept-name': onConceptNameChange,
+      'edit-toggle': () => {
+        isEditingTable.value = !isEditingTable.value
+      },
     }
   }
   return {

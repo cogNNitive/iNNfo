@@ -13,7 +13,7 @@ import { IndexedDbWorkspaceRepository } from '../repositories/IndexedDbWorkspace
 import type { IWorkspaceRepository } from '../repositories/IWorkspaceRepository'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { useUrlDocLoader } from '../composables/useUrlDocLoader'
-import type { DirectoryHandleLike } from '../model/fs-types'
+import type { DirectoryHandleLike, FileHandleLike } from '../model/fs-types'
 import type { BumpLevel } from '../utils/version'
 import type { ModelDriver } from '@cognnitive/innfo-core'
 import type { ActiveView } from './uiStore'
@@ -41,6 +41,20 @@ export interface WorkspaceState {
   /** Set by open() when folder contains zero _NN.md model files. */
   emptyFolderError: boolean
 }
+
+async function resolveFileHandleForWrite(
+  root: DirectoryHandleLike,
+  refPath: string,
+): Promise<FileHandleLike> {
+  const segments = refPath.replace(/\\/g, '/').split('/').filter((p) => p && p !== '.')
+  let current: DirectoryHandleLike = root
+  for (let i = 0; i < segments.length - 1; i++) {
+    current = await current.getDirectoryHandle(segments[i], { create: true })
+  }
+  const last = segments[segments.length - 1]
+  return current.getFileHandle(last, { create: true })
+}
+
 
 /**
  * workspaceStore owns the FS directory handle, permission verification,
@@ -414,7 +428,23 @@ export const useWorkspaceStore = defineStore('workspace', {
         }
 
         const modelStore = useModelStore()
-        await recursiveSerialize(modelStore.nodes, modelStore.dirtyIds, this.driver ?? undefined)
+        const reports = await recursiveSerialize(modelStore.nodes, modelStore.dirtyIds, this.driver ?? undefined)
+
+        if (!this.driver) {
+          // If no driver is set, write the dirty model files directly using the directory handle
+          for (const report of reports) {
+            if (report.nodeId.startsWith('spec:')) continue
+            const node = modelStore.getNode(report.nodeId)
+            if (node && node.rawContent !== undefined) {
+              const fileHandle = await resolveFileHandleForWrite(this.handle, report.path)
+              if (fileHandle.createWritable) {
+                const w = await fileHandle.createWritable()
+                await w.write(node.rawContent)
+                await w.close()
+              }
+            }
+          }
+        }
 
         // Persist spec:* nodes (templates/specs) to .specs/ directory
         const specsDir = await this.handle.getDirectoryHandle('.specs', { create: true })

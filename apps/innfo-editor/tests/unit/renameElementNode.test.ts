@@ -19,8 +19,8 @@ describe('modelStore.renameElementNode propagation', () => {
           parentId: 'doc',
           childIds: [],
           fields: {
-            assignee: 'Task Beta',
-            notes: 'Refers to [[Task Beta|secondary task]]',
+            assignee: { value: 'Task Beta', provenance: { author: { kind: 'system', id: 'test' }, timestamp: '' } },
+            notes: { value: 'Refers to [[Task Beta|secondary task]]', provenance: { author: { kind: 'system', id: 'test' }, timestamp: '' } },
           },
           markers: {},
         },
@@ -40,8 +40,8 @@ describe('modelStore.renameElementNode propagation', () => {
     store.renameElementNode('doc/node2', 'Task Gamma')
 
     const node1 = store.getNode('doc/node1')
-    expect(node1?.fields['assignee']).toBe('Task Gamma')
-    expect(node1?.fields['notes']).toBe('Refers to [[Task Gamma|secondary task]]')
+    expect(node1?.fields['assignee']?.value).toBe('Task Gamma')
+    expect(node1?.fields['notes']?.value).toBe('Refers to [[Task Gamma|secondary task]]')
 
     const node2 = store.getNode('doc/node2/Task Gamma') || store.getNode('doc/node2')
     expect(node2).toBeDefined()
