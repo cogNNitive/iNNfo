@@ -12,8 +12,7 @@ import { parseModel, serializeModel, validateModel as coreValidate, applyMutatio
 import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/innfo-core'
 
 import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec, normalizeId } from './spec.js'
-import { isLocalPath, toLocalFilePath } from './resolver-node.js'
-import { writeSpecToCache } from './cache-manifest.js'
+import { isLocalPath, toLocalFilePath, saveSpecOnce } from './resolver-node.js'
 
 /* ── Types ───────────────────────────────────────────────────── */
 
@@ -128,7 +127,7 @@ export async function validateModel(
       // hard error, not a structural-only warning. coreValidate already emits
       // [PARENT_RESOLUTION_FAILED]; surface the offending URL explicitly,
       // the directories searched, and the per-link resolution attempts.
-      const searchedSuffix = ` (searched: ${rootDir}/specs, ${rootDir}/.specs, ${rootDir}/.spec-cache, direct relative path, network)`
+      const searchedSuffix = ` (searched: ${rootDir}/specs, network)`
       const detailSuffix = resolutionDetail ? ` Detail: ${resolutionDetail}` : ''
       result.errors.push({
         path: 'parent_spec',
@@ -328,14 +327,10 @@ async function bumpVersion(
         await rm(oldParentPath, { force: true })
       }
 
-      // Sync to .spec-cache (atomic write + manifest entry — see cache-manifest.ts)
-      const cacheDir = join(rootDir, '.spec-cache')
-      await writeSpecToCache(
-        cacheDir,
-        `${newParentName}_NN.md`,
-        parentContent,
-        model.frontmatter.parent_spec?.url ?? newParentPath,
-      )
+      // Mirror into specs/ too (write-once, atomic — see resolver-node.ts),
+      // so later resolutions find the bumped template without a re-fetch.
+      const specsDir = join(rootDir, 'specs')
+      await saveSpecOnce(specsDir, `${newParentName}_NN.md`, parentContent)
     }
 
     // 2. Write model file

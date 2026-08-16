@@ -42,34 +42,30 @@ title: Local Parent Spec
   })
 
   it('resolves parent spec URL with file:// scheme directly via readFile', async () => {
-    const cacheDir = join(tmpDir, 'cache1')
-    const cache = await resolveParentChainNode(tmpDir, specUrl, 'test-parent_V_1-0', cacheDir)
+    const cache = await resolveParentChainNode(tmpDir, specUrl, 'test-parent_V_1-0')
     expect(cache.specs.has('test-parent_V_1-0')).toBe(true)
     const doc = cache.specs.get('test-parent_V_1-0')
     expect(doc?.frontmatter.title).toBe('Local Parent Spec')
   })
 
   it('resolves parent spec URL specified as OS absolute path directly via readFile', async () => {
-    const cacheDir = join(tmpDir, 'cache2')
-    const cache = await resolveParentChainNode(tmpDir, specPath, 'test-parent_V_1-0', cacheDir)
+    const cache = await resolveParentChainNode(tmpDir, specPath, 'test-parent_V_1-0')
     expect(cache.specs.has('test-parent_V_1-0')).toBe(true)
     const doc = cache.specs.get('test-parent_V_1-0')
     expect(doc?.frontmatter.title).toBe('Local Parent Spec')
   })
 
   it('throws a controlled error on missing local path without network fetch', async () => {
-    const cacheDir = join(tmpDir, 'cache3')
     const missingPath = join(tmpDir, 'non-existent-spec.md')
     await expect(
-      resolveParentChainNode(tmpDir, missingPath, 'non-existent-spec', cacheDir),
+      resolveParentChainNode(tmpDir, missingPath, 'non-existent-spec'),
     ).rejects.toThrow()
   })
 
   it('throws a controlled error on traversal attempts like ../../secret', async () => {
-    const cacheDir = join(tmpDir, 'cache4')
     const secretUrl = 'file:///../../secret'
     await expect(
-      resolveParentChainNode(tmpDir, secretUrl, 'secret', cacheDir),
+      resolveParentChainNode(tmpDir, secretUrl, 'secret'),
     ).rejects.toThrow()
   })
 })

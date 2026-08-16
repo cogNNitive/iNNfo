@@ -5,7 +5,6 @@ import { validateModel, validateModelUrl, applyChange, validateTemplate } from '
 
 const rootDir = join(import.meta.dirname!, '..', '..', 'temp-test-mutate')
 const specsDir = join(rootDir, 'specs')
-const cacheDir = join(rootDir, '.spec-cache')
 
 /** Write the level-1 + level-0 spec chain locally so resolution never hits the network. */
 async function stubSpecChain() {
@@ -84,7 +83,6 @@ describe('mutate tools', () => {
   beforeEach(async () => {
     await rm(rootDir, { recursive: true, force: true })
     await mkdir(specsDir, { recursive: true })
-    await mkdir(cacheDir, { recursive: true })
     vi.restoreAllMocks()
     // Default: no real network I/O in tests. Individual tests override this
     // spy when they need to exercise a specific fetch outcome.
@@ -123,8 +121,6 @@ describe('mutate tools', () => {
       expect(err).toBeDefined()
       expect(err!.message).toContain('(searched:')
       expect(err!.message).toContain('specs')
-      expect(err!.message).toContain('.spec-cache')
-      expect(err!.message).toContain('direct relative path')
       expect(err!.message).toContain('network')
     })
 

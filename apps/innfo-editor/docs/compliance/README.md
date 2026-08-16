@@ -67,15 +67,14 @@ Cell values are rendered with the matching interactive widget in `MatricesGrid.v
 The parent chain resolver (`src/services/SpecResolverService.ts`) implements the resolver
 protocol from defiNNe:
 
-1. **Cache-first**: looks for the template in the workspace `.specs/` directory
-2. **Download-on-miss**: fetches `parent_spec.url` and persists to `.specs/`
+1. **Local-first**: looks for the template in the workspace `specs/` directory
+2. **Download-on-miss**: fetches `parent_spec.url` and persists to `specs/`, write-once
+   (an existing file is never overwritten — `specs/` content is immutable by convention,
+   so there is no separate cache directory or staleness to track)
 3. **Recursive**: follows `parent_spec` until level 0
 4. Template matrix declarations are propagated to the model root node as `__matrix_defs`
    (via `normalizeMatrixDecl`), so the matrices view, matrix summaries and the
    metamatrix config share one source of truth.
-
-> When a template version changes, stale `.specs/` caches and the repo `.spec-cache/`
-> must be refreshed (see version bump procedure).
 
 ## Serialization
 

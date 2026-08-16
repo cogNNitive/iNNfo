@@ -339,7 +339,7 @@ export const useWorkspaceStore = defineStore('workspace', {
     },
 
     /**
-     * Downloads the generic iNNfo specification (level-1) into .specs/ when
+     * Downloads the generic iNNfo specification (level-1) into specs/ when
      * the root node declares a spec_version and the file is not already present.
      *
      * Best-effort: network failures or missing versions degrade gracefully.
@@ -362,7 +362,7 @@ export const useWorkspaceStore = defineStore('workspace', {
       const specFilename = `iNNfo_${specVersion}_NN.md`
 
       try {
-        const specsDir = await handle.getDirectoryHandle('.specs', { create: true })
+        const specsDir = await handle.getDirectoryHandle('specs', { create: true })
 
         // Skip if already exists
         try {
@@ -446,12 +446,19 @@ export const useWorkspaceStore = defineStore('workspace', {
           }
         }
 
-        // Persist spec:* nodes (templates/specs) to .specs/ directory
-        const specsDir = await this.handle.getDirectoryHandle('.specs', { create: true })
+        // Persist spec:* nodes (templates/specs) to specs/ directory.
+        // Write-once: specs/ content is immutable by convention, so an
+        // existing file is left as authoritative rather than overwritten.
+        const specsDir = await this.handle.getDirectoryHandle('specs', { create: true })
         for (const [id, node] of Object.entries(modelStore.nodes)) {
           if (id.startsWith('spec:') && node.rawContent) {
             const specName = node.name || id.substring(5)
             const filename = specName.endsWith('_NN') ? `${specName}.md` : `${specName}_NN.md`
+            const alreadyPresent = await specsDir
+              .getFileHandle(filename)
+              .then(() => true)
+              .catch(() => false)
+            if (alreadyPresent) continue
             const fileHandle = await specsDir.getFileHandle(filename, { create: true })
             if (fileHandle.createWritable) {
               const w = await fileHandle.createWritable()

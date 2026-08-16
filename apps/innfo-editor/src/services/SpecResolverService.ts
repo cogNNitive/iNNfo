@@ -109,17 +109,19 @@ async function tryDevLocalTemplate(parentName: string): Promise<string | null> {
  * co-location. Mutates `nodes`/`rootIds` in place.
  *
  * Resolution order per model:
- *   1. local workspace directories (`.specs/`, `.spec-cache/`, `specs/`) via
- *      the folder handle — matching the parent name or the URL's basename;
+ *   1. the workspace's `specs/` directory via the folder handle — matching
+ *      the parent name or the URL's basename;
  *   2. the `parent_spec.url` itself when it is a local/relative path
  *      (resolved against the workspace handle instead of fetch());
  *   3. dev-only `specs/latest` fallback;
  *   4. network fetch, ONLY for http(s) URLs.
  *
- * Locally-resolved and fetched templates are persisted back to `.specs/` when a
- * handle is available. Best-effort: when the template cannot be resolved, a
- * parse issue is recorded (surfaced as a warning) and the model's own
- * `# NN matrices:` blocks keep the matrices visible in the tree.
+ * Locally-resolved and fetched templates are persisted back to `specs/`
+ * (write-once — an existing file is never overwritten, since `specs/`
+ * content is immutable by convention) when a handle is available. Best-effort:
+ * when the template cannot be resolved, a parse issue is recorded (surfaced
+ * as a warning) and the model's own `# NN matrices:` blocks keep the
+ * matrices visible in the tree.
  */
 export async function resolveParentSpecs(
   nodes: Record<string, ModelNode>,
@@ -153,22 +155,20 @@ export async function resolveParentSpecs(
     let text = ''
     let specFilename = ''
 
-    // 1. Local workspace directories (`.specs/`, `.spec-cache/`, `specs/`),
-    //    matched by parent name. `specs/` is normally ignored for parsing but
-    //    is a legitimate place for level-2 specialization templates.
+    // 1. The workspace's `specs/` directory, matched by parent name. `specs/`
+    //    is normally ignored for parsing but is a legitimate place for
+    //    level-2 specialization templates (and where resolved templates get
+    //    persisted back to, see step below).
     if (handle) {
-      for (const dirName of ['.specs', '.spec-cache', 'specs']) {
-        if (text) break
-        try {
-          const dirHandle = await handle.getDirectoryHandle(dirName)
-          const localResult = await findLocalSpecInHandle(dirHandle, parentName)
-          if (localResult) {
-            text = localResult.content
-            specFilename = `${dirName}/${localResult.filename}`
-          }
-        } catch {
-          // directory not present — try the next one
+      try {
+        const dirHandle = await handle.getDirectoryHandle('specs')
+        const localResult = await findLocalSpecInHandle(dirHandle, parentName)
+        if (localResult) {
+          text = localResult.content
+          specFilename = `specs/${localResult.filename}`
         }
+      } catch {
+        // specs/ not present in this workspace
       }
     }
 
@@ -188,7 +188,7 @@ export async function resolveParentSpecs(
         // direct path not present — fall through to the basename directory search
       }
       if (!text) {
-        for (const dirName of ['', '.specs', '.spec-cache', 'specs']) {
+        for (const dirName of ['', 'specs']) {
           if (text) break
           try {
             const base = dirName ? await handle.getDirectoryHandle(dirName) : handle
@@ -226,20 +226,28 @@ export async function resolveParentSpecs(
       }
     }
 
-    // Persist resolved templates to .specs/ when a handle is available
+    // Persist resolved templates to specs/ when a handle is available.
+    // Write-once: specs/ content is immutable by convention, so an existing
+    // file is left as authoritative rather than overwritten.
     if (text && handle && specFilename && !specFilename.startsWith('spec:')) {
       const persistName = parentName.replace(/\.md$/i, '').replace(/_NN$/, '')
       const filename = `${persistName}_NN.md`
       try {
-        const specsDir = await handle.getDirectoryHandle('.specs', { create: true })
-        const fileHandle = await specsDir.getFileHandle(filename, { create: true })
-        if (fileHandle.createWritable) {
-          const w = await fileHandle.createWritable()
-          await w.write(text)
-          await w.close()
+        const specsDir = await handle.getDirectoryHandle('specs', { create: true })
+        const alreadyPresent = await specsDir
+          .getFileHandle(filename)
+          .then(() => true)
+          .catch(() => false)
+        if (!alreadyPresent) {
+          const fileHandle = await specsDir.getFileHandle(filename, { create: true })
+          if (fileHandle.createWritable) {
+            const w = await fileHandle.createWritable()
+            await w.write(text)
+            await w.close()
+          }
         }
       } catch (e) {
-        console.warn(`[template] Could not persist spec to .specs/:`, e)
+        console.warn(`[template] Could not persist spec to specs/:`, e)
       }
     }
 

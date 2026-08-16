@@ -6,7 +6,6 @@ import { validateModel } from './mutate'
 
 const rootDir = join(import.meta.dirname!, '..', '..', 'temp-test-spec')
 const specsDir = join(rootDir, 'specs')
-const cacheDir = join(rootDir, '.spec-cache')
 
 /** Write the level-1 + level-0 spec chain locally so resolution never hits the network. */
 async function stubSpecChain() {
@@ -54,7 +53,6 @@ describe('Spec Tools Integration (URL- and model-derived, no hardcoding)', () =>
   beforeEach(async () => {
     await rm(rootDir, { recursive: true, force: true })
     await mkdir(specsDir, { recursive: true })
-    await mkdir(cacheDir, { recursive: true })
     vi.restoreAllMocks()
   })
 

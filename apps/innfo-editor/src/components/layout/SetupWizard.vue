@@ -199,7 +199,7 @@ async function finishWizard(): Promise<void> {
     // Create workspace structure (directories + support files)
     await initWorkspaceStructure(handle, name, templateChoice.value)
 
-    // Pre-populate .specs/ with the full spec chain so both the editor
+    // Pre-populate specs/ with the full spec chain so both the editor
     // and AI agents have local copies without fetching on first use.
     if (templateChoice.value !== 'blank') {
       const starter = getStarterByTemplate(templateChoice.value)
@@ -429,7 +429,7 @@ const stepTitles = [
             <span>Your model file with semantic versioning and template type</span>
           </div>
           <div class="wizard__file">
-            <code>.specs/</code>
+            <code>specs/</code>
             <span>Template specifications downloaded automatically</span>
           </div>
 

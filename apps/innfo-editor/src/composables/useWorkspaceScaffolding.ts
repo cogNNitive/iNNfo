@@ -12,8 +12,8 @@ export async function initWorkspaceStructure(
   modelName: string,
   chosenTemplate: TemplateChoice,
 ): Promise<void> {
-  // Create dot-directories (application-managed)
-  await handle.getDirectoryHandle('.specs', { create: true })
+  // Create application-managed directories
+  await handle.getDirectoryHandle('specs', { create: true })
 
 
 
@@ -30,7 +30,7 @@ This workspace was created by iNNfo — a structured knowledge model editor for 
 | \`${modelName}_V_1-0-0_${chosenTemplate}_NN.md\` | Your model file |
 | \`iNNfo.html\` | Open this to launch the editor |
 | \`AGENTS.md\` | AI agent entry point — skill and MCP setup instructions |
-| \`.specs/\` | Template specifications (auto-managed) |
+| \`specs/\` | Template specifications (auto-managed) |
 | \`.backups/\` | Auto-save history (auto-managed) |
 
 ## How to edit
@@ -127,7 +127,7 @@ On Windows, use \`%USERPROFILE%\\.cache\\innfo-mcp\\innfo-mcp.cmd\` as the \`com
 |------|---------|
 | \`*_NN.md\` | iNNfo model files |
 | \`index.md\` | Entry point with [[wikilinks]] to models |
-| \`.specs/\` | Spec chain cache (auto-managed) |
+| \`specs/\` | Spec chain, local + downloaded (auto-managed) |
 | \`README.md\` | Workspace overview |
 `
   const agentsHandle = await handle.getFileHandle('AGENTS.md', { create: true })
@@ -189,7 +189,7 @@ title: "${modelName} Index"
 
 /**
  * Walks the spec parent chain starting from the chosen template's URL
- * and pre-populates .specs/ so both the editor and AI agents have
+ * and pre-populates specs/ so both the editor and AI agents have
  * local copies without fetching on first use.
  */
 export async function prepopulateSpecs(handle: DirectoryHandleLike, starterUrl: string): Promise<void> {
@@ -203,7 +203,7 @@ export async function prepopulateSpecs(handle: DirectoryHandleLike, starterUrl: 
   let depth = 10
 
   while (currentUrl && currentName && depth-- > 0) {
-    const specsDir = await handle.getDirectoryHandle('.specs', { create: true })
+    const specsDir = await handle.getDirectoryHandle('specs', { create: true })
     const filename = `${currentName}_NN.md`
 
     // Skip if already exists

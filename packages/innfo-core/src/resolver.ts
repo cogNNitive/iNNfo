@@ -1,12 +1,7 @@
 import { SpecCache, SpecDocument, ResolverOptions } from './types'
 
 export interface SpecResolver {
-  resolveParentChain(
-    parentUrl: string,
-    parentName: string,
-    cacheDir: string,
-    options?: ResolverOptions,
-  ): Promise<SpecCache>
+  resolveParentChain(parentUrl: string, parentName: string, options?: ResolverOptions): Promise<SpecCache>
 }
 
 export class SpecResolutionError extends Error {

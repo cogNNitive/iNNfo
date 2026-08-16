@@ -4,7 +4,7 @@
 
 The `innfo-mcp` server wraps `@cognnitive/innfo-core` and MUST be agnostic of any spec publisher. An iNNfo model is self-describing: its frontmatter declares `spec_url` and `parent_spec.url`, which are the single source of truth for resolution. The server stores no spec/template URLs or template names as constants. A spec or template is resolved only from a URL supplied by the caller or derived from a loaded model's `parent_spec.url`.
 
-Resolution runs through `resolveParentChain` (innfo-core), which walks the self-describing parent chain up to level 0, resolving each document from a local `specs/` directory, then a local cache, then the network.
+Resolution runs through `resolveParentChain` (innfo-core), which walks the self-describing parent chain up to level 0, resolving each document from the local `specs/` directory, then the network — falling back downloads are saved into `specs/` too (write-once), so there is no separate cache directory.
 
 ## Requirements
 
@@ -16,14 +16,14 @@ The system MUST provide `getTemplateFromUrl(rootDir, url, name)` that resolves a
 
 - GIVEN a URL pointing to a reachable level-2 template document
 - WHEN `getTemplateFromUrl` is called with that URL and a chain-start name
-- THEN it calls `resolveParentChain(url, name, cacheDir)` directly
+- THEN it calls `resolveParentChain(rootDir, url, name)` directly
 - AND returns the `SpecDocument` from `coreGetTemplate(cache)`
 
-#### Scenario: `coreGetTemplate` returns undefined (fallback to direct file read)
+#### Scenario: `coreGetTemplate` returns undefined (fallback to the requested name in the resolved chain)
 
-- GIVEN a URL that resolves via `resolveParentChain` but `coreGetTemplate` returns undefined
+- GIVEN a URL that resolves via `resolveParentChain` but `coreGetTemplate` returns undefined (e.g. a level-1 spec requested directly, with no level-2/3 document in the chain)
 - WHEN `getTemplateFromUrl` is called
-- THEN it reads the cached file at `.spec-cache/{name}_NN.md`, parses its frontmatter, and returns a `SpecDocument` built from it
+- THEN it returns `cache.specs.get(name)` — the document already resolved for the requested name, with no additional disk read
 
 #### Scenario: Unreachable URL or timeout
 

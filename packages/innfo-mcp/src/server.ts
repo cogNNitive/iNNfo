@@ -32,10 +32,10 @@ import { validateModel, validateModelUrl, applyChange, validateTemplate, initMod
 import { findRepoRoot } from './tools/repo-root.js'
 
 /**
- * Root directory for model scanning and `.spec-cache/` placement.
+ * Root directory for model scanning and `specs/` placement.
  *
  * Defaults to the repo root found by walking up from `process.cwd()` (so
- * `.spec-cache/` always lands inside the repo, not in some ambiguous
+ * `specs/` always lands inside the repo, not in some ambiguous
  * sibling/parent directory when the server is started from an unexpected
  * cwd), falling back to `process.cwd()` itself when no `.git` is found.
  */

@@ -9,7 +9,7 @@ const INNFO_FILE_SUFFIX = '.md'
 const INDEX_MD = 'index.md'
 
 /** Directories whose contents are never parsed as models. */
-export const IGNORED_DIRECTORIES = new Set(['backups', 'archive', 'specs', '.spec-cache'])
+export const IGNORED_DIRECTORIES = new Set(['backups', 'archive', 'specs'])
 
 /**
  * Returns true when the error indicates a file/directory was not found.
@@ -27,7 +27,7 @@ export function isNotFound(err: unknown): boolean {
 
 /**
  * Returns true when the given path is inside an ignored directory
- * (backups/, archive/, specs/, .spec-cache/).
+ * (backups/, archive/, specs/).
  */
 export function isIgnoredPath(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, '/')

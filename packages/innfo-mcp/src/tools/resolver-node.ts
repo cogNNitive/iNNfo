@@ -1,9 +1,8 @@
-import { readdir, readFile, mkdir } from 'node:fs/promises'
+import { readdir, readFile, mkdir, writeFile, rename } from 'node:fs/promises'
 import { join, basename, isAbsolute } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseFrontmatter, SpecResolutionError } from '@cognnitive/innfo-core'
-import type { SpecCache, SpecDocument, SpecFrontmatter, ResolverOptions } from '@cognnitive/innfo-core'
-import { writeSpecToCache, isCacheEntryValid } from './cache-manifest.js'
+import type { SpecCache, SpecDocument, ResolverOptions } from '@cognnitive/innfo-core'
 
 export function isLocalPath(url: string): boolean {
   if (!url) return false
@@ -85,15 +84,15 @@ function versionFromFrontmatter(content: string): string | undefined {
 }
 
 /**
- * Canonical cache name for a downloaded document.
+ * Canonical local filename for a resolved document.
  *
- * The cache filename must reflect the document's OWN version, not the caller's
- * request name. A request for `business` (from a `latest/` URL) must cache as
+ * The filename must reflect the document's OWN version, not the caller's
+ * request name. A request for `business` (from a `latest/` URL) must save as
  * `business_V_0-3-0_NN.md`, so the same spec is never duplicated under a
- * versionless name and a versioned one. Falls back to the request name when the
- * document declares no version.
+ * versionless name and a versioned one. Falls back to the request name when
+ * the document declares no version.
  */
-export function canonicalCacheName(requestName: string, content: string): string {
+export function canonicalSpecFilename(requestName: string, content: string): string {
   const fmVersion = versionFromFrontmatter(content)
   if (!fmVersion) return requestName
   // Preserve the request name's original case (iNNfo, defiNNe, cogNNitive...).
@@ -155,56 +154,61 @@ async function preferHighestVersion(matches: string[]): Promise<string | null> {
   return best
 }
 
-async function findSpecInDirs(
-  dirs: string[],
-  reqName: string,
-  listFiles: (dir: string) => Promise<string[]>,
-): Promise<string | null> {
+/**
+ * Find a spec matching `reqName` (base + optional version) under `specsDir`,
+ * searched recursively. This is the SINGLE local lookup: it covers both
+ * hand-placed/vendored templates and anything a previous run already fetched
+ * and saved here — there is no separate cache directory to check.
+ */
+async function findLocalSpec(specsDir: string, reqName: string): Promise<string | null> {
   const reqParsed = parseSpecName(reqName)
   const matches: string[] = []
-  for (const dir of dirs) {
-    for (const filePath of await listFiles(dir)) {
-      if (await matchSpecPath(reqParsed, filePath)) matches.push(filePath)
-    }
+  for (const filePath of await getMarkdownFiles(specsDir)) {
+    if (await matchSpecPath(reqParsed, filePath)) matches.push(filePath)
   }
   if (reqParsed.version) return matches[0] ?? null
   return preferHighestVersion(matches)
 }
 
-async function findLocalSpec(specsDir: string, reqName: string): Promise<string | null> {
-  return findSpecInDirs([specsDir], reqName, getMarkdownFiles)
-}
-
-async function listCacheFiles(cacheDir: string): Promise<string[]> {
-  try {
-    const entries = await readdir(cacheDir, { withFileTypes: true })
-    return entries
-      .filter((e) => e.isFile() && /\.(md|markdown)$/i.test(e.name))
-      .map((e) => join(cacheDir, e.name))
-  } catch {
-    return []
-  }
+/**
+ * Write `content` to `path` atomically: write to a sibling temp file, then
+ * rename over the destination. Never leaves a partially-written file at
+ * `path` for a concurrent reader to observe.
+ */
+async function atomicWriteFile(path: string, content: string): Promise<void> {
+  const tmpPath = `${path}.tmp-${process.pid}-${Date.now()}`
+  await writeFile(tmpPath, content, 'utf-8')
+  await rename(tmpPath, path)
 }
 
 /**
- * Find a spec in the flat `.spec-cache` directory using the same
- * base+version semantics as the local `specs/` lookup, so legacy
- * unversioned cache files and canonical versioned files are interchangeable.
+ * Save a resolved spec into `specs/`, once. `specs/` content is immutable by
+ * convention in this project — a version bump always produces a new
+ * filename, never an in-place edit — so an existing file is simply never
+ * overwritten. That write-once rule is the entire integrity guarantee: there
+ * is nothing to hash-verify because nothing is ever silently replaced.
  */
-export async function findCachedSpec(cacheDir: string, reqName: string): Promise<string | null> {
-  return findSpecInDirs([cacheDir], reqName, listCacheFiles)
+export async function saveSpecOnce(specsDir: string, filename: string, content: string): Promise<void> {
+  await mkdir(specsDir, { recursive: true })
+  const path = join(specsDir, filename)
+  try {
+    await readFile(path, 'utf-8')
+    return // already present — leave the existing file as authoritative
+  } catch {
+    // doesn't exist yet, fall through to write it
+  }
+  await atomicWriteFile(path, content)
 }
 
 export async function resolveParentChainNode(
   rootDir: string,
   parentUrl: string,
   parentName: string,
-  cacheDir: string,
   options: ResolverOptions = {},
 ): Promise<SpecCache> {
   const maxDepth = options.maxDepth ?? MAX_DEPTH_DEFAULT
   const timeout = options.timeout ?? 10000
-  const specsDirs = [join(rootDir, 'specs'), join(rootDir, '.specs')]
+  const specsDir = join(rootDir, 'specs')
   const specs = new Map<string, SpecDocument>()
   const chain: string[] = []
 
@@ -212,7 +216,7 @@ export async function resolveParentChainNode(
   let currentName: string | undefined = parentName
   let depth = 0
 
-  await mkdir(cacheDir, { recursive: true })
+  await mkdir(specsDir, { recursive: true })
 
   while (currentUrl && currentName && depth < maxDepth) {
     let content: string | null = null
@@ -224,54 +228,33 @@ export async function resolveParentChainNode(
       attempted.push(`local path "${localPath}"`)
       try {
         content = await readFile(localPath, 'utf-8')
-        // Cache local resolutions like http downloads so a later run resolves
-        // from .spec-cache even if the absolute path moves or disappears.
-        const cacheName = canonicalCacheName(currentName, content)
-        await writeSpecToCache(cacheDir, `${cacheName}_NN.md`, content, currentUrl).catch(() => {})
+        // Mirror local resolutions into specs/ too, so a later run still
+        // resolves even if the absolute path moves or disappears.
+        const specName = canonicalSpecFilename(currentName, content)
+        await saveSpecOnce(specsDir, `${specName}_NN.md`, content).catch(() => {})
       } catch {
         content = null
       }
     }
 
-    // 1. Try local specs/ or .specs/ directory recursively
+    // 1. specs/ — the single local search (recursive).
     if (content === null) {
-      for (const dir of specsDirs) {
-        attempted.push(`specs dir "${dir}"`)
-        const localPath = await findLocalSpec(dir, currentName)
-        if (localPath) {
-          content = await readFile(localPath, 'utf-8')
-          break
-        }
+      attempted.push(`specs dir "${specsDir}"`)
+      const localPath = await findLocalSpec(specsDir, currentName)
+      if (localPath) {
+        content = await readFile(localPath, 'utf-8')
       }
     }
 
-    // 2. Try cache directory (version-agnostic lookup). A cache hit is only
-    //    served when the manifest's recorded sha256 still matches the file's
-    //    current on-disk content, and the content parses as valid
-    //    frontmatter. Either failure means the cache entry is stale/corrupt
-    //    and must be treated as a MISS — falling through to network fetch —
-    //    rather than served (fixes silent staleness/corruption).
-    if (content === null) {
-      attempted.push(`cache dir "${cacheDir}"`)
-      const cachePath = await findCachedSpec(cacheDir, currentName)
-      if (cachePath) {
-        const cachedContent = await readFile(cachePath, 'utf-8')
-        const cacheFilename = basename(cachePath)
-        const validEntry = await isCacheEntryValid(cacheDir, cacheFilename, cachedContent)
-        if (validEntry && parseFrontmatter(cachedContent) !== null) {
-          content = cachedContent
-        }
-      }
-    }
-
-    // 3. Download from network and save to cache directory under the
-    //    document's canonical versioned name.
+    // 2. Download from network and save into specs/ under the document's
+    //    canonical versioned name, so later runs hit step 1 and never
+    //    re-fetch.
     if (content === null) {
       attempted.push(`network url "${currentUrl}"`)
       try {
         content = await download(currentUrl, timeout)
-        const cacheName = canonicalCacheName(currentName, content)
-        await writeSpecToCache(cacheDir, `${cacheName}_NN.md`, content, currentUrl)
+        const specName = canonicalSpecFilename(currentName, content)
+        await saveSpecOnce(specsDir, `${specName}_NN.md`, content)
       } catch {
         content = null
       }
@@ -284,7 +267,16 @@ export async function resolveParentChainNode(
       )
     }
 
-    const fm = parseFrontmatter(content) ?? ({} as SpecFrontmatter)
+    // Every resolved source is held to the same standard: unparseable
+    // content is always a hard error, never silently treated as a valid
+    // empty-parent leaf.
+    const fm = parseFrontmatter(content)
+    if (fm === null) {
+      throw new SpecResolutionError(
+        `Unparseable frontmatter in resolved spec "${currentName}" (${attempted[attempted.length - 1]})`,
+        currentUrl,
+      )
+    }
     const doc: SpecDocument = {
       name: currentName,
       level: fm.level ?? 0,

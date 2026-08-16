@@ -11,7 +11,6 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 // than a static import (which Vitest would hoist above this assignment).
 const rootDir = join(import.meta.dirname!, '..', 'temp-test-server')
 const specsDir = join(rootDir, 'specs')
-const cacheDir = join(rootDir, '.spec-cache')
 process.env.INNFO_MODELS_DIR = rootDir
 
 const { server } = await import('./server')
@@ -111,7 +110,6 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
   beforeEach(async () => {
     await rm(rootDir, { recursive: true, force: true })
     await mkdir(specsDir, { recursive: true })
-    await mkdir(cacheDir, { recursive: true })
     vi.restoreAllMocks()
     // Default: no real network I/O in tests. Individual tests override this
     // spy when they need to exercise a specific fetch outcome.

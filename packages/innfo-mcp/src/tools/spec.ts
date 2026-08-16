@@ -14,7 +14,7 @@ import { join, basename } from 'node:path'
 import { readFile, stat } from 'node:fs/promises'
 import { getTemplate as coreGetTemplate, getFormatSpec, parseFrontmatter, SpecResolutionError } from '@cognnitive/innfo-core'
 import type { SpecDocument, SpecCache } from '@cognnitive/innfo-core'
-import { resolveParentChainNode, findCachedSpec } from './resolver-node.js'
+import { resolveParentChainNode } from './resolver-node.js'
 
 /**
  * Derive a chain-start name from a spec/template URL.
@@ -110,7 +110,7 @@ export async function getSpec(
   if (!name) name = deriveNameFromUrl(url)
 
   try {
-    const cache = await resolveParentChainNode(rootDir, url, name, join(rootDir, '.spec-cache'))
+    const cache = await resolveParentChainNode(rootDir, url, name)
     // get_spec always returns the level-1 iNNfo spec from the resolved chain,
     // falling back to the requested document when no level-1 is present.
     const spec = getFormatSpec(cache) ?? cache.specs.get(name) ?? null
@@ -135,29 +135,13 @@ export async function getTemplateFromUrl(
   url: string,
   name: string,
 ): Promise<SpecDocument | null> {
-  const cacheDir = join(rootDir, '.spec-cache')
   try {
-    const cache = await resolveParentChainNode(rootDir, url, name, cacheDir)
-    const template = coreGetTemplate(cache) ?? null
-    if (template) return template
-
-    // Fallback: read the cached file directly (version-agnostic lookup) and build a SpecDocument.
-    const cachePath = await findCachedSpec(cacheDir, name)
-    const content = cachePath ? await readFile(cachePath, 'utf-8').catch(() => null) : null
-    if (content) {
-      const fm = parseFrontmatter(content)
-      if (fm) {
-        return {
-          name,
-          level: fm.level ?? 2,
-          parentName: fm.parent_spec?.name,
-          parentUrl: fm.parent_spec?.url,
-          frontmatter: fm,
-          rawContent: content,
-        }
-      }
-    }
-    return null
+    const cache = await resolveParentChainNode(rootDir, url, name)
+    // Prefer a level-2/3 template from the walked chain; fall back to
+    // whatever was resolved for the requested name itself (e.g. a level-1
+    // spec requested directly) — it's already in `cache.specs`, no need to
+    // re-read anything from disk.
+    return coreGetTemplate(cache) ?? cache.specs.get(name) ?? null
   } catch (err) {
     // Surface the actionable resolution detail (searched locations) to the
     // caller so validate_model output can include it; other failures keep the

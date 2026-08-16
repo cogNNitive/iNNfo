@@ -251,7 +251,6 @@ export interface ModelDriver {
 }
 
 export interface ResolverOptions {
-  cacheDir?: string
   maxDepth?: number
   timeout?: number
 }

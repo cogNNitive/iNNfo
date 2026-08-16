@@ -37,7 +37,7 @@ export interface ModelInfo {
 const MD_FILE_RE = /\.md$/i
 
 /** Directories that must never be scanned for model files. */
-const IGNORED_DIRS = new Set(['backups', 'archive', 'specs', '.spec-cache', 'node_modules', '.git'])
+const IGNORED_DIRS = new Set(['backups', 'archive', 'specs', 'node_modules', '.git'])
 
 function isIgnoredDir(name: string): boolean {
   return name.startsWith('.') || IGNORED_DIRS.has(name.toLowerCase())
@@ -65,7 +65,7 @@ async function collectModels(dir: string, models: ModelInfo[]): Promise<void> {
 
 /**
  * Scan a root directory (recursively) for iNNfo model files (`*.md`).
- * Skips `backups`, `archive`, `specs`, `.spec-cache`, `node_modules`, `.git`,
+ * Skips `backups`, `archive`, `specs`, `node_modules`, `.git`,
  * and any dot-directory. Returns an array of `ModelInfo` sorted by id.
  */
 export async function listModels(rootDir: string): Promise<ModelInfo[]> {
