@@ -10,4 +10,3 @@ Pages:
 - [iNNfo Modeler](https://innfo.cognnitive.com/documentation/innfo-editor): Workspace editor docs
 - [innfo-core](https://innfo.cognnitive.com/documentation/innfo-core): Parser, resolver, validator library
 - [innfo-mcp](https://innfo.cognnitive.com/documentation/innfo-mcp): MCP server for AI agents
-- [traNNsform](https://innfo.cognnitive.com/documentation/trannsform): Import/export pipeline

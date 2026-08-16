@@ -184,7 +184,7 @@
             v-if="isConcept"
             class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 text-sm font-medium"
           >
-            Estos campos son heredados de la plantilla y deben ser editados en la plantilla.
+            These fields are inherited from the template and must be edited in the template.
           </div>
 
           <div

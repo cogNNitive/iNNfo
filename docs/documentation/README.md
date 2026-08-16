@@ -26,9 +26,6 @@ npm run dev -w @cognnitive/innfo-editor
 ### [innfo-mcp](innfo-mcp)
 `@cognnitive/innfo-mcp` is an MCP server that exposes iNNfo models and operations to AI coding agents (Claude Code, OpenCode, and others) over stdio.
 
-### [traNNsform](trannsform)
-The export/import pipeline that turns iNNfo models into self-contained HTML visualizers, and turns source documents back into iNNfo models — driven by an external AI agent following the protocol in `traNNsform/AGENT.md`.
-
 ### [Ecosystem](ecosystem)
 The four-level specification chain:
 

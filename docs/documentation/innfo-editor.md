@@ -8,7 +8,7 @@
 2. **Single recursive parse** — the workspace is parsed once into a normalized node graph shared by every view.
 3. **Edit** — each node opens the editing sub-view that fits its kind.
 4. **Auto-validate** — every parse runs the `@cognnitive/innfo-core` validator (`validateFormatContent` / `validateModel`); results surface as a status badge in the header.
-5. **Use AI** — click the "Use AI" button in the header to open the `AiWorkflowModal`, a tabbed modal with Guide, Import, and Export tabs that generate copiable agent prompts prefixed with `innfo:` to trigger the `innv0-router` skill. Prompts reference structured workflow files under `traNNsform/workflows/`.
+5. **Use AI** — click the "Use AI" button in the header to open the AI Guide view, with step-by-step instructions and copiable prompts (prefixed with `innfo:`) for connecting an external AI coding agent to the current workspace.
 6. **Save** — writes back to disk with automatic backups and a version bump.
 
 ## Home
@@ -59,15 +59,9 @@ Models using template extensions can be executed and visualized in **Standalone 
 - **URL Parameter**: Pass `?url=<RAW_MD_URL>` (e.g. `http://localhost:5173/app/view/procedure?url=https://raw.githubusercontent.com/.../CodeReviewProcess_V_1-0-0_procedures_NN.md`).
 - **Features**: Full FSM state derivation, step sequence navigation, sub-steps progress tracking, RACI accountability matrix inspection, and artifact I/O mapping in a clean, full-screen interface.
 
-## AI Workflow Modal
+## AI Guide View
 
-The **"Use AI"** button in the header opens `AiWorkflowModal` — a single entry point that replaces three separate full-page panels. It has three tabs:
-
-- **Guide** — a step checklist for connecting an external coding agent (Claude Code, Google Antigravity, or OpenCode Desktop) to the current workspace.
-- **Import** — builds a copiable `innfo:`-prefixed agent prompt that instructs an external AI agent to transform source documents into a new iNNfo model following `traNNsform/workflows/import.workflow.md`.
-- **Export** — builds a copiable `innfo:`-prefixed agent prompt that generates an HTML visualizer for the current model following `traNNsform/workflows/export.workflow.md`.
-
-Each tab has an independent copy button. The `innfo:` prefix activates the `innv0-router` skill, which dispatches to the correct pipeline skill automatically. The actual transformation work is executed by the AI agent reading the structured workflow files under `traNNsform/workflows/`.
+The **"Use AI"** button in the header opens the AI Guide view (`AiWorkflowPanel`) — a step checklist for connecting an external coding agent (Claude Code, Google Antigravity, or OpenCode Desktop) to the current workspace, with copiable prompts prefixed with `innfo:` for each step.
 
 ## Development
 

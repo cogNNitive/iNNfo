@@ -1,6 +1,6 @@
 ﻿---
 title: About — iNNfo
-description: Learn about iNNfo, the hub for the iNNfo ecosystem — the iNNfo Modeler, innfo-core, innfo-mcp, the traNNsform pipeline, and the spec chain.
+description: Learn about iNNfo, the hub for the iNNfo ecosystem — the iNNfo Modeler, innfo-core, innfo-mcp, and the spec chain.
 html_url: https://innfo.cognnitive.com/about
 generator: https://skills.innv0.com/innv0-web-design-guide
 ---
@@ -11,7 +11,7 @@ The monorepo that ties the iNNfo ecosystem together.
 
 ## Architecture
 
-npm workspaces monorepo — one editor app, two shared packages, the spec chain, and an agent-driven pipeline:
+npm workspaces monorepo — one editor app, two shared packages, and the spec chain:
 
 ```
 iNNfo/
@@ -21,7 +21,6 @@ iNNfo/
 â”‚   â”œâ”€â”€ innfo-core/       â† TS parser, resolver, validator
 â”‚   â””â”€â”€ innfo-mcp/        â† MCP server for AI agents
 â”œâ”€â”€ specs/                â† defiNNe, iNNfo, templates, samples
-â”œâ”€â”€ traNNsform/           â† Agent-driven import/export pipeline
 â””â”€â”€ docs/                 â† This website
 ```
 

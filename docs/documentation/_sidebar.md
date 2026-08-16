@@ -2,7 +2,6 @@
 - [innfo-editor](innfo-editor)
 - [innfo-core](innfo-core)
 - [innfo-mcp](innfo-mcp)
-- [traNNsform](trannsform)
 - [Ecosystem](ecosystem)
 - [Specifications](specifications)
 - [OKF Compatibility](ecosystem?id=open-knowledge-format-compatibility)
