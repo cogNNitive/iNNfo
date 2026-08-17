@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import SourceRefModal from '../../src/components/editor/SourceRefModal.vue'
+import FilePreviewModal from '../../src/components/editor/FilePreviewModal.vue'
 import { useWorkspaceStore } from '../../src/stores/workspaceStore'
 import { parseSourceRef } from '../../src/utils/sourceRef'
 import { buildFakeTree, type FakeTree } from '../helpers/fakeFs'
@@ -16,7 +16,7 @@ normalized_at: "2026-01-01T00:00:00Z"
 Normalized content line 1.
 `
 
-describe('SourceRefModal', () => {
+describe('FilePreviewModal', () => {
   let wrapper: ReturnType<typeof mount> | null = null
 
   beforeEach(() => {
@@ -45,8 +45,8 @@ describe('SourceRefModal', () => {
     workspaceStore.handle = handle
 
     const parsed = parseSourceRef('sources/nn/report.md')
-    wrapper = mount(SourceRefModal, {
-      props: { isOpen: true, parsed },
+    wrapper = mount(FilePreviewModal, {
+      props: { isOpen: true, kind: 'source', filePath: parsed.filePath, fileName: parsed.fileName },
       attachTo: document.body,
     })
 
@@ -85,8 +85,8 @@ describe('SourceRefModal', () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
 
     const parsed = parseSourceRef('sources/nn/report.md')
-    wrapper = mount(SourceRefModal, {
-      props: { isOpen: true, parsed },
+    wrapper = mount(FilePreviewModal, {
+      props: { isOpen: true, kind: 'source', filePath: parsed.filePath, fileName: parsed.fileName },
       attachTo: document.body,
     })
 

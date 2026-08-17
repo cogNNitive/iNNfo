@@ -5,7 +5,7 @@
  * refers to an image. Previously each consumer kept its own extension
  * whitelist (some only `.jpg`), so images in other formats — `.png`,
  * `.webp`, `.avif`, `.tiff`, `.heic`, etc. — were rendered as plain files.
- * Now every consumer (BlockPill, BlockSheet, FieldViewer, WidgetField,
+ * Now every consumer (Pill, BlockSheet, FieldViewer, WidgetField,
  * NodeMedia, WorkspaceView, media scanner) shares the same detection.
  */
 

@@ -171,7 +171,7 @@
                     transformOrigin: '0 100%',
                   }"
                 >
-                  <BlockPill
+                  <Pill
                     kind="instance"
                     :concept-type="activeMatrix.target"
                     :name="columns[vCol.index]"
@@ -213,7 +213,7 @@
                   transform: 'translateY(' + (vRow.start - scrollTop) + 'px)',
                 }"
               >
-                <BlockPill
+                <Pill
                   kind="instance"
                   :concept-type="activeMatrix.source"
                   :name="rows[vRow.index]"
@@ -400,7 +400,7 @@ import { useVirtualizer } from '@tanstack/vue-virtual'
 import { ChevronDown } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
-import BlockPill from './BlockPill.vue'
+import Pill from './Pill.vue'
 import MatrixPill from './MatrixPill.vue'
 import IconRenderer from './IconRenderer.vue'
 import { extractMatrixDefs, useMatrixDefinitions } from '../../composables/useMatrixDefinitions'
@@ -623,7 +623,7 @@ const getNodeDescription = (name: string): string => {
   return getNodeByName(name)?.rawSections?.description ?? ''
 }
 
-/** Unwraps FieldValue entries into plain values for the BlockPill popup. */
+/** Unwraps FieldValue entries into plain values for the Pill popup. */
 const getNodeFields = (name: string): Record<string, any> => {
   const node = getNodeByName(name)
   const out: Record<string, any> = {}

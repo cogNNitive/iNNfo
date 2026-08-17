@@ -456,6 +456,14 @@ const pillStyle = computed(() => {
     return {}
   }
 
+  // Solid-identity and firm-outline tiers (concept, model, source, artifact)
+  // always carry their own complete Tailwind-based styling from
+  // containerClasses, regardless of nodeId — never override with inline
+  // YIQ tinting, which is reserved for the default (instance/soft-outline) tier.
+  if (props.kind === 'concept' || props.kind === 'model' || props.kind === 'source' || props.kind === 'artifact') {
+    return {}
+  }
+
   const style: Record<string, string> = {}
   style.backgroundColor = getHexColorLight(effectiveColorHex.value)
   if (contrastTextColor.value) {
@@ -473,7 +481,9 @@ const pillClasses = computed(() => {
     props.interactive
       ? 'cursor-pointer active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1'
       : '',
-    isEmpty.value ? 'italic' : '',
+    // Ghost state (no content yet): composes with any fill tier — dashed border
+    // where a border color exists, faded opacity always.
+    isEmpty.value ? 'italic border-dashed opacity-[0.55]' : '',
   ]
 
   if (props.selected) {

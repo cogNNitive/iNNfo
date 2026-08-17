@@ -27,8 +27,13 @@ export const getConceptTypeIcon = (type: ConceptType): Component => {
 }
 
 /**
- * Semantic kind of a pill/block:
- * - `concept`  → the instantiable definition (a mold). Rendered as an outline.
- * - `instance` → a concrete block created from a concept. Rendered as a solid fill.
+ * Semantic kind of a pill/block. Each kind maps to one of three fill tiers
+ * (see useBlockVisuals.ts `containerClasses`):
+ * - `concept`  → root identity (the mold). Solid fill, own color.
+ * - `model`    → root identity (a file). Solid fill, own color.
+ * - `source`   → file reference, fixed neutral color. White fill, firm outline.
+ * - `artifact` → file reference, fixed neutral color. White fill, firm outline.
+ * - `instance` → an instance of a concept (e.g. an Element). No fill, soft
+ *   50%-opacity outline in the parent concept's color.
  */
-export type BlockKind = 'concept' | 'instance'
+export type BlockKind = 'concept' | 'instance' | 'model' | 'artifact' | 'source'

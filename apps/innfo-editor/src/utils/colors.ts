@@ -18,6 +18,10 @@ export interface ColorPalette {
   ring: string
   /** Solid background for selected concept pills (dark enough for white text) */
   selectedBg: string
+  /** 50%-opacity border, used by the "inherited" pill tier (e.g. Element) */
+  borderSoft: string
+  /** Firm (mid-strength) border, used by the "file reference" pill tier (e.g. Source/Artifact) */
+  borderFirm: string
 }
 
 /**
@@ -39,6 +43,8 @@ const PALETTES: Record<string, ColorPalette> = {
     gradient: 'from-blue-50/50',
     ring: 'ring-blue-100',
     selectedBg: 'bg-blue-600',
+    borderSoft: 'border-blue-600/50',
+    borderFirm: 'border-blue-400',
   },
   green: {
     bg: 'bg-emerald-50',
@@ -52,6 +58,8 @@ const PALETTES: Record<string, ColorPalette> = {
     gradient: 'from-emerald-50/50',
     ring: 'ring-emerald-100',
     selectedBg: 'bg-emerald-600',
+    borderSoft: 'border-emerald-600/50',
+    borderFirm: 'border-emerald-400',
   },
   indigo: {
     bg: 'bg-indigo-50',
@@ -65,6 +73,8 @@ const PALETTES: Record<string, ColorPalette> = {
     gradient: 'from-indigo-50/50',
     ring: 'ring-indigo-100',
     selectedBg: 'bg-indigo-600',
+    borderSoft: 'border-indigo-600/50',
+    borderFirm: 'border-indigo-400',
   },
   orange: {
     bg: 'bg-orange-50',
@@ -78,6 +88,8 @@ const PALETTES: Record<string, ColorPalette> = {
     gradient: 'from-orange-50/50',
     ring: 'ring-orange-100',
     selectedBg: 'bg-orange-600',
+    borderSoft: 'border-orange-600/50',
+    borderFirm: 'border-orange-400',
   },
   red: {
     bg: 'bg-rose-50',
@@ -91,6 +103,8 @@ const PALETTES: Record<string, ColorPalette> = {
     gradient: 'from-rose-50/50',
     ring: 'ring-rose-100',
     selectedBg: 'bg-rose-600',
+    borderSoft: 'border-rose-600/50',
+    borderFirm: 'border-rose-400',
   },
   violet: {
     bg: 'bg-violet-50',
@@ -104,6 +118,8 @@ const PALETTES: Record<string, ColorPalette> = {
     gradient: 'from-violet-50/50',
     ring: 'ring-violet-100',
     selectedBg: 'bg-violet-600',
+    borderSoft: 'border-violet-600/50',
+    borderFirm: 'border-violet-400',
   },
   amber: {
     bg: 'bg-amber-50',
@@ -117,6 +133,8 @@ const PALETTES: Record<string, ColorPalette> = {
     gradient: 'from-amber-50/50',
     ring: 'ring-amber-100',
     selectedBg: 'bg-amber-600',
+    borderSoft: 'border-amber-600/50',
+    borderFirm: 'border-amber-400',
   },
   yellow: {
     bg: 'bg-yellow-50',
@@ -130,6 +148,40 @@ const PALETTES: Record<string, ColorPalette> = {
     gradient: 'from-yellow-50/50',
     ring: 'ring-yellow-100',
     selectedBg: 'bg-yellow-600',
+    borderSoft: 'border-yellow-600/50',
+    borderFirm: 'border-yellow-400',
+  },
+  /** Source: fixed neutral color for the "file reference" pill tier. */
+  slate: {
+    bg: 'bg-slate-50',
+    text: 'text-slate-700',
+    border: 'border-slate-200',
+    accent: 'text-slate-600',
+    borderLeft: 'border-l-slate-500',
+    hoverBg: 'hover:bg-slate-50',
+    hoverText: 'hover:text-slate-700',
+    hoverBorder: 'hover:border-slate-200',
+    gradient: 'from-slate-50/50',
+    ring: 'ring-slate-100',
+    selectedBg: 'bg-slate-600',
+    borderSoft: 'border-slate-600/50',
+    borderFirm: 'border-slate-400',
+  },
+  /** Artifact: fixed neutral "black" color for the "file reference" pill tier. */
+  black: {
+    bg: 'bg-slate-900/5',
+    text: 'text-slate-900',
+    border: 'border-slate-300',
+    accent: 'text-slate-900',
+    borderLeft: 'border-l-slate-900',
+    hoverBg: 'hover:bg-slate-900/5',
+    hoverText: 'hover:text-slate-900',
+    hoverBorder: 'hover:border-slate-400',
+    gradient: 'from-slate-900/5',
+    ring: 'ring-slate-300',
+    selectedBg: 'bg-slate-900',
+    borderSoft: 'border-slate-900/50',
+    borderFirm: 'border-slate-400',
   },
 }
 
@@ -145,6 +197,8 @@ const FALLBACK: ColorPalette = {
   gradient: 'from-slate-50/50',
   ring: 'ring-slate-100',
   selectedBg: 'bg-slate-600',
+  borderSoft: 'border-slate-600/50',
+  borderFirm: 'border-slate-400',
 }
 
 export const getColorClasses = (colorName: string | null | undefined): ColorPalette => {

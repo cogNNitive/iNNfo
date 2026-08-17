@@ -171,7 +171,7 @@ describe('ConceptTreeNode.vue — BlockPill integration (R-TN-01)', () => {
     })
 
     // BlockPill should be rendered within the tree row
-    expect(wrapper.findComponent({ name: 'BlockPill' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'Pill' }).exists()).toBe(true)
   })
 
   it('passes the node name to BlockPill', () => {

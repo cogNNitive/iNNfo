@@ -146,7 +146,7 @@
             </div>
           </div>
 
-          <!-- Vertical scrollable list of BlockPills -->
+          <!-- Vertical scrollable list of Pills -->
           <div
             v-if="availableConcepts.length > 0"
             class="flex flex-col gap-1.5 max-h-60 overflow-y-auto pr-1 text-xs scrollbar-thin border-t border-slate-100 dark:border-slate-700/60 pt-2"
@@ -164,7 +164,7 @@
                 class="w-3.5 h-3.5 rounded text-primary border-slate-300 focus:ring-primary cursor-pointer shrink-0"
                 @click.stop="uiStore.toggleConceptFilter(concept, availableConcepts)"
               />
-              <BlockPill
+              <Pill
                 :name="concept"
                 :concept-type="concept"
                 kind="concept"
@@ -306,7 +306,7 @@ import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { useToast } from '../../shared/useToast'
-import BlockPill from '../editor/BlockPill.vue'
+import Pill from '../editor/Pill.vue'
 import { getConceptMeta } from '../../composables/useConceptVisuals'
 
 

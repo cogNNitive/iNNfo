@@ -2,7 +2,7 @@
  * useNodeMediaScan — reactive wrapper around useMediaScanner that
  * caches scanned results per node and triggers scans on demand.
  *
- * Components like BlockPill (thumbnail) and BlockSheet (full media gallery)
+ * Components like Pill (thumbnail) and BlockSheet (full media gallery)
  * call `scan(nodeId)` and consume `scannedImages.value` / `allScanned.value`.
  */
 import { ref, computed } from 'vue'

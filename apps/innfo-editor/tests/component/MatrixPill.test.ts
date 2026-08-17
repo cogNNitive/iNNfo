@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import MatrixPill from '../../src/components/editor/MatrixPill.vue'
+import Pill from '../../src/components/editor/Pill.vue'
 import { useModelStore } from '../../src/stores/modelStore'
 
 describe('MatrixPill component', () => {
@@ -22,7 +23,7 @@ describe('MatrixPill component', () => {
     expect(wrapper.text()).toContain('Role')
   })
 
-  it('renders source and target like tree concept headers with colored name, icon, and element counts', () => {
+  it('renders source and target as unified Pill components, colored by concept, with element counts', () => {
     const modelStore = useModelStore()
     modelStore.setGraph(
       {
@@ -72,13 +73,14 @@ describe('MatrixPill component', () => {
     expect(targetCount.exists()).toBe(true)
     expect(targetCount.text()).toBe('1')
 
-    // Colored by concept: uppercase name uses the concept hex color
-    const coloredNames = wrapper.findAll('.uppercase')
-    expect(coloredNames.length).toBe(2)
-    expect(coloredNames[0].text()).toBe('Work')
-    expect(coloredNames[0].attributes('style')).toContain('#3b82f6')
-    expect(coloredNames[1].text()).toBe('Role')
-    expect(coloredNames[1].attributes('style')).toContain('#22c55e')
+    // Colored by concept: source/target identity renders as a Pill, colored per concept
+    const pills = wrapper.findAllComponents(Pill)
+    expect(pills.length).toBe(2)
+    expect(pills[0].props('name')).toBe('Work')
+    expect(pills[0].props('color')).toBe('#3b82f6')
+    expect(pills[0].props('kind')).toBe('concept')
+    expect(pills[1].props('name')).toBe('Role')
+    expect(pills[1].props('color')).toBe('#22c55e')
   })
 
   it('renders count badge when valueCount is provided (> 0)', () => {

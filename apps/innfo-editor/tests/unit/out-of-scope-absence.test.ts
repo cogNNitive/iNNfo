@@ -30,13 +30,13 @@ describe('out-of-scope feature absence (R19)', () => {
     // The shared/validator.ts checks wikilink syntax as part of FORMAT compliance
     // (conv-wikilinks: ensures [[refs]] match declared concepts). This is syntax
     // validation, not resolution/navigation — R19 intent remains intact.
-    // Editor components ported from file-format (BlockSheet, BlockPill, BlockRelationships)
+    // Editor components ported from file-format (BlockSheet, Pill, BlockRelationships)
     // reference [[wikilinks]] as part of FORMAT document parsing/display, not as
     // cross-boundary resolution or navigation UI — same exclusion rationale.
     const wikilinkExcluded = [
       /[\/\\]shared[\/\\]validator\.ts$/,
       /[\/\\]components[\/\\]editor[\/\\]BlockSheet\.vue$/,
-      /[\/\\]components[\/\\]editor[\/\\]BlockPill\.vue$/,
+      /[\/\\]components[\/\\]editor[\/\\]Pill\.vue$/,
       /[\/\\]components[\/\\]editor[\/\\]BlockRelationships\.vue$/,
       /[\/\\]components[\/\\]editor[\/\\]FieldViewer\.vue$/,
       /[\/\\]components[\/\\]editor[\/\\]FieldSchemaView\.vue$/,

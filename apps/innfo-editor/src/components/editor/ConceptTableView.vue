@@ -73,7 +73,7 @@
             <td
               class="sticky left-0 z-10 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30 px-2 py-1 border-r border-slate-100 dark:border-slate-700/50 min-w-[280px]"
             >
-              <BlockPill
+              <Pill
                 kind="instance"
                 :concept-type="conceptType"
                 :name="child.name"
@@ -149,7 +149,7 @@ import { useModelStore } from '../../stores/modelStore'
 import { useConfirmStore } from '../../stores/confirmStore'
 import { useUiStore } from '../../stores/uiStore'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
-import BlockPill from './BlockPill.vue'
+import Pill from './Pill.vue'
 import type { FieldValue } from '@cognnitive/innfo-core'
 
 const props = defineProps<{

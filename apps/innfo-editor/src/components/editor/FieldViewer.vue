@@ -42,7 +42,7 @@
             </span>
           </template>
           <template v-else-if="entry.def.type === 'reference'">
-            <BlockPill
+            <Pill
               v-if="entry.refNode"
               :node-id="entry.refNode.id"
               :name="entry.refNode.name"
@@ -78,13 +78,13 @@
           <template v-else-if="Array.isArray(entry.displayValue)">
             <div class="flex flex-wrap gap-1.5 items-center">
               <template v-for="(item, idx) in entry.displayValue" :key="idx">
-                <SourceRefPill v-if="isSourceRef(item)" :raw-value="String(item)" />
+                <FileRefPill v-if="isSourceRef(item)" kind="source" v-bind="toFileRef(String(item))" />
                 <span v-else>{{ item }}</span>
               </template>
             </div>
           </template>
           <template v-else-if="isSourceRef(entry.displayValue)">
-            <SourceRefPill :raw-value="String(entry.displayValue)" />
+            <FileRefPill kind="source" v-bind="toFileRef(String(entry.displayValue))" />
           </template>
           <template v-else>
             {{ entry.displayValue }}
@@ -110,8 +110,8 @@ import WidgetField from '../../shared/widgets/WidgetField.vue'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import type { ModelNode } from '../../model/types'
-import BlockPill from './BlockPill.vue'
-import SourceRefPill from './SourceRefPill.vue'
+import Pill from './Pill.vue'
+import FileRefPill from './FileRefPill.vue'
 import { parseSourceRef } from '../../utils/sourceRef'
 import { isImageFieldValue } from '../../utils/imageDetection'
 
@@ -123,6 +123,11 @@ function cleanReferenceName(val: unknown): string {
 function isSourceRef(val: unknown): boolean {
   if (typeof val !== 'string') return false
   return parseSourceRef(val).isValid
+}
+
+function toFileRef(val: string): { filePath: string; fileName: string; slug?: string } {
+  const { filePath, fileName, slug } = parseSourceRef(val)
+  return { filePath, fileName, slug }
 }
 
 const MARKDOWN_FIELD_TYPES = new Set(['markdown_inline', 'markdown_file', 'markdown'])

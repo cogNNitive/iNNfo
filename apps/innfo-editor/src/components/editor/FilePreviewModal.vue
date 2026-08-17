@@ -9,29 +9,29 @@
         class="relative flex flex-col w-[92vw] max-w-4xl max-h-[88vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-scale-in"
         role="dialog"
         aria-modal="true"
-        aria-label="Source Traceability Viewer"
+        aria-label="File Preview"
         @keydown.escape="close"
       >
         <!-- Modal Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-violet-600/10 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-500/20">
-              <Link class="w-5 h-5" />
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center border" :class="meta.iconWrap">
+              <component :is="meta.headerIcon" class="w-5 h-5" />
             </div>
             <div>
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 border border-violet-300/60 dark:border-violet-700">
-                  Fuente
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold border" :class="meta.badge">
+                  {{ meta.label }}
                 </span>
                 <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">
-                  {{ parsed.fileName }}
+                  {{ fileName }}
                 </h2>
-                <span v-if="parsed.slug" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                  {{ resolvedSection ? resolvedSection.heading.text : parsed.slug }}
+                <span v-if="slug" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  {{ resolvedSection ? resolvedSection.heading.text : slug }}
                 </span>
               </div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono truncate max-w-xl">
-                {{ parsed.filePath }}
+                {{ filePath }}
               </p>
             </div>
 
@@ -66,17 +66,18 @@
         <div class="px-6 py-3 bg-slate-100/60 dark:bg-slate-850 border-b border-slate-200/80 dark:border-slate-800 shrink-0">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700">
-              <FileText class="w-4 h-4 text-violet-500 shrink-0" />
+              <FileText class="w-4 h-4 shrink-0" :class="meta.metaIcon" />
               <div class="min-w-0 flex-1">
                 <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none">Archivo Original</span>
-                <span class="font-mono text-xs truncate block font-medium" :title="metadata.source_file || parsed.filePath">
+                <span class="font-mono text-xs truncate block font-medium" :title="metadata.source_file || filePath">
                   {{ metadata.source_file || 'N/A' }}
                 </span>
               </div>
               <button
                 v-if="metadata.source_file"
                 type="button"
-                class="p-1 rounded-md text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-950/40 transition-colors cursor-pointer shrink-0"
+                class="p-1 rounded-md text-slate-400 transition-colors cursor-pointer shrink-0"
+                :class="meta.openHover"
                 title="Abrir archivo original en una pestaña nueva"
                 @click="openOriginalFile"
               >
@@ -129,21 +130,21 @@
           ]"
         >
           <div v-if="loading" class="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
-            <div class="w-7 h-7 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
-            <span>Cargando contenido de la fuente...</span>
+            <div class="w-7 h-7 border-2 border-t-transparent rounded-full animate-spin" :class="meta.spinner"></div>
+            <span>Cargando contenido...</span>
           </div>
 
           <div v-else-if="error" class="p-4 rounded-xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs">
             <p class="font-bold flex items-center gap-2">
               <X class="w-4 h-4 text-red-400" />
-              No se pudo cargar el archivo de fuente
+              No se pudo cargar el archivo
             </p>
             <p class="mt-1 font-mono text-slate-400">{{ error }}</p>
           </div>
 
           <!-- Preview Mode for Images -->
           <div v-else-if="viewMode === 'preview' && isImage" class="flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-900 rounded-xl h-[60vh] overflow-auto">
-            <img :src="objectUrl" class="max-w-full max-h-full object-contain rounded-lg shadow-md border border-slate-200 dark:border-slate-800" :alt="parsed.fileName" />
+            <img :src="objectUrl" class="max-w-full max-h-full object-contain rounded-lg shadow-md border border-slate-200 dark:border-slate-800" :alt="fileName" />
           </div>
 
           <!-- Preview Mode for PDFs -->
@@ -161,9 +162,7 @@
               :key="idx"
               :id="`line-${idx + 1}`"
               class="flex items-start gap-4 px-2 py-0.5 rounded transition-colors"
-              :class="{
-                'bg-violet-900/60 text-violet-100 font-bold border-l-4 border-violet-500 pl-3': isLineTargeted(idx + 1)
-              }"
+              :class="isLineTargeted(idx + 1) ? `font-bold border-l-4 pl-3 ${meta.highlight}` : ''"
             >
               <span class="w-8 shrink-0 text-right select-none text-slate-600 text-[11px] font-mono">
                 {{ idx + 1 }}
@@ -195,15 +194,18 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
-import { Link, X, FileText, Hash, HardDrive, Clock, CheckCircle2, ExternalLink } from 'lucide-vue-next'
+import { Link, FileOutput, Sparkles, X, FileText, Hash, HardDrive, Clock, CheckCircle2, ExternalLink } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
-import { resolveHeadingSection, type ParsedSourceRef } from '../../utils/sourceRef'
+import { resolveHeadingSection } from '../../utils/sourceRef'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { renderMarkdown } from '../../utils/markdown'
 
 const props = defineProps<{
   isOpen: boolean
-  parsed: ParsedSourceRef
+  kind: 'artifact' | 'source' | 'model' | 'file'
+  filePath: string
+  fileName: string
+  slug?: string
 }>()
 
 const emit = defineEmits<{
@@ -211,6 +213,51 @@ const emit = defineEmits<{
 }>()
 
 const workspaceStore = useWorkspaceStore()
+
+const KIND_META = {
+  source: {
+    label: 'Fuente',
+    headerIcon: Link,
+    iconWrap: 'bg-slate-600/10 dark:bg-slate-400/20 text-slate-600 dark:text-slate-300 border-slate-500/20',
+    badge: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-600',
+    spinner: 'border-slate-500',
+    metaIcon: 'text-slate-500',
+    openHover: 'hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60',
+    highlight: 'bg-slate-700/60 text-slate-100 border-slate-400',
+  },
+  artifact: {
+    label: 'Artefacto',
+    headerIcon: FileOutput,
+    iconWrap: 'bg-slate-900/10 dark:bg-slate-100/10 text-slate-900 dark:text-slate-100 border-slate-900/20',
+    badge: 'bg-slate-900/10 dark:bg-slate-100/10 text-slate-900 dark:text-slate-100 border-slate-900/30 dark:border-slate-100/30',
+    spinner: 'border-slate-900 dark:border-slate-100',
+    metaIcon: 'text-slate-900 dark:text-slate-100',
+    openHover: 'hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60',
+    highlight: 'bg-slate-900/70 text-white border-slate-400',
+  },
+  model: {
+    label: 'Modelo',
+    headerIcon: Sparkles,
+    iconWrap: 'bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
+    badge: 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-300/60 dark:border-indigo-700',
+    spinner: 'border-indigo-500',
+    metaIcon: 'text-indigo-500',
+    openHover: 'hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40',
+    highlight: 'bg-indigo-900/60 text-indigo-100 border-indigo-500',
+  },
+  file: {
+    label: 'Archivo',
+    headerIcon: FileText,
+    iconWrap: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/20',
+    badge: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-600',
+    spinner: 'border-slate-400',
+    metaIcon: 'text-slate-400',
+    openHover: 'hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60',
+    highlight: 'bg-slate-600/60 text-slate-100 border-slate-400',
+  },
+} as const
+
+const meta = computed(() => KIND_META[props.kind])
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -227,7 +274,7 @@ const viewMode = ref<'preview' | 'code'>('preview')
 const objectUrl = ref('')
 
 const extension = computed(() => {
-  const parts = props.parsed.fileName.split('.')
+  const parts = props.fileName.split('.')
   return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : ''
 })
 
@@ -239,8 +286,8 @@ const formattedHtml = computed(() => renderMarkdown(rawContent.value))
 const lines = computed(() => rawContent.value.split('\n'))
 
 const resolvedSection = computed(() => {
-  if (!props.parsed.slug || !rawContent.value) return null
-  return resolveHeadingSection(rawContent.value, props.parsed.slug)
+  if (!props.slug || !rawContent.value) return null
+  return resolveHeadingSection(rawContent.value, props.slug)
 })
 
 function isLineTargeted(lineNum: number): boolean {
@@ -278,8 +325,8 @@ function cleanupObjectUrl(): void {
   }
 }
 
-async function loadSourceContent(): Promise<void> {
-  if (!props.parsed.filePath) return
+async function loadFileContent(): Promise<void> {
+  if (!props.filePath) return
   loading.value = true
   error.value = null
   rawContent.value = ''
@@ -291,7 +338,7 @@ async function loadSourceContent(): Promise<void> {
 
     if (isImage.value || isPdf.value) {
       if (handle) {
-        const parts = props.parsed.filePath.split(/[/\\]/).filter(Boolean)
+        const parts = props.filePath.split(/[/\\]/).filter(Boolean)
         let current: any = handle
         for (let i = 0; i < parts.length - 1; i++) {
           current = await current.getDirectoryHandle(parts[i])
@@ -300,8 +347,7 @@ async function loadSourceContent(): Promise<void> {
         const file = await fileHandle.getFile()
         objectUrl.value = URL.createObjectURL(file)
       } else {
-        // Fallback: use filePath directly
-        objectUrl.value = props.parsed.filePath
+        objectUrl.value = props.filePath
       }
       loading.value = false
       return
@@ -310,7 +356,7 @@ async function loadSourceContent(): Promise<void> {
     let textContent = ''
 
     if (handle) {
-      const parts = props.parsed.filePath.split(/[/\\]/).filter(Boolean)
+      const parts = props.filePath.split(/[/\\]/).filter(Boolean)
       let current: any = handle
       for (let i = 0; i < parts.length - 1; i++) {
         current = await current.getDirectoryHandle(parts[i])
@@ -319,8 +365,7 @@ async function loadSourceContent(): Promise<void> {
       const file = await fileHandle.getFile()
       textContent = await file.text()
     } else {
-      // Virtual workspace / preview fallback: construct URL or fetch
-      const resp = await fetch(props.parsed.filePath)
+      const resp = await fetch(props.filePath)
       if (!resp.ok) {
         throw new Error(`HTTP error ${resp.status} - ${resp.statusText}`)
       }
@@ -329,7 +374,6 @@ async function loadSourceContent(): Promise<void> {
 
     rawContent.value = textContent
 
-    // Extract frontmatter metadata if present
     const fm = parseFrontmatter(textContent) as any
     if (fm) {
       metadata.value = {
@@ -340,9 +384,8 @@ async function loadSourceContent(): Promise<void> {
       }
     }
 
-    // Auto-scroll to the target section's heading line
-    if (props.parsed.slug) {
-      const section = resolveHeadingSection(textContent, props.parsed.slug)
+    if (props.slug) {
+      const section = resolveHeadingSection(textContent, props.slug)
       if (section) {
         await nextTick()
         const targetEl = document.getElementById(`line-${section.startLine + 1}`)
@@ -375,10 +418,9 @@ async function openOriginalFile(): Promise<void> {
       }
       const fileHandle = await current.getFileHandle(parts[parts.length - 1])
       const file = await fileHandle.getFile()
-      const objectUrl = URL.createObjectURL(file)
-      window.open(objectUrl, '_blank')
+      const url = URL.createObjectURL(file)
+      window.open(url, '_blank')
     } else {
-      // Virtual workspace / preview fallback: same resolution style as loadSourceContent's fetch fallback.
       window.open(sourceFile, '_blank')
     }
   } catch (err) {
@@ -390,12 +432,12 @@ watch(
   () => props.isOpen,
   (val) => {
     if (val) {
-      if (props.parsed.slug) {
+      if (props.slug) {
         viewMode.value = 'code'
       } else {
         viewMode.value = (isMarkdown.value || isImage.value || isPdf.value) ? 'preview' : 'code'
       }
-      loadSourceContent()
+      loadFileContent()
     } else {
       cleanupObjectUrl()
     }
@@ -416,7 +458,6 @@ watch(
 .animate-fade-in { animation: fade-in 0.15s ease-out forwards; }
 .animate-scale-in { animation: scale-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-/* Sleek minimal styles for markdown preview inside modal */
 .markdown-body :deep(h1) { font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem; }
 .markdown-body :deep(h2) { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; }
 .markdown-body :deep(h3) { font-size: 1.1rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; }

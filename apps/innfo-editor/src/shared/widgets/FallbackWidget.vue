@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SourceRefPill from '../../components/editor/SourceRefPill.vue'
+import FileRefPill from '../../components/editor/FileRefPill.vue'
 import { parseSourceRef } from '../../utils/sourceRef'
 
 /**
@@ -17,6 +17,11 @@ function isSourceRef(value: unknown): boolean {
   return parseSourceRef(value).isValid
 }
 
+function toFileRef(val: string): { filePath: string; fileName: string; slug?: string } {
+  const { filePath, fileName, slug } = parseSourceRef(val)
+  return { filePath, fileName, slug }
+}
+
 function displayValue(value: unknown): string {
   if (value === undefined || value === null) return ''
   if (typeof value === 'object') return JSON.stringify(value)
@@ -26,7 +31,7 @@ function displayValue(value: unknown): string {
 
 <template>
   <div class="fallback-widget">
-    <SourceRefPill v-if="isSourceRef(modelValue)" :raw-value="String(modelValue)" />
+    <FileRefPill v-if="isSourceRef(modelValue)" kind="source" v-bind="toFileRef(String(modelValue))" />
     <span v-else class="fallback-widget__value">{{ displayValue(modelValue) }}</span>
     <span class="fallback-widget__badge">{{ widgetType }}</span>
   </div>

@@ -79,10 +79,12 @@
     </div>
 
     <!-- File Content Viewer Modal -->
-    <SourceRefModal
+    <FilePreviewModal
       v-if="showFileModal && activeFileForModal"
       :is-open="showFileModal"
-      :parsed="activeFileForModal"
+      :kind="activeFileForModal.kind"
+      :file-path="activeFileForModal.filePath"
+      :file-name="activeFileForModal.fileName"
       @close="showFileModal = false"
     />
   </div>
@@ -92,12 +94,18 @@
 import { ref, onMounted, watch } from 'vue'
 import { FolderTree, Search, RotateCw, Loader, X } from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
-import SourceRefModal from '../editor/SourceRefModal.vue'
-import type { ParsedSourceRef } from '../../utils/sourceRef'
+import FilePreviewModal from '../editor/FilePreviewModal.vue'
+import { classifyExplorerItem } from '../../utils/explorerClassify'
 import { useUiStore, type ExplorerFilterMode } from '../../stores/uiStore'
 import { useModelStore } from '../../stores/modelStore'
 import FileTreeNode, { type FileItem } from './FileTreeNode.vue'
 import type { DirectoryHandleLike } from '../../model/fs-types'
+
+interface ActiveFileForModal {
+  filePath: string
+  fileName: string
+  kind: 'artifact' | 'source' | 'model' | 'file'
+}
 
 const workspaceStore = useWorkspaceStore()
 const uiStore = useUiStore()
@@ -109,9 +117,9 @@ const searchQuery = ref('')
 
 const filterOptions: { id: ExplorerFilterMode; label: string; activeClass: string }[] = [
   { id: 'all', label: 'All', activeClass: 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-100 shadow-2xs' },
-  { id: 'models', label: 'Models', activeClass: 'bg-primary-500 text-white shadow-2xs font-bold' },
-  { id: 'sources', label: 'Sources', activeClass: 'bg-emerald-600 text-white shadow-2xs' },
-  { id: 'artifacts', label: 'Artifacts', activeClass: 'bg-amber-600 text-white shadow-2xs' },
+  { id: 'models', label: 'Models', activeClass: 'bg-indigo-600 text-white shadow-2xs font-bold' },
+  { id: 'sources', label: 'Sources', activeClass: 'bg-slate-600 text-white shadow-2xs' },
+  { id: 'artifacts', label: 'Artifacts', activeClass: 'bg-slate-900 text-white shadow-2xs' },
 ]
 
 function setFilter(mode: ExplorerFilterMode): void {
@@ -239,14 +247,14 @@ async function refreshTree(): Promise<void> {
   }
 }
 
-const activeFileForModal = ref<ParsedSourceRef | null>(null)
+const activeFileForModal = ref<ActiveFileForModal | null>(null)
 const showFileModal = ref(false)
 
 function handleViewFile(item: FileItem): void {
   activeFileForModal.value = {
     filePath: item.path,
     fileName: item.name,
-    isValid: true,
+    kind: classifyExplorerItem(item) ?? 'file',
   }
   showFileModal.value = true
 }

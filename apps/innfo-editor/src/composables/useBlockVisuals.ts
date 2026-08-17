@@ -64,10 +64,21 @@ export function useBlockVisuals(opts: BlockVisualsOptions): BlockVisuals {
 
   const containerClasses = computed<string[]>(() => {
     const p = palette.value
-    if (toValue(opts.kind) === 'concept') {
-      return [p.bg, 'border', 'border-solid', p.text, p.border]
+    const kind = toValue(opts.kind)
+
+    // Solid identity tier: Concept (the mold) and Model (a file identity) — own color, solid fill.
+    if (kind === 'concept' || kind === 'model') {
+      return [p.selectedBg, 'text-white', 'border', 'border-transparent']
     }
-    return [p.bg, p.text]
+
+    // Firm outline tier: Source and Artifact — fixed neutral color, white fill, solid border/text.
+    if (kind === 'source' || kind === 'artifact') {
+      return ['bg-white', 'dark:bg-slate-900', 'border', p.borderFirm, p.accent]
+    }
+
+    // Soft inherited tier: instance (e.g. Element) — no fill, 50%-opacity border,
+    // regular-weight text in the parent concept's color.
+    return ['bg-transparent', 'border', p.borderSoft, p.accent, 'font-normal']
   })
 
   return {

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import SourceRefPill from '../../components/editor/SourceRefPill.vue'
+import FileRefPill from '../../components/editor/FileRefPill.vue'
 import { parseSourceRef } from '../../utils/sourceRef'
 
 /**
- * Renders a string field as a text input or SourceRefPill if it matches a canonical source reference.
+ * Renders a string field as a text input or FileRefPill if it matches a canonical source reference.
  * Part of the unified widget registry (rebuild-format-editor-ui Phase 4).
  * Uses v-model contract: modelValue / update:modelValue.
  *
  * The `sources` field can carry a single reference string or an array of
  * reference strings (iNNfo's generic `[a, b]` list syntax, already parsed
  * into a real JS array by innfo-core before it reaches this component). In
- * readonly mode each valid entry renders its own SourceRefPill; the edit
+ * readonly mode each valid entry renders its own FileRefPill; the edit
  * path still operates on the raw string form only (multi-value editing is
  * out of scope for now).
  */
@@ -32,6 +32,11 @@ function isSourceRef(val: unknown): boolean {
   return parseSourceRef(val).isValid
 }
 
+function toFileRef(val: string): { filePath: string; fileName: string; slug?: string } {
+  const { filePath, fileName, slug } = parseSourceRef(val)
+  return { filePath, fileName, slug }
+}
+
 const editableValue = computed(() =>
   Array.isArray(props.modelValue) ? props.modelValue.join(', ') : props.modelValue,
 )
@@ -41,12 +46,12 @@ const editableValue = computed(() =>
   <template v-if="readonly">
     <div v-if="Array.isArray(modelValue)" class="flex flex-wrap gap-1.5 items-center">
       <template v-for="(item, idx) in modelValue" :key="idx">
-        <SourceRefPill v-if="isSourceRef(item)" :raw-value="item" />
+        <FileRefPill v-if="isSourceRef(item)" kind="source" v-bind="toFileRef(item)" />
         <span v-else class="field-string-readonly">{{ item }}</span>
       </template>
     </div>
     <template v-else>
-      <SourceRefPill v-if="isSourceRef(modelValue)" :raw-value="modelValue" />
+      <FileRefPill v-if="isSourceRef(modelValue)" kind="source" v-bind="toFileRef(modelValue as string)" />
       <span v-else class="field-string-readonly">{{ modelValue || '—' }}</span>
     </template>
   </template>

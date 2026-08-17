@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import FieldViewer from '../../src/components/editor/FieldViewer.vue'
-import SourceRefPill from '../../src/components/editor/SourceRefPill.vue'
+import FileRefPill from '../../src/components/editor/FileRefPill.vue'
 import { useModelStore } from '../../src/stores/modelStore'
 import type { ModelNode } from '../../src/model/types'
 
@@ -178,11 +178,11 @@ describe('FieldViewer.vue — R-SC-06', () => {
     })
 
     // Should resolve the node and render BlockPill with name 'Salón-Comedor'
-    expect(wrapper.findComponent({ name: 'BlockPill' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'Pill' }).exists()).toBe(true)
     expect(wrapper.text()).toContain('Salón-Comedor')
   })
 
-  it('renders one SourceRefPill per item for a multi-value sources:: field', () => {
+  it('renders one FileRefPill per item for a multi-value sources:: field', () => {
     const modelStore = useModelStore()
     modelStore.setGraph(
       {
@@ -201,7 +201,7 @@ describe('FieldViewer.vue — R-SC-06', () => {
       },
     })
 
-    const pills = wrapper.findAllComponents(SourceRefPill)
+    const pills = wrapper.findAllComponents(FileRefPill)
     expect(pills).toHaveLength(2)
     expect(wrapper.text()).toContain('The_Goonies.md')
     expect(wrapper.text()).toContain('interview.md')

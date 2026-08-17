@@ -249,7 +249,7 @@ import ConceptTreeNode from './ConceptTreeNode.vue'
 import VirtualGroupNode, { type TreeGroup } from './VirtualGroupNode.vue'
 import WorkspaceExplorer from './WorkspaceExplorer.vue'
 import MatrixPill from '../editor/MatrixPill.vue'
-import BlockPill from '../editor/BlockPill.vue'
+import Pill from '../editor/Pill.vue'
 
 const emit = defineEmits<{
   'select-node': [nodeId: string]

@@ -37,6 +37,7 @@ export const COLOR_HEX: Record<string, string> = {
   yellow: '#eab308',
   indigo: '#6366f1',
   pink: '#ec4899',
+  black: '#0f172a',
 }
 
 export function getHexColor(colorName?: string | null): string {

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { nextTick } from 'vue'
-import BlockPill from '../../src/components/editor/BlockPill.vue'
+import Pill from '../../src/components/editor/Pill.vue'
 import { yiqLuminance, textColor } from '../../src/composables/useConceptVisuals'
 import { useUiStore } from '../../src/stores/uiStore'
 
@@ -42,15 +42,15 @@ describe('textColor utility', () => {
   })
 })
 
-// ── BlockPill component tests ───────────────────────────────────
+// ── Pill component tests ───────────────────────────────────
 
-describe('BlockPill.vue — Ghost state detection (R-TN-04)', () => {
+describe('Pill.vue — Ghost state detection (R-TN-04)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
 
   it('shows "Empty" label when description, fields, and instanceCount are all empty/zero', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'MyNode',
         description: '',
@@ -62,7 +62,7 @@ describe('BlockPill.vue — Ghost state detection (R-TN-04)', () => {
   })
 
   it('does NOT show "Empty" when description is present', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'MyNode',
         description: 'Has content',
@@ -74,7 +74,7 @@ describe('BlockPill.vue — Ghost state detection (R-TN-04)', () => {
   })
 
   it('does NOT show "Empty" when instanceCount > 0', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'MyNode',
         description: '',
@@ -86,7 +86,7 @@ describe('BlockPill.vue — Ghost state detection (R-TN-04)', () => {
   })
 
   it('does NOT show "Empty" when fields have values', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'MyNode',
         description: '',
@@ -98,13 +98,13 @@ describe('BlockPill.vue — Ghost state detection (R-TN-04)', () => {
   })
 })
 
-describe('BlockPill.vue — Popup structure (R-TN-03)', () => {
+describe('Pill.vue — Popup structure (R-TN-03)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
 
   it('renders pill name in the main content when blockId is provided', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'MyPill',
         blockId: 'Root',
@@ -115,7 +115,7 @@ describe('BlockPill.vue — Popup structure (R-TN-03)', () => {
   })
 
   it('renders without popup content when no blockId is provided', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: { name: 'Simple' },
     })
     expect(wrapper.text()).toContain('Simple')
@@ -124,7 +124,7 @@ describe('BlockPill.vue — Popup structure (R-TN-03)', () => {
   })
 
   it('includes description text in the template for popup rendering', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'Test Node',
         blockId: 'Root',
@@ -139,7 +139,7 @@ describe('BlockPill.vue — Popup structure (R-TN-03)', () => {
   })
 
   it('navigates to the block page from the popup nav icon', async () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'MyNode',
         blockId: 'Root/MyNode',
@@ -167,13 +167,13 @@ describe('BlockPill.vue — Popup structure (R-TN-03)', () => {
   })
 })
 
-describe('BlockPill.vue — YIQ text contrast (R-TN-01)', () => {
+describe('Pill.vue — YIQ text contrast (R-TN-01)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
 
   it('renders with YIQ-based text color via inline style', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'Dark Pill',
         color: '#a855f7', // purple, luminance < 0.55 → white text
@@ -185,7 +185,7 @@ describe('BlockPill.vue — YIQ text contrast (R-TN-01)', () => {
   })
 
   it('renders with dark text for light background colors', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'Light Pill',
         color: '#eab308', // yellow, luminance > 0.55 → dark text
@@ -197,7 +197,7 @@ describe('BlockPill.vue — YIQ text contrast (R-TN-01)', () => {
   })
 
   it('does not apply inline YIQ styles when no color is provided', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: { name: 'No Color' },
     })
     const el = wrapper.element as HTMLElement
@@ -206,26 +206,26 @@ describe('BlockPill.vue — YIQ text contrast (R-TN-01)', () => {
   })
 })
 
-describe('BlockPill.vue — Ghost visual state (R-TN-04)', () => {
+describe('Pill.vue — Ghost visual state (R-TN-04)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
 
   it('applies opacity 0.45 in inline style when ghost', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'GhostNode',
         color: '#a855f7',
       },
     })
     const el = wrapper.element as HTMLElement
-    // BlockPill delegates ghost opacity to the parent row; the pill itself
-    // does not apply opacity. As a visual cue, it shows the 'Empty' label.
+    // Ghost opacity is applied via a Tailwind utility class (opacity-[0.55]),
+    // not an inline style, so el.style.opacity stays empty here.
     expect(el.style.opacity).toBe('')
   })
 
   it('does not apply reduced opacity when node has content', () => {
-    const wrapper = mount(BlockPill, {
+    const wrapper = mount(Pill, {
       props: {
         name: 'FullNode',
         color: '#a855f7',

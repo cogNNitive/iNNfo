@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia } from 'pinia'
-import SourceRefPill from '../../src/components/editor/SourceRefPill.vue'
+import FileRefPill from '../../src/components/editor/FileRefPill.vue'
 import { parseSourceRef, slugifyHeading, extractHeadings, resolveHeadingSection } from '../../src/utils/sourceRef'
 
 describe('parseSourceRef utility (sources/nn/ path format)', () => {
@@ -102,11 +102,15 @@ describe('slugifyHeading / heading resolution', () => {
   })
 })
 
-describe('SourceRefPill component', () => {
-  it('renders pill with link icon, file name, and section slug (no synthetic id) when given valid canonical reference string', () => {
-    const wrapper = mount(SourceRefPill, {
+describe('FileRefPill component (kind="source")', () => {
+  it('renders pill with file name and section slug (no synthetic id) when given a parsed canonical reference', () => {
+    const parsed = parseSourceRef('sources/nn/Una_noche_en_la_ópera.md#overview')
+    const wrapper = mount(FileRefPill, {
       props: {
-        rawValue: 'sources/nn/Una_noche_en_la_ópera.md#overview',
+        kind: 'source',
+        filePath: parsed.filePath,
+        fileName: parsed.fileName,
+        slug: parsed.slug,
       },
       global: {
         plugins: [createPinia()],
@@ -116,18 +120,5 @@ describe('SourceRefPill component', () => {
     expect(wrapper.text()).toContain('Una_noche_en_la_ópera.md')
     expect(wrapper.text()).toContain('#overview')
     expect(wrapper.text()).not.toContain('src-')
-  })
-
-  it('renders plain text when given non-canonical reference string', () => {
-    const wrapper = mount(SourceRefPill, {
-      props: {
-        rawValue: 'Plain string without ref',
-      },
-      global: {
-        plugins: [createPinia()],
-      },
-    })
-
-    expect(wrapper.text()).toBe('Plain string without ref')
   })
 })

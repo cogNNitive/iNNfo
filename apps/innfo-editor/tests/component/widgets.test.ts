@@ -7,7 +7,7 @@ import CategoryWidget from '../../src/shared/widgets/CategoryWidget.vue'
 import FieldString from '../../src/shared/widgets/FieldString.vue'
 import FieldNumber from '../../src/shared/widgets/FieldNumber.vue'
 import FieldSelect from '../../src/shared/widgets/FieldSelect.vue'
-import SourceRefPill from '../../src/components/editor/SourceRefPill.vue'
+import FileRefPill from '../../src/components/editor/FileRefPill.vue'
 import { resolveWidgetComponent } from '../../src/shared/widgets'
 
 describe('TextWidget (fixture-exercised concept type "text")', () => {
@@ -111,7 +111,7 @@ describe('FieldString (field-type widget for string fields)', () => {
     expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['New text'])
   })
 
-  it('renders one SourceRefPill per valid entry when modelValue is an array of source refs (readonly)', () => {
+  it('renders one FileRefPill per valid entry when modelValue is an array of source refs (readonly)', () => {
     const wrapper = mount(FieldString, {
       props: {
         modelValue: ['sources/nn/a.md#intro', 'sources/nn/b/c.md#methodology'],
@@ -121,7 +121,7 @@ describe('FieldString (field-type widget for string fields)', () => {
     })
     expect(wrapper.text()).toContain('a.md')
     expect(wrapper.text()).toContain('c.md')
-    expect(wrapper.findAllComponents(SourceRefPill).length).toBe(2)
+    expect(wrapper.findAllComponents(FileRefPill).length).toBe(2)
   })
 
   it('falls back to plain text for array entries that are not valid source refs (readonly)', () => {
@@ -205,7 +205,7 @@ describe('FieldReference (field-type widget for reference fields)', () => {
       global: { plugins: [pinia] },
     })
 
-    expect(wrapper.findComponent({ name: 'BlockPill' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'Pill' }).exists()).toBe(true)
     expect(wrapper.text()).toContain('Salón-Comedor')
   })
 })

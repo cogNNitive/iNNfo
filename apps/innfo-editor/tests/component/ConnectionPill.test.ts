@@ -26,7 +26,7 @@ describe('ConnectionPill.vue', () => {
     setActivePinia(createPinia())
   })
 
-  it('renders target BlockPill and relationship role in compact outgoing mode', async () => {
+  it('renders target Pill and relationship role in compact outgoing mode', async () => {
     const modelStore = useModelStore()
     const target = makeNode('Procedures/Pasaporte', { name: 'Pasaporte', type: 'Artifact' })
     modelStore.setGraph({ 'Procedures/Pasaporte': target }, ['Procedures/Pasaporte'])
@@ -45,7 +45,7 @@ describe('ConnectionPill.vue', () => {
     expect(wrapper.text()).toContain('>')
   })
 
-  it('renders source BlockPill and relationship role in compact incoming mode', async () => {
+  it('renders source Pill and relationship role in compact incoming mode', async () => {
     const modelStore = useModelStore()
     const source = makeNode('Procedures/Task1', { name: 'Task1', type: 'Task' })
     modelStore.setGraph({ 'Procedures/Task1': source }, ['Procedures/Task1'])
@@ -64,7 +64,7 @@ describe('ConnectionPill.vue', () => {
     expect(wrapper.text()).toContain('<')
   })
 
-  it('renders both source and target BlockPills when mode is full', async () => {
+  it('renders both source and target Pills when mode is full', async () => {
     const modelStore = useModelStore()
     const source = makeNode('Procedures/Task1', { name: 'Task1', type: 'Task' })
     const target = makeNode('Procedures/Pasaporte', { name: 'Pasaporte', type: 'Artifact' })

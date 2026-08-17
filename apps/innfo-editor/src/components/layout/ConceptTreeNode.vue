@@ -21,8 +21,8 @@
       </button>
       <span v-else class="w-5 shrink-0"></span>
 
-      <!-- BlockPill: colored pill with icon + name + YIQ text + markers + info popup -->
-      <BlockPill
+      <!-- Pill: colored pill with icon + name + YIQ text + markers + info popup -->
+      <Pill
         :node-id="nodeId"
         :name="node?.name ?? '(unknown)'"
         :kind="isConceptLike ? 'concept' : 'instance'"
@@ -108,7 +108,7 @@ import { ref, computed, watch } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useConceptVisuals, getHexColorMedium } from '../../composables/useConceptVisuals'
-import BlockPill from '../editor/BlockPill.vue'
+import Pill from '../editor/Pill.vue'
 import VirtualGroupNode from './VirtualGroupNode.vue'
 import type { ModelNode } from '../../model/types'
 
@@ -286,9 +286,6 @@ const rowStyle = computed(() => {
 
   if (sel && isConcept) {
     style.backgroundColor = getHexColorMedium(color)
-    style.borderColor = color
-    style.borderWidth = '1px'
-    style.borderStyle = 'solid'
   }
 
   if (isConcept) {

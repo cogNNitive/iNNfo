@@ -5,7 +5,7 @@
   >
     <!-- MODE FULL: [Source] — ( [Icon] Rol ) → [Target] -->
     <template v-if="mode === 'full'">
-      <BlockPill
+      <Pill
         v-if="sourceId || sourceName"
         :block-id="resolvedSourceId"
         :node-id="resolvedSourceId"
@@ -24,7 +24,7 @@
         {{ effectiveRole }}
       </span>
       <span v-if="effectiveRole" class="text-xs text-slate-400 dark:text-slate-500 font-bold shrink-0">&rarr;</span>
-      <BlockPill
+      <Pill
         v-if="targetId || targetName"
         :block-id="resolvedTargetId"
         :node-id="resolvedTargetId"
@@ -38,7 +38,7 @@
     <template v-else>
       <!-- Incoming direction: [Source Pill] < ( [Icon] Rol ) < -->
       <template v-if="direction === 'incoming'">
-        <BlockPill
+        <Pill
           v-if="sourceId || sourceName"
           :block-id="resolvedSourceId"
           :node-id="resolvedSourceId"
@@ -72,7 +72,7 @@
           {{ effectiveRole }}
         </span>
         <span v-if="effectiveRole" class="text-xs text-slate-400 dark:text-slate-500 font-bold shrink-0">&gt;</span>
-        <BlockPill
+        <Pill
           v-if="targetId || targetName"
           :block-id="resolvedTargetId"
           :node-id="resolvedTargetId"
@@ -89,7 +89,7 @@
 import { computed } from 'vue'
 import { LayoutGrid, Tag, FileText } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
-import BlockPill from './BlockPill.vue'
+import Pill from './Pill.vue'
 
 const props = withDefaults(
   defineProps<{

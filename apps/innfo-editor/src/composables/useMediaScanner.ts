@@ -1,6 +1,6 @@
 /**
  * useMediaScanner — scans element folders for media files (images, video, audio,
- * markdown, pdf, etc.) and returns discovered assets for display in BlockPill,
+ * markdown, pdf, etc.) and returns discovered assets for display in Pill,
  * NodeMedia, and BlockSheet.
  *
  * Follows the same folder conventions as resolveElementAssets() in recursiveParser.ts:

@@ -9,7 +9,7 @@
 import { ref, computed, watch } from 'vue'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
-import BlockPill from '../../components/editor/BlockPill.vue'
+import Pill from '../../components/editor/Pill.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -186,7 +186,7 @@ function onBlur(): void {
 <template>
   <div class="field-reference-container">
     <template v-if="readonly">
-      <BlockPill
+      <Pill
         v-if="refNode"
         :node-id="refNode.id"
         :name="refNode.name"

@@ -11,20 +11,13 @@
     <template v-if="showSourceTarget && source && target">
       <span class="truncate min-w-0 leading-tight flex items-center gap-1.5 flex-1">
         <span class="flex items-center gap-1 min-w-0">
-          <span class="relative shrink-0 flex items-center justify-center w-4 h-4">
-            <IconRenderer
-              :icon="getConceptMeta(source).icon"
-              fallback="folder"
-              custom-class="shrink-0"
-              :style="{ color: getConceptHex(source), width: '14px', height: '14px' }"
-            />
-          </span>
-          <span
-            class="truncate text-[11px] font-bold uppercase tracking-wider"
-            :style="{ color: getConceptHex(source) }"
-          >
-            {{ source }}
-          </span>
+          <Pill
+            kind="concept"
+            :color="getConceptHex(source)"
+            :icon="getConceptMeta(source).icon"
+            :name="source"
+            hide-empty
+          />
           <span
             class="text-2xs px-1.5 py-0.5 rounded-full shrink-0 font-medium tabular-nums"
             :style="{
@@ -41,20 +34,13 @@
         }}</span>
         <span class="text-slate-300 dark:text-slate-600 font-normal shrink-0">&rarr;</span>
         <span class="flex items-center gap-1 min-w-0">
-          <span class="relative shrink-0 flex items-center justify-center w-4 h-4">
-            <IconRenderer
-              :icon="getConceptMeta(target).icon"
-              fallback="folder"
-              custom-class="shrink-0"
-              :style="{ color: getConceptHex(target), width: '14px', height: '14px' }"
-            />
-          </span>
-          <span
-            class="truncate text-[11px] font-bold uppercase tracking-wider"
-            :style="{ color: getConceptHex(target) }"
-          >
-            {{ target }}
-          </span>
+          <Pill
+            kind="concept"
+            :color="getConceptHex(target)"
+            :icon="getConceptMeta(target).icon"
+            :name="target"
+            hide-empty
+          />
           <span
             class="text-2xs px-1.5 py-0.5 rounded-full shrink-0 font-medium tabular-nums"
             :style="{
@@ -71,17 +57,15 @@
 
     <!-- Legacy: leading icon + matrix name -->
     <template v-else>
-      <IconRenderer
+      <Pill
+        kind="concept"
+        :color="getConceptHex(source)"
         :icon="resolvedSourceIcon"
-        custom-class="shrink-0 w-3.5 h-3.5"
-        :class="[sourceAccent, isGhost ? 'opacity-60' : '']"
+        :name="name"
+        hide-empty
+        full-width
+        class="flex-1 min-w-0"
       />
-      <span
-        class="truncate min-w-0 leading-tight flex-1"
-        :class="isGhost ? 'italic opacity-70' : ''"
-      >
-        {{ name }}
-      </span>
     </template>
 
     <span
@@ -108,7 +92,7 @@ import { useModelStore } from '../../stores/modelStore'
 import { useMetamodelStore } from '../../stores/metamodelStore'
 import { getColorClasses } from '../../utils/colors'
 import { getHexColor, COLOR_HEX } from '../../composables/useConceptVisuals'
-import IconRenderer from './IconRenderer.vue'
+import Pill from './Pill.vue'
 
 const modelStore = useModelStore()
 const metamodelStore = useMetamodelStore()
@@ -176,12 +160,6 @@ function getConceptElementCount(typeName: string | undefined): number {
 }
 
 const resolvedSourceIcon = computed(() => getConceptMeta(props.source).icon || 'table-2')
-
-const sourceAccent = computed(() => {
-  const color = getConceptMeta(props.source).color
-  const palette = color ? getColorClasses(color) : null
-  return palette?.accent || 'text-slate-400 dark:text-slate-500'
-})
 
 const chevronClasses = computed(() => {
   if (!props.interactive) return 'hidden'

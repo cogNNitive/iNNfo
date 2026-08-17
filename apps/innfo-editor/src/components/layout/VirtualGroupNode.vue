@@ -21,23 +21,16 @@
         </button>
         <span v-else class="w-5 shrink-0"></span>
 
-        <!-- Icon from concept definition -->
-        <div class="relative shrink-0 flex items-center justify-center w-4 h-4">
-          <IconRenderer
-            :icon="conceptIcon"
-            fallback="folder"
-            custom-class="shrink-0"
-            :style="{ color: conceptColorHex, width: '14px', height: '14px' }"
-          />
-        </div>
-
-        <!-- Concept name (uppercase, subtle) -->
-        <span
-          class="flex-1 min-w-0 truncate text-[11px] font-bold uppercase tracking-wider"
-          :style="{ color: conceptColorHex }"
-        >
-          {{ conceptName }}
-        </span>
+        <!-- Concept identity: unified Pill -->
+        <Pill
+          kind="concept"
+          :color="conceptColorHex"
+          :icon="conceptIcon"
+          :name="conceptName"
+          hide-empty
+          full-width
+          class="flex-1 min-w-0"
+        />
 
         <!-- Count badge -->
         <span
@@ -108,24 +101,15 @@
         @click="onHeaderClick"
         data-testid="ghost-group-header"
       >
-        <div
-          class="pointer-events-none flex items-center gap-1 flex-1 min-w-0"
-          style="opacity: 0.55"
-        >
-          <div class="relative shrink-0 flex items-center justify-center w-4 h-4">
-            <IconRenderer
-              :icon="conceptIcon"
-              fallback="folder"
-              custom-class="shrink-0"
-              :style="{ color: conceptColorHex, width: '14px', height: '14px' }"
-            />
-          </div>
-          <span
-            class="flex-1 min-w-0 truncate text-[11px] font-bold uppercase tracking-wider italic"
-            :style="{ color: conceptColorHex }"
-          >
-            {{ conceptName }}
-          </span>
+        <div class="pointer-events-none flex items-center gap-1 flex-1 min-w-0">
+          <Pill
+            kind="concept"
+            :color="conceptColorHex"
+            :icon="conceptIcon"
+            :name="conceptName"
+            full-width
+            class="flex-1 min-w-0"
+          />
           <span class="text-2xs text-slate-400 dark:text-slate-500 italic tabular-nums">0</span>
         </div>
       </div>
@@ -143,7 +127,7 @@ import {
 } from '../../composables/useConceptVisuals'
 import { useMetamodelStore } from '../../stores/metamodelStore'
 import { useModelStore } from '../../stores/modelStore'
-import IconRenderer from '../editor/IconRenderer.vue'
+import Pill from '../editor/Pill.vue'
 import ConceptTreeNode from './ConceptTreeNode.vue'
 import type { ModelNode } from '../../model/types'
 
