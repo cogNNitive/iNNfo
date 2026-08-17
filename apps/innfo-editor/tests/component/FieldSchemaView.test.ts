@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createPinia } from 'pinia'
 import FieldSchemaView from '../../src/components/editor/FieldSchemaView.vue'
 
 describe('FieldSchemaView.vue — Fields Schema metadata', () => {
@@ -11,6 +12,7 @@ describe('FieldSchemaView.vue — Fields Schema metadata', () => {
           { name: 'summary', type: 'string' },
         ],
       },
+      global: { plugins: [createPinia()] },
     })
 
     const text = wrapper.text()
@@ -29,6 +31,7 @@ describe('FieldSchemaView.vue — Fields Schema metadata', () => {
           { name: 'status', type: 'select', options: ['active', 'inactive', 'archived'] },
         ],
       },
+      global: { plugins: [createPinia()] },
     })
 
     const text = wrapper.text()
@@ -45,6 +48,7 @@ describe('FieldSchemaView.vue — Fields Schema metadata', () => {
           { name: 'owner', type: 'reference', target_concepts: ['Stakeholders', 'Teams'] },
         ],
       },
+      global: { plugins: [createPinia()] },
     })
 
     const text = wrapper.text()
@@ -61,6 +65,7 @@ describe('FieldSchemaView.vue — Fields Schema metadata', () => {
           { name: 'flag', type: 'boolean', default: true },
         ],
       },
+      global: { plugins: [createPinia()] },
     })
 
     const text = wrapper.text()
@@ -74,6 +79,7 @@ describe('FieldSchemaView.vue — Fields Schema metadata', () => {
       props: {
         fieldDefinitions: [{ name: 'summary', type: 'string' }],
       },
+      global: { plugins: [createPinia()] },
     })
 
     const text = wrapper.text()

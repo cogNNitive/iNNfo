@@ -98,12 +98,13 @@
                   <span class="px-2 py-0.5 rounded text-2xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">
                     Step {{ currentStepIndex + 1 }} of {{ activeSteps.length }}
                   </span>
-                  <span
-                    class="px-2.5 py-0.5 rounded text-2xs font-bold uppercase tracking-wide"
-                    :class="getStepTypeBadgeClass(currentStep.stepType)"
-                  >
-                    {{ currentStep.stepType }}
-                  </span>
+                  <Pill
+                    kind="instance"
+                    :color="stepTypeColor(currentStep.stepType)"
+                    :icon="stepTypeIcon(currentStep.stepType)"
+                    :name="currentStep.stepType"
+                    hide-empty
+                  />
                 </div>
                 <h1 class="text-xl font-black text-slate-900 dark:text-slate-100">
                   {{ currentStep.name }}
@@ -162,12 +163,14 @@
                       <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
                         {{ sub.name }}
                       </span>
-                      <span
-                        class="text-3xs font-bold px-1.5 py-0.2 rounded uppercase shrink-0"
-                        :class="getStepTypeBadgeClass(sub.stepType)"
-                      >
-                        {{ sub.stepType }}
-                      </span>
+                      <Pill
+                        kind="instance"
+                        :color="stepTypeColor(sub.stepType)"
+                        :icon="stepTypeIcon(sub.stepType)"
+                        :name="sub.stepType"
+                        hide-empty
+                        class="shrink-0"
+                      />
                     </div>
                     <p v-if="sub.description" class="text-2xs text-slate-500 dark:text-slate-400 truncate">
                       {{ sub.description }}
@@ -394,6 +397,7 @@ import {
   ChevronRight,
   ListTree,
 } from 'lucide-vue-next'
+import Pill from './Pill.vue'
 import { renderInlineMarkdown } from '../../utils/renderMarkdown'
 import { useWorkspaceExtensionAdapter } from '../../extensions/adapters/workspaceAdapter'
 import { useProcedureFSM } from '../../extensions/procedures/useProcedureFSM'
@@ -464,15 +468,27 @@ function navigateToModelNode(nodeId: string) {
 }
 
 // Styling helper functions
-function getStepTypeBadgeClass(type: string) {
+function stepTypeColor(type: string) {
   switch (type?.toLowerCase()) {
     case 'decision':
-      return 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+      return 'amber'
     case 'event':
-      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+      return 'green'
     case 'task':
     default:
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
+      return 'blue'
+  }
+}
+
+function stepTypeIcon(type: string) {
+  switch (type?.toLowerCase()) {
+    case 'decision':
+      return 'split'
+    case 'event':
+      return 'zap'
+    case 'task':
+    default:
+      return 'clipboardcheck'
   }
 }
 

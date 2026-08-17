@@ -8,6 +8,7 @@ import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { mergeMatrixDefs } from '../../composables/useMatrixDefinitions'
 import { getHexColor, getHexColorLight } from '../../composables/useConceptVisuals'
 import IconRenderer from './IconRenderer.vue'
+import Pill from './Pill.vue'
 import mermaid from 'mermaid'
 
 const props = defineProps<{
@@ -451,15 +452,12 @@ watch(showModal, async (isOpen) => {
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span
-              class="text-2xs px-2 py-0.5 rounded-full font-medium font-mono"
-              :style="{
-                backgroundColor: getHexColor(concept.color) + '12',
-                color: getHexColor(concept.color)
-              }"
-            >
-              {{ conceptCounts[concept.name] || 0 }}
-            </span>
+            <Pill
+              kind="instance"
+              :color="concept.color"
+              :name="String(conceptCounts[concept.name] || 0)"
+              hide-empty
+            />
             <ChevronRight class="w-3.5 h-3.5 text-slate-300 group-hover/card:text-indigo-500 transition-colors" />
           </div>
         </div>

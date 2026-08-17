@@ -12,12 +12,8 @@
           class="font-mono text-sm font-semibold text-slate-800 dark:text-slate-200 break-all"
           >{{ def.name }}</span
         >
-        <span
-          data-testid="field-type-badge"
-          class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border shrink-0"
-          :class="typeBadgeClass(def.type)"
-        >
-          {{ def.type }}
+        <span data-testid="field-type-badge" class="shrink-0">
+          <Pill kind="instance" :color="typeBadgeColor(def.type)" :name="def.type" hide-empty />
         </span>
       </div>
 
@@ -81,6 +77,8 @@
 </template>
 
 <script setup lang="ts">
+import Pill from './Pill.vue'
+
 interface FieldSchema {
   name: string
   type: string
@@ -99,68 +97,46 @@ withDefaults(
 )
 
 /**
- * Color-coded badge per field type. Unknown types fall back to the
- * neutral slate badge so new widget types never render unstyled.
+ * Color-coded Pill per field type, grouped by role. Unknown types fall
+ * back to the neutral slate group so new widget types never render
+ * unstyled. `black` is reserved for the Artifact identity color and
+ * deliberately unused here.
  */
-const TYPE_BADGE_CLASSES: Record<string, string> = {
-  string:
-    'bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-300 border-slate-200 dark:border-slate-600',
-  text: 'bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-300 border-slate-200 dark:border-slate-600',
-  category:
-    'bg-slate-100 text-slate-600 dark:bg-slate-700/40 dark:text-slate-300 border-slate-200 dark:border-slate-600',
-  number:
-    'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300 border-sky-200 dark:border-sky-800',
-  boolean:
-    'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-  select:
-    'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border-violet-200 dark:border-violet-800',
-  multiselect:
-    'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border-violet-200 dark:border-violet-800',
-  tags: 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border-violet-200 dark:border-violet-800',
-  togglegroup:
-    'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 border-violet-200 dark:border-violet-800',
-  reference:
-    'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
-  date: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  timestamp:
-    'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  rating:
-    'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  scale:
-    'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  cycle:
-    'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  url: 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800',
-  color:
-    'bg-fuchsia-50 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-300 border-fuchsia-200 dark:border-fuchsia-800',
-  image:
-    'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
-  image_url:
-    'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
-  asset:
-    'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
-  file: 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
-  video:
-    'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
-  audio:
-    'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800',
-  markdown:
-    'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800',
-  markdown_inline:
-    'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800',
-  markdown_file:
-    'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300 border-rose-200 dark:border-rose-800',
-  code: 'bg-stone-100 text-stone-600 dark:bg-stone-700/40 dark:text-stone-300 border-stone-200 dark:border-stone-600',
-  mermaid:
-    'bg-stone-100 text-stone-600 dark:bg-stone-700/40 dark:text-stone-300 border-stone-200 dark:border-stone-600',
-  diagram:
-    'bg-stone-100 text-stone-600 dark:bg-stone-700/40 dark:text-stone-300 border-stone-200 dark:border-stone-600',
-  weight:
-    'bg-stone-100 text-stone-600 dark:bg-stone-700/40 dark:text-stone-300 border-stone-200 dark:border-stone-600',
+const TYPE_BADGE_COLORS: Record<string, string> = {
+  string: 'slate',
+  text: 'slate',
+  category: 'slate',
+  code: 'slate',
+  mermaid: 'slate',
+  diagram: 'slate',
+  weight: 'slate',
+  number: 'blue',
+  url: 'blue',
+  boolean: 'green',
+  select: 'violet',
+  multiselect: 'violet',
+  tags: 'violet',
+  togglegroup: 'violet',
+  reference: 'indigo',
+  date: 'amber',
+  timestamp: 'amber',
+  rating: 'amber',
+  scale: 'amber',
+  cycle: 'amber',
+  color: 'orange',
+  image: 'yellow',
+  image_url: 'yellow',
+  asset: 'yellow',
+  file: 'yellow',
+  video: 'yellow',
+  audio: 'yellow',
+  markdown: 'red',
+  markdown_inline: 'red',
+  markdown_file: 'red',
 }
 
-function typeBadgeClass(type: string): string {
-  return TYPE_BADGE_CLASSES[type] ?? TYPE_BADGE_CLASSES.string
+function typeBadgeColor(type: string): string {
+  return TYPE_BADGE_COLORS[type] ?? 'slate'
 }
 
 function hasDefault(def: FieldSchema): boolean {
