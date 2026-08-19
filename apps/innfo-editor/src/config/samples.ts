@@ -13,3 +13,24 @@
 const REMOTE_SAMPLE_BASE = 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates'
 
 export const SAMPLE_BASE: string = import.meta.env.DEV ? '/specs/templates' : REMOTE_SAMPLE_BASE
+
+/**
+ * Bundled fallback of each shipped L2 template's newest known
+ * `template_version`, keyed by template slug (e.g. "business").
+ *
+ * Used by `useTemplateVersionNotice` (spec-versioning D3) as one half of the
+ * union that decides whether a model's pinned template is stale — the other
+ * half is a live scan of the connected workspace's local search dirs
+ * (`specs/`, `.specs/`, `.spec-cache/`, see design.md A1). This map exists so
+ * the badge can still fire for a workspace that has never locally cached a
+ * newer template file (e.g. right after this app itself ships a bump).
+ *
+ * Keep in sync with `specs/templates/{name}/{name}_V_x-y-z_NN.md` — update
+ * this entry whenever a shipped template's `template_version` is bumped.
+ */
+export const SHIPPED_TEMPLATE_VERSIONS: Record<string, string> = {
+  business: 'V_0-1-0',
+  procedures: 'V_0-1-0',
+  organization: 'V_0-1-0',
+  projects: 'V_0-1-0',
+}

@@ -310,6 +310,31 @@
                 </span>
               </template>
             </div>
+
+            <!-- Template Version Notice (D3) — passive, never blocks editing -->
+            <div
+              v-if="templateVersionNotice"
+              data-testid="template-version-badge"
+              class="mt-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-lg p-3 space-y-2"
+            >
+              <p class="text-3xs font-semibold text-amber-700 dark:text-amber-300">
+                A newer template version is available: {{ templateVersionNotice.latest }} (current: {{ templateVersionNotice.current }})
+              </p>
+              <p class="text-3xs text-amber-600 dark:text-amber-400 leading-relaxed">
+                Copy the prompt below and paste it into OpenCode to migrate this model to a new file. The original is never edited or deleted.
+              </p>
+              <div class="flex items-center justify-end">
+                <button
+                  data-testid="template-version-copy-prompt"
+                  @click="copyMigrationPrompt"
+                  class="inline-flex items-center gap-1.5 text-2xs font-medium px-3 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors cursor-pointer"
+                >
+                  <Check v-if="copiedMigrationPrompt" class="w-3 h-3" />
+                  <Copy v-else class="w-3 h-3" />
+                  {{ copiedMigrationPrompt ? 'Copied' : 'Copy migration prompt' }}
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- 3. Model Info -->
@@ -500,7 +525,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { useModelStore } from '../../stores/modelStore'
@@ -520,12 +545,15 @@ import {
   Sparkles,
   Play,
   ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-vue-next'
 import { buildSpecificationUrl } from '../../utils/constants'
 import type { BumpLevel } from '../../utils/version'
 import { useToast } from '../../shared/useToast'
 import { useModelFrontmatter } from './composables/useModelFrontmatter'
 import { useVersionBump } from './composables/useVersionBump'
+import { useTemplateVersionNotice } from '../../composables/useTemplateVersionNotice'
 
 const props = defineProps<{
   rootNodeId: string
@@ -659,6 +687,47 @@ const modelFileName = computed(() => {
   if (!path) return 'model.md'
   return path.split('/').pop()?.split('\\').pop() || path
 })
+
+// ── Template Version Notice (D3) ────────────────────────────────────────
+// Passive badge + copyable migration prompt when the model's parent_spec
+// pins an older template_version than the newest one discoverable locally
+// or in the bundled SHIPPED_TEMPLATE_VERSIONS map. Never blocks editing.
+
+const workspaceHandle = computed(() => workspaceStore.handle ?? undefined)
+
+const { notice: templateVersionNotice, refresh: refreshTemplateVersionNotice } =
+  useTemplateVersionNotice({
+    templateName,
+    modelFileName,
+    handle: workspaceHandle,
+  })
+
+watch(
+  [templateName, workspaceHandle],
+  () => {
+    void refreshTemplateVersionNotice()
+  },
+  { immediate: true },
+)
+
+const copiedMigrationPrompt = ref(false)
+
+function copyMigrationPrompt(): void {
+  const prompt = templateVersionNotice.value?.prompt
+  if (!prompt) return
+  navigator.clipboard.writeText(prompt).catch(() => {
+    const ta = document.createElement('textarea')
+    ta.value = prompt
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+  })
+  copiedMigrationPrompt.value = true
+  setTimeout(() => {
+    copiedMigrationPrompt.value = false
+  }, 2000)
+}
 
 const specFileName = computed(() => {
   return `iNNfo_${formatVersion.value}_NN.md`

@@ -19,6 +19,8 @@ Chain strategy: size-exception
 ### D3 Line-Count Decision
 Computed estimate ~300–350 lines: `useTemplateVersionNotice.ts` ~90, `samples.ts` map ~12, prompt builder ~15, `ModelInfoPanel.vue` badge+copy ~40, unit tests ~90, integration test ~60. **Decision: pull D3 into a follow-up PR.** It fits the budget standalone and is explicitly separable from D4 (D4's atomicity covers only the tree move/delete). Bundling it into the already `size:exception`-approved core PR would hide its own review risk (false-positive badge, wrong version compare) inside a diff nobody is reading line-by-line.
 
+**Post-apply measured actual (sdd-apply, Phase 5 complete):** `git diff --stat` over the 5 changed/new files = **604 insertions + 1 deletion (605 total)** — after one trimming pass (cut redundant JSDoc prose, consolidated the two identical fixture constants and 2 pairs of negative-case unit tests). This exceeds both the ~300–350 forecast and the 400-line budget by ~1.5x. Breakdown: `ModelInfoPanel.vue` +71/-1, `useTemplateVersionNotice.ts` +191 (new), `samples.ts` +21, `ModelInfoPanel-templateBadge.test.ts` +146 (new), `useTemplateVersionNotice.test.ts` +176 (new). The gap vs. forecast is almost entirely test code (322 of 605 lines) driven by this repo's `strict_tdd: true` gate (triangulation minimum of 2+ cases per behavior, plus a dedicated fake-`DirectoryHandleLike` integration harness) — further cuts would trade test quality for a line count. **Needs an explicit decision before merge**: accept `size:exception` for this already-small follow-up PR, or split further (Slice A: `useTemplateVersionNotice.ts` + its unit tests, ~367 lines; Slice B: `ModelInfoPanel.vue` wiring + `samples.ts` + the integration test, ~238 lines).
+
 ### Suggested Work Units
 
 | Unit | Goal | PR | Focused test | Runtime harness | Rollback boundary |
@@ -58,9 +60,9 @@ Computed estimate ~300–350 lines: `useTemplateVersionNotice.ts` ~90, `samples.
 - [x] 4.5 Confirm no commit shows both `specs/templates/` and `specs/latest/` (R-SV-07) — no commits were created in this session (see apply-progress for rationale); all changes are staged/unstaged in the working tree only. Re-verified repeatedly throughout the session that `specs/latest/`, `specs/v0.2.0/`, `specs/v0.2.1/`, `models/specs/` do not exist on disk at any point after Phase 2 landed.
 
 ## Phase 5: Follow-up PR — Template Version Badge (D3)
-- [ ] 5.1 Create `composables/useTemplateVersionNotice.ts`: scan `specs/`, `.specs/`, `.spec-cache/` + `SHIPPED_TEMPLATE_VERSIONS`, compare `V_x-y-z` (A1)
-- [ ] 5.2 Add `SHIPPED_TEMPLATE_VERSIONS` map to `config/samples.ts`
-- [ ] 5.3 Migration-prompt builder (`innfoPrompt()`): names model/current/latest `template_version`, instructs new-file migration mirroring only `mutate.ts:271-274`'s `parent_spec.name` regex (never its delete logic), ends with `validate_model` (G4, A3)
-- [ ] 5.4 Add passive badge + Copy button to `ModelInfoPanel.vue` (reuse `AIGuidePanel.vue:197` clipboard pattern) (A2)
-- [ ] 5.5 Unit tests: version compare, scan→latest selection, prompt text
-- [ ] 5.6 Integration test: badge visible/absent in `ModelInfoPanel`
+- [x] 5.1 Create `composables/useTemplateVersionNotice.ts`: scan `specs/`, `.specs/`, `.spec-cache/` + `SHIPPED_TEMPLATE_VERSIONS`, compare `V_x-y-z` (A1) — implemented as explicit `{ notice, refresh() }` (not a bare `ComputedRef`, since detection requires an async directory scan); `refresh()` is invoked from `ModelInfoPanel.vue` via a `watch([templateName, workspaceHandle], ..., { immediate: true })`
+- [x] 5.2 Add `SHIPPED_TEMPLATE_VERSIONS` map to `config/samples.ts` — all four shipped templates pinned at `V_0-1-0` (A6)
+- [x] 5.3 Migration-prompt builder (`innfoPrompt()`): names model/current/latest `template_version`, instructs new-file migration mirroring only `mutate.ts:271-274`'s `parent_spec.name` regex (never its delete logic), ends with `validate_model` (G4, A3)
+- [x] 5.4 Add passive badge + Copy button to `ModelInfoPanel.vue` (reuse `AIGuidePanel.vue:197` clipboard pattern) (A2) — note: that file is `components/editor/AIGuidePanel.vue` (host component `AiWorkflowPanel.vue` just wraps it); badge added inside the existing "2. Template" info card, `v-if="templateVersionNotice"`, never disables/hides any other control
+- [x] 5.5 Unit tests: version compare, scan→latest selection, prompt text — `tests/unit/useTemplateVersionNotice.test.ts` (18 tests, all passing) using the existing `tests/helpers/fakeFs.ts` `buildFakeTree` fake `DirectoryHandleLike`
+- [x] 5.6 Integration test: badge visible/absent in `ModelInfoPanel` — `tests/component/ModelInfoPanel-templateBadge.test.ts` (3 tests: newer version present → badge+copy button, pinned at newest known version → absent, no handle connected → absent); pre-existing `tests/component/ModelInfoPanel-version.test.ts` (13 tests) re-run clean after wiring — zero regressions
