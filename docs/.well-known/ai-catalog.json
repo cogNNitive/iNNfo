@@ -2,9 +2,9 @@
   "@context": "https://schema.org",
   "@type": "DataCatalog",
   "name": "iNNfo",
-  "description": "Central hub for the iNNv0 FORMAT ecosystem.",
+  "description": "Central hub for the CogNNitive FORMAT ecosystem.",
   "generator": {
     "@type": "SoftwareApplication",
-    "url": "https://skills.innv0.com/innv0-web-design-guide"
+    "url": "https://actionn.cognnitive.com/nn-design-presets"
   }
 }

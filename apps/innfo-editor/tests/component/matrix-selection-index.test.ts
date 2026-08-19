@@ -125,6 +125,7 @@ describe('matrix selection index space (sidebar ↔ grid)', () => {
     )
 
     const sidebar = mountSidebar()
+    await sidebar.find('[data-testid="relations-header"]').trigger('click')
     const pills = realPills(sidebar)
     const names = sidebarPillNames(sidebar)
 
@@ -159,6 +160,7 @@ describe('matrix selection index space (sidebar ↔ grid)', () => {
     modelStore.setGraph({ Model: root, 'spec:business': spec }, ['Model', 'spec:business'])
 
     const sidebar = mountSidebar()
+    await sidebar.find('[data-testid="relations-header"]').trigger('click')
     const pills = realPills(sidebar)
     expect(sidebarPillNames(sidebar)).toEqual(['M1', 'M2', 'M3'])
 

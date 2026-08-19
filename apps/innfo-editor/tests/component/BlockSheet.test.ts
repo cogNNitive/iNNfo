@@ -185,4 +185,60 @@ describe('BlockSheet.vue — Redesigned layout & assets', () => {
       expect(wrapper.text()).toContain('No media or attachments.')
     })
   })
+
+  describe('Inherited Concepts (OpenCode Prompt Helper)', () => {
+    it('renders the warning banner and the OpenCode prompt copy box when editing an inherited concept', async () => {
+      const modelStore = useModelStore()
+
+      // Setup mock root node with a parent_spec
+      const root = makeNode('Root', {
+        rawContent: '---\nspec_version: V_0-1-5\nparent_spec:\n  name: "business_V_0-1-1"\n  url: "https://example.com/spec"\n---\n',
+      })
+
+      // Setup mock spec node
+      const specTemplate = makeNode('spec:business_V_0-1-1', {
+        rawContent: '# Business Template\nThis is the template content.',
+        source: { path: 'specs/business_V_0-1-1_NN.md' },
+      })
+
+      // Setup concept node under Root
+      const conceptNode = makeNode('Root/MyConcept', {
+        name: 'MyConcept',
+        parentId: 'Root',
+        type: 'MyConcept',
+      })
+
+      modelStore.setGraph({
+        Root: root,
+        'spec:business_V_0-1-1': specTemplate,
+        'Root/MyConcept': conceptNode,
+      }, ['Root', 'spec:business_V_0-1-1'])
+
+      const wrapper = mount(BlockSheet, {
+        props: {
+          block: { id: 'Root/MyConcept', name: 'MyConcept', description: '' },
+          kind: 'concept',
+          conceptType: 'MyConcept',
+          conceptName: 'MyConcept',
+          collapsed: false,
+          isEditing: true,
+        },
+      })
+
+      // Verificar que se muestre la advertencia
+      expect(wrapper.text()).toContain('These fields are inherited from the template')
+
+      // Verificar que se renderice la caja del prompt para OpenCode
+      expect(wrapper.text()).toContain('OpenCode Prompt (AI Editor)')
+      expect(wrapper.text()).toContain('business_V_0-1-1_NN.md')
+
+      // Buscar el textarea y verificar que tenga el prompt generado
+      const textarea = wrapper.find('textarea')
+      expect(textarea.exists()).toBe(true)
+      expect(textarea.element.value).toContain('I need to edit the concept "MyConcept"')
+      expect(textarea.element.value).toContain('business_V_0-1-1_NN.md')
+      expect(textarea.element.value).toContain('specs/business_V_0-1-1_NN.md')
+      expect(textarea.element.value).toContain('Root')
+    })
+  })
 })

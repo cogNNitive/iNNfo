@@ -37,26 +37,6 @@ export interface NodeMarkers {
   }
 }
 
-// ─── Perspectives ──────────────────────────────────────────────
-
-export interface PerspectiveEdge {
-  parent: string // concept name
-  child: string // concept name
-}
-
-export interface Perspective {
-  id: string
-  name: string
-  icon: string
-  edges: PerspectiveEdge[]
-}
-
-export interface PerspectiveNeighborhood {
-  perspective: Perspective
-  parents: string[]
-  children: string[]
-}
-
 // ─── Field definitions ─────────────────────────────────────────
 
 export type FieldType = 'string' | 'boolean' | 'number' | 'select' | 'reference'

@@ -169,7 +169,7 @@ import { computed } from 'vue'
 import { Trash2 } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { commitFieldValue } from '../../shared/provenance'
-import { MATRIX_DEFS_KEY, readMatrixDefsField, type MatrixDef } from '../../composables/useMatrixDefinitions'
+import { MATRIX_DEFS_KEY, extractMatrixDefs, type MatrixDef } from '../../composables/useMatrixDefinitions'
 
 const modelStore = useModelStore()
 
@@ -181,7 +181,7 @@ const rootNode = computed(() => {
 
 const matrixDefs = computed<MatrixDef[]>({
   get() {
-    return readMatrixDefsField(rootNode.value) as MatrixDef[]
+    return extractMatrixDefs(rootNode.value) as MatrixDef[]
   },
   set(_val) {
     // Write-through via saveDefs()
@@ -203,7 +203,7 @@ function saveDefs() {
   const root = rootNode.value
   if (!root) return
   // Read current defs from the reactive computed
-  const raw = root.fields[MATRIX_DEFS_KEY]?.value
+  const raw = matrixDefs.value
   if (raw) {
     commitFieldValue(modelStore, root.id, MATRIX_DEFS_KEY, raw, { kind: 'user', id: 'anonymous' })
   }

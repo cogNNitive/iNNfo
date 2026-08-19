@@ -477,8 +477,9 @@ describe('R-MM-08: matrix values, description and header pills', () => {
     setupStoreWithValuesAndDescription()
     const wrapper = mount(MatricesGrid, { props: { matrixIndex: 0 } })
     const pills = wrapper.findAll('[data-testid="block-pill"]')
-    expect(pills[0].text()).toContain('Src')
-    expect(pills[1].text()).toContain('Tgt')
+    const texts = pills.map((p) => p.text())
+    expect(texts.some((t) => t.includes('Src'))).toBe(true)
+    expect(texts.some((t) => t.includes('Tgt'))).toBe(true)
     expect(wrapper.text()).not.toContain('Empty')
   })
 

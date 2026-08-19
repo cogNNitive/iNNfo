@@ -54,8 +54,7 @@ describe('VirtualGroupNode — ghost rendering', () => {
     const ghostHeader = wrapper.find('.flex.items-center')
     expect(ghostHeader.exists()).toBe(true)
     const style = ghostHeader.attributes('style') ?? ''
-    expect(style).toContain('dashed')
-    expect(style).toContain('2px')
+    expect(style).not.toContain('border-left')
   })
 
   it('emits "select" with virtual concept ID when ghost header is clicked', async () => {
@@ -173,7 +172,7 @@ describe('VirtualGroupNode — ghost rendering', () => {
 
     const header = wrapper.find('[data-testid="ghost-group-header"]')
     expect(header.exists()).toBe(true)
-    expect(header.attributes('style')).toContain('dashed')
+    expect(header.attributes('style')).not.toContain('border-left')
   })
 
   it('renders non-ghost variant normally (no dashed border)', () => {
@@ -217,8 +216,7 @@ describe('VirtualGroupNode — ghost rendering', () => {
     // Non-ghost should have solid border, not dashed
     const headerDiv = wrapper.find('.flex.items-center')
     const style = headerDiv.attributes('style') ?? ''
-    expect(style).toContain('solid')
-    expect(style).not.toContain('dashed')
+    expect(style).not.toContain('border-left')
 
     // Non-ghost should NOT have the clickable ghost header testid
     expect(wrapper.find('[data-testid="ghost-group-header"]').exists()).toBe(false)

@@ -2,7 +2,7 @@
 title: About — iNNfo
 description: Learn about iNNfo, the hub for the iNNfo ecosystem — the iNNfo Modeler, innfo-core, innfo-mcp, and the spec chain.
 html_url: https://innfo.cognnitive.com/about
-generator: https://skills.innv0.com/innv0-web-design-guide
+generator: https://actionn.cognnitive.com/nn-design-presets
 ---
 
 # About iNNfo
@@ -15,13 +15,13 @@ npm workspaces monorepo — one editor app, two shared packages, and the spec ch
 
 ```
 iNNfo/
-â”œâ”€â”€ apps/
-â”‚   â””â”€â”€ innfo-editor/     â† Vue 3 workspace editor (the iNNfo Modeler)
-â”œâ”€â”€ packages/
-â”‚   â”œâ”€â”€ innfo-core/       â† TS parser, resolver, validator
-â”‚   â””â”€â”€ innfo-mcp/        â† MCP server for AI agents
-â”œâ”€â”€ specs/                â† defiNNe, iNNfo, templates, samples
-â””â”€â”€ docs/                 â† This website
+├── apps/
+│   └── innfo-editor/     ← Vue 3 workspace editor (the iNNfo Modeler)
+├── packages/
+│   ├── innfo-core/       ← TS parser, resolver, validator
+│   └── innfo-mcp/        ← MCP server for AI agents
+├── specs/                ← defiNNe, iNNfo, templates, samples
+└── docs/                 ← This website
 ```
 
 ## App

@@ -4,7 +4,6 @@ import { setActivePinia, createPinia } from 'pinia'
 import LeftSidebar from '../../src/components/layout/LeftSidebar.vue'
 import { useModelStore } from '../../src/stores/modelStore'
 import { useMetamodelStore } from '../../src/stores/metamodelStore'
-import { useUiStore } from '../../src/stores/uiStore'
 import type { ModelNode } from '../../src/model/types'
 
 function makeNode(id: string, overrides: Partial<ModelNode> = {}): ModelNode {
@@ -86,10 +85,6 @@ describe('Ghost groups — Add action integration', () => {
     )
 
     const metamodelStore = useMetamodelStore()
-    const uiStore = useUiStore()
-
-    // Switch to 'all' mode to show ghost groups
-    uiStore.setGhostFilterMode('all')
 
     expect(metamodelStore.ghostConcepts).toHaveLength(1)
 

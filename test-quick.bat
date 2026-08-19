@@ -1,6 +1,6 @@
 echo.
 echo +----------------------------------------------------+
-echo |            iNNv0 - Dev Environment                 |
+echo |            CogNNitive - Dev Environment            |
 echo +----------------------------------------------------+
 echo.
 echo Starting 3 development servers in this window...

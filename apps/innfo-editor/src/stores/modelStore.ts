@@ -162,6 +162,20 @@ export const useModelStore = defineStore('model', {
     },
 
     /**
+     * Moves a child within its parent's childIds array to a specific target index.
+     */
+    moveChildToIndex(parentId: string, childId: string, targetIdx: number): void {
+      const parent = this.nodes[parentId]
+      if (!parent) return
+      const idx = parent.childIds.indexOf(childId)
+      if (idx === -1) return
+      if (targetIdx < 0 || targetIdx >= parent.childIds.length) return
+      parent.childIds.splice(idx, 1)
+      parent.childIds.splice(targetIdx, 0, childId)
+      this.markDirty(parentId)
+    },
+
+    /**
      * Creates a new child node under the given parent.
      * @returns the new node's id
      */
@@ -175,20 +189,25 @@ export const useModelStore = defineStore('model', {
       if (!parent) throw new Error(`Parent node "${parentId}" not found`)
       const id = `${parentId}/${name}`
       if (this.nodes[id]) throw new Error(`Node "${id}" already exists`)
-      this.nodes[id] = {
-        id,
-        name,
-        parentId,
-        childIds: [],
-        type,
-        kind: kind ?? 'element',
-        fields: {},
-        markers: {},
-        relationships: [],
-        rawSections: {},
-        source: { path: '' },
+
+      this.nodes = {
+        ...this.nodes,
+        [id]: {
+          id,
+          name,
+          parentId,
+          childIds: [],
+          type,
+          kind: kind ?? 'element',
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          source: { path: '' },
+        },
       }
-      parent.childIds.push(id)
+
+      parent.childIds = [...parent.childIds, id]
       this.markDirty(parentId)
       return id
     },

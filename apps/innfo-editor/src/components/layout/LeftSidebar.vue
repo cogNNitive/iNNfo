@@ -64,7 +64,7 @@
       <!-- Explorer View -->
       <WorkspaceExplorer v-if="uiStore.activeView === 'explorer'" />
 
-      <!-- Header with expand/collapse all + ghost filter (for editor/graph view) -->
+      <!-- Header with expand/collapse all (for editor/graph view) -->
       <div v-else class="flex items-center justify-between px-2">
         <div class="flex items-center gap-1.5">
           <Database class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
@@ -73,22 +73,6 @@
           </h2>
         </div>
         <div class="flex items-center gap-2">
-          <!-- Ghost filter: show complete only -->
-          <button
-            @click="toggleGhostFilter"
-            class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-2xs transition-colors flex items-center justify-center gap-1"
-            :class="
-              ghostFilterMode === 'model'
-                ? 'text-primary dark:text-primary-100'
-                : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
-            "
-            :title="ghostFilterMode === 'model' ? 'Show all concepts' : 'Filter complete only'"
-            data-testid="ghost-filter-toggle"
-          >
-            <span class="text-[10px] font-medium">
-              {{ ghostFilterMode === 'model' ? 'ALL' : 'CMP' }}
-            </span>
-          </button>
           <button
             @click="expandAll"
             class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-2xs text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors flex items-center justify-center"
@@ -142,9 +126,9 @@
           <!-- Concepts under this Model -->
           <div
             v-if="isModelExpanded(rootId)"
-            class="ml-2 pl-1 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
+            class="ml-1 pl-0.5 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
           >
-            <div v-for="item in getConceptsForModel(rootId, ghostFilterMode)" :key="item.name">
+            <div v-for="item in getConceptsForModel(rootId)" :key="item.name">
               <VirtualGroupNode
                 :concept-name="item.name"
                 :elements="item.elements"
@@ -158,7 +142,7 @@
               />
             </div>
             <p
-              v-if="getConceptsForModel(rootId, ghostFilterMode).length === 0"
+              v-if="getConceptsForModel(rootId).length === 0"
               class="px-2 py-2 text-2xs text-slate-400 dark:text-slate-500 italic"
             >
               No nodes loaded
@@ -170,38 +154,46 @@
               class="pt-2 mt-2 border-t border-slate-200/60 dark:border-slate-700/60 space-y-1"
             >
               <div
-                class="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 select-none"
+                class="flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 select-none cursor-pointer hover:text-slate-600 dark:hover:text-slate-300"
+                @click="toggleRelations(rootId)"
+                data-testid="relations-header"
               >
-                <Table2 class="w-3 h-3 text-slate-400 shrink-0" />
-                <span>Relations</span>
-              </div>
-              <p
-                v-if="hasUnresolvedMatrixDefs(rootId)"
-                class="px-1.5 text-[10px] leading-snug text-amber-600 dark:text-amber-400"
-                title="Template not resolved — matrices render from model data with empty source/target"
-              >
-                Template not resolved — matrices shown from model data (source/target empty)
-              </p>
-              <div class="space-y-0.5 pl-1">
-                <MatrixPill
-                  v-for="matrix in getMatricesForModel(rootId)"
-                  :key="matrix.name"
-                  :name="matrix.name"
-                  :source="matrix.source"
-                  :target="matrix.target"
-                  :label="matrix.label"
-                  :value-count="getMatrixValueCount(matrix.name)"
-                  :selected="
-                    uiStore.activeMatrixIndex === resolveMatrixIndexByName(matrix.name) &&
-                    uiStore.activeView === 'matrices'
-                  "
-                  :full-width="true"
-                  interactive
-                  show-source-target
-                  as="button"
-                  @click="selectModelMatrix(rootId, matrix.name)"
+                <ChevronDown
+                  class="transition-transform duration-200 w-2.5 h-2.5 text-slate-400 dark:text-slate-500"
+                  :class="{ '-rotate-90': !isRelationsExpanded(rootId) }"
                 />
+                <Table2 class="w-3 h-3 text-slate-400 shrink-0" />
+                <span>Relations ({{ getMatricesForModel(rootId).length }})</span>
               </div>
+              <template v-if="isRelationsExpanded(rootId)">
+                <p
+                  v-if="hasUnresolvedMatrixDefs(rootId)"
+                  class="px-1.5 text-[10px] leading-snug text-amber-600 dark:text-amber-400"
+                  title="Template not resolved — matrices render from model data with empty source/target"
+                >
+                  Template not resolved — matrices shown from model data (source/target empty)
+                </p>
+                <div class="space-y-0.5 pl-1">
+                  <MatrixPill
+                    v-for="matrix in getMatricesForModel(rootId)"
+                    :key="matrix.name"
+                    :name="matrix.name"
+                    :source="matrix.source"
+                    :target="matrix.target"
+                    :label="matrix.label"
+                    :value-count="getMatrixValueCount(matrix.name)"
+                    :selected="
+                      uiStore.activeMatrixIndex === resolveMatrixIndexByName(matrix.name) &&
+                      uiStore.activeView === 'matrices'
+                    "
+                    :full-width="true"
+                    interactive
+                    show-source-target
+                    as="button"
+                    @click="selectModelMatrix(rootId, matrix.name)"
+                  />
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -343,12 +335,6 @@ const { width, startResize } = useResizablePanel({
   side: 'right',
 })
 
-const ghostFilterMode = computed(() => uiStore.ghostFilterMode)
-
-function toggleGhostFilter(): void {
-  uiStore.setGhostFilterMode(ghostFilterMode.value === 'model' ? 'all' : 'model')
-}
-
 const activeModelId = computed(() => uiStore.activeModelId || visibleRootIds.value[0] || null)
 
 function selectModelHeader(rootId: string): void {
@@ -383,6 +369,28 @@ const { expandedGeneration, expandedModels, expandAll, collapseAll, toggleModel 
 const selectedId = computed(() => uiStore.selectedNodeId)
 
 // Relations section.
+const expandedRelations = ref<Record<string, boolean>>({})
+
+function isRelationsExpanded(rootId: string): boolean {
+  return expandedRelations.value[rootId] === true
+}
+
+function toggleRelations(rootId: string): void {
+  expandedRelations.value[rootId] = !isRelationsExpanded(rootId)
+}
+
+watch(expandedGeneration, (val) => {
+  if (val >= 0) {
+    for (const rootId of visibleRootIds.value) {
+      expandedRelations.value[rootId] = true
+    }
+  } else {
+    for (const rootId of visibleRootIds.value) {
+      expandedRelations.value[rootId] = false
+    }
+  }
+})
+
 // IMPORTANT: the pills must list the SAME matrices (and in the SAME order) as
 // MatricesGrid renders, because uiStore.activeMatrixIndex is an index into this
 // list. Resolving against `modelStore.rootIds` + `merge` keeps the sidebar and
@@ -500,7 +508,7 @@ function buildTreeGroups(input: TreeGroupsInput): TreeGroup[] {
   // Build a recursive tree from taxonomy edges
   function buildTree(name: string): TreeGroup {
     const directElements = childrenByType.get(name) ?? []
-    const kids = taxonomyChildren.get(name) ?? []
+    const kids = (taxonomyChildren.get(name) ?? []).filter((k) => templateByName.has(k))
     const subGroups: TreeGroup[] = []
     for (const k of kids) {
       subGroups.push(buildTree(k))
@@ -566,7 +574,7 @@ function buildTreeGroups(input: TreeGroupsInput): TreeGroup[] {
   return items
 }
 
-function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGroup[] {
+function getConceptsForModel(rootId: string): TreeGroup[] {
   const rootNode = modelStore.getNode(rootId)
   if (!rootNode) return []
 
@@ -662,16 +670,18 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
 
   // Build taxonomy tree: parent → children names
   const taxonomyChildren = new Map<string, string[]>()
-  const allChildren = new Set<string>()
   for (const e of taxonomyEdges) {
     const list = taxonomyChildren.get(e.parent) ?? []
     list.push(e.child)
     taxonomyChildren.set(e.parent, list)
-    allChildren.add(e.child)
   }
 
-  // Roots = parents that are never a child in the taxonomy
-  const taxonomyRoots = [...taxonomyChildren.keys()].filter((p) => !allChildren.has(p))
+  // parseIndexBlock() encodes every top-level index bullet as an edge with
+  // parent === '' (there is no real concept named ''). The true roots are its
+  // children, not "keys never seen as a child" — that formula always evaluated
+  // to [''] for standard index sections, which has no entry in templateByName,
+  // so the whole subtree silently vanished instead of being built.
+  const taxonomyRoots = taxonomyChildren.get('') ?? []
 
   const templateByName = new Map(modelConcepts.map((c) => [c.name, c]))
   const templateOrder = new Map(modelConcepts.map((c, i) => [c.name, i]))
@@ -684,11 +694,6 @@ function getConceptsForModel(rootId: string, ghostMode: 'model' | 'all'): TreeGr
     templateOrder,
     hasContent,
   })
-
-  // Filter out completely empty ghost concepts if ghostMode is 'model' (Complete Only)
-  if (ghostMode === 'model') {
-    return items.filter((item) => !item.ghost)
-  }
 
   return items
 }

@@ -182,9 +182,42 @@
           <!-- Warning banner for concepts -->
           <div
             v-if="isConcept"
-            class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 text-sm font-medium"
+            class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-lg text-amber-800 dark:text-amber-300 text-sm font-medium flex flex-col gap-3"
           >
-            These fields are inherited from the template and must be edited in the template.
+            <div>
+              These fields are inherited from the template and must be edited in the template.
+            </div>
+
+            <div v-if="templateNode" class="mt-2 border-t border-amber-200 dark:border-amber-900/40 pt-3 flex flex-col gap-2 font-normal">
+              <div class="text-xs font-bold text-amber-900 dark:text-amber-400 uppercase tracking-wide">
+                OpenCode Prompt (AI Editor)
+              </div>
+              <p class="text-xs text-amber-700 dark:text-amber-500">
+                Copy and paste this prompt into OpenCode to ask the AI to perform modifications on the template file <code class="px-1 py-0.5 bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded font-mono font-bold">{{ templateFilename }}</code>:
+              </p>
+
+              <div class="relative mt-1">
+                <textarea
+                  readonly
+                  :value="generatedPrompt"
+                  rows="6"
+                  class="w-full text-xs font-mono p-2 pr-10 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/80 rounded-md focus:outline-none text-slate-700 dark:text-slate-300 resize-none leading-normal"
+                ></textarea>
+                <button
+                  type="button"
+                  @click="copyPrompt"
+                  class="absolute top-2 right-2 p-1.5 rounded-md bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/50 dark:hover:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900 transition-all cursor-pointer flex items-center justify-center"
+                  :title="copied ? 'Copied!' : 'Copy prompt'"
+                >
+                  <Check v-if="copied" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <Copy v-else class="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div v-if="copied" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold self-end transition-all">
+                Prompt copied to clipboard!
+              </div>
+            </div>
           </div>
 
           <div
@@ -382,7 +415,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { ChevronDown, ArrowUp, ArrowDown, Pencil, Check, Trash2, PlusCircle, X } from 'lucide-vue-next'
+import { ChevronDown, ArrowUp, ArrowDown, Pencil, Check, Trash2, PlusCircle, X, Copy } from 'lucide-vue-next'
 import IconRenderer from './IconRenderer.vue'
 import MarkerButton from './MarkerButton.vue'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
@@ -682,4 +715,62 @@ watch(
     }
   },
 )
+
+const copied = ref(false)
+
+const templateNode = computed(() => {
+  if (!rootNodeId.value) return undefined
+  const rootNode = modelStore.getNode(rootNodeId.value)
+  if (!rootNode?.rawContent) return undefined
+
+  const fm = parseFrontmatter(rootNode.rawContent)
+  const parentName = (fm as any)?.parent_spec?.name
+  if (!parentName) return undefined
+
+  const templateId = `spec:${parentName}`
+  return modelStore.getNode(templateId)
+})
+
+const templatePath = computed(() => templateNode.value?.source?.path || '')
+const templateFilename = computed(() => {
+  const path = templatePath.value
+  return path.split('/').pop() || path.split('\\').pop() || 'template'
+})
+
+const modelPath = computed(() => {
+  if (!rootNodeId.value) return ''
+  const rootNode = modelStore.getNode(rootNodeId.value)
+  return rootNode?.source?.path || ''
+})
+
+const modelFilename = computed(() => {
+  const path = modelPath.value
+  return path.split('/').pop() || path.split('\\').pop() || 'model'
+})
+
+const generatedPrompt = computed(() => {
+  const concept = props.conceptName || props.conceptType
+  const templateName = templateFilename.value
+  const templateLoc = templatePath.value ? ` (located at "${templatePath.value}")` : ''
+  const modelName = modelFilename.value
+  const modelLoc = modelPath.value ? ` (located at "${modelPath.value}")` : ''
+
+  return `I need to edit the concept "${concept}" in the specification template "${templateName}"${templateLoc}.
+
+This template is used by the model "${modelName}"${modelLoc}.
+
+Please inspect the template file and perform the corresponding modifications to the definition of "${concept}" (e.g., modify fields, types, descriptions, or relationships as needed).`
+})
+
+const copyPrompt = async () => {
+  try {
+    await navigator.clipboard.writeText(generatedPrompt.value)
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('Failed to copy text: ', err)
+  }
+}
 </script>

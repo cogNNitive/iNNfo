@@ -3,7 +3,6 @@ import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import LeftSidebar from '../../src/components/layout/LeftSidebar.vue'
 import { useModelStore } from '../../src/stores/modelStore'
-import { useUiStore } from '../../src/stores/uiStore'
 import type { ModelNode } from '../../src/model/types'
 
 function makeNode(id: string, overrides: Partial<ModelNode> = {}): ModelNode {
@@ -53,9 +52,6 @@ title: Business Model
       ['model.md'],
     )
 
-    const uiStore = useUiStore()
-    uiStore.setGhostFilterMode('all')
-
     const wrapper = mount(LeftSidebar, {
       attachTo: document.body,
     })
@@ -103,9 +99,6 @@ title: Business Model
       },
       ['model.md'],
     )
-
-    const uiStore = useUiStore()
-    uiStore.setGhostFilterMode('all')
 
     const wrapper = mount(LeftSidebar, {
       attachTo: document.body,

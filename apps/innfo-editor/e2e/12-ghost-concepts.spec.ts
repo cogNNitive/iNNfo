@@ -1,49 +1,15 @@
 import { test, expect } from '@playwright/test'
 import { injectMockFileSystem, loadHomePage, openMockFolder } from './helpers/setup'
 
-test.describe('Ghost Concepts — filter toggle, ghost groups, add lifecycle', () => {
+test.describe('Ghost Concepts — ghost groups, add lifecycle', () => {
   test.beforeEach(async ({ page, context }) => {
     await injectMockFileSystem(page, context)
     await loadHomePage(page)
     await openMockFolder(page)
   })
 
-  test('R-TGC-01: Filter toggle is visible and functional', async ({ page }) => {
-    // Wait for the tree to render
-    await page.getByTestId('expand-all').click()
-
-    // The ghost filter toggle should be visible
-    const toggle = page.getByTestId('ghost-filter-toggle')
-    await expect(toggle).toBeVisible()
-
-    // Default label on the button should be CMP (showing complete only, option to cycle to ALL)
-    await expect(toggle).toHaveText('CMP')
-  })
-
-  test('R-TGC-02: Filter toggle switches modes and renders ghost concepts', async ({ page }) => {
-    await page.getByTestId('expand-all').click()
-
-    const toggle = page.getByTestId('ghost-filter-toggle')
-    await expect(toggle).toBeVisible()
-
-    // Click to cycle to ALL mode (which shows ghosts)
-    await toggle.click()
-    await expect(toggle).toHaveText('ALL')
-
-    // In ALL mode, ghost concept headers should render in the tree
-    const ghostHeaders = page.getByTestId('ghost-group-header')
-    // They may exist if metamodel has ghost concepts
-    const count = await ghostHeaders.count()
-    if (count > 0) {
-      await expect(ghostHeaders.first()).toBeVisible()
-    }
-  })
-
   test('R-TGC-03: Selecting a ghost concept opens empty table view', async ({ page }) => {
     await page.getByTestId('expand-all').click()
-
-    const toggle = page.getByTestId('ghost-filter-toggle')
-    await toggle.click() // Switch to ALL mode to see ghosts
 
     const ghostHeaders = page.getByTestId('ghost-group-header')
     if ((await ghostHeaders.count()) > 0) {
@@ -64,9 +30,6 @@ test.describe('Ghost Concepts — filter toggle, ghost groups, add lifecycle', (
     page,
   }) => {
     await page.getByTestId('expand-all').click()
-
-    const toggle = page.getByTestId('ghost-filter-toggle')
-    await toggle.click() // Switch to ALL mode to see ghosts
 
     const ghostHeaders = page.getByTestId('ghost-group-header')
     if ((await ghostHeaders.count()) > 0) {

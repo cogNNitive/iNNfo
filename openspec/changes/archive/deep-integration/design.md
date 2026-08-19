@@ -10,10 +10,10 @@ One normalized node graph in `apps/format-editor/` (new Vue 3 SPA). `format-core
 |----------|---------|-----------|--------|
 | Graph shape | Nested tree of nodes vs flat map + parent refs | Nested is easy to render but painful to look up by qualified id and to normalize provenance/dirty state. Flat map gives O(1) lookup, stable references, easy identity index. | **Flat normalized `Record<qualifiedId, ModelNode>`** + `rootIds[]`; each node holds `childIds[]` and `parentId`. Tree component derives hierarchy from refs. |
 | Node identity key | Bare name vs path vs qualified `Parent/Child` | Bare name collides across branches; raw FS path leaks storage mode into identity. Qualified name is human, wikilink-ready, and mode-agnostic. | **Qualified id = ancestor chain joined `Parent/Child`**, sibling name unique; `name` unique among siblings enforced at parse. |
-| Node payload | Reuse `ElementNode`/`FolderElement` directly vs new normalized `ModelNode` | Core types differ per mode (FILE `ElementNode`, FOLDER `FolderElement`); using them directly reintroduces the two-model split. | **New `ModelNode`** `{ id, name, qualifiedId, parentId, childIds, storageMode, type, fields, markers, relationships, rawSections, source }` â€” one shape both drivers normalize into. |
-| Storage mode detection | Infer at save vs record at parse | Inferring later loses the round-trip source. | **Record per node at parse**: FILE primitive â†’ `storageMode: 'FILE'`; FOLDER dir with `_FORMAT.md` â†’ `'FOLDER'`. Serializer reads it back. |
+| Node payload | Reuse `ElementNode`/`FolderElement` directly vs new normalized `ModelNode` | Core types differ per mode (FILE `ElementNode`, FOLDER `FolderElement`); using them directly reintroduces the two-model split. | **New `ModelNode`** `{ id, name, qualifiedId, parentId, childIds, storageMode, type, fields, markers, relationships, rawSections, source }` — one shape both drivers normalize into. |
+| Storage mode detection | Infer at save vs record at parse | Inferring later loses the round-trip source. | **Record per node at parse**: FILE primitive → `storageMode: 'FILE'`; FOLDER dir with `_FORMAT.md` → `'FOLDER'`. Serializer reads it back. |
 | Fractal folder+file | Folder node whose `_FORMAT.md` also has `# _F` sections | A FOLDER node can carry file-structured element sections AND child dirs. | **Parse both**: run `parseModel` on the folder's `_FORMAT.md` for in-file elements, then recurse into child dirs; both feed the same graph under that folder node. |
-| Metamodel resolution | New nesting resolver vs reuse spec-chain | Inventing a parallel resolver risks diverging from proven inherit/override semantics. | **Reuse `resolveParentChain`/`getSpecForLevel`**; generalize inward â€” a subtree's effective metamodel = root-resolved spec merged with that node's local `concepts`/`markers` override. |
+| Metamodel resolution | New nesting resolver vs reuse spec-chain | Inventing a parallel resolver risks diverging from proven inherit/override semantics. | **Reuse `resolveParentChain`/`getSpecForLevel`**; generalize inward — a subtree's effective metamodel = root-resolved spec merged with that node's local `concepts`/`markers` override. |
 | Widget port scope | Port all ~40 now vs fixture-driven subset | Full port balloons the slice. | **Port only widgets exercised by `models/*` fixtures this slice**; unknown types render a **`FallbackWidget`** (raw value + type badge). Track remainder for later PRs. |
 | Provenance shape | Global changelog vs per-field stamp | Global log can't answer "who set this field". | **Per-field record** `{ value, author: {kind:'user'\|'ai'\|'system', id}, timestamp }` written on every widget commit. |
 | Core changes | Modify core for recursion vs additive helpers in editor | Core API must stay stable per proposal. | **Additive only in `format-editor`.** One unavoidable additive core export if needed: `parseModelSections` seam is already covered by `rawSections`; no core edit planned. |
@@ -22,28 +22,28 @@ One normalized node graph in `apps/format-editor/` (new Vue 3 SPA). `format-core
 
 ```
 Open workspace (FS handle, IndexedDB recovery)
-        â”‚
-        â–¼
-workspaceStore.open() â”€â”€ single parse pass â”€â”€â”
-        â”‚                                     â–¼
-        â”‚                        recursiveParse(node)
-        â”‚                         â”œâ”€ FILE  â†’ parseModel(content)        â†’ ModelNode[]
-        â”‚                         â”œâ”€ FOLDERâ†’ discoverFolder + parseModel â†’ ModelNode[] + recurse dirs
-        â”‚                         â””â”€ assign qualifiedId, storageMode, rawSections
-        â–¼                                     â”‚
-   modelStore  â—„â”€â”€ normalized {id â†’ ModelNode}, rootIds
-        â”‚                                     â”‚
-        â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º SidebarTree (derives hierarchy from parentId/childIds)
-        â”‚                         â”‚ select node
-        â–¼                         â–¼
- resolveMetamodel(node) â”€â”€ root spec chain + subtree override â”€â”€â–º effective concepts/markers
-        â”‚                                     â”‚
-        â–¼                                     â–¼
-    NodeForm â”€â”€ binds fields/markers â”€â”€â–º shared/ widgets â”€â”€ commit â”€â”€â–º provenance stamp
-        â”‚                                                                    â”‚
-        â–¼  save                                                              â–¼
-recursiveSerialize(node) â”€â”€ by storageMode â”€â”€â”¬â”€ FILE  â†’ serializeModel â†’ writeFile
-                                             â””â”€ FOLDERâ†’ per-dir _FORMAT.md write
+        │
+        ▼
+workspaceStore.open() ── single parse pass ──┐
+        │                                     ▼
+        │                        recursiveParse(node)
+        │                         ├─ FILE  → parseModel(content)        → ModelNode[]
+        │                         ├─ FOLDER→ discoverFolder + parseModel → ModelNode[] + recurse dirs
+        │                         └─ assign qualifiedId, storageMode, rawSections
+        ▼                                     │
+   modelStore  ◄── normalized {id → ModelNode}, rootIds
+        │                                     │
+        ├──────────────► SidebarTree (derives hierarchy from parentId/childIds)
+        │                         │ select node
+        ▼                         ▼
+ resolveMetamodel(node) ── root spec chain + subtree override ──► effective concepts/markers
+        │                                     │
+        ▼                                     ▼
+    NodeForm ── binds fields/markers ──► shared/ widgets ── commit ──► provenance stamp
+        │                                                                    │
+        ▼  save                                                              ▼
+recursiveSerialize(node) ── by storageMode ──┬─ FILE  → serializeModel → writeFile
+                                             └─ FOLDER→ per-dir _FORMAT.md write
 ```
 
 ## File Changes
@@ -61,7 +61,7 @@ recursiveSerialize(node) â”€â”€ by storageMode â”€â”€â”¬
 | `apps/format-editor/src/model/identity.ts` | Create | Qualified-id builder + sibling-uniqueness enforcement + collision diagnostics. |
 | `apps/format-editor/src/shared/widgets/` (dir) | Create | Vue port of fixture-exercised widgets + `FallbackWidget`; provenance-stamping commit hook. |
 | `apps/format-editor/src/components/SidebarTree.vue`, `NodeForm.vue` | Create | One tree mixing file/folder nodes; metamodel-driven form. |
-| `apps/format-editor/tests/roundtrip.spec.ts` | Create | Golden-file parseâ†’serialize on `models/*`. |
+| `apps/format-editor/tests/roundtrip.spec.ts` | Create | Golden-file parse→serialize on `models/*`. |
 | `packages/format-core/*` | Unchanged | Reused as-is; no public API change. |
 
 ## Interfaces / Contracts
@@ -92,19 +92,19 @@ interface ModelNode {
 |-------|--------------|----------|
 | Unit | Qualified-id build + sibling collision; metamodel inherit+override matches spec-chain semantics | Vitest against known `models/*` frontmatter. |
 | Unit | `storageMode` recorded correctly per node (FILE vs FOLDER vs fractal folder+file) | Vitest with mixed fixtures. |
-| Golden | parse â†’ serialize round-trip equal on every `models/*` fixture | Golden-file compare (structure + preserved raw sections) before any UI wiring. |
-| Component | NodeForm renders resolved widgets; commit stamps provenance; unknown type â†’ FallbackWidget | Vitest + `@vue/test-utils`, mocked handle. |
+| Golden | parse → serialize round-trip equal on every `models/*` fixture | Golden-file compare (structure + preserved raw sections) before any UI wiring. |
+| Component | NodeForm renders resolved widgets; commit stamps provenance; unknown type → FallbackWidget | Vitest + `@vue/test-utils`, mocked handle. |
 | Integration | SidebarTree mixes file+folder nodes from one graph; single parse pass | Mount with Pinia + Router, fake `FileSystemDirectoryHandle`. |
 | Regression | `packages/format-core` suite passes unchanged | Run core vitest. |
 
 ## Migration / Rollout
 
-No data migration. Work lands in `apps/format-editor/` only; core stays API-stable; sibling `folder-format` React repo is not migrated (widgets ported by hand). Commit per approach step (model types â†’ recursive parser/serializer â†’ metamodel â†’ widget substrate â†’ tree/forms) so each is independently revertible. On-hold `ecosystem-consolidation` artifacts stay as historical reference.
+No data migration. Work lands in `apps/format-editor/` only; core stays API-stable; sibling `folder-format` React repo is not migrated (widgets ported by hand). Commit per approach step (model types → recursive parser/serializer → metamodel → widget substrate → tree/forms) so each is independently revertible. On-hold `ecosystem-consolidation` artifacts stay as historical reference.
 
-**Deferred seams (explicitly NOT built this slice, left clean):** conversion swaps only a node's `storageMode` + serializer (graph unchanged) â€” seam is the per-node mode field. Wikilinks resolve against the qualified-id index â€” seam is `identity.ts`. Relationship view editors are projections of the already-normalized `relationships` â€” seam is the stored shape. Rules/workflows and AI have no hooks this slice by design.
+**Deferred seams (explicitly NOT built this slice, left clean):** conversion swaps only a node's `storageMode` + serializer (graph unchanged) — seam is the per-node mode field. Wikilinks resolve against the qualified-id index — seam is `identity.ts`. Relationship view editors are projections of the already-normalized `relationships` — seam is the stored shape. Rules/workflows and AI have no hooks this slice by design.
 
 ## Open Questions
 
-- [ ] Folder write-back granularity: rewrite only dirty `_FORMAT.md` files vs all â€” flag for sdd-tasks (dirty-tracking already in `modelStore`).
+- [ ] Folder write-back granularity: rewrite only dirty `_FORMAT.md` files vs all — flag for sdd-tasks (dirty-tracking already in `modelStore`).
 - [ ] `serializeModel` reconstructs frontmatter/sections from structured data; confirm golden fixtures tolerate canonical reformatting, else lean harder on `rawSections`/`rawContent` passthrough.
 - [ ] Vue Router history mode (hash vs HTML5) for `vite preview`.

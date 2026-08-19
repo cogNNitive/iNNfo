@@ -12,21 +12,17 @@ export type ActiveView =
   | 'guided-procedure'
   | 'gantt-chart'
 
-export type GhostFilterMode = 'model' | 'all'
-
 export type ExplorerFilterMode = 'all' | 'models' | 'sources' | 'artifacts'
 
 /**
  * UI-only state that does not belong in modelStore.
  *
  * Following the design decision: modelStore stays a clean data graph with zero
- * UI state. All view-only state (selected node, active perspective, active
- * view) lives in uiStore.
+ * UI state. All view-only state (selected node, active view) lives in uiStore.
  */
 export const useUiStore = defineStore('ui', () => {
   const activeModelId = ref<string | null>(null)
   const activeConcept = ref<string | null>(null)
-  const activePerspective = ref<string>('default')
   const activeView = ref<ActiveView>('editor')
   const selectedNodeId = ref<string | null>(null)
   const selectedInstanceId = ref<string | null>(null)
@@ -35,7 +31,6 @@ export const useUiStore = defineStore('ui', () => {
   const showMetamatrixConfig = ref(false)
   const showSaveWorkspaceModal = ref(false)
   const showAiModal = ref(false)
-  const ghostFilterMode = ref<GhostFilterMode>('all')
   const explorerFilterMode = ref<ExplorerFilterMode>('all')
   const isSearchOpen = ref(false)
   const searchQuery = ref('')
@@ -98,10 +93,6 @@ export const useUiStore = defineStore('ui', () => {
     activeConcept.value = name
   }
 
-  function setActivePerspective(id: string): void {
-    activePerspective.value = id
-  }
-
   function setActiveView(view: ActiveView): void {
     activeView.value = view
   }
@@ -124,10 +115,6 @@ export const useUiStore = defineStore('ui', () => {
 
   function setShowSaveWorkspaceModal(val: boolean): void {
     showSaveWorkspaceModal.value = val
-  }
-
-  function setGhostFilterMode(mode: GhostFilterMode): void {
-    ghostFilterMode.value = mode
   }
 
   function setExplorerFilterMode(mode: ExplorerFilterMode): void {
@@ -176,7 +163,6 @@ export const useUiStore = defineStore('ui', () => {
   return {
     activeModelId,
     activeConcept,
-    activePerspective,
     activeView,
     selectedNodeId,
     selectedInstanceId,
@@ -185,7 +171,6 @@ export const useUiStore = defineStore('ui', () => {
     showMetamatrixConfig,
     showSaveWorkspaceModal,
     showAiModal,
-    ghostFilterMode,
     explorerFilterMode,
     isSearchOpen,
     searchQuery,
@@ -198,7 +183,6 @@ export const useUiStore = defineStore('ui', () => {
     toggleConceptFilter,
     setActiveModel,
     setActiveConcept,
-    setActivePerspective,
     setActiveView,
     selectNode,
     selectInstance,
@@ -206,7 +190,6 @@ export const useUiStore = defineStore('ui', () => {
     setShowValidationReport,
     setShowSaveWorkspaceModal,
     setShowAiModal,
-    setGhostFilterMode,
     setExplorerFilterMode,
     toggleSearchOpen,
     setSearchOpen,

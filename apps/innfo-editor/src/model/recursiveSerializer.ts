@@ -186,6 +186,8 @@ function serializeNodeContent(node: ModelNode): {
           const parentNode = modelStore.getNode(child.parentId)
           if (parentNode && parentNode.kind === 'element') {
             parentName = parentNode.name
+          } else {
+            parentName = child.type || ''
           }
         }
       }
@@ -207,6 +209,23 @@ function serializeNodeContent(node: ModelNode): {
   // model so they round-trip back to disk.
   if (node.rawSections && Object.keys(node.rawSections).length > 0) {
     parsed.rawSections = { ...(parsed.rawSections ?? {}), ...node.rawSections }
+  }
+
+  // Synchronize dynamic relational matrices declarations (__matrix_defs) to frontmatter
+  const matrixDefs = (node.fields['__matrix_defs'] as any)?.value
+  if (Array.isArray(matrixDefs)) {
+    parsed.frontmatter.matrices = matrixDefs.map((m: any) => ({
+      name: m.name,
+      source: m.source,
+      target: m.target,
+      params: m.params,
+      values: m.values,
+      widgetType: m.widgetType,
+      description: m.description,
+      min_color: m.min_color,
+      max_color: m.max_color,
+      label: m.label,
+    }))
   }
 
   // Apply matrix cell edits from node.fields into parsed.matrices

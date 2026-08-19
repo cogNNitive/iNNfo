@@ -63,7 +63,7 @@
     <!-- ── Children (recursive, with optional virtual grouping) ── -->
     <div
       v-if="hasChildren && !isCollapsed"
-      class="ml-2 pl-1 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
+      class="ml-4 pl-1 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
     >
       <!-- When groupByConcept is set, group flat elements by their type -->
       <template v-if="props.groupByConcept">
@@ -288,13 +288,7 @@ const rowStyle = computed(() => {
     style.backgroundColor = getHexColorMedium(color)
   }
 
-  if (isConcept) {
-    style.borderLeft = `3px solid ${color}`
-    style.paddingLeft = 'calc(0.5rem - 2px)'
-  } else {
-    // Elements: thin transparent left border for alignment
-    style.paddingLeft = '0.5rem'
-  }
+  style.paddingLeft = '0.5rem'
 
   // Ghost state: reduced opacity on the entire row
   if (isGhost.value) {

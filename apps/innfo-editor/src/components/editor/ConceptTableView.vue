@@ -67,11 +67,23 @@
             v-for="(child, idx) in children"
             :key="child.id"
             @click="navigateTo(child.id)"
+            :draggable="draggableRowId === child.id"
+            @dragstart="onDragStart($event, idx)"
+            @dragover.prevent="onDragOver($event, idx)"
+            @dragend="onDragEnd"
+            @drop="onDrop($event, idx)"
             class="group transition-colors cursor-pointer border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30"
-            :class="idx === children.length - 1 ? 'border-b-0' : ''"
+            :class="[
+              idx === children.length - 1 ? 'border-b-0' : '',
+              draggedIndex === idx ? 'opacity-40 bg-slate-100 dark:bg-slate-700/50' : '',
+              dragOverIndex === idx ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : ''
+            ]"
           >
             <td
-              class="sticky left-0 z-10 bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30 px-2 py-1 border-r border-slate-100 dark:border-slate-700/50 min-w-[280px]"
+              class="sticky left-0 z-10 px-2 py-1 border-r border-slate-100 dark:border-slate-700/50 min-w-[280px]"
+              :class="[
+                draggedIndex === idx ? 'bg-slate-100/40 dark:bg-slate-700/20' : (dragOverIndex === idx ? 'bg-indigo-50/40 dark:bg-indigo-950/20' : 'bg-white dark:bg-slate-800 group-hover:bg-slate-50 dark:group-hover:bg-slate-700/30')
+              ]"
             >
               <Pill
                 kind="instance"
@@ -102,23 +114,16 @@
               />
             </td>
             <td class="px-3 py-2 text-sm text-slate-700 dark:text-slate-300 text-center">
-              <div class="flex items-center justify-center gap-1">
-                <button
-                  :disabled="idx === 0"
-                  @click.stop="moveUp(child.id)"
-                  class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer flex items-center justify-center"
-                  title="Move up"
+              <div class="flex items-center justify-center">
+                <span
+                  class="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 transition-colors flex items-center justify-center"
+                  title="Drag to reorder"
+                  @mousedown="draggableRowId = child.id"
+                  @mouseup="draggableRowId = null"
+                  @mouseleave="draggableRowId = null"
                 >
-                  <ChevronUp class="w-3.5 h-3.5" />
-                </button>
-                <button
-                  :disabled="idx === children.length - 1"
-                  @click.stop="moveDown(child.id)"
-                  class="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer flex items-center justify-center"
-                  title="Move down"
-                >
-                  <ChevronDown class="w-3.5 h-3.5" />
-                </button>
+                  <GripVertical class="w-4 h-4" />
+                </span>
               </div>
             </td>
           </tr>
@@ -144,7 +149,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { ChevronUp, ChevronDown, Plus, Pencil, Check } from 'lucide-vue-next'
+import { GripVertical, Plus, Pencil, Check } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useConfirmStore } from '../../stores/confirmStore'
 import { useUiStore } from '../../stores/uiStore'
@@ -163,6 +168,10 @@ const confirmStore = useConfirmStore()
 const uiStore = useUiStore()
 
 const isEditMode = ref(false)
+
+const draggedIndex = ref<number | null>(null)
+const dragOverIndex = ref<number | null>(null)
+const draggableRowId = ref<string | null>(null)
 
 const topScrollRef = ref<HTMLDivElement | null>(null)
 const tableContainerRef = ref<HTMLDivElement | null>(null)
@@ -235,44 +244,73 @@ function getDescription(child: { rawSections?: Record<string, string> }): string
 }
 
 const children = computed(() => {
+  console.log('ConceptTableView computed children: nodeId =', props.nodeId)
   const id = props.nodeId
   if (id.startsWith('virtual:')) {
     const parts = id.split(':')
     const parentId = parts[1]
     const conceptName = parts[2]
     const parentNode = modelStore.getNode(parentId)
-    if (!parentNode) return []
-    return parentNode.childIds
+    if (!parentNode) {
+      console.log('ConceptTableView computed children: parentNode not found for parentId =', parentId)
+      return []
+    }
+    const result = parentNode.childIds
       .map((cid) => modelStore.getNode(cid))
       .filter(
         (child): child is any => !!child && child.type === conceptName && child.kind === 'element',
       )
+    console.log('ConceptTableView computed children: mapped elements count =', result.length)
+    return result
   }
-  return modelStore.getChildren(id)
+  const result = modelStore.getChildren(id)
+  console.log('ConceptTableView computed children: getChildren count =', result.length)
+  return result
 })
 
 function navigateTo(nodeId: string): void {
   uiStore.selectNode(nodeId)
 }
 
-function moveUp(childId: string): void {
-  const id = props.nodeId
-  if (id.startsWith('virtual:')) {
-    const parentId = id.split(':')[1]
-    modelStore.reorderChild(parentId, childId, -1)
-  } else {
-    modelStore.reorderChild(id, childId, -1)
+function onDragStart(e: DragEvent, index: number): void {
+  draggedIndex.value = index
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', index.toString())
   }
 }
 
-function moveDown(childId: string): void {
-  const id = props.nodeId
-  if (id.startsWith('virtual:')) {
-    const parentId = id.split(':')[1]
-    modelStore.reorderChild(parentId, childId, 1)
-  } else {
-    modelStore.reorderChild(id, childId, 1)
+function onDragOver(e: DragEvent, index: number): void {
+  if (draggedIndex.value === null) return
+  if (draggedIndex.value !== index) {
+    dragOverIndex.value = index
   }
+}
+
+function onDragEnd(): void {
+  draggedIndex.value = null
+  dragOverIndex.value = null
+  draggableRowId.value = null
+}
+
+function onDrop(e: DragEvent, targetIdx: number): void {
+  e.preventDefault()
+  if (draggedIndex.value === null || draggedIndex.value === targetIdx) {
+    draggedIndex.value = null
+    dragOverIndex.value = null
+    draggableRowId.value = null
+    return
+  }
+
+  const childId = children.value[draggedIndex.value].id
+  const id = props.nodeId
+  const parentId = id.startsWith('virtual:') ? id.split(':')[1] : id
+
+  modelStore.moveChildToIndex(parentId, childId, targetIdx)
+
+  draggedIndex.value = null
+  dragOverIndex.value = null
+  draggableRowId.value = null
 }
 
 async function deleteElement(childId: string): Promise<void> {
@@ -287,26 +325,34 @@ async function deleteElement(childId: string): Promise<void> {
 }
 
 function addElement(): void {
-  const type = props.conceptType
-  if (!type) return
-
   let parentId = props.nodeId
+  let conceptName = props.conceptType || ''
   if (props.nodeId.startsWith('virtual:')) {
-    parentId = props.nodeId.split(':')[1]
+    const parts = props.nodeId.split(':')
+    parentId = parts[1]
+    conceptName = parts[2]
+  }
+
+  console.log('ConceptTableView addElement clicked. conceptName =', conceptName, 'nodeId =', props.nodeId)
+  if (!conceptName) {
+    console.error('ConceptTableView addElement: conceptName/conceptType is missing!')
+    return
   }
 
   let index = 1
-  let elementName = `New ${type}`
+  let elementName = `New ${conceptName}`
   let targetId = `${parentId}/${elementName}`
   while (modelStore.getNode(targetId)) {
     index++
-    elementName = `New ${type} ${index}`
+    elementName = `New ${conceptName} ${index}`
     targetId = `${parentId}/${elementName}`
   }
 
-  const newId = modelStore.createChild(parentId, elementName, type, 'element')
+  console.log('ConceptTableView addElement: calling createChild with parentId =', parentId, 'elementName =', elementName, 'type =', conceptName)
+  const newId = modelStore.createChild(parentId, elementName, conceptName, 'element')
+  console.log('ConceptTableView addElement: createChild returned =', newId)
   if (newId) {
-    uiStore.selectNode(newId)
+    isEditMode.value = true
   }
 }
 </script>

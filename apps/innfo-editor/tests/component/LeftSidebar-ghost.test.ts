@@ -3,7 +3,6 @@ import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import LeftSidebar from '../../src/components/layout/LeftSidebar.vue'
 import { useModelStore } from '../../src/stores/modelStore'
-import { useUiStore } from '../../src/stores/uiStore'
 import type { ModelNode } from '../../src/model/types'
 
 function makeNode(id: string, overrides: Partial<ModelNode> = {}): ModelNode {
@@ -22,93 +21,12 @@ function makeNode(id: string, overrides: Partial<ModelNode> = {}): ModelNode {
   }
 }
 
-describe('LeftSidebar — ghost filter toggle (R-TGC-01, R-TGC-05)', () => {
+describe('LeftSidebar — ghost concept groups (R-TGC-01, R-TGC-05)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
 
-  it('renders filter toggle when ghost concepts exist', () => {
-    const modelStore = useModelStore()
-    modelStore.setGraph(
-      {
-        Root: makeNode('Root', {
-          childIds: [],
-          localMetamodel: {
-            concepts: [
-              { name: 'Ghost1', type: 'list' },
-              { name: 'Ghost2', type: 'text' },
-            ],
-            markers: [],
-          },
-        }),
-      },
-      ['Root'],
-    )
-
-    const wrapper = mount(LeftSidebar, {
-      attachTo: document.body,
-    })
-
-    const toggle = wrapper.find('[data-testid="ghost-filter-toggle"]')
-    expect(toggle.exists()).toBe(true)
-  })
-
-  it('renders filter toggle even when no ghost concepts exist', () => {
-    const modelStore = useModelStore()
-    modelStore.setGraph(
-      {
-        Root: makeNode('Root', {
-          localMetamodel: {
-            concepts: [],
-            markers: [],
-          },
-        }),
-      },
-      ['Root'],
-    )
-
-    const wrapper = mount(LeftSidebar, {
-      attachTo: document.body,
-    })
-
-    const toggle = wrapper.find('[data-testid="ghost-filter-toggle"]')
-    expect(toggle.exists()).toBe(true)
-  })
-
-  it('ghost filter toggle exists and toggles mode', async () => {
-    const modelStore = useModelStore()
-    modelStore.setGraph(
-      {
-        Root: makeNode('Root', {
-          localMetamodel: {
-            concepts: [{ name: 'G', type: 'list' }],
-            markers: [],
-          },
-        }),
-      },
-      ['Root'],
-    )
-
-    const uiStore = useUiStore()
-    uiStore.setGhostFilterMode('all') // default is now 'all'
-
-    const wrapper = mount(LeftSidebar, {
-      attachTo: document.body,
-    })
-
-    const toggle = wrapper.find('[data-testid="ghost-filter-toggle"]')
-    expect(toggle.exists()).toBe(true)
-
-    // Click to toggle to 'model' (complete only)
-    await toggle.trigger('click')
-    expect(uiStore.ghostFilterMode).toBe('model')
-
-    // Click again to toggle back to 'all'
-    await toggle.trigger('click')
-    expect(uiStore.ghostFilterMode).toBe('all')
-  })
-
-  it('shows ghost concept groups inline in "all" mode', () => {
+  it('shows ghost concept groups inline alongside populated ones', () => {
     const modelStore = useModelStore()
     modelStore.setGraph(
       {
@@ -132,9 +50,6 @@ describe('LeftSidebar — ghost filter toggle (R-TGC-01, R-TGC-05)', () => {
       ['Root'],
     )
 
-    const uiStore = useUiStore()
-    uiStore.setGhostFilterMode('all')
-
     const wrapper = mount(LeftSidebar, {
       attachTo: document.body,
     })
@@ -145,32 +60,5 @@ describe('LeftSidebar — ghost filter toggle (R-TGC-01, R-TGC-05)', () => {
     const ghostHeaders = wrapper.findAll('[data-testid="ghost-group-header"]')
     expect(ghostHeaders.length).toBeGreaterThan(0)
     expect(ghostHeaders[0].text()).toContain('GhostConcept')
-  })
-
-  it('hides ghost groups in "model" mode, shows in "all" mode', async () => {
-    const modelStore = useModelStore()
-    modelStore.setGraph(
-      {
-        Root: makeNode('Root', {
-          localMetamodel: {
-            concepts: [{ name: 'G', type: 'list' }],
-            markers: [],
-          },
-        }),
-      },
-      ['Root'],
-    )
-
-    const uiStore = useUiStore()
-    uiStore.setGhostFilterMode('all')
-
-    const wrapper = mount(LeftSidebar, {
-      attachTo: document.body,
-    })
-    expect(wrapper.findAll('[data-testid="ghost-group-header"]').length).toBeGreaterThan(0)
-
-    uiStore.setGhostFilterMode('model')
-    await wrapper.vm.$nextTick()
-    expect(wrapper.findAll('[data-testid="ghost-group-header"]')).toHaveLength(0)
   })
 })

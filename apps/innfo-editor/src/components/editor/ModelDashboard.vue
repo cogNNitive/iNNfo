@@ -66,27 +66,6 @@ const conceptCounts = computed(() => {
   return counts
 })
 
-// Resolve taxonomy edges from this model
-const taxonomyEdges = computed(() => {
-  if (!rootNode.value?.rawContent) return []
-  try {
-    const fm = parseFrontmatter(rootNode.value.rawContent)
-    const rawTaxonomy = (fm as Record<string, unknown>).taxonomy
-    if (!Array.isArray(rawTaxonomy)) return []
-    return rawTaxonomy
-      .filter(
-        (e: unknown): e is { parent: string; child: string } =>
-          typeof e === 'object' &&
-          e !== null &&
-          typeof (e as Record<string, unknown>).parent === 'string' &&
-          typeof (e as Record<string, unknown>).child === 'string',
-      )
-      .map((e) => ({ parent: e.parent, child: e.child }))
-  } catch {
-    return []
-  }
-})
-
 // Resolve associated matrix definitions
 const matrices = computed(() => {
   if (!rootNode.value) return []
@@ -140,16 +119,6 @@ const mermaidCode = computed(() => {
     const id = getMermaidId(concept.name)
     lines.push(`  ${id}["${label}"]`)
     lines.push(`  class ${id} ${className}`)
-  }
-
-  // Taxonomy hierarchy: solid line with arrow
-  for (const edge of taxonomyEdges.value) {
-    // Only connect if both concepts are declared
-    const hasParent = concepts.value.some((c) => c.name === edge.parent)
-    const hasChild = concepts.value.some((c) => c.name === edge.child)
-    if (hasParent && hasChild) {
-      lines.push(`  ${getMermaidId(edge.parent)} --> ${getMermaidId(edge.child)}`)
-    }
   }
 
   // Reference fields: dotted line with arrow and field name

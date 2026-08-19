@@ -47,23 +47,8 @@
       <!-- ── Children (sub-groups + elements, collapsible) ── -->
       <div
         v-if="hasChildren && !isCollapsed"
-        class="ml-2 pl-1 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
+        class="ml-4 pl-1 border-l border-slate-200 dark:border-slate-700 space-y-0.5"
       >
-        <!-- Sub-concept groups (from _NN index nesting) -->
-        <VirtualGroupNode
-          v-for="sub in subGroups"
-          :key="sub.name"
-          :concept-name="sub.name"
-          :sub-groups="sub.children"
-          :elements="sub.elements"
-          :selected-id="selectedId"
-          :depth="depth + 1"
-          :expanded-generation="expandedGeneration"
-          :ghost="sub.ghost"
-          @select="(id: string) => $emit('select', id)"
-          @click-ghost="(name: string) => $emit('click-ghost', name)"
-        />
-
         <!-- Direct element children (flat, no parent hierarchy) -->
         <template v-if="!hasParentHierarchy">
           <ConceptTreeNode
@@ -89,6 +74,21 @@
             @select="(id: string) => $emit('select', id)"
           />
         </template>
+
+        <!-- Sub-concept groups (from _NN index nesting) -->
+        <VirtualGroupNode
+          v-for="sub in subGroups"
+          :key="sub.name"
+          :concept-name="sub.name"
+          :sub-groups="sub.children"
+          :elements="sub.elements"
+          :selected-id="selectedId"
+          :depth="depth + 1"
+          :expanded-generation="expandedGeneration"
+          :ghost="sub.ghost"
+          @select="(id: string) => $emit('select', id)"
+          @click-ghost="(name: string) => $emit('click-ghost', name)"
+        />
       </div>
     </template>
 
@@ -291,8 +291,7 @@ const headerStyle = computed(() => {
   const color = conceptColorHex.value
   const sel = isSelected.value
   return {
-    borderLeft: `3px solid ${color}`,
-    paddingLeft: 'calc(0.5rem - 2px)',
+    paddingLeft: '0.5rem',
     backgroundColor: sel ? getHexColorLight(color) : 'transparent',
   }
 })
@@ -307,8 +306,7 @@ const ghostHeaderStyle = computed(() => {
   const color = conceptColorHex.value
   const sel = isSelected.value
   return {
-    borderLeft: `2px dashed ${color}66`,
-    paddingLeft: 'calc(0.5rem - 1px)',
+    paddingLeft: '0.5rem',
     backgroundColor: sel ? getHexColorLight(color) : 'transparent',
   }
 })

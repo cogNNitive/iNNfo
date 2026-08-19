@@ -5,7 +5,7 @@ fields:
   path: "apps/launcher"
   framework: "Vue 3"
   build: "Vite"
-  description: "Main launcher for the iNNv0 iNNfo ecosystem"
+  description: "Main launcher for the CogNNitive iNNfo ecosystem"
 markers:
   weight: 10
 ---

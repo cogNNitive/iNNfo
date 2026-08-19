@@ -191,5 +191,68 @@ matrices:
 
     expect(reparsedDocNode.fields['Problems-Values Matrix||Problem 1||Value A']?.value).toBe('X')
   })
+
+  it('persists dynamic relational matrix definitions from node.fields to serialized markdown', async () => {
+    const docWithoutMatrix = `---
+spec_version: "V_0-1-1"
+level: 3
+title: "Matrix Definitions Test"
+---
+
+# NN index
+
+* [[Problems]]
+* [[Values]]
+
+# NN Problems
+
+## NN Problems: Problem 1
+
+# NN Values
+
+## NN Values: Value A
+`
+    const tree: FakeTree = { 'index.md': indexMd, 'Doc_NN.md': docWithoutMatrix }
+    const root = buildFakeTree('workspace', tree)
+    const parsed = await recursiveParse(root)
+
+    const docNode = Object.values(parsed.nodes).find((n) => n.name === 'Doc')!
+
+    // Simulate user editing/adding matrix definitions (writing to node.fields[__matrix_defs])
+    docNode.fields['__matrix_defs'] = {
+      value: [
+        {
+          name: 'My Custom Matrix',
+          source: 'Problems',
+          target: 'Values',
+          widgetType: 'scale',
+          params: 'min:1;max:5',
+          description: 'A scale matrix.',
+        },
+      ],
+    }
+
+    let writtenContent: string | null = null
+    const capturingDriver: ModelDriver = {
+      readModel: async () => {
+        throw new Error('not expected')
+      },
+      writeModel: async (_uri: string, model: ParsedModel) => {
+        writtenContent = model.rawContent
+      },
+      listChildren: async () => [],
+      listAssets: async () => [],
+    }
+
+    await recursiveSerialize(parsed.nodes, new Set([docNode.id]), capturingDriver)
+    expect(writtenContent).not.toBeNull()
+    expect(writtenContent!).toContain('matrices:')
+    expect(writtenContent!).toContain('  - name: "My Custom Matrix"')
+    expect(writtenContent!).toContain('    source: "Problems"')
+    expect(writtenContent!).toContain('    target: "Values"')
+    expect(writtenContent!).toContain('    params: "min:1;max:5"')
+    expect(writtenContent!).toContain('    widget: "scale"')
+    expect(writtenContent!).toContain('    description: "A scale matrix."')
+  })
 })
 

@@ -125,4 +125,91 @@ describe('modelStore', () => {
     expect(specNode!.localMetamodel?.concepts[0].name).toBe('Market')
     expect(specNode!.localMetamodel?.concepts[0].color).toBe('blue')
   })
+
+  it('preserves nested taxonomy under concept for elements when serialized', async () => {
+    const { buildFakeTree } = await import('../helpers/fakeFs')
+    const { recursiveSerialize } = await import('../../src/model/recursiveSerializer')
+
+    const indexMd = '# NN index\n* [[model_NN.md]]'
+    const modelMd = [
+      '---',
+      'spec_version: "V_0-1-1"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "My Model"',
+      '---',
+      '',
+      '# NN index',
+      '* [[Problems]]',
+      '  * [[Problem One]]',
+      '',
+      '# NN Problems',
+      '## NN Problems: Problem One',
+    ].join('\n')
+
+    const fakeTree = buildFakeTree('workspace', {
+      'index.md': indexMd,
+      'model_NN.md': modelMd,
+    })
+
+    const modelStore = useModelStore()
+    await modelStore.parseFromHandle(fakeTree)
+
+    // Locate the root node
+    const rootId = modelStore.rootIds[0]
+    const rootNode = modelStore.getNode(rootId)
+    expect(rootNode).toBeDefined()
+
+    // Run serialization on the root node using recursiveSerialize
+    await recursiveSerialize(modelStore.nodes, new Set([rootId]))
+    const serialized = rootNode!.rawContent ?? ''
+    console.log("SERIALIZED OUTPUT INDEX:\n", serialized.substring(serialized.indexOf('# NN index'), serialized.indexOf('# NN Problems')))
+
+    expect(serialized).toContain('  * [[Problem One]]')
+  })
+
+  it('saves newly created element when serialized', async () => {
+    const { buildFakeTree } = await import('../helpers/fakeFs')
+    const { recursiveSerialize } = await import('../../src/model/recursiveSerializer')
+
+    const indexMd = '# NN index\n* [[model_NN.md]]'
+    const modelMd = [
+      '---',
+      'spec_version: "V_0-1-1"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "My Model"',
+      '---',
+      '',
+      '# NN index',
+      '* [[Problems]]',
+      '  * [[Problem One]]',
+      '',
+      '# NN Problems',
+      '## NN Problems: Problem One',
+    ].join('\n')
+
+    const fakeTree = buildFakeTree('workspace', {
+      'index.md': indexMd,
+      'model_NN.md': modelMd,
+    })
+
+    const modelStore = useModelStore()
+    await modelStore.parseFromHandle(fakeTree)
+
+    const rootId = modelStore.rootIds[0]
+
+    // Create a new child under the concept 'Problems'
+    const newId = modelStore.createChild(rootId, 'Problem Two', 'Problems', 'element')
+    expect(newId).toBe(`${rootId}/Problem Two`)
+
+    // Run serialization on the root node using recursiveSerialize
+    await recursiveSerialize(modelStore.nodes, new Set([rootId]))
+    const serialized = modelStore.getNode(rootId)!.rawContent ?? ''
+
+    console.log("SERIALIZED MODEL WITH NEW ELEMENT:\n", serialized)
+
+    expect(serialized).toContain('## NN Problems: Problem Two')
+    expect(serialized).toContain('  * [[Problem Two]]')
+  })
 })
