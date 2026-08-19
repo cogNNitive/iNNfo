@@ -23,7 +23,7 @@ import { resolveParentChainNode } from './resolver-node.js'
 export function deriveNameFromUrl(url: string): string {
   return basename(url)
     .replace(/\.(md|markdown)$/i, '')
-    .replace(/_NN$/i, '')
+    .replace(/_(NN|FORMAT|F)$/i, '')
 }
 
 import { normalizeId } from './list-read.js'

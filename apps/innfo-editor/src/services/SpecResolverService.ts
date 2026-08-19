@@ -84,16 +84,17 @@ async function resolvePathInHandle(
 }
 
 /**
- * Dev-only fallback: resolves a template from the repo's `specs/latest`
- * directory (served by vite at `/specs/latest`). `parentName` is a canonical
- * name like `procedures_V_0-3-0`; the latest folder uses unversioned stable
- * names, so we derive the folder/slug (`procedures`) and load its `_NN.md`.
+ * Dev-only fallback: resolves a template from the repo's `specs` directory
+ * (served by vite at `/specs`, see `vite.config.ts` `serveLocalSpecs`).
+ * `parentName` is a canonical, filename-encoded template name (e.g.
+ * `business_V_0-1-0`); the template lives under its own `specs/templates/{slug}/`
+ * folder alongside its samples (see `spec-versioning`, R-SV-01).
  */
 async function tryDevLocalTemplate(parentName: string): Promise<string | null> {
   if (!import.meta.env.DEV) return null
   const slug = parentName.replace(/_V_\d+-\d+-\d+$/, '')
   if (!slug || slug === parentName) return null
-  const localUrl = `/specs/latest/level2/${slug}/${slug}_NN.md`
+  const localUrl = `/specs/templates/${slug}/${parentName}_NN.md`
   try {
     const resp = await fetch(localUrl)
     if (!resp.ok) return null
@@ -113,7 +114,7 @@ async function tryDevLocalTemplate(parentName: string): Promise<string | null> {
  *      the parent name or the URL's basename;
  *   2. the `parent_spec.url` itself when it is a local/relative path
  *      (resolved against the workspace handle instead of fetch());
- *   3. dev-only `specs/latest` fallback;
+ *   3. dev-only `specs/templates/{name}/` fallback (served by vite);
  *   4. network fetch, ONLY for http(s) URLs.
  *
  * Locally-resolved and fetched templates are persisted back to `specs/`
@@ -142,12 +143,12 @@ export async function resolveParentSpecs(
     // Name comparison: strip trailing _NN from node name since parent_spec.name
     // (e.g. "business_V_0-1-1") doesn't include it but the filename-derived node
     // name does (e.g. "business_V_0-1-1_NN").
-    const normalizedParent = parentName.replace(/_NN$/, '')
+    const normalizedParent = parentName.replace(/_(NN|FORMAT|F)$/i, '')
     const existingPeer = rootIds.find((rid) => {
       if (rid === rootId) return false
       const candidate = nodes[rid]
       if (!candidate?.localMetamodel?.concepts?.length) return false
-      const candidateName = candidate.name?.replace(/_NN$/, '')
+      const candidateName = candidate.name?.replace(/_(NN|FORMAT|F)$/i, '')
       return candidateName === normalizedParent
     })
     if (existingPeer) continue
@@ -230,7 +231,7 @@ export async function resolveParentSpecs(
     // Write-once: specs/ content is immutable by convention, so an existing
     // file is left as authoritative rather than overwritten.
     if (text && handle && specFilename && !specFilename.startsWith('spec:')) {
-      const persistName = parentName.replace(/\.md$/i, '').replace(/_NN$/, '')
+      const persistName = parentName.replace(/\.md$/i, '').replace(/_(NN|FORMAT|F)$/i, '')
       const filename = `${persistName}_NN.md`
       try {
         const specsDir = await handle.getDirectoryHandle('specs', { create: true })

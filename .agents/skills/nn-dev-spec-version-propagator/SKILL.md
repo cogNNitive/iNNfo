@@ -1,64 +1,57 @@
 ---
 name: nn-dev-spec-version-propagator
 description: >
-  Detect and propagate specification version bumps across the entire repo.
-  When the iNNfo spec (or any spec) changes version, this skill identifies
-  every file that needs updating â€” frontmatter, file names, URLs, constants,
-  documentation, and test fixtures.
+  Keep the single default-version constant in sync after an iNNfo (L0/L1) spec
+  bump, and detect any stray reference to a removed/legacy spec path. Since
+  `spec-versioning` made every spec artifact immutable and filename-encoded
+  (a bump always creates a new file; nothing downstream is ever silently
+  repointed), this skill's job is now narrow: update the one source-of-truth
+  constant and confirm the checker script finds no leftover references to the
+  old file.
 trigger: >
   spec version bump, propagate version, version propagation, update spec version,
-  actualizar versiÃ³n especificaciÃ³n, version bump, bump spec, check spec version,
-  stale version references, update format version, rebase specs
+  actualizar versión especificación, version bump, bump spec, check spec version,
+  stale version references, update format version
 source: iNNfo
-version: "1.0.0"
+version: "2.0.0"
 ---
 
-# Spec Version Propagator
+# Spec Version Propagator (residual scope)
 
 ## Purpose
 
-The iNNfo ecosystem has a strict parent-chain dependency graph. When a specification version changes (`V_0-2-N` â†’ `V_0-2-M`), the change **ripples** through every file that references that version â€” directly or transitively.
+Before `spec-versioning` (see `openspec/changes/archive/*/specs/spec-versioning/spec.md`
+once archived, or the live `openspec/specs/spec-versioning/spec.md`), a spec bump had to be
+manually propagated across a 13-category fan-out: templates, models, samples, test
+fixtures, source constants, docs, and CHANGELOGs. That fan-out is gone by design —
+every spec artifact under `specs/` is immutable and filename-encoded
+(`specs/iNNfo_V_x-y-z_NN.md`, `specs/templates/{name}/{name}_V_x-y-z_NN.md`). A bump
+**always creates a new file**; every existing consumer keeps pointing at the exact
+file it was authored against, so there is nothing to silently repoint or break.
 
-This skill maps the **complete propagation graph** and provides a companion script to detect every stale file.
+This skill's residual job is two mechanical checks, both scoped to the L0/L1 specs
+(`defiNNe`, `iNNfo`) — L2 template bumps do **not** need this skill, since nothing
+consumes an L2 template implicitly by "latest" anymore (see the passive
+template-version badge in `spec-versioning`'s D3 for how consumers learn about a
+newer L2 template, out of scope here):
 
-## Hierarchy & Propagation Rules
-
-```
-Level 0: defiNNe (meta-spec, rarely bumped)
-  â”‚  parent of
-  â–¼
-Level 1: iNNfo (the concrete spec)
-  â”‚  parent of
-  â–¼
-Level 2: Templates (business, procedures, organization)
-  â”‚  parent of
-  â–¼
-Level 3: Models, fixtures, samples
-```
-
-### What changes when a spec version bumps
-
-| Artifact | What to Update | Example |
-|---|---|---|
-| **Spec file itself** | File name rename; `spec_version`; `spec_url` | `FORMAT_V_0-1-2_FORMAT.md` â†’ `FORMAT_V_0-1-3_FORMAT.md` |
-| **Level 2 Templates** | `parent.name` (e.g. `FORMAT_V_0-1-2` â†’ `FORMAT_V_0-1-3`); `parent.url`; optionally `spec_version` | `business_V_0-1-1_FORMAT.md` |
-| **Level 3 Models & Samples** | `spec_version`; `spec_url` (if it references the spec); `parent.url` (if it references a template) | `Ghostbusters_V_0-1-2_business_FORMAT.md` |
-| **Test fixtures** | Same as Level 3 models | `tests/fixtures/*_F.md` |
-| **Test inline frontmatter** | Hardcoded version strings in `.test.ts` files | `.test.ts` with `spec_version: "V_0-1-2"` |
-| **Source code constants** | `DEFAULT_INNFO_VERSION` in `constants.ts` | |
-| **Documentation** | Version strings, file paths, URLs in `.md` docs | `docs/spec_consolidation.md` |
-| **CHANGELOGs** | New entry + version strings | `specs/CHANGELOG.md`, `CHANGELOG.md` |
-| **Workspace index** | `spec_version` if it references the spec | `tests/fixtures/workspace-index.md` |
+1. **Keep `DEFAULT_INNFO_VERSION` in sync.** `apps/innfo-editor/src/utils/constants.ts`
+   holds the single source-of-truth default L1 version used when a model omits
+   `spec_version`. When `specs/iNNfo_V_x-y-z_NN.md` is bumped, update this constant
+   to match.
+2. **Confirm no stray legacy references remain.** After any spec change (bump,
+   rename, deletion), run the checker script in `--check` mode against the *old*
+   version/path to confirm nothing still points at it.
 
 ## Companion Script
 
 The **canonical detection tool** is `scripts/check-spec-version.mjs`.
 
 ```bash
-# Scan for all files referencing a specific version
+# Scan for all files still referencing an old/removed version
 node scripts/check-spec-version.mjs --version V_0-1-2
 
-# Same, but categorize by file type (specs, templates, models, tests, source, docs)
+# Same, but categorize by file type
 node scripts/check-spec-version.mjs --version V_0-1-2 --by-type
 
 # Check mode: exit code 1 if any stale references found (for CI/commit hooks)
@@ -67,122 +60,72 @@ node scripts/check-spec-version.mjs --version V_0-1-2 --check
 # Scan for ALL known spec versions in the repo (inventory mode, excludes archives)
 node scripts/check-spec-version.mjs --inventory
 
-# Include archived files (historical models, backup specs) in the scan
-node scripts/check-spec-version.mjs --version V_0-1-2 --include-archives
-
-# After updating a spec, verify no old references remain
-node scripts/check-spec-version.mjs --version V_0-1-1 --check
+# Verify every hardcoded raw.githubusercontent.com URL in source files still
+# resolves to an existing file under the current specs/ tree
+node scripts/check-spec-version.mjs --check-urls
 ```
 
-> **Note:** By default, `archive/` and any directory named `archive` inside `openspec/` are excluded. Use `--include-archives` for comprehensive scans.
+> **Note:** By default, `archive/` and any directory named `archive` inside
+> `openspec/` are excluded. Use `--include-archives` for a comprehensive scan when
+> auditing history, not when gating a change.
 
-## Propagation Procedure
+## Procedure
 
-When bumping a spec version, follow this order:
+### Bumping the L1 spec (`iNNfo`)
 
-### Step 1 â€” Bump the spec itself
+1. Create the new file: `specs/iNNfo_V_x-y-z_NN.md` (never edit the previous
+   version file in place).
+2. Update `DEFAULT_INNFO_VERSION` in
+   `apps/innfo-editor/src/utils/constants.ts` to the new version.
+3. Run `node scripts/check-spec-version.mjs --version <old-version> --check` to
+   confirm no file still assumes the old version is current (a non-zero exit means
+   something — typically a doc or fixture — still hardcodes the old value; fix and
+   re-run).
 
-```bash
-# 1a. Copy the spec file to the new version name
-cp specs/FORMAT_V_0-1-2_FORMAT.md specs/FORMAT_V_0-1-3_FORMAT.md
+### Bumping the L0 spec (`defiNNe`)
 
-# 1b. Update frontmatter in the new file:
-#   - spec_version: "V_0-1-3"
-#   - spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.2/specs/FORMAT_V_0-1-3_FORMAT.md"
-#   (use the tag that matches the repo release, not necessarily the spec version)
+Same as above, minus the constant update — `defiNNe` has no corresponding
+source-code default (it is only referenced via `parent` from the L1 spec).
 
-# 1c. If the content changed, update the spec body accordingly
-```
+### Bumping an L2 template
 
-### Step 2 â€” Update source-code single source of truth
+No propagation step is required. Create the new versioned file under
+`specs/templates/{name}/`; existing models keep resolving against the version they
+were authored with (write-once guarantee, `spec-resolution` R-LSR-02). The
+D3 badge (`spec-versioning`, out of scope for this skill) is how a user *learns*
+a newer template version exists; this skill does not drive that flow.
 
-Edit `apps/format-editor/src/utils/constants.ts`:
+### Deleting or renaming a spec path
 
-```typescript
-export const DEFAULT_INNFO_VERSION = 'V_0-2-0';
-```
-
-### Step 3 â€” Run the checker
-
-```bash
-node scripts/check-spec-version.mjs --version V_0-1-2 --by-type
-```
-
-This lists every file still referencing the OLD version.
-
-### Step 4 â€” Propagate to templates (Level 2)
-
-For each template spec (`business_V_0-1-1_NN.md`, `procedures_V_0-1-1_NN.md`, `organization_V_0-1-1_NN.md`):
-
-- Update `parent.name` to point to the new FORMAT version
-- Update `parent.url` to point to the new FORMAT file URL
-- Optionally bump the template's own version in `spec_version`
-
-### Step 5 â€” Propagate to models, samples, and fixtures (Level 3)
-
-For every model/fixture/sample that references the old version:
-
-- Update `spec_version` (the spec version the model was authored against)
-- Update `spec_url` if it references the spec directly
-- Update `parent.url` if it references a template whose file path changed
-
-### Step 6 â€” Update test inline frontmatter
-
-Test files like `*.test.ts` often embed version strings. The checker script finds these.
-
-### Step 7 â€” Update documentation
-
-Search and replace version references in `docs/`:
-
-- `docs/spec_consolidation.md`
-- `docs/documentation/specifications.md`
-- `docs/documentation/usage.md`
-- `docs/SESSION_HANDOFF.md` (historical only)
-- `docs/changesets/*.md`
-
-### Step 8 â€” Update CHANGELOGs
-
-- Add new version entry to `specs/CHANGELOG.md` (spec changelog)
-- Add new version entry to `CHANGELOG.md` (repo changelog)
-
-### Step 9 â€” Final verification
-
-```bash
-node scripts/check-spec-version.mjs --version V_0-1-1 --check
-# Should exit 0 â€” no remaining old references
-```
+Run `node scripts/check-spec-version.mjs --check-urls` after the change to confirm
+no hardcoded `raw.githubusercontent.com` URL in `.ts`/`.vue` source now points at a
+path that no longer exists.
 
 ## File Pattern Reference
 
-The script scans these glob patterns:
+The script scans these glob-equivalent patterns (see `check-spec-version.mjs`'s
+`classifyFile`/`collectFiles` for the exact logic — it walks the whole repo minus
+`node_modules`/`.git`/`archive` dirs, so no explicit glob list needs to be kept in
+sync here):
 
-| Pattern | Category | What version field is checked |
-|---|---|---|---|
-| `specs/*_F.md` (and `_FORMAT.md` for frozen) | Specs & Templates | `spec_version`, `parent.name`, `parent.url` |
-| `specs/*/samples/*_F.md` | Samples | `spec_version`, `spec_url`, `parent.url` |
-| `tests/fixtures/*_F.md` | Test Fixtures (historic, `kb`/`FOLDER` models removed in V_0-2-0) | `spec_version`, `spec_url`, `parent.url` |
-| `tests/fixtures/*.md` | Workspace index | `spec_version` |
-| `apps/**/tests/fixtures/models/*_F.md` | App Fixtures | `spec_version`, `spec_url`, `parent.url` |
-| `apps/**/tests/**/*.test.ts` | Test code | Inline frontmatter strings |
-| `packages/**/tests/**/*.test.ts` | Package tests | Inline frontmatter strings |
-| `apps/**/src/**/*.{ts,vue}` | Source code | `DEFAULT_INNFO_VERSION`, template and sample paths/URLs |
-| `packages/**/src/**/*.ts` | Source code | Version strings, comments |
-| `docs/**/*.md` | Documentation | Version string references |
-| `CHANGELOG.md` | Changelog | Version entries |
-| `specs/CHANGELOG.md` | Spec changelog | Version entries |
-| `.agents/skills/**/SKILL.md` | Skills | Version references in contexts |
+| Category | Typical location | What version field is checked |
+|---|---|---|
+| Spec (L0/L1) | `specs/*_NN.md` | filename, `specification_version`, `parent` |
+| Template (L2) | `specs/templates/{name}/*_NN.md` | filename, `specification_version`, `template_version`, `parent` |
+| Model / Sample | `specs/templates/{name}/samples/*_NN.md`, `apps/**/tests/fixtures/**/*.md` | filename, `model_version`, `parent` |
+| Test | `**/*.test.ts`, `**/*.spec.ts` | inline frontmatter strings |
+| Source | `apps/**/src/**/*.{ts,vue}`, `packages/**/src/**/*.ts` | `DEFAULT_INNFO_VERSION`, hardcoded template/sample URLs |
+| Docs | `docs/**/*.md` | version string references |
+| Changelog | `CHANGELOG.md` (repo root — the only changelog; `specs/CHANGELOG.md` was removed by `spec-versioning`) | version entries |
 
-## URL Version Format
-
-When updating URLs, note the two-part version scheme:
+## URL Format
 
 ```
-spec_url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/FORMAT_V_0-1-2_FORMAT.md"
-                                         ^^^^^^^ ^^^^^^^
-                                    repo-tag       spec-file-version
+spec_url / parent / specification_url:
+  "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+  "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
 ```
 
-- **Repo tag** (`v0.1.1`): The Git tag of the release that contains this spec version
-- **Spec file version** (`V_0-1-2`): The file name's version
-
-These are often different! The repo tag stays at the last release; the spec file version is the spec's own version number. When bumping, you typically only bump the **spec file version**, not the repo tag (that happens at release time).
+Always `main` branch, never a git tag — the filename itself is the pin (see
+`spec-versioning`, A4). There is no `specs/latest/`, `specs/v0.x.y/`, or
+`models/specs/` alias to choose between anymore.

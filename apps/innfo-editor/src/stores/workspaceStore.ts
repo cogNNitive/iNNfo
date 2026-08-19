@@ -8,7 +8,7 @@ import {
   bumpVersion,
   formatVersionString,
 } from '../utils/version'
-import { buildSpecificationUrl, buildSpecificationUrlFromMain } from '../utils/constants'
+import { buildSpecificationUrl } from '../utils/constants'
 import { IndexedDbWorkspaceRepository } from '../repositories/IndexedDbWorkspaceRepository'
 import type { IWorkspaceRepository } from '../repositories/IWorkspaceRepository'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
@@ -372,31 +372,21 @@ export const useWorkspaceStore = defineStore('workspace', {
           // Not found — proceed to download
         }
 
-        // URL patterns ordered by correctness for the current repo structure
-        const urls = [
-          // Model-published path (main branch)
-          `https://raw.githubusercontent.com/cogNNitive/iNNfo/main/models/specs/iNNfo_${specVersion}_NN.md`,
-          // Tag-pinned URL (may not exist for unreleased versions)
-          buildSpecificationUrl(specVersion),
-          // Main branch fallback (legacy path)
-          buildSpecificationUrlFromMain(specVersion),
-        ]
-
+        // Single URL strategy: the filename already encodes the version, so the
+        // `main` branch is content-pinned (see `spec-versioning`, A4). There is
+        // no separate tag-pinned or `models/specs/` fallback anymore.
         let text = ''
-        for (const url of urls) {
-          try {
-            const resp = await fetch(url)
-            if (resp.ok) {
-              text = await resp.text()
-              break
-            }
-          } catch {
-            continue
+        try {
+          const resp = await fetch(buildSpecificationUrl(specVersion))
+          if (resp.ok) {
+            text = await resp.text()
           }
+        } catch {
+          // network failure — degrade gracefully below
         }
 
         if (!text) {
-          console.warn(`[spec] Failed to fetch spec for version ${specVersion} from any URL`)
+          console.warn(`[spec] Failed to fetch spec for version ${specVersion}`)
           return
         }
 

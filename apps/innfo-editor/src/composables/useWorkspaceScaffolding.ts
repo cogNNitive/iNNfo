@@ -53,10 +53,10 @@ Read this file FIRST when entering this workspace. It tells you how to configure
 
 ## Skills
 
-iNNv0 skills are maintained at \`https://github.com/iNNfo/actioNN\`. Clone the repo to get all skills:
+CogNNitive skills are maintained at \`https://github.com/cogNNitive/actioNN\`. Clone the repo to get all skills:
 
 \`\`\`
-git clone https://github.com/iNNfo/actioNN.git
+git clone https://github.com/cogNNitive/actioNN.git
 \`\`\`
 
 ### Installing skills per agent

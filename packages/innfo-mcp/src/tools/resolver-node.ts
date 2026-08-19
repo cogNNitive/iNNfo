@@ -37,7 +37,7 @@ function normalizeVersion(versionStr: string): string {
 
 function parseSpecName(name: string) {
   // Strip file extensions and NN/FORMAT suffixes
-  const clean = name.replace(/\.(md|markdown)$/i, '').replace(/_(NN|FORMAT)$/i, '')
+  const clean = name.replace(/\.(md|markdown)$/i, '').replace(/_(NN|FORMAT|F)$/i, '')
   // Split at _V_ to extract base and version
   const parts = clean.split(/_V_/i)
   const base = parts[0].toLowerCase()
@@ -98,7 +98,7 @@ export function canonicalSpecFilename(requestName: string, content: string): str
   // Preserve the request name's original case (iNNfo, defiNNe, cogNNitive...).
   const base = requestName
     .replace(/\.(md|markdown)$/i, '')
-    .replace(/_(NN|FORMAT)$/i, '')
+    .replace(/_(NN|FORMAT|F)$/i, '')
     .split(/_V_/i)[0]
   return `${base}_V_${fmVersion.replace(/\./g, '-')}`
 }

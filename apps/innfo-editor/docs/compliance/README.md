@@ -3,7 +3,7 @@
 ## Purpose
 
 This document describes how the `innfo-editor` application implements the defiNNe / iNNfo
-specification requirements (`specs/v0.2.0/**`), and how it validates that models meet those
+specification requirements (`specs/**`), and how it validates that models meet those
 requirements.
 
 ## defiNNe / iNNfo Compliance
@@ -84,6 +84,7 @@ protocol from defiNNe:
 
 ## Versioning
 
-Specs are immutable once published (`specs/v0.2.0/**`). Corrections ship as a new patch
-version (e.g. `business_V_0-2-1`), and `specs/latest/**` is manually re-synced.
+Specs are immutable once published (`specs/**`) — every spec artifact is addressable only
+by its own versioned filename, so a bump always creates a new file rather than mutating or
+re-syncing an alias (see `spec-versioning`, R-SV-01/R-SV-02).
 

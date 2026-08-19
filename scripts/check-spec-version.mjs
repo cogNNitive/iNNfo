@@ -32,7 +32,7 @@ const ARCHIVE_DIRS = new Set(['archive', 'node_modules', '.git', '.playwright-mc
 const ACTIVE_IGNORE = new Set(['node_modules', '.git', '.playwright-mcp', 'home-page'])
 
 const FORMAT_VERSION_RE = /V_\d+-\d+-\d+/g
-const GITHUB_RAW_URL_RE = /https:\/\/raw\.githubusercontent\.com\/innV0\/iNNfo\/(?:main|v[\d.]+)\/([^\s"')\]]+)/g
+const GITHUB_RAW_URL_RE = /https:\/\/raw\.githubusercontent\.com\/cogNNitive\/iNNfo\/(?:main|v[\d.]+)\/([^\s"')\]]+)/g
 
 // â”€â”€ File Collection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -93,7 +93,9 @@ function classifyFile(relPath) {
     return 'source'
   if (relPath.startsWith('docs') && relPath.endsWith('.md')) return 'doc'
   if (relPath.startsWith('.agents') && relPath.endsWith('.md')) return 'skill'
-  if (relPath === 'CHANGELOG.md' || relPath === 'specs/CHANGELOG.md') return 'doc'
+  // specs/CHANGELOG.md was removed by spec-versioning — root CHANGELOG.md is
+  // now the only changelog.
+  if (relPath === 'CHANGELOG.md') return 'doc'
   if (
     relPath.startsWith('specs') &&
     relPath.endsWith('.md') &&

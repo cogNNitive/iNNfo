@@ -1,7 +1,7 @@
 import { defineAsyncComponent, type Component } from 'vue'
 import type { ExtensionManifest, ExtensionContext } from './types'
-import proceduresManifest from '../../../../specs/v0.2.0/level2/procedures/extension/manifest.json'
-import projectsManifest from '../../../../specs/latest/level2/projects/extension/manifest.json'
+import proceduresManifest from './procedures/manifest.json'
+import projectsManifest from './projects/manifest.json'
 
 export interface RegisteredExtension {
   manifest: ExtensionManifest

@@ -10,7 +10,7 @@
  *   3. Update each stale file to match.
  *   4. Never duplicate this value as a hardcoded string elsewhere in .ts/.vue.
  */
-export const DEFAULT_INNFO_VERSION = 'V_0-2-0'
+export const DEFAULT_INNFO_VERSION = 'V_0-3-0'
 
 /** Default template name for new documents. */
 export const DEFAULT_TEMPLATE_NAME = ''
@@ -25,28 +25,21 @@ export const MAX_MARKER_SCORE = 3
 export const MARKER_CYCLE_COUNT = MAX_MARKER_SCORE + 1
 
 /**
- * Builds the canonical raw GitHub URL for an iNNfo specification version.
+ * Builds the canonical raw GitHub URL for an iNNfo (L1) specification version.
  * Use this instead of concatenating the URL by hand.
  *
- * The folder segment preserves the uppercase `V_x-y-z` form.
+ * Every spec file under `specs/` is immutable and filename-encoded, so the
+ * `main` branch is already content-pinned — there is no separate tag-pinned
+ * vs. main-branch strategy to choose between (see `spec-versioning`, A4).
  */
 export function buildSpecificationUrl(version: string = DEFAULT_INNFO_VERSION): string {
-  // Tag-pinned URL first (e.g. v0.1.2), falls back to main when tag doesn't exist
-  const tag = 'v' + version.slice(2).replace(/-/g, '.')
-  return `https://raw.githubusercontent.com/cogNNitive/iNNfo/${tag}/specs/iNNfo_${version}_NN.md`
-}
-
-/**
- * Same as buildSpecificationUrl but always uses the main branch.
- * Use this when the spec version may not have a published tag yet (e.g. starters, sandbox).
- */
-export function buildSpecificationUrlFromMain(version: string = DEFAULT_INNFO_VERSION): string {
   return `https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_${version}_NN.md`
 }
 
 /**
- * Canonical documentation location for a spec version.
+ * Builds the canonical raw GitHub URL for an L2 template version, grouped
+ * under its own `specs/templates/{name}/` folder alongside its samples.
  */
-export function buildDocumentationLocation(version: string = DEFAULT_INNFO_VERSION): string {
-  return `docs/spec/${version}/`
+export function buildTemplateUrl(name: string, version: string = DEFAULT_TEMPLATE_VERSION): string {
+  return `https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/${name}/${name}_${version}_NN.md`
 }

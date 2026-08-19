@@ -48,14 +48,19 @@ export function normalizeSingleModel(
   // When the filename follows the `_NN` convention, surface the problem so an
   // "empty folder" report isn't misleading: the file was found but could not
   // be parsed as a model (e.g. broken YAML delimiters).
-  if (!parsed.frontmatter.spec_version) {
+  const fm = parsed.frontmatter
+  const hasSpecVersion = typeof fm.spec_version === 'string' && fm.spec_version.length > 0
+  const hasLevel = typeof fm.level === 'number'
+  const hasParent = !!(fm.parent || fm.parent_spec)
+
+  if (!hasSpecVersion && !hasLevel && !hasParent) {
     const isNnNamed =
       refName.toLowerCase().endsWith('_nn') || refPath.toLowerCase().endsWith('_nn.md')
     if (isNnNamed) {
       ctx.issues.push({
         path: refPath,
         message:
-          'File uses the _NN naming convention but has no valid iNNfo frontmatter (missing spec_version) — skipped',
+          'File uses the _NN naming convention but has no valid iNNfo frontmatter (missing level, parent or spec_version) — skipped',
       })
     }
     return { nodes: ctx.nodes, issues: ctx.issues }

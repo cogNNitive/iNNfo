@@ -8,15 +8,15 @@ import {
 } from '../src/index'
 import type { SpecDocument } from '../src/types'
 
-const specsLatest = join(import.meta.dirname!, '..', '..', '..', 'specs', 'latest')
+const specsRoot = join(import.meta.dirname!, '..', '..', '..', 'specs')
 
-function readLatest(pathSegments: string): string {
-  return readFileSync(join(specsLatest, pathSegments), 'utf-8')
+function readSpec(pathSegments: string): string {
+  return readFileSync(join(specsRoot, pathSegments), 'utf-8')
 }
 
-describe('Metaplantilla Nivel 1 (specs/latest)', () => {
+describe('Metaplantilla Nivel 1 (specs/)', () => {
   it('level-1 spec declares V_0-3-0 with defiNNe parent and meta-template title', () => {
-    const content = readLatest('level1/iNNfo_NN.md')
+    const content = readSpec('iNNfo_V_0-3-0_NN.md')
     const fm = parseFrontmatter(content)!
     expect(fm.spec_version).toBe('V_0-3-0')
     expect(fm.level).toBe(1)
@@ -27,7 +27,7 @@ describe('Metaplantilla Nivel 1 (specs/latest)', () => {
   })
 
   it('level-1 spec documents the four root primitives', () => {
-    const content = readLatest('level1/iNNfo_NN.md')
+    const content = readSpec('iNNfo_V_0-3-0_NN.md')
     for (const primitive of [
       'Concept Definition',
       'Field Definition',
@@ -41,7 +41,7 @@ describe('Metaplantilla Nivel 1 (specs/latest)', () => {
   })
 
   it('business template exposes its schema as body elements, not frontmatter blocks', () => {
-    const content = readLatest('level2/business/business_NN.md')
+    const content = readSpec('templates/business/business_V_0-1-0_NN.md')
     const fm = parseFrontmatter(content)!
     expect(fm.level).toBe(2)
     expect(fm.concepts).toBeUndefined()
@@ -69,7 +69,7 @@ describe('Metaplantilla Nivel 1 (specs/latest)', () => {
   })
 
   it('procedures template schema extracts concepts, fields, markers, matrices', () => {
-    const content = readLatest('level2/procedures/procedures_NN.md')
+    const content = readSpec('templates/procedures/procedures_V_0-1-0_NN.md')
     const schema = extractTemplateSchemaFromContent(content)
     expect(schema.concepts.map((c) => c.name)).toEqual(['Work', 'Artifact', 'Tools', 'Roles'])
     const work = schema.concepts.find((c) => c.name === 'Work')!
@@ -98,7 +98,7 @@ describe('Metaplantilla Nivel 1 (specs/latest)', () => {
   })
 
   it('organization template schema extracts concepts, fields, markers, matrices', () => {
-    const content = readLatest('level2/organization/organization_NN.md')
+    const content = readSpec('templates/organization/organization_V_0-1-0_NN.md')
     const schema = extractTemplateSchemaFromContent(content)
     expect(schema.concepts.map((c) => c.name)).toEqual(['Organization', 'Roles', 'Position', 'Person'])
     const roles = schema.concepts.find((c) => c.name === 'Roles')!
@@ -110,7 +110,7 @@ describe('Metaplantilla Nivel 1 (specs/latest)', () => {
   })
 
   it('projects template schema extracts concepts, fields, markers, matrices', () => {
-    const content = readLatest('level2/projects/projects_NN.md')
+    const content = readSpec('templates/projects/projects_V_0-1-0_NN.md')
     const schema = extractTemplateSchemaFromContent(content)
     expect(schema.concepts.map((c) => c.name)).toEqual([
       'Project',
@@ -140,7 +140,7 @@ describe('Metaplantilla Nivel 1 (specs/latest)', () => {
   })
 
   it('validates a unified-syntax model against the migrated procedures template', () => {
-    const templateContent = readLatest('level2/procedures/procedures_NN.md')
+    const templateContent = readSpec('templates/procedures/procedures_V_0-1-0_NN.md')
     const templateDoc: SpecDocument = {
       name: 'procedures_V_0-3-0',
       level: 2,
@@ -193,12 +193,12 @@ Reviews the pull request.
 
   it('still parses the migrated templates with the unified parser', () => {
     for (const p of [
-      'level2/business/business_NN.md',
-      'level2/organization/organization_NN.md',
-      'level2/procedures/procedures_NN.md',
-      'level2/projects/projects_NN.md',
+      'templates/business/business_V_0-1-0_NN.md',
+      'templates/organization/organization_V_0-1-0_NN.md',
+      'templates/procedures/procedures_V_0-1-0_NN.md',
+      'templates/projects/projects_V_0-1-0_NN.md',
     ]) {
-      const parsed = parseModel(readLatest(p))
+      const parsed = parseModel(readSpec(p))
       expect(parsed.elements.has('Concept Definition')).toBe(true)
       expect(parsed.elements.has('Field Definition')).toBe(true)
       expect(parsed.elements.has('Marker Definition')).toBe(true)
@@ -207,7 +207,7 @@ Reviews the pull request.
   })
 
   it('parseModel + extractTemplateSchema agree with extractTemplateSchemaFromContent', () => {
-    const content = readLatest('level2/business/business_NN.md')
+    const content = readSpec('templates/business/business_V_0-1-0_NN.md')
     const direct = extractTemplateSchema(parseModel(content))
     const fromContent = extractTemplateSchemaFromContent(content)
     expect(direct.concepts.length).toBe(fromContent.concepts.length)
@@ -217,12 +217,12 @@ Reviews the pull request.
 
   it('migrated samples use the unified syntax with no legacy markers', () => {
     for (const p of [
-      'level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
-      'level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
-      'level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
-      'level2/projects/samples/SoftwareReleaseProject_V_1-0-0_projects_NN.md',
+      'templates/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
+      'templates/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
+      'templates/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
+      'templates/projects/samples/SoftwareReleaseProject_V_1-0-0_projects_NN.md',
     ]) {
-      const content = readLatest(p)
+      const content = readSpec(p)
       const body = content.replace(/^---[\s\S]*?---\n/, '')
       expect(body).not.toMatch(/# _NN/)
       expect(body).not.toMatch(/[*-]\s+_NN/)
@@ -233,7 +233,7 @@ Reviews the pull request.
   })
 
   it('parses the migrated Ghostbusters sample with fields and matrices', () => {
-    const content = readLatest('level2/business/samples/Ghostbusters_V_0-1-2_business_NN.md')
+    const content = readSpec('templates/business/samples/Ghostbusters_V_0-1-2_business_NN.md')
     const parsed = parseModel(content)
     expect(parsed.elements.has('Stakeholders')).toBe(true)
     expect(parsed.elements.get('Stakeholders')!.length).toBeGreaterThan(5)
@@ -243,7 +243,7 @@ Reviews the pull request.
   })
 
   it('parses the migrated CodeReviewProcess sample with key:: value properties', () => {
-    const content = readLatest('level2/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md')
+    const content = readSpec('templates/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md')
     const parsed = parseModel(content)
     const work = parsed.elements.get('Work')!
     const openPr = work.find((e) => e.name === 'Open Pull Request')!
@@ -256,7 +256,7 @@ Reviews the pull request.
   })
 
   it('parses the migrated EngineeringTeam sample with scope properties', () => {
-    const content = readLatest('level2/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md')
+    const content = readSpec('templates/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md')
     const parsed = parseModel(content)
     const roles = parsed.elements.get('Roles')!
     expect(roles).toHaveLength(3)
@@ -265,7 +265,7 @@ Reviews the pull request.
   })
 
   it('parses the SoftwareReleaseProject sample with dependencies and RACI matrix', () => {
-    const content = readLatest('level2/projects/samples/SoftwareReleaseProject_V_1-0-0_projects_NN.md')
+    const content = readSpec('templates/projects/samples/SoftwareReleaseProject_V_1-0-0_projects_NN.md')
     const parsed = parseModel(content)
     const tasks = parsed.elements.get('Task')!
     expect(tasks).toHaveLength(4)

@@ -22,6 +22,10 @@ e2e-fixtures/
 .engram/
 # Backup
 specs.bak/
+# Local scratch / demo artifacts
+temp_demo.tmp/
+scratch_*.mjs
+*.parse_test.js
 # Generated exports (AI agent output)
 traNNsform/outputs/*
 !/traNNsform/outputs/.gitkeep

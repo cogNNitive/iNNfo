@@ -18,60 +18,22 @@ import {
 } from '../src/index'
 import type { ElementNode } from '../src/types'
 
-const specsV020 = join(import.meta.dirname!, '..', '..', '..', 'specs', 'v0.2.0')
-const specsLatest = join(import.meta.dirname!, '..', '..', '..', 'specs', 'latest')
+const specsRoot = join(import.meta.dirname!, '..', '..', '..', 'specs')
 
 function readSpec(pathSegments: string): string {
-  return readFileSync(join(specsV020, pathSegments), 'utf-8')
+  return readFileSync(join(specsRoot, pathSegments), 'utf-8')
 }
-function readLatestSpec(pathSegments: string): string {
-  return readFileSync(join(specsLatest, pathSegments), 'utf-8')
-}
-describe('defiNNe (level 0)', () => {
-  const content = readSpec('level0/defiNNe_V_0-2-0_NN.md')
-  const fm = parseFrontmatter(content)!
 
-  it('parses frontmatter', () => {
-    expect(fm.level).toBe(0)
-    expect(fm.spec_version).toBe('V_0-2-0')
-    expect(fm.parent_spec).toBeUndefined()
-    expect(fm.title).toContain('defiNNe')
-  })
-})
-
-describe('iNNfo (level 1)', () => {
-  const content = readSpec('level1/iNNfo_V_0-2-0_NN.md')
-  const fm = parseFrontmatter(content)!
-
-  it('parses frontmatter', () => {
-    expect(fm.level).toBe(1)
-    expect(fm.parent_spec).toBeDefined()
-    expect(fm.parent_spec!.name).toBe('defiNNe_V_0-2-0')
-    expect(fm.title).toContain('iNNfo')
-  })
-})
-
-describe('business template (level 2)', () => {
-  const content = readSpec('level2/business/business_V_0-2-0_NN.md')
-  const fm = parseFrontmatter(content)!
-
-  it('parses frontmatter', () => {
-    expect(fm.level).toBe(2)
-    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-2-0')
-    expect(fm.concepts?.find((c: any) => c.type === 'text')).toBeTruthy()
-    expect(fm.concepts).toBeDefined()
-    expect(fm.concepts!.length).toBeGreaterThan(60)
-    expect(fm.markers).toBeDefined()
-    expect(fm.markers!.length).toBeGreaterThan(0)
-    expect(fm.matrices).toBeDefined()
-    expect(fm.matrices!.length).toBeGreaterThan(10)
-  })
-
-  it('has relationship_types', () => {
-    expect(fm.relationship_types).toBeDefined()
-    expect((fm.relationship_types as any)?.evaluable_matrix?.enabled).toBe(true)
-  })
-})
+// NOTE: the `defiNNe (level 0)`, `iNNfo (level 1)`, `business template (level 2)`,
+// and `procedures template (level 2)` describe blocks that used to live here read
+// the frozen `specs/v0.2.0/**` snapshot, which used the OLD frontmatter-array
+// grammar (`concepts:`/`markers:`/`matrices:` blocks) predating the unified `NN`
+// syntax migration. `spec-versioning` (R-SV-06) deletes that frozen snapshot
+// outright — it was never meant to coexist with the new immutable `specs/`
+// tree — so those old-grammar-specific assertions have no live fixture to read
+// anymore. Equivalent frontmatter/schema-extraction coverage against the
+// CURRENT unified-syntax specs (defiNNe, iNNfo, and all four L2 templates)
+// lives in `tests/metaplantilla-specs.test.ts`.
 
 describe('iNNfo model with _NN markers (level 3)', () => {
   // Use inline content with _NN markers — legacy fixtures with _F are out of scope
@@ -188,7 +150,7 @@ describe('iNNfo model with _NN markers (level 3)', () => {
   it('serializes and re-parses correctly', async () => {
     const { serializeModel } = await import('../src/index')
     const serialized = serializeModel(model)
-    expect(serialized).toContain('spec_version: "V_0-2-0"')
+    expect(serialized).toContain('parent: "https://example.com/business"')
     expect(serialized).toContain('# NN Stakeholders')
     expect(serialized).toContain('# NN matrices: problems-value propositions matrix')
     expect(serialized).toContain('## NN Stakeholders:')
@@ -230,19 +192,6 @@ describe('iNNfo model with _NN markers (level 3)', () => {
   })
 })
 
-describe('procedures template (level 2)', () => {
-  const content = readSpec('level2/procedures/procedures_V_0-2-0_NN.md')
-  const fm = parseFrontmatter(content)!
-
-  it('parses frontmatter', () => {
-    expect(fm.level).toBe(2)
-    expect(fm.parent_spec!.name).toBe('iNNfo_V_0-2-0')
-    expect(fm.concepts).toBeDefined()
-    expect(fm.markers).toBeDefined()
-    expect(fm.matrices).toBeDefined()
-  })
-})
-
 describe('validator', () => {
   const validModelContent = [
     '---',
@@ -265,7 +214,7 @@ describe('validator', () => {
     '',
   ].join('\n')
 
-  const bizTemplateContent = readLatestSpec('level2/business/business_NN.md')
+  const bizTemplateContent = readSpec('templates/business/business_V_0-1-0_NN.md')
   const bizTemplateFm = parseFrontmatter(bizTemplateContent)!
 
   it('validates a model against the migrated business template', () => {
@@ -1868,11 +1817,41 @@ describe('FOLDER mode rejection (FR-007)', () => {
   })
 })
 
+// The frozen `specs/v0.2.1/**` snapshot this used to read from disk is deleted
+// by `spec-versioning` (R-SV-06) — old-grammar frontmatter-array snapshots don't
+// coexist with the new immutable `specs/` tree. This inline fixture preserves
+// the exact per-matrix `description`/`widget`/`values` declarations the
+// business_V_0-2-1 patch introduced (see root CHANGELOG.md, "Business template
+// patch — business_V_0-2-1"), so `normalizeMatrixDecl`'s handling of rich
+// matrix declarations keeps its regression coverage without depending on a
+// deleted file.
 describe('business template V_0-2-1 (patch)', () => {
-  const content = readFileSync(
-    join(import.meta.dirname!, '..', '..', '..', 'specs', 'v0.2.1', 'level2', 'business', 'business_V_0-2-1_NN.md'),
-    'utf-8',
-  )
+  const content = [
+    '---',
+    'specification_version: "V_0-2-1"',
+    'level: 2',
+    'parent_spec:',
+    '  name: "iNNfo_V_0-2-0"',
+    '  url: "https://example.com/iNNfo_V_0-2-0_NN.md"',
+    'title: "Business Template"',
+    'matrices:',
+    '  - name: "Journey map"',
+    '    source: "Journey"',
+    '    target: "Emotions"',
+    '    widget: "set"',
+    '    values: [Max, Very High, High, Slightly High, Neutral, Slightly Low, Low, Very Low, Min]',
+    '    description: "Cross-tabulates Journey steps (rows) against Emotions (columns) to score the emotional intensity of each touchpoint."',
+    '  - name: "Functions-Positions Matrix"',
+    '    source: "Functions"',
+    '    target: "Positions"',
+    '    widget: "boolean"',
+    '    values: [Assumes]',
+    '    description: "Boolean assignment of which Position assumes responsibility for each Function."',
+    '---',
+    '',
+    '> [!NOTE]',
+    '> This is an **iNNfo document**.',
+  ].join('\n')
   const fm = parseFrontmatter(content)!
 
   it('declares V_0-2-1 with parent iNNfo_V_0-2-0', () => {

@@ -14,17 +14,17 @@ const getGitCommitDate = () => {
 }
 
 /**
- * Dev-only middleware that serves the repo's `specs/latest` directory at
- * `/specs/latest`. This lets the home-page samples (and their templates)
+ * Dev-only middleware that serves the repo's `specs` directory at
+ * `/specs`. This lets the home-page samples (and their templates)
  * load the CURRENT working-tree content instead of the published GitHub
  * `main` branch, which may still hold legacy-format files.
  */
 function serveLocalSpecs(): Plugin {
-  const specsRoot = resolve(__dirname, '..', '..', 'specs', 'latest')
+  const specsRoot = resolve(__dirname, '..', '..', 'specs')
   return {
     name: 'serve-local-specs',
     configureServer(server) {
-      server.middlewares.use('/specs/latest', (req, res, next) => {
+      server.middlewares.use('/specs', (req, res, next) => {
         try {
           const urlPath = (req.url || '').replace(/\?.*$/, '')
           const abs = resolve(specsRoot, '.' + urlPath)

@@ -24,13 +24,22 @@ export function serializeModel(model: ParsedModel): string {
   const lines: string[] = []
   const fm = model.frontmatter
   lines.push('---')
-  lines.push(`spec_version: "${fm.spec_version || 'V_0-2-0'}"`)
-  if (fm.spec_url) lines.push(`spec_url: "${fm.spec_url}"`)
+  if (fm.level !== 3 || fm.spec_version) {
+    lines.push(`spec_version: "${fm.spec_version || 'V_0-2-0'}"`)
+  }
+  if (fm.spec_url) {
+    lines.push(`spec_url: "${fm.spec_url}"`)
+  }
   if (fm.level !== undefined) lines.push(`level: ${fm.level}`)
   if (fm.parent_spec) {
-    lines.push('parent_spec:')
-    lines.push(`  name: "${fm.parent_spec.name}"`)
-    lines.push(`  url: "${fm.parent_spec.url}"`)
+    lines.push(`parent: "${fm.parent_spec.url}"`)
+  } else if ((fm as any).parent !== undefined) {
+    const val = (fm as any).parent
+    if (typeof val === 'string') {
+      lines.push(`parent: "${val}"`)
+    } else {
+      lines.push(yamlStringify({ parent: val }).trim())
+    }
   }
   if (fm.model_version) lines.push(`model_version: "${fm.model_version}"`)
   if (fm.title) lines.push(`title: "${fm.title}"`)

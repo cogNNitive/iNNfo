@@ -44,7 +44,7 @@ Validation runs automatically on every parse via `@cognnitive/innfo-core`. A pas
 ## Template Extensions Architecture
 
 The editor features a decoupled **Domain Extension Architecture**:
-- Each level 2 template (e.g. `procedures_V_0-2-0`) can define its own extension in its specification directory (`specs/v0.2.0/level2/procedures/extension/`).
+- Each level 2 template (e.g. `procedures_V_0-1-0`) can define its own extension, living alongside its consumers under `apps/innfo-editor/src/extensions/{name}/` (extensions are app code, not spec content, so they never live under `specs/`).
 - **Manifest (`manifest.json`)**: Declares views, widgets, and target concepts provided by the template extension.
 - **Pure Domain Logic (`useProcedureFSM.ts`)**: Decoupled state machine logic operating on a pure node map.
 - **Extension Registry (`registry.ts`)**: Resolves and dynamically mounts extension views based on model `parent_spec`.

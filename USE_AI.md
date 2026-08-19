@@ -47,7 +47,7 @@ AI Agent ? actioNN (instructions) ? innfo-mcp (MCP server) ? @cognnitive/innfo-c
 
 - The MCP server (`innfo-mcp`) wraps `@cognnitive/innfo-core` from this repo
 - The agent delegates all resolution, validation, and mutation to the MCP � never hand-rolls
-- Specs are fetched at runtime from `iNNfo/specs/latest/` � no duplication
+- Specs are fetched at runtime from `iNNfo/specs/` (immutable, filename-versioned) — no duplication
 
 ## Developing iNNfo
 

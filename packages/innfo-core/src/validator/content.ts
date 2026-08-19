@@ -141,7 +141,8 @@ export function validateFormatContent(
   })
 
   // 6. spec_version
-  const specVersionOk = typeof fm.spec_version === 'string' && fm.spec_version.length > 0
+  const isLevel3 = fm.level === 3
+  const specVersionOk = isLevel3 || (typeof fm.spec_version === 'string' && fm.spec_version.length > 0)
   checks.push({
     id: 'fm-spec-version',
     label: 'Specification version declared',
@@ -153,8 +154,8 @@ export function validateFormatContent(
   })
 
   // 6b. spec_version matches expected spec version
-  if (specVersionOk && expectedSpecVersion) {
-    const specMatch = fm.spec_version === expectedSpecVersion
+  if (expectedSpecVersion) {
+    const specMatch = (isLevel3 && !fm.spec_version) || fm.spec_version === expectedSpecVersion
     checks.push({
       id: 'fm-spec-version-match',
       label: 'Specification version matches current spec',
