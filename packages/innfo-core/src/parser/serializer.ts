@@ -32,7 +32,9 @@ export function serializeModel(model: ParsedModel): string {
   }
   if (fm.level !== undefined) lines.push(`level: ${fm.level}`)
   if (fm.parent_spec) {
-    lines.push(`parent: "${fm.parent_spec.url}"`)
+    lines.push('parent_spec:')
+    lines.push(`  name: "${fm.parent_spec.name}"`)
+    lines.push(`  url: "${fm.parent_spec.url}"`)
   } else if ((fm as any).parent !== undefined) {
     const val = (fm as any).parent
     if (typeof val === 'string') {

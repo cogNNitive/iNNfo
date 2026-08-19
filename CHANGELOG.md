@@ -1,5 +1,18 @@
 ﻿# Changelog
 
+## Unreleased (2026-08-19)
+
+### Spec tree consolidation
+- Collapsed `specs/latest/` + `specs/v0.2.0/` + `specs/v0.2.1/` + `models/specs/` into
+  a single flat `specs/` tree: `specs/{defiNNe,iNNfo}_V_x-y-z_NN.md` at the top level,
+  level-2 templates under `specs/templates/{name}/` with their own `samples/`.
+- Level-2 templates gain their own `template_version` field, independent from
+  `specification_version` (previously templates had no version identity of their own).
+- Deleted 3 orphan templates with zero code references (`businessV2`, `cogNNitive`, `biz`).
+- `parent_spec` stays `{name, url}` (not collapsed to a bare `parent:` string) to keep
+  the resolver's write-once immutability guarantee and version-bump detection working.
+- See `openspec/changes/spec-version-simplification/` for the full proposal/spec/design.
+
 ## v0.2.1 (2026-08-01)
 
 ### Business template patch — `business_V_0-2-1`

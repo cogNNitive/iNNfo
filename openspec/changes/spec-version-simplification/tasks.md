@@ -40,7 +40,7 @@ Computed estimate ~300–350 lines: `useTemplateVersionNotice.ts` ~90, `samples.
 ## Phase 3: Commit 3 — Content Edits
 - [x] 3.1 Rename moved templates → `{name}_V_0-1-0_NN.md`; add `template_version: "V_0-1-0"` frontmatter (R-SV-02/03, A6)
 - [x] 3.2 Rename L0/L1 to real versions: `iNNfo_V_0-3-0_NN.md`, `defiNNe_V_0-2-0_NN.md` (A6)
-- [x] 3.3 Repoint shipped samples' `parent_spec.url` → `specs/templates/{name}/{file}` (R-SV-08) — actual on-disk field in these documents is the bare `parent: "<url>"` string per the L1 grammar, not an object; repointed accordingly.
+- [x] 3.3 Repoint shipped samples' `parent_spec.url` → `specs/templates/{name}/{file}` (R-SV-08) — kept `parent_spec: {name, url}` as the locked design decision (not the bare `parent:` string the L1 grammar prescribes elsewhere); verified during `sdd-verify` that `serializer.ts` was also collapsing it back to a bare string on write and fixed that too.
 - [x] 3.4 Rewrite `constants.ts`: `DEFAULT_INNFO_VERSION`→`V_0-3-0`, flat `buildSpecificationUrl`, drop `buildSpecificationUrlFromMain`/`buildDocumentationLocation`, add `buildTemplateUrl` (A4/A5)
 - [x] 3.5 Collapse `workspaceStore.ts` `_ensureGeneralSpec` to one URL strategy (A4)
 - [x] 3.6 Fix `extensions/registry.ts` manifest imports → `./procedures/manifest.json`, `./projects/manifest.json` (A8)

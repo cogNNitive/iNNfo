@@ -191,6 +191,10 @@ function scanUrls(files) {
     if (matches.length === 0) continue
 
     for (const match of matches) {
+      // Skip dynamic template-literal URLs (e.g. `.../${name}/${name}_${version}_NN.md`) -
+      // these are runtime-constructed URL builders, not static references to verify.
+      if (match[0].includes('${')) continue
+
       const repoPath = match[1].replace(/\/+$/, '')
       const localPath = join(ROOT, repoPath.replace(/\//g, '\\'))
 

@@ -408,7 +408,9 @@ describe('SaveWorkspaceModal.vue', () => {
 
     expect((window as any).showDirectoryPicker).toHaveBeenCalled()
     expect(tree['MyModel_V_1-0-0_business_NN.md']).toContain('title: "Test Model"')
-    expect(tree['MyModel_V_1-0-0_business_NN.md']).toContain('parent: "https://example.test/specs/business_V_0-1-1_FORMAT.md"')
+    expect(tree['MyModel_V_1-0-0_business_NN.md']).toContain(
+      'url: "https://example.test/specs/business_V_0-1-1_FORMAT.md"',
+    )
     expect(tree['Open iNNfo Editor.html']).toContain('refresh')
     expect(tree['README.md']).toContain('Workspace Instructions')
 

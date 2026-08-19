@@ -150,7 +150,7 @@ describe('iNNfo model with _NN markers (level 3)', () => {
   it('serializes and re-parses correctly', async () => {
     const { serializeModel } = await import('../src/index')
     const serialized = serializeModel(model)
-    expect(serialized).toContain('parent: "https://example.com/business"')
+    expect(serialized).toContain('url: "https://example.com/business"')
     expect(serialized).toContain('# NN Stakeholders')
     expect(serialized).toContain('# NN matrices: problems-value propositions matrix')
     expect(serialized).toContain('## NN Stakeholders:')
