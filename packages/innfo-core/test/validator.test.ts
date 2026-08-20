@@ -67,4 +67,26 @@ describe('parent spec resolution failure diagnostics', () => {
     const parentError = result.errors.find((e) => e.message.includes('[PARENT_RESOLUTION_FAILED]'))
     expect(parentError).toBeUndefined()
   })
+
+  it('validates the official Ghostbusters sample successfully against the updated Business template', async () => {
+    const fs = await import('fs')
+    const path = await import('path')
+    const modelContent = fs.readFileSync(path.join(import.meta.dirname, '../../../specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md'), 'utf8')
+    const templateContent = fs.readFileSync(path.join(import.meta.dirname, '../../../specs/templates/business/business_V_0-1-0_NN.md'), 'utf8')
+
+
+    const model = parseModel(modelContent)
+    const mockTemplate = {
+      name: 'business_V_0-1-0',
+      level: 2 as const,
+      frontmatter: model.frontmatter,
+      rawContent: templateContent,
+    }
+
+    const result = validateModel(model, mockTemplate, null)
+    const undefinedConceptErrors = result.errors.filter((e) => e.message.includes('is not defined in template'))
+    expect(undefinedConceptErrors).toEqual([])
+  })
 })
+
+

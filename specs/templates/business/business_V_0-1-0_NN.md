@@ -66,6 +66,12 @@ type:: weight
 color:: blue
 weight:: 80
 
+## NN Concept Definition: Persona
+icon:: user-round
+type:: weight
+color:: blue
+weight:: 50
+
 ## NN Concept Definition: Segmentation
 icon:: split
 type:: weight
@@ -156,11 +162,23 @@ type:: weight
 color:: blue
 weight:: 80
 
+## NN Concept Definition: Products and services
+icon:: package
+type:: category
+color:: blue
+weight:: 95
+
 ## NN Concept Definition: Features
 icon:: sparkles
 type:: weight
 color:: blue
 weight:: 40
+
+## NN Concept Definition: Components
+icon:: boxes
+type:: weight
+color:: blue
+weight:: 75
 
 ## NN Concept Definition: Roadmap
 icon:: map
@@ -227,6 +245,12 @@ icon:: lightbulb
 type:: category
 color:: blue
 weight:: 60
+
+## NN Concept Definition: Inspiration
+icon:: sparkles
+type:: weight
+color:: blue
+weight:: 50
 
 ## NN Concept Definition: Opportunity
 icon:: door-open
@@ -299,6 +323,18 @@ icon:: user-check
 type:: weight
 color:: blue
 weight:: 80
+
+## NN Concept Definition: Contributions
+icon:: gift
+type:: weight
+color:: blue
+weight:: 60
+
+## NN Concept Definition: Compensations
+icon:: coins
+type:: weight
+color:: blue
+weight:: 60
 
 ## NN Concept Definition: Positions
 icon:: contact
