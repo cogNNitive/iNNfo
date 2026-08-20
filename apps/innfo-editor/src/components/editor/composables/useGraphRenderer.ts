@@ -1,6 +1,7 @@
-import { Ref } from 'vue'
+import { Ref, h, render as vueRender } from 'vue'
 import * as d3 from 'd3'
 import { GNode, GEdge } from './useGraphData'
+import Pill from '../Pill.vue'
 
 interface GraphRendererOptions {
   containerRef: Ref<HTMLDivElement | undefined>
@@ -17,6 +18,7 @@ interface GraphRendererOptions {
   hslStr: (hex: string, satMult: number, lightOff: number) => string
   textColor: (bg: string) => string
   emit: (event: 'select-node', nodeId: string) => void
+  appContext?: any
 }
 
 export function useGraphRenderer(options: GraphRendererOptions) {
@@ -35,6 +37,7 @@ export function useGraphRenderer(options: GraphRendererOptions) {
     hslStr,
     textColor,
     emit,
+    appContext,
   } = options
 
   let resizeObs: ResizeObserver | null = null
@@ -136,72 +139,7 @@ export function useGraphRenderer(options: GraphRendererOptions) {
     return { shown, collapsible }
   }
 
-  // ── d3 SVG helper functions ──
-  function navIcon(
-    parent: d3.Selection<any, any, any, any>,
-    x: number,
-    y: number,
-    color: string,
-    onClick: () => void,
-    tooltip: string,
-  ) {
-    const g = parent
-      .append('g')
-      .attr('cursor', 'pointer')
-      .attr('class', 'sn-nav')
-      .attr('transform', `translate(${x},${y})`)
-    g.append('circle')
-      .attr('r', 7)
-      .attr('fill', color)
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 1.5)
-    g.append('path')
-      .attr('d', 'M-2.5,0 h5 M0,-2.5 l2.5,2.5 -2.5,2.5')
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 1.5)
-      .attr('fill', 'none')
-      .attr('stroke-linecap', 'round')
-      .attr('stroke-linejoin', 'round')
-    g.append('title').text(tooltip)
-    g.on('click', (event: any) => {
-      event.stopPropagation()
-      onClick()
-    })
-    return g
-  }
 
-  function expandIcon(
-    parent: d3.Selection<any, any, any, any>,
-    x: number,
-    y: number,
-    color: string,
-    expanded: boolean,
-    onClick: () => void,
-    tooltip: string,
-  ) {
-    const g = parent
-      .append('g')
-      .attr('cursor', 'pointer')
-      .attr('class', 'sn-expand')
-      .attr('transform', `translate(${x},${y})`)
-    g.append('circle')
-      .attr('r', 7)
-      .attr('fill', expanded ? color : 'none')
-      .attr('stroke', color)
-      .attr('stroke-width', 1.5)
-    g.append('path')
-      .attr('d', expanded ? 'M-3,0 h6' : 'M-3,0 h6 M0,-3 v6')
-      .attr('stroke', expanded ? '#fff' : color)
-      .attr('stroke-width', 1.5)
-      .attr('fill', 'none')
-      .attr('stroke-linecap', 'round')
-    g.append('title').text(tooltip)
-    g.on('click', (event: any) => {
-      event.stopPropagation()
-      onClick()
-    })
-    return g
-  }
 
   /* ─── SANKEY: concepts = colored column headers, instances = flow nodes ─── */
   function renderSankey() {
@@ -234,9 +172,10 @@ export function useGraphRenderer(options: GraphRendererOptions) {
 
     const headerH = 32,
       padX = 40,
-      instGapY = 34
-    const slotW = (W - 2 * padX) / cCount
-    const colW = Math.max(140, Math.min(220, slotW * 0.7))
+      instGapY = 66
+    const colW = 200
+    const minSlotW = colW + 40 // 240px spacing guarantees a 40px gutter
+    const slotW = Math.max(minSlotW, (W - 2 * padX) / cCount)
 
     const contentStartX = padX
 
@@ -251,7 +190,7 @@ export function useGraphRenderer(options: GraphRendererOptions) {
       const positions: { y: number; h: number }[] = []
       insts.forEach((n, i) => {
         const y = startY + i * instGapY
-        const h = 22
+        const h = 52
         instPos.set(n.id, { x, y, w, h })
         positions.push({ y, h })
       })
@@ -263,17 +202,30 @@ export function useGraphRenderer(options: GraphRendererOptions) {
       const s = instPos.get(e.source),
         t = instPos.get(e.target)
       if (!s || !t) return
-      const sx = s.x + s.w,
-        sy = s.y + s.h / 2
-      const tx = t.x,
-        ty = t.y + t.h / 2
-      const cpx = (sx + tx) / 2
+      
+      // Determine direction to avoid lines crossing through cards
+      let sx, tx
+      if (s.x < t.x) {
+        sx = s.x + s.w
+        tx = t.x
+      } else if (s.x > t.x) {
+        sx = s.x
+        tx = t.x + t.w
+      } else {
+        sx = s.x + s.w
+        tx = t.x + t.w
+      }
+
+      const sy = s.y + s.h / 2
+      const ty = t.y + t.h / 2
+      const mx = (sx + tx) / 2
+      
       root
         .append('path')
-        .attr('d', `M${sx},${sy} C${cpx},${sy} ${cpx},${ty} ${tx},${ty}`)
+        .attr('d', `M ${sx} ${sy} H ${mx} V ${ty} H ${tx}`)
         .attr('fill', 'none')
         .attr('stroke', e.color)
-        .attr('stroke-width', 2.5)
+        .attr('stroke-width', 1.5)
         .attr('stroke-opacity', 0.3)
         .attr('stroke-linecap', 'round')
         .attr('data-edge', '')
@@ -334,56 +286,38 @@ export function useGraphRenderer(options: GraphRendererOptions) {
       insts.forEach((n, i) => {
         const pos = positions[i]
         if (!pos) return
-        const sel = isNodeSelected(n)
         const g = root.append('g').attr('cursor', 'pointer').attr('data-node', n.id)
 
-        g.append('rect')
+        const container = document.createElement('div')
+        const vnode = h(Pill, {
+          blockId: n.id.replace(/^inst:/, ''),
+          nodeId: n.id.replace(/^inst:/, ''),
+          name: n.label,
+          interactive: true,
+          selected: isNodeSelected(n),
+          fullWidth: true
+        })
+        if (appContext) {
+          vnode.appContext = appContext
+        }
+        vueRender(vnode, container)
+
+        const fo = g.append('foreignObject')
           .attr('x', x)
           .attr('y', pos.y)
           .attr('width', w)
           .attr('height', pos.h)
-          .attr('rx', 4)
-          .attr('fill', hslStr(n.color, 0.35, 0.35))
-          .attr('stroke', n.color)
-          .attr('stroke-width', sel ? 3 : 1.5)
 
-        g.append('text')
-          .text(n.label)
-          .attr('x', x + 5)
-          .attr('y', pos.y + pos.h / 2 + 3.5)
-          .attr('font-size', 10)
-          .attr('fill', '#1e293b')
-          .attr('font-weight', sel ? 700 : 500)
+        const foNode = fo.node()
+        if (foNode && container.firstElementChild) {
+          foNode.appendChild(container.firstElementChild)
+        }
 
         g.on('click', (event: any) => {
           event.stopPropagation()
           selectNode(n)
         })
         g.append('title').text(`${n.label} (${n.concept})`)
-
-        let iy = 0
-        if (n.id === selectedNodeId.value && !highlightedConcept.value) {
-          navIcon(
-            root,
-            x + w + 3,
-            pos.y + 4 + iy,
-            n.color,
-            () => navigateToNode(n),
-            `Navigate to ${n.label}`,
-          )
-          iy += 18
-        }
-        if (collapsible.has(n.id)) {
-          expandIcon(
-            root,
-            x + w + 3,
-            pos.y + 4 + iy,
-            n.color,
-            expandedNodes.has(n.id),
-            () => expandNode(n.id),
-            expandedNodes.has(n.id) ? 'Collapse' : 'Expand',
-          )
-        }
       })
     })
 
@@ -439,35 +373,36 @@ export function useGraphRenderer(options: GraphRendererOptions) {
     const nodeG = root.append('g')
     const node = nodeG.selectAll('g').data(gData.nodes).join('g').attr('cursor', 'pointer')
 
-    node
-      .append('circle')
-      .attr('r', (d: any) => (d.inst ? 16 : 28))
-      .attr('fill', (d: any) => d.color)
-      .attr('stroke', 'white')
-      .attr('stroke-width', (d: any) => (d.inst ? 2 : 3))
-
-    // Inner ring for concept nodes
     node.each(function (d: any) {
-      if (!d.inst) {
-        d3.select(this)
-          .insert('circle', ':first-child')
-          .attr('r', 22)
-          .attr('fill', 'none')
-          .attr('stroke', 'white')
-          .attr('stroke-width', 1.5)
-          .attr('opacity', 0.5)
+      const g = d3.select(this)
+
+      const container = document.createElement('div')
+      const vnode = h(Pill, {
+        blockId: d.inst ? d.id.replace(/^inst:/, '') : d.id,
+        nodeId: d.inst ? d.id.replace(/^inst:/, '') : d.id,
+        name: d.label,
+        kind: d.inst ? 'instance' : 'concept',
+        interactive: true,
+        selected: isNodeSelected(d),
+        fullWidth: true
+      })
+      if (appContext) {
+        vnode.appContext = appContext
+      }
+      vueRender(vnode, container)
+
+      const fo = g.append('foreignObject')
+        .attr('width', 200)
+        .attr('height', 52)
+        .attr('x', -100)
+        .attr('y', -26)
+        .attr('class', 'force-fo')
+
+      const foNode = fo.node()
+      if (foNode && container.firstElementChild) {
+        foNode.appendChild(container.firstElementChild)
       }
     })
-
-    node
-      .append('text')
-      .text((d: any) => (d.label.length > 18 ? d.label.slice(0, 16) + '\u2026' : d.label))
-      .attr('text-anchor', 'middle')
-      .attr('dy', (d: any) => (d.inst ? 3 : 4))
-      .attr('font-size', (d: any) => (d.inst ? 10 : 11))
-      .attr('font-weight', (d: any) => (d.inst ? 500 : 700))
-      .attr('fill', (d: any) => textColor(d.color))
-      .attr('pointer-events', 'none')
 
     node
       .append('title')
@@ -487,9 +422,10 @@ export function useGraphRenderer(options: GraphRendererOptions) {
           const el = d3.select(this)
           if (connected.has(n.id)) {
             el.attr('opacity', 1)
-            el.select('circle')
-              .attr('stroke-width', n.inst ? 3 : 4)
-              .attr('stroke', n.inst ? d.color : '#fff')
+            el.select('.force-fo')
+              .style('outline', `2px solid ${n.color || '#3b82f6'}`)
+              .style('outline-offset', '2px')
+              .style('border-radius', '8px')
           } else {
             el.attr('opacity', 0.25)
           }
@@ -545,13 +481,28 @@ export function useGraphRenderer(options: GraphRendererOptions) {
       )
       .force('charge', d3.forceManyBody().strength(-400))
       .force('center', d3.forceCenter(W / 2, H / 2))
-      .force('collision', d3.forceCollide(36))
+      .force('collision', d3.forceCollide(60))
       .on('tick', () => {
+        function getBoxIntersection(s: { x: number; y: number }, t: { x: number; y: number }, w = 200, h = 52) {
+          const dx = t.x - s.x
+          const dy = t.y - s.y
+          if (dx === 0 && dy === 0) return { x: s.x, y: s.y }
+          const hw = w / 2
+          const hh = h / 2
+          if (Math.abs(dx) * hh > Math.abs(dy) * hw) {
+            const rx = dx > 0 ? hw : -hw
+            return { x: s.x + rx, y: s.y + (dy / dx) * rx }
+          } else {
+            const ry = dy > 0 ? hh : -hh
+            return { x: s.x + (dx / dy) * ry, y: s.y + ry }
+          }
+        }
+
         link
-          .attr('x1', (d: any) => d.source.x)
-          .attr('y1', (d: any) => d.source.y)
-          .attr('x2', (d: any) => d.target.x)
-          .attr('y2', (d: any) => d.target.y)
+          .attr('x1', (d: any) => getBoxIntersection(d.source, d.target).x)
+          .attr('y1', (d: any) => getBoxIntersection(d.source, d.target).y)
+          .attr('x2', (d: any) => getBoxIntersection(d.target, d.source).x)
+          .attr('y2', (d: any) => getBoxIntersection(d.target, d.source).y)
         linkLabel
           .attr('x', (d: any) => (d.source.x + d.target.x) / 2)
           .attr('y', (d: any) => (d.source.y + d.target.y) / 2)
@@ -566,15 +517,13 @@ export function useGraphRenderer(options: GraphRendererOptions) {
     const selId = selectedNodeId.value
     if (!forceNodeSel || !forceLinkSel) return
 
-    forceNodeSel.selectAll('.sn-nav, .sn-expand').remove()
-
     if (!selId) {
       forceNodeSel.attr('opacity', 1)
       forceNodeSel
-        .select('circle')
-        .attr('stroke-width', (d: any) => (d.inst ? 2 : 3))
-        .attr('stroke', 'white')
-      forceNodeSel.select('text').attr('font-weight', (d: any) => (d.inst ? 500 : 700))
+        .select('.force-fo')
+        .style('outline', null)
+        .style('outline-offset', null)
+        .style('border-radius', null)
       forceLinkSel.attr('stroke-opacity', 0.3)
       forceEdgeG?.selectAll('text').attr('opacity', 1)
       return
@@ -587,29 +536,16 @@ export function useGraphRenderer(options: GraphRendererOptions) {
     forceNodeSel.each(function (d: any) {
       const el = d3.select(this)
       const sel = isNodeSelected(d)
-      el.select('text').attr('font-weight', sel ? 700 : d.inst ? 500 : 700)
-      el.select('circle')
-        .attr('stroke-width', sel ? (d.inst ? 4 : 5) : d.inst ? 2 : 3)
-        .attr('stroke', sel ? d.color : 'white')
-    })
-    forceNodeSel.each(function (d: any) {
-      const el = d3.select(this)
-      const r = d.inst ? 16 : 28
-      let oy = -r + 6
-      if (d.id === selId && !highlightedConcept.value) {
-        navIcon(el, r + 2, oy, d.color, () => navigateToNode(d), `Navigate to ${d.label}`)
-        oy += 18
-      }
-      if (collapsible.has(d.id)) {
-        expandIcon(
-          el,
-          r + 2,
-          oy,
-          d.color,
-          expandedNodes.has(d.id),
-          () => expandNode(d.id),
-          expandedNodes.has(d.id) ? 'Collapse' : 'Expand',
-        )
+      if (sel) {
+        el.select('.force-fo')
+          .style('outline', `2px solid ${d.color || '#3b82f6'}`)
+          .style('outline-offset', '2px')
+          .style('border-radius', '8px')
+      } else {
+        el.select('.force-fo')
+          .style('outline', null)
+          .style('outline-offset', null)
+          .style('border-radius', null)
       }
     })
     forceLinkSel.attr('stroke-opacity', (d: any) =>

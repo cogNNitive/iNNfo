@@ -27,11 +27,12 @@ export function validateFormatSyntax(content: string): SyntaxCheck[] {
 
   // Document structure checks (recommended — ordering defaults to front matter order)
   const hasIndex = parsed.taxonomy.length > 0
+  const isLevel3 = parsed.frontmatter.level === 3
   checks.push({
     id: 'syntax-index',
     label: 'NN index section present (recommended)',
-    passed: hasIndex,
-    message: hasIndex
+    passed: hasIndex || isLevel3,
+    message: (hasIndex || isLevel3)
       ? undefined
       : 'No NN index found — concepts will render in declaration order. Add one to control hierarchy and ordering.',
   })

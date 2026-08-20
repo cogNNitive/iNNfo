@@ -3,101 +3,12 @@ level: 3
 parent_spec:
   name: "business_V_0-1-0"
   url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
-model_version: "V_0-1-2"
+model_version: "V_0-1-0"
 title: "Ghostbusters"
 ---
 
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
-
-# NN index
-
-* [[Analysis]]
-  * [[Assumptions]]
-  * [[Risks]]
-  * [[Suggestions]]
-  * [[SWOT]]
-  * [[Unfair advantage]]
-  * [[Keys]]
-* [[Business idea]]
-  * [[Business status]]
-  * [[Challenges]]
-  * [[Inspiration]]
-  * [[Opportunity]]
-* [[Business objectives]]
-  * [[Mission]]
-  * [[Organizational goals]]
-  * [[Organizational values]]
-  * [[Vision]]
-* [[Communication]]
-  * [[Pitch]]
-  * [[Presentations]]
-  * [[Storytelling]]
-  * [[Web]]
-* [[Finance]]
-  * [[Costs]]
-  * [[Customer Acquisition Cost]]
-  * [[Funding sources]]
-  * [[Life Time Value]]
-  * [[Projections]]
-  * [[Revenue]]
-  * [[Shareholders]]
-  * [[Unit economics]]
-* [[Legal]]
-  * [[Contracts]]
-  * [[Legal issues]]
-* [[Market]]
-  * [[Segments]]
-  * [[Behaviors]]
-  * [[Channels]]
-  * [[Competition]]
-  * [[Emotions]]
-  * [[Journey]]
-  * [[Market size]]
-  * [[Market trends]]
-  * [[Messages]]
-  * [[Perceptions]]
-  * [[Problems]]
-  * [[Profiles]]
-    * [[Persona]]
-  * [[Relationships]]
-  * [[Roles]]
-  * [[Segmentation]]
-  * [[Value propositions]]
-  * [[Stakeholders]]
-* [[Marketing]]
-  * [[Branding]]
-  * [[Logo]]
-  * [[Media plan]]
-  * [[Naming]]
-  * [[Visual identity]]
-* [[Operations]]
-  * [[Activities]]
-  * [[Functions]]
-  * [[Resources]]
-* [[Organization]]
-* [[Products and services]]
-  * [[Brochure]]
-  * [[Components]]
-  * [[Features]]
-  * [[Offerings]]
-  * [[Portfolio]]
-  * [[Pricing]]
-  * [[Roadmap]]
-* [[Project plan]]
-  * [[Milestones]]
-  * [[Phases]]
-* [[Solutions]]
-* [[Team]]
-  * [[Compensations]]
-  * [[Contributions]]
-  * [[Goals]]
-  * [[Positions]]
-  * [[Skills]]
-* [[Validation]]
-  * [[Coherence]]
-  * [[Experiments]]
-  * [[Metrics]]
 
 # NN Business summary
 
@@ -745,6 +656,19 @@ High-margin incident revenue supports fixed cost base. Commercial contracts prov
 Pilot a 3-month Brooklyn dispatch trial to validate response time, volume, and unit economics before committing to full expansion.
 ## NN Experiments: Franchise Interest Survey
 Survey 50 paranormal enthusiast groups to gauge interest in a licensed operator model.
+
+# NN Procedure
+
+## NN Procedure: Compile Strategic Showroom
+target_artifact:: "temp/index.html"
+trigger_command:: "/generate-showroom"
+instructions:: |
+  Generate a single HTML dashboard compiling the 25 strategic diagrams based on the active L3 business model data.
+  Follow these visual mapping rules:
+  1. Read [[Journey]] and [[Emotions]] for the Customer Journey Emotion Map timeline.
+  2. Map [[Problems]] and [[Value propositions]] in the Solution Fit Flow Sankey.
+  3. Map [[Profiles]] (Nancy) and [[Behaviors]] for the Buyer Persona Card columns.
+  Use the reference layout from `https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/samples/showroom.html` (which has all CSS and SVGs inline) as the base design. Inject the actual L3 model values into the SVG elements.
 
 # NN matrices: journey map
 

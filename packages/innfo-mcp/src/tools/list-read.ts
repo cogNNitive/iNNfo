@@ -55,8 +55,8 @@ export async function listModels(rootDir: string): Promise<ModelInfo[]> {
 
 /**
  * Read and parse an iNNfo model by its id.
- * The id is the filename stem (e.g. `Ghostbusters_V_0-1-2_business`
- * resolves to `Ghostbusters_V_0-1-2_business_NN.md`).
+ * The id is the filename stem (e.g. `Ghostbusters_V_0-1-0_business`
+ * resolves to `Ghostbusters_V_0-1-0_business_NN.md`).
  *
  * Searches the root and the conventional `models/` subdirectory, trying
  * `<cleanId>_NN.md`, `<cleanId>.md`, `<cleanId>`, `<id>` and `<id>.md`.

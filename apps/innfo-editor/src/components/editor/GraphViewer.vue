@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, toRef, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, toRef, onMounted, onUnmounted, watch, getCurrentInstance } from 'vue'
 import { GitFork, Share2 } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useGraphData } from './composables/useGraphData'
@@ -129,6 +129,8 @@ const depthLimit = ref(1)
 const expandedNodes = new Set<string>()
 const expansionSig = ref(0)
 
+const appContext = getCurrentInstance()?.appContext
+
 const {
   initSvg,
   render,
@@ -155,6 +157,7 @@ const {
   hslStr,
   textColor,
   emit,
+  appContext,
 })
 
 const modelStore = useModelStore()

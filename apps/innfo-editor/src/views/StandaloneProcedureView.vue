@@ -68,8 +68,8 @@ const error = ref<string | null>(null)
 const standaloneAdapter = useStandaloneExtensionAdapter()
 
 const canonicalSampleMarkdown = `---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+specification_version: "V_0-1-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 level: 3
 parent_spec:
   name: "procedures_V_0-1-0"

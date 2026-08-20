@@ -1,6 +1,6 @@
 ---
-specification_version: "V_0-2-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-2-0_NN.md"
+specification_version: "V_0-1-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 level: 0
 title: "defiNNe — The Definition of Definitions"
 description: "Meta-specification for the CogNNitive ecosystem. Defines the structure, versioning, normative language, terminology discipline, and dependency resolution for all derived specifications."
@@ -141,7 +141,7 @@ No `parent`.
 specification_version: "V_x-y-z"
 specification_url: "<immutable-URL>"
 level: 1
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-2-0_NN.md"
+parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 title: "..."
 description: "..."
 ---
@@ -154,7 +154,7 @@ description: "..."
 specification_version: "V_x-y-z"
 specification_url: "<immutable-URL>"
 level: 2
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-2-0_NN.md"
+parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 title: "..."
 concepts: [...]
 markers: [...]
@@ -186,10 +186,10 @@ All specification and model files use the `_NN.md` suffix.
 
 | Level | Pattern | Example |
 |---|---|---|
-| 0 | `<Name>_V_x-y-z_NN.md` | `defiNNe_V_0-2-0_NN.md` |
-| 1 | `<Name>_V_x-y-z_NN.md` | `iNNfo_V_0-2-0_NN.md` |
-| 2 | `<Template>_V_x-y-z_NN.md` | `business_V_0-2-0_NN.md` |
-| 3 | `<Model>_V_x-y-z_<Template>_NN.md` | `Ghostbusters_V_0-2-0_business_NN.md` |
+| 0 | `<Name>_V_x-y-z_NN.md` | `defiNNe_V_0-1-0_NN.md` |
+| 1 | `<Name>_V_x-y-z_NN.md` | `iNNfo_V_0-1-0_NN.md` |
+| 2 | `<Template>_V_x-y-z_NN.md` | `business_V_0-1-0_NN.md` |
+| 3 | `<Model>_V_x-y-z_<Template>_NN.md` | `Ghostbusters_V_0-1-0_business_NN.md` |
 
 Files are organized by level within each version directory:
 
@@ -204,7 +204,7 @@ v<version>/
     └── ...
 ```
 
-The `latest/` directory mirrors this structure but uses stable filenames without version numbers (e.g. `defiNNe_NN.md` instead of `defiNNe_V_0-2-0_NN.md`).
+The `latest/` directory mirrors this structure but uses stable filenames without version numbers (e.g. `defiNNe_NN.md` instead of `defiNNe_V_0-1-0_NN.md`).
 
 ### Versioning
 
@@ -320,30 +320,30 @@ title: "Model Name"
 
 ### Full Parent Chain Resolution
 
-From the sample model `specs/templates/business/samples/Ghostbusters_V_0-1-2_business_NN.md`:
+From the sample model `specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md`:
 
 ```yaml
 # Ghostbusters (level 3)
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-2-0_NN.md"
+parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
 
-# business_V_0-2-0 (level 2)
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-2-0_NN.md"
+# business_V_0-1-0 (level 2)
+parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 
-# iNNfo_V_0-2-0 (level 1)
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-2-0_NN.md"
+# iNNfo_V_0-1-0 (level 1)
+parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 
-# defiNNe_V_0-2-0 (level 0) — this document
+# defiNNe_V_0-1-0 (level 0) — this document
 # No parent — root of the chain
 ```
 
 ### Cached Directory After First Load
 
 ```
-📂 Ghostbusters_V_0-2-0_business/
-  📄 Ghostbusters_V_0-2-0_business_NN.md
+📂 Ghostbusters_V_0-1-0_business/
+  📄 Ghostbusters_V_0-1-0_business_NN.md
   📂 specs/
     📂 templates/business/
-      📄 business_V_0-2-0_NN.md
-    📄 iNNfo_V_0-2-0_NN.md
-    📄 defiNNe_V_0-2-0_NN.md
+      📄 business_V_0-1-0_NN.md
+    📄 iNNfo_V_0-1-0_NN.md
+    📄 defiNNe_V_0-1-0_NN.md
 ```

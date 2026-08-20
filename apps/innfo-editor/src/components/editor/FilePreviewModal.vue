@@ -178,7 +178,7 @@
         <div class="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between shrink-0">
           <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <CheckCircle2 class="w-4 h-4 text-emerald-500" />
-            Trazabilidad verificada con especificación iNNfo V_0-3-0
+            Trazabilidad verificada con especificación iNNfo V_0-1-0
           </span>
           <button
             @click="close"

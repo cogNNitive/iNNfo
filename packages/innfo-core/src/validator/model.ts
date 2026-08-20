@@ -225,7 +225,7 @@ export function validateModel(
   }
 
   // R-IE-04: matrix cell row/col labels must resolve to element names.
-  // Reported as WARNINGS here (not errors): real V_0-3-0 fixtures use matrix
+  // Reported as WARNINGS here (not errors): real V_0-1-0 fixtures use matrix
   // labels that are numbered/abbreviated variants of element names (e.g.
   // `## NN Journey: 1. Paranormal Incident` with row `Paranormal Incident`,
   // or row `Open PR` vs element `Open Pull Request`), so failing hard would

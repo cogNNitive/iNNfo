@@ -15,19 +15,19 @@ function readSpec(pathSegments: string): string {
 }
 
 describe('Metaplantilla Nivel 1 (specs/)', () => {
-  it('level-1 spec declares V_0-3-0 with defiNNe parent and meta-template title', () => {
-    const content = readSpec('iNNfo_V_0-3-0_NN.md')
+  it('level-1 spec declares V_0-1-0 with defiNNe parent and meta-template title', () => {
+    const content = readSpec('iNNfo_V_0-1-0_NN.md')
     const fm = parseFrontmatter(content)!
-    expect(fm.spec_version).toBe('V_0-3-0')
+    expect(fm.spec_version).toBe('V_0-1-0')
     expect(fm.level).toBe(1)
-    expect(fm.parent_spec!.name).toBe('defiNNe_V_0-2-0')
+    expect(fm.parent_spec!.name).toBe('defiNNe_V_0-1-0')
     expect(fm.title).toContain('Meta-template')
     expect(content).toContain('# NN Concept Definition')
     expect(content).toContain('## NN Concept Definition:')
   })
 
   it('level-1 spec documents the four root primitives', () => {
-    const content = readSpec('iNNfo_V_0-3-0_NN.md')
+    const content = readSpec('iNNfo_V_0-1-0_NN.md')
     for (const primitive of [
       'Concept Definition',
       'Field Definition',
@@ -49,7 +49,7 @@ describe('Metaplantilla Nivel 1 (specs/)', () => {
     expect(fm.matrices).toBeUndefined()
 
     const schema = extractTemplateSchemaFromContent(content)
-    expect(schema.concepts.length).toBe(73)
+    expect(schema.concepts.length).toBe(74)
     expect(schema.markers.length).toBe(5)
     expect(schema.matrices.length).toBe(13)
 
@@ -217,10 +217,10 @@ Reviews the pull request.
 
   it('migrated samples use the unified syntax with no legacy markers', () => {
     for (const p of [
-      'templates/business/samples/Ghostbusters_V_0-1-2_business_NN.md',
-      'templates/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md',
-      'templates/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md',
-      'templates/projects/samples/SoftwareReleaseProject_V_1-0-0_projects_NN.md',
+      'templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md',
+      'templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md',
+      'templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md',
+      'templates/projects/samples/SoftwareReleaseProject_V_0-1-0_projects_NN.md',
     ]) {
       const content = readSpec(p)
       const body = content.replace(/^---[\s\S]*?---\n/, '')
@@ -233,7 +233,7 @@ Reviews the pull request.
   })
 
   it('parses the migrated Ghostbusters sample with fields and matrices', () => {
-    const content = readSpec('templates/business/samples/Ghostbusters_V_0-1-2_business_NN.md')
+    const content = readSpec('templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md')
     const parsed = parseModel(content)
     expect(parsed.elements.has('Stakeholders')).toBe(true)
     expect(parsed.elements.get('Stakeholders')!.length).toBeGreaterThan(5)
@@ -243,7 +243,7 @@ Reviews the pull request.
   })
 
   it('parses the migrated CodeReviewProcess sample with key:: value properties', () => {
-    const content = readSpec('templates/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md')
+    const content = readSpec('templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md')
     const parsed = parseModel(content)
     const work = parsed.elements.get('Work')!
     const openPr = work.find((e) => e.name === 'Open Pull Request')!
@@ -256,7 +256,7 @@ Reviews the pull request.
   })
 
   it('parses the migrated EngineeringTeam sample with scope properties', () => {
-    const content = readSpec('templates/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md')
+    const content = readSpec('templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md')
     const parsed = parseModel(content)
     const roles = parsed.elements.get('Roles')!
     expect(roles).toHaveLength(3)
@@ -265,7 +265,7 @@ Reviews the pull request.
   })
 
   it('parses the SoftwareReleaseProject sample with dependencies and RACI matrix', () => {
-    const content = readSpec('templates/projects/samples/SoftwareReleaseProject_V_1-0-0_projects_NN.md')
+    const content = readSpec('templates/projects/samples/SoftwareReleaseProject_V_0-1-0_projects_NN.md')
     const parsed = parseModel(content)
     const tasks = parsed.elements.get('Task')!
     expect(tasks).toHaveLength(4)

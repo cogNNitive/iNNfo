@@ -196,8 +196,8 @@ export function validateFormatContent(
     description: 'Models should have a # NN index section with [[wikilinks]] to control ordering and hierarchy',
     category: 'body',
     severity: 'warning',
-    passed: hasIndex,
-    message: hasIndex
+    passed: hasIndex || isLevel3,
+    message: (hasIndex || isLevel3)
       ? undefined
       : 'No NN index section found — concepts will render in front matter declaration order. Add a # NN index section to control ordering and hierarchy.',
   })

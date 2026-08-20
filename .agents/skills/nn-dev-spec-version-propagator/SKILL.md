@@ -122,7 +122,7 @@ sync here):
 
 ```
 spec_url / parent / specification_url:
-  "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+  "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
   "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
 ```
 

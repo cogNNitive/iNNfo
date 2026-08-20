@@ -17,7 +17,7 @@ The system MUST define the `Organization` template (`organization_NN.md` and ver
 - THEN the validator MUST parse it successfully with no errors
 
 ### R-ORG-02: Engineering Team Sample Model
-The system MUST provide a sample team model `EngineeringTeam_V_1-0-0_organization_NN.md` (and versioned equivalent) implementing the Organization template.
+The system MUST provide a sample team model `EngineeringTeam_V_0-1-0_organization_NN.md` (and versioned equivalent) implementing the Organization template.
 
 #### Scenario: Sample model is parsed successfully
 - GIVEN the `EngineeringTeam` sample model

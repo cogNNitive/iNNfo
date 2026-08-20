@@ -64,7 +64,7 @@ const toolDefinitions: Tool[] = [
       properties: {
         id: {
           type: 'string',
-          description: 'Model id (filename stem, e.g. Ghostbusters_V_0-1-2_business)',
+          description: 'Model id (filename stem, e.g. Ghostbusters_V_0-1-0_business)',
         },
         root: {
           type: 'string',

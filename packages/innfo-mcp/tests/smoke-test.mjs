@@ -57,7 +57,7 @@ async function run() {
   send('list_models', {})
 
   // Test 2: read_model
-  setTimeout(() => send('read_model', { id: 'Ghostbusters_V_0-1-2_business' }), 200)
+  setTimeout(() => send('read_model', { id: 'Ghostbusters_V_0-1-0_business' }), 200)
 
   // Test 3: validate_model with valid content
   setTimeout(() => {
@@ -102,7 +102,7 @@ async function run() {
   // Test 5: apply_change (add element)
   setTimeout(() => {
     send('apply_change', {
-      id: 'Ghostbusters_V_0-1-2_business',
+      id: 'Ghostbusters_V_0-1-0_business',
       op: 'add_element',
       args: {
         conceptName: 'Stakeholders',

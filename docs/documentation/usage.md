@@ -6,7 +6,7 @@ An iNNfo model is a single Markdown file (`_NN.md`) with YAML frontmatter follow
 
 ```markdown
 ---
-spec_version: "V_0-2-0"
+spec_version: "V_0-1-0"
 level: 3
 parent: "business_V_1-0-0"
 model_version: "V_0-1-0"

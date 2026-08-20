@@ -1,10 +1,10 @@
 ---
-specification_version: "V_0-3-0"
+specification_version: "V_0-1-0"
 specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/organization/organization_V_0-1-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+  name: "iNNfo_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 template_version: "V_0-1-0"
 title: "Organization Template"
 relationship_types:
@@ -188,4 +188,4 @@ validate and render your model.
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/templates/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`. It exercises all concept types, lists, and the positions-roles and persons-positions matrices.
+The official sample for this template is at `specs/templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`. It exercises all concept types, lists, and the positions-roles and persons-positions matrices.

@@ -7,7 +7,7 @@ import { buildFakeTree } from '../helpers/fakeFs'
 // Frozen snapshot of the top-level `models/*` FILE fixtures, sourced from
 // committed HEAD. Each fixture is wrapped with an index.md for the new parser.
 // Legacy _F.md filenames are mapped to _NN.md in the virtual tree so the
-// V_0-2-0 suffix check recognizes them. The disk files remain untouched.
+// V_0-1-0 suffix check recognizes them. The disk files remain untouched.
 const modelsDir = join(import.meta.dirname!, '..', 'fixtures', 'models')
 const fixtureFiles = readdirSync(modelsDir).filter((f) => f.endsWith('.md'))
 

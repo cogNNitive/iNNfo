@@ -12,7 +12,7 @@ lists the current file for each spec.
 
 | Spec | Source |
 |------|--------|
-| **defiNNe** V 0.2.0 | [`specs/defiNNe_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/defiNNe_V_0-2-0_NN.md) |
+| **defiNNe** V 0.1.0 | [`specs/defiNNe_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/defiNNe_V_0-1-0_NN.md) |
 
 ## Level 1 — Central specification
 
@@ -20,7 +20,7 @@ The **iNNfo** specification. Every model is a single `_NN.md` document with opti
 
 | Spec | Source |
 |------|--------|
-| **iNNfo** V 0.3.0 | [`specs/iNNfo_V_0-3-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/iNNfo_V_0-3-0_NN.md) |
+| **iNNfo** V 0.1.0 | [`specs/iNNfo_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/iNNfo_V_0-1-0_NN.md) |
 
 ## Level 2 — Templates
 
@@ -38,9 +38,9 @@ Concrete data instances. Lightweight — just data and a parent pointer to their
 
 | Model | Template | Source |
 |-------|----------|--------|
-| **Ghostbusters** | business | [`specs/templates/business/samples/Ghostbusters_V_0-1-2_business_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business/samples/Ghostbusters_V_0-1-2_business_NN.md) |
-| **Code Review Process** | procedures | [`specs/templates/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md) |
-| **Engineering Team** | organization | [`specs/templates/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/organization/samples/EngineeringTeam_V_1-0-0_organization_NN.md) |
+| **Ghostbusters** | business | [`specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md) |
+| **Code Review Process** | procedures | [`specs/templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md) |
+| **Engineering Team** | organization | [`specs/templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md) |
 
 ## Related Standards
 

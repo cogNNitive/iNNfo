@@ -56,7 +56,7 @@ The editor features a decoupled **Domain Extension Architecture**:
 
 Models using template extensions can be executed and visualized in **Standalone Mode** without opening the full IDE workspace:
 - **Route**: `/view/procedure` (or `/standalone/procedure`).
-- **URL Parameter**: Pass `?url=<RAW_MD_URL>` (e.g. `http://localhost:5173/app/view/procedure?url=https://raw.githubusercontent.com/.../CodeReviewProcess_V_1-0-0_procedures_NN.md`).
+- **URL Parameter**: Pass `?url=<RAW_MD_URL>` (e.g. `http://localhost:5173/app/view/procedure?url=https://raw.githubusercontent.com/.../CodeReviewProcess_V_0-1-0_procedures_NN.md`).
 - **Features**: Full FSM state derivation, step sequence navigation, sub-steps progress tracking, RACI accountability matrix inspection, and artifact I/O mapping in a clean, full-screen interface.
 
 ## AI Guide View

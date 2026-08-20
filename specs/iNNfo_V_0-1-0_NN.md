@@ -1,8 +1,8 @@
 ---
-specification_version: "V_0-3-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+specification_version: "V_0-1-0"
+specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 level: 1
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-2-0_NN.md"
+parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 title: "iNNfo Meta-template Specification"
 description: "Level-1 meta-template defining the four root primitives (Concept Definition, Field Definition, Matrix Definition, Marker Definition) and the unified NN syntax: `# NN` sections, `## NN` elements, and `key:: value` properties."
 author: "innV0 Team"
@@ -252,7 +252,7 @@ MUST be reported by the application as dangling references.
 iNNfo is a level 1 specification. Its `parent` points to defiNNe:
 
 ```yaml
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-2-0_NN.md"
+parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 ```
 
 All templates (level 2) MUST declare `parent` pointing to iNNfo. All models
@@ -467,10 +467,10 @@ and relationship settings; its body instantiates the four root primitives.
 
 ```yaml
 ---
-specification_version: "V_0-3-0"
+specification_version: "V_0-1-0"
 specification_url: "<immutable-url>"
 level: 2
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 title: "<Template Name>"
 template_version: "V_x-y-z"
 specializes: "<base-template-name>"
@@ -532,7 +532,7 @@ widget:: set
 
 ```yaml
 ---
-specification_version: "V_0-3-0"
+specification_version: "V_0-1-0"
 specification_url: "<immutable-url>"
 level: 3
 parent: "<immutable-url>"
@@ -601,6 +601,6 @@ The following are NOT part of iNNfo:
 
 ## Self-Description
 
-This document (`iNNfo_V_0-3-0_NN.md`) is itself a level 1 specification following
-defiNNe. It declares `parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-2-0_NN.md"` and defines
+This document (`iNNfo_V_0-1-0_NN.md`) is itself a level 1 specification following
+defiNNe. It declares `parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"` and defines
 the four root primitives that every level-2 template instantiates.

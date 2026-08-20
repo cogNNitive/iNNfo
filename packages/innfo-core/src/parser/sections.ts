@@ -2,7 +2,7 @@ import { ElementNode, MatrixCell } from '../types'
 import { parseMarkdownTable } from './markdown'
 
 /**
- * Unified syntax (Metaplantilla Nivel 1, V_0-3-0). There is NO legacy syntax:
+ * Unified syntax (Metaplantilla Nivel 1, V_0-1-0). There is NO legacy syntax:
  *
  *   Concept section:  `# NN <Concept>`              (H1 heading)
  *   Element heading:  `## NN <Concept>: <Element>`  (H2 heading)

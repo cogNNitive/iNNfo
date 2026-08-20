@@ -14,7 +14,7 @@ Enable natural-language creation, editing, and querying of iNNfo models through 
 | R4 | Self-Correction Loop | MUST | On an edit, the agent calls validation; if `errors[]` is non-empty it MUST fix and re-validate before reporting success |
 | R5 | Single Source Of Truth | MUST | The iNNfo spec/templates are fetched from a public, versioned URL; `innfo-core`'s validator and the agent consume the same source |
 | R6 | No Spec Duplication | MUST NOT | No skill, rules, prompt, or agent config file contains copied iNNfo spec/template content; such files may only reference/point to the source |
-| R7 | Version-Aware Spec Retrieval | MUST | `get_spec`/`get_template` resolve version from filename SemVer matching V_0-2-0 (both `_NN.md` and `_F.md` suffixes). `SPEC_BASE_URL` points to `v0.1.5/specs/iNNfo_V_0-2-0_NN.md`. Explicit `version` arg MAY override. |
+| R7 | Version-Aware Spec Retrieval | MUST | `get_spec`/`get_template` resolve version from filename SemVer matching V_0-1-0 (both `_NN.md` and `_F.md` suffixes). `SPEC_BASE_URL` points to `main/specs/iNNfo_V_0-1-0_NN.md`. Explicit `version` arg MAY override. |
 | R8 | Spec Caching And Offline Behavior | MUST | Retrieved spec/template content is cached (ETag/version); on fetch failure the last cached version is served with a staleness annotation, and invalid/fabricated spec content MUST NOT be returned |
 | R9 | Mode-Transparent Tools | MUST | Tools accept model `id`; server dispatches to FILE primitive (`_NN.md`). FOLDER mode removed. Callers never select a driver. |
 | R10 | Behavior-Only Rules | MUST | The rules file describes workflow and tool usage (iNNfo FILE handling, validate-after-edit, which tool when) and is runtime-agnostic so a future embedded chat reuses it unchanged |
@@ -38,9 +38,9 @@ Enable natural-language creation, editing, and querying of iNNfo models through 
 | R4 | Valid edit reported once green | A valid natural-language edit | Agent applies and validates | Validation passes with empty `errors[]`; success is reported |
 | R5 | Shared source confirmed | Validator config and `get_spec` | Both resolve the spec for the same model version | Both read from the same public source (no second embedded copy) |
 | R6 | No copied spec text | Repo skill/rules/agent/opencode files | Files are scanned for iNNfo spec keywords/rule bodies | Only URLs/pointers are found; no copied spec/template content exists |
-| R7 | Version from `_NN.md` | Model `..._V_0-2-0_NN.md` | `get_spec` with no argument | Resolves `0-2-0` from updated URL |
+| R7 | Version from `_NN.md` | Model `..._V_0-1-0_NN.md` | `get_spec` with no argument | Resolves `0-1-0` from updated URL |
 | R7 | Legacy `_F.md` support | Model `..._V_0-1-1_F.md` | `get_spec` called | Legacy suffix resolves correctly |
-| R7 | Explicit version override | Model `..._V_0-2-0_NN.md` | `get_spec` + `version: 0-1-0` | `0-1-0` spec returned (arg overrides filename) |
+| R7 | Explicit version override | Model `..._V_0-1-0_NN.md` | `get_spec` + `version: 0-1-1` | `0-1-1` spec returned (arg overrides filename) |
 | R8 | Cache hit avoids refetch | Spec previously fetched, ETag unchanged | `get_spec` called again | Cached content is served without a full refetch |
 | R8 | Offline serves stale, flagged | Public URL unreachable; a cached version exists | `get_spec` called | Last cached content is returned with a staleness annotation; no fabricated content |
 | R8 | Offline, no cache, no fabrication | Public URL unreachable; nothing cached | `get_spec` called | A clear error is returned; no invalid/fabricated spec is produced |

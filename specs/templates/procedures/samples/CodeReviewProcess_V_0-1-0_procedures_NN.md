@@ -3,19 +3,12 @@ level: 3
 parent_spec:
   name: "procedures_V_0-1-0"
   url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/procedures/procedures_V_0-1-0_NN.md"
-model_version: "V_1-0-0"
+model_version: "V_0-1-0"
 title: "Code Review Process"
 ---
 
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
-
-# NN index
-
-* [[Work]]
-* [[Roles]]
-* [[Artifact]]
-* [[Tools]]
 
 # NN Work
 

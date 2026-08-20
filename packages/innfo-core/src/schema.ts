@@ -2,7 +2,7 @@ import type { Concept, ConceptField, Marker, MatrixDecl, ParsedModel } from './t
 import { parseModel } from './parser'
 
 /**
- * Root primitives of the Metaplantilla Nivel 1 (V_0-3-0). A level-2 template
+ * Root primitives of the Metaplantilla Nivel 1 (V_0-1-0). A level-2 template
  * instantiates these four primitives as ordinary elements in its body, using
  * the unified syntax:
  *

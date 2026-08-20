@@ -1,5 +1,19 @@
 # Design: Spec Version Simplification
 
+## Post-Implementation Correction (2026-08-19)
+
+A5/A6 below specify `DEFAULT_INNFO_VERSION` → `V_0-3-0` and L1/L0 filenames
+`iNNfo_V_0-3-0_NN.md` / `defiNNe_V_0-2-0_NN.md`. That is **not** what shipped, and
+the shipped state is the correct one: `specs/iNNfo_V_0-1-0_NN.md` and
+`specs/defiNNe_V_0-1-0_NN.md`, with `DEFAULT_INNFO_VERSION = 'V_0-1-0'` in
+`constants.ts`. The old `V_0.2.x`/`V_0.3.0` numbers tracked the pre-simplification
+scheme (folder snapshots + `latest/` alias); under the new immutable
+filename-encoded scheme they'd assert a release history that never existed for
+this layout — exactly the same reasoning A6 already gives for resetting the L2
+templates to `V_0-1-0` instead of carrying `V_0-2-0`/`V_0-2-1` forward. Applying
+that reasoning consistently, L0/L1 reset too. Treat every `V_0-3-0`/`V_0-2-0`
+reference below as historical intent, superseded by `V_0-1-0`.
+
 ## Technical Approach
 
 Make immutability structural: every spec artifact is addressable only by a versioned filename, so the L2 tree is `specs/templates/{name}/{name}_V_x-y-z_NN.md` and L0/L1 sit flat in `specs/`. Consumers then need exactly one URL strategy (main branch + versioned filename), because the *file name* is the pin — not the git ref, not a folder snapshot, not a `latest/` alias. The D3 badge is a read-only observer over that naming rule; it never mutates anything.

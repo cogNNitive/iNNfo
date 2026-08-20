@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Relationship edges on normalized Blocks (`ModelNode.relationships`) carry a required `origin` exposing the three documented relationship levels (`matrix`, `field`, `mention`) plus explicit `graph_edge` to all consumers. innfo-core builds all origins via one model-wide Element-name resolution pass; the graph keeps consuming `relationships` and renders each origin distinctly. Scenarios map to Vitest tests (core: normalize; editor: useGraphData). Bounded to V_0-3-0.
+Relationship edges on normalized Blocks (`ModelNode.relationships`) carry a required `origin` exposing the three documented relationship levels (`matrix`, `field`, `mention`) plus explicit `graph_edge` to all consumers. innfo-core builds all origins via one model-wide Element-name resolution pass; the graph keeps consuming `relationships` and renders each origin distinctly. Scenarios map to Vitest tests (core: normalize; editor: useGraphData). Bounded to V_0-1-0.
 
 ## Requirements
 

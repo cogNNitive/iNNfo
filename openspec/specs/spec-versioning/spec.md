@@ -116,7 +116,7 @@ point at a mutable alias such as a `latest/` path. Shipped samples MUST follow t
 same rule.
 
 #### Scenario: Shipped sample pins a versioned filename
-- GIVEN the shipped sample `CodeReviewProcess_V_1-0-0_procedures_NN.md`
+- GIVEN the shipped sample `CodeReviewProcess_V_0-1-0_procedures_NN.md`
 - WHEN its `parent_spec.url` is inspected
 - THEN it points at a specific versioned file under `specs/templates/procedures/`, not at any `latest/` path
 

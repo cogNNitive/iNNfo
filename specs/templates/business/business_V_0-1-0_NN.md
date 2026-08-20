@@ -1,10 +1,10 @@
 ---
-specification_version: "V_0-3-0"
+specification_version: "V_0-1-0"
 specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+  name: "iNNfo_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 template_version: "V_0-1-0"
 title: "Business Template"
 relationship_types:
@@ -32,6 +32,7 @@ relationship_types:
 * [[Finance]]
 * [[Analysis]]
 * [[Validation]]
+* [[Procedure]]
 
 # NN Concept Definition
 
@@ -473,6 +474,12 @@ type:: text
 color:: grey
 weight:: 10
 
+## NN Concept Definition: Procedure
+icon:: refresh-cw
+type:: text
+color:: orange
+weight:: 10
+
 # NN Field Definition
 
 ## NN Field Definition: status
@@ -561,6 +568,21 @@ description:: Customer Life Time Value (LTV).
 concept:: Unit economics
 type:: string
 description:: Payback period in months.
+
+## NN Field Definition: target_artifact
+concept:: Procedure
+type:: string
+description:: Nombre del archivo o entregable final a generar (ej. showroom.html).
+
+## NN Field Definition: trigger_command
+concept:: Procedure
+type:: string
+description:: Comando o atajo de OpenCode para disparar el proceso (ej. /generate-showroom).
+
+## NN Field Definition: instructions
+concept:: Procedure
+type:: markdown_inline
+description:: Instrucciones detalladas de prompt para que el agente ejecute la generacion del artefacto.
 
 # NN Marker Definition
 
@@ -828,7 +850,7 @@ The application will resolve the `parent` URL, download this template, and use i
 
 ### Canonical Sample
 
-The official sample for this template is `specs/templates/business/samples/Ghostbusters_V_0-1-2_business_NN.md`. It exercises all concept types, two matrix types, and the index block.
+The official sample for this template is `specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md`. It exercises all concept types, two matrix types, and the index block.
 
 ### Parent Chain
 
@@ -840,8 +862,8 @@ parent_spec:
 
 # This template's parent:
 parent_spec:
-  name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+  name: "iNNfo_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 ```
 
 

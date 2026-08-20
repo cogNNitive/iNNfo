@@ -1,10 +1,10 @@
 ---
-specification_version: "V_0-3-0"
+specification_version: "V_0-1-0"
 specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/procedures/procedures_V_0-1-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+  name: "iNNfo_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 template_version: "V_0-1-0"
 title: "Procedures Template"
 relationship_types:
@@ -225,7 +225,7 @@ validate and render your model.
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/templates/procedures/samples/CodeReviewProcess_V_1-0-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), element properties (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
+The official sample for this template is at `specs/templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), element properties (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
 
 ### Parent Chain
 
@@ -237,8 +237,8 @@ parent_spec:
 
 # This template's parent:
 parent_spec:
-  name: "iNNfo_V_0-3-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-3-0_NN.md"
+  name: "iNNfo_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 ```
 
 

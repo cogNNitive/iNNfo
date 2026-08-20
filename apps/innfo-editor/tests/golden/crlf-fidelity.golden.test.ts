@@ -18,7 +18,7 @@ const modelsDir = join(import.meta.dirname!, '..', 'fixtures', 'models')
 const fixtureFile = 'mini-file_V_0-0-1_business_F.md'
 const nnFixtureName = fixtureFile.replace(/_F\.md$/i, '_NN.md')
 
-/** Migrate legacy _F content to _NN on the fly for V_0-2-0+ parser. */
+/** Migrate legacy _F content to _NN on the fly for V_0-1-0+ parser. */
 function toNnContent(content: string): string {
   return content
     .replace(/(\s*_F\s+)/g, (m) => m.replace('_F', '_NN'))

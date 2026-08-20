@@ -88,7 +88,7 @@ function versionFromFrontmatter(content: string): string | undefined {
  *
  * The filename must reflect the document's OWN version, not the caller's
  * request name. A request for `business` (from a `latest/` URL) must save as
- * `business_V_0-3-0_NN.md`, so the same spec is never duplicated under a
+ * `business_V_0-1-0_NN.md`, so the same spec is never duplicated under a
  * versionless name and a versioned one. Falls back to the request name when
  * the document declares no version.
  */

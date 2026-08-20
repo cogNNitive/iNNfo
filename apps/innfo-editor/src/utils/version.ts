@@ -1,9 +1,9 @@
 /**
- * iNNfo versioning & file-naming helpers (spec V_0-2-0 §8).
+ * iNNfo versioning & file-naming helpers (spec V_0-1-0 §8).
  *
  * Every version string in the iNNfo ecosystem uses Semantic Versioning,
  * rendered with a `V_` prefix and hyphen separators instead of dots:
- *   V_MAJOR-MINOR-PATCH   (e.g. V_0-2-0)
+ *   V_MAJOR-MINOR-PATCH   (e.g. V_0-1-0)
  *
  * An iNNfo-compliant file name MUST end with `_NN.md` (§8.1):
  *   - Model document:    <ModelName>_V_x-y-z_<TemplateName>_NN.md
@@ -30,7 +30,7 @@ export interface ParsedFormatName {
   version: SemVer
 }
 
-/** Renders a SemVer as the iNNfo version string, e.g. `V_0-2-0`. */
+/** Renders a SemVer as the iNNfo version string, e.g. `V_0-1-0`. */
 export function formatVersionString(v: SemVer): string {
   return `V_${v.major}-${v.minor}-${v.patch}`
 }

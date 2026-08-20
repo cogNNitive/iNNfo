@@ -15,7 +15,7 @@ const VERSION_FILENAME_RE = /_V_(\d+-\d+-\d+)_/
 
 /**
  * Extract the SemVer (e.g. `0-1-1`) from an iNNfo filename like
- * `Ghostbusters_V_0-1-2_business_NN.md` → `0-1-2`.
+ * `Ghostbusters_V_0-1-0_business_NN.md` → `0-1-0`.
  * Returns `null` if no version marker is found.
  */
 export function resolveSpecVersionFromFilename(filename: string): string | null {

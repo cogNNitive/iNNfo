@@ -1,6 +1,7 @@
 import { computed, Ref } from 'vue'
 import * as d3 from 'd3'
 import { useModelStore } from '../../../stores/modelStore'
+import { getConceptMeta, getHexColor as resolveHexColor } from '../../../composables/useConceptVisuals'
 
 export interface GNode {
   id: string
@@ -23,54 +24,14 @@ export function useGraphData(localNodeId: Ref<string>) {
 
   // ── Build concept color map from node types ──
   const conceptColors: Record<string, string> = {}
-  const paletteColors = [
-    '#3b82f6',
-    '#22c55e',
-    '#f59e0b',
-    '#a855f7',
-    '#ef4444',
-    '#14b8a6',
-    '#f97316',
-    '#6366f1',
-    '#ec4899',
-    '#84cc16',
-    '#06b6d4',
-    '#e11d48',
-  ]
 
   function initConceptColors() {
-    const types = new Set<string>()
-    for (const node of Object.values(modelStore.nodes)) {
-      if (node.type) types.add(node.type)
-    }
-    let idx = 0
-    for (const t of types) {
-      if (!conceptColors[t]) {
-        conceptColors[t] = paletteColors[idx % paletteColors.length]
-        idx++
-      }
-    }
+    // No-op: colors are now statically resolved via metamodel spec
   }
 
-  // Run initial color mapping
-  initConceptColors()
-
   function getHexColor(colorName: string): string {
-    const map: Record<string, string> = {
-      blue: '#3b82f6',
-      green: '#22c55e',
-      orange: '#f97316',
-      purple: '#a855f7',
-      red: '#ef4444',
-      teal: '#14b8a6',
-      indigo: '#6366f1',
-      violet: '#8b5cf6',
-      amber: '#f59e0b',
-      yellow: '#eab308',
-      emerald: '#22c55e',
-      rose: '#f43f5e',
-    }
-    return map[colorName?.toLowerCase()] || conceptColors[colorName] || '#94a3b8'
+    const metaColor = getConceptMeta(colorName).color
+    return resolveHexColor(metaColor || colorName)
   }
 
   function hslStr(hex: string, satMult: number, lightOff: number): string {
@@ -103,7 +64,7 @@ export function useGraphData(localNodeId: Ref<string>) {
 
     // Create concept-level nodes (column headers)
     for (const type of conceptTypes) {
-      const c = conceptColors[type] || 'slate'
+      const c = getConceptMeta(type).color || 'slate'
       addNode(`concept:${type}`, type, type, c, false)
       typeColorMap.set(type, c)
     }
@@ -112,9 +73,9 @@ export function useGraphData(localNodeId: Ref<string>) {
     for (const node of Object.values(modelStore.nodes)) {
       const typeColor = typeColorMap.get(node.type)
       const conceptColor = node.conceptBinding?.name
-        ? getHexColor(conceptColors[node.conceptBinding.name] ?? 'slate')
+        ? (getConceptMeta(node.conceptBinding.name).color ?? 'slate')
         : null
-      const color = typeColor ?? conceptColor ?? '#94a3b8'
+      const color = typeColor ?? conceptColor ?? 'slate'
       addNode(`inst:${node.id}`, node.name, node.type, color, true)
     }
 
@@ -132,7 +93,7 @@ export function useGraphData(localNodeId: Ref<string>) {
           const sourceId = `inst:${node.id}`
           const targetId = `inst:${rel.targetId}`
           if (nodeSet.has(sourceId) && nodeSet.has(targetId)) {
-            const color = conceptColors[node.type] || '#94a3b8'
+            const color = getConceptMeta(node.type).color || 'slate'
             result.push({
               source: sourceId,
               target: targetId,
