@@ -659,16 +659,16 @@ Survey 50 paranormal enthusiast groups to gauge interest in a licensed operator 
 
 # NN Procedure
 
-## NN Procedure: Compile Strategic Showroom
-target_artifact:: "temp/index.html"
-trigger_command:: "/generate-showroom"
+## NN Procedure: Compile Strategic Master
+target_artifact:: "temp/master.html"
+trigger_command:: "/generate-master"
 instructions:: |
   Generate a single HTML dashboard compiling the 25 strategic diagrams based on the active L3 business model data.
   Follow these visual mapping rules:
   1. Read [[Journey]] and [[Emotions]] for the Customer Journey Emotion Map timeline.
   2. Map [[Problems]] and [[Value propositions]] in the Solution Fit Flow Sankey.
   3. Map [[Profiles]] (Nancy) and [[Behaviors]] for the Buyer Persona Card columns.
-  Use the reference layout from `https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/samples/showroom.html` (which has all CSS and SVGs inline) as the base design. Inject the actual L3 model values into the SVG elements.
+  Use the reference layout from `https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/samples/master.html` (which has all CSS and SVGs inline) as the base design. Inject the actual L3 model values into the SVG elements.
 
 # NN matrices: journey map
 

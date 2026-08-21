@@ -608,12 +608,12 @@ description:: Payback period in months.
 ## NN Field Definition: target_artifact
 concept:: Procedure
 type:: string
-description:: Nombre del archivo o entregable final a generar (ej. showroom.html).
+description:: Nombre del archivo o entregable final a generar (ej. master.html).
 
 ## NN Field Definition: trigger_command
 concept:: Procedure
 type:: string
-description:: Comando o atajo de OpenCode para disparar el proceso (ej. /generate-showroom).
+description:: Comando o atajo de OpenCode para disparar el proceso (ej. /generate-master).
 
 ## NN Field Definition: instructions
 concept:: Procedure
@@ -859,11 +859,9 @@ title: "<Your Business Name>"
 > This is an **iNNfo document**...
 
 # NN index
-* [[Market]]
-  * [[Stakeholders]]
-  * [[Segments]]
-    * [[Problems]]
-    * [[Value propositions]]
+* [[Concept A]]
+  * [[Concept B]]
+  * [[Concept C]]
 ...
 
 # NN Business summary
@@ -886,7 +884,7 @@ The application will resolve the `parent` URL, download this template, and use i
 
 ### Canonical Sample
 
-The official sample for this template is `specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md`. It exercises all concept types, two matrix types, and the index block.
+The official sample for this template is `specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md`. It exercises all concept types and two matrix types; it inherits its concept hierarchy from this template's `# NN index` (see below) via `parent_spec`, so it declares no index block of its own.
 
 ### Parent Chain
 
@@ -4506,4 +4504,96 @@ Patent databases like those maintained by the U.S. Patent and Trademark Office o
 
 ### Prompts
 *No prompts provided.*
+
+# NN index
+* [[Business summary]]
+* [[Market]]
+  * [[Stakeholders]]
+    * [[Roles]]
+  * [[Segments]]
+    * [[Profiles]]
+      * [[Persona]]
+      * [[Problems]]
+      * [[Value propositions]]
+      * [[Messages]]
+      * [[Channels]]
+      * [[Relationships]]
+      * [[Perceptions]]
+      * [[Emotions]]
+      * [[Behaviors]]
+      * [[Journey]]
+    * [[Segmentation]]
+  * [[Market trends]]
+  * [[Market size]]
+  * [[Competition]]
+* [[Solutions]]
+  * [[Products and services]]
+    * [[Portfolio]]
+    * [[Components]]
+    * [[Features]]
+    * [[Roadmap]]
+  * [[Pricing]]
+  * [[Offerings]]
+  * [[Brochure]]
+* [[Marketing]]
+  * [[Branding]]
+    * [[Naming]]
+    * [[Visual identity]]
+      * [[Logo]]
+  * [[Media plan]]
+  * [[Communication]]
+  * [[Pitch]]
+  * [[Web]]
+  * [[Storytelling]]
+  * [[Presentations]]
+* [[Organization]]
+  * [[Business idea]]
+    * [[Inspiration]]
+    * [[Opportunity]]
+  * [[Business status]]
+  * [[Challenges]]
+  * [[Business objectives]]
+    * [[Mission]]
+    * [[Vision]]
+    * [[Organizational values]]
+    * [[Organizational goals]]
+  * [[Team]]
+    * [[Goals]]
+    * [[Skills]]
+    * [[Persons]]
+    * [[Contributions]]
+    * [[Compensations]]
+    * [[Positions]]
+* [[Operations]]
+  * [[Activities]]
+  * [[Functions]]
+  * [[Resources]]
+  * [[Project plan]]
+    * [[Phases]]
+    * [[Milestones]]
+  * [[Metrics]]
+* [[Finance]]
+  * [[Revenue]]
+  * [[Costs]]
+  * [[Funding sources]]
+    * [[Shareholders]]
+  * [[Unit economics]]
+    * [[Life Time Value]]
+    * [[Customer Acquisition Cost]]
+  * [[Projections]]
+* [[Legal]]
+  * [[Legal issues]]
+  * [[Contracts]]
+* [[Analysis]]
+  * [[Assumptions]]
+  * [[Risks]]
+  * [[SWOT]]
+    * [[Unfair advantage]]
+  * [[Keys]]
+  * [[Suggestions]]
+* [[Validation]]
+  * [[Coherence]]
+  * [[Experiments]]
+* [[Procedure]]
+* [[Misc]]
 
