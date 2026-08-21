@@ -12,7 +12,7 @@ export function nowIso(): string {
  *  models declare no local metamodel. */
 export function toLocalMetamodel(parsed: ParsedModel): LocalMetamodel {
   const schema = extractTemplateSchema(parsed)
-  return { concepts: schema.concepts, markers: schema.markers }
+  return { concepts: schema.concepts, markers: schema.markers, taxonomy: schema.taxonomy }
 }
 
 export function toFieldValues(fields: Record<string, unknown>): Record<string, FieldValue> {

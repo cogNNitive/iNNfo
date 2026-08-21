@@ -1,4 +1,4 @@
-import type { LocalMetamodel, MetamodelConcept, MetamodelMarker, ModelNode } from './types'
+import type { LocalMetamodel, MetamodelConcept, MetamodelMarker, ModelNode, TaxonomyEdge } from './types'
 
 /**
  * Builds the ancestor chain for `nodeId`, root-first (e.g. `[Root, Root/A,
@@ -31,10 +31,18 @@ function buildAncestorChain(nodeId: string, nodes: Record<string, ModelNode>): M
  * metamodel (nested elements) contribute nothing and are transparent to
  * the walk.
  *
+ * `taxonomy` follows a different rule than `concepts`/`markers`: it is a
+ * coherent tree, not a bag of independently-keyed items, so it is resolved
+ * by wholesale replacement rather than per-edge merge — the closest
+ * ancestor with a non-empty taxonomy wins outright, same closest-wins
+ * directionality as concepts/markers, just applied to the whole edge list
+ * at once instead of per name.
+ *
  * Template roots: if `allRootIds` is provided, every root-level node
  * (parentId === null) contributes its local metamodel to the result.
- * This makes template concepts from structural ghost roots available
- * to child models that reference them via parent_spec.
+ * This makes template concepts (and, absent a closer taxonomy, template
+ * taxonomy) from structural ghost roots available to child models that
+ * reference them via parent_spec.
  */
 export function resolveEffectiveMetamodel(
   nodeId: string,
@@ -45,6 +53,7 @@ export function resolveEffectiveMetamodel(
 
   const conceptsByName = new Map<string, MetamodelConcept>()
   const markersByName = new Map<string, MetamodelMarker>()
+  let taxonomy: TaxonomyEdge[] = []
 
   // Collect from ancestor chain (node-level inheritance)
   for (const ancestor of chain) {
@@ -55,6 +64,9 @@ export function resolveEffectiveMetamodel(
     }
     for (const marker of local.markers) {
       markersByName.set(marker.name, marker)
+    }
+    if (local.taxonomy && local.taxonomy.length > 0) {
+      taxonomy = local.taxonomy
     }
   }
 
@@ -76,11 +88,15 @@ export function resolveEffectiveMetamodel(
           markersByName.set(marker.name, marker)
         }
       }
+      if (taxonomy.length === 0 && local.taxonomy && local.taxonomy.length > 0) {
+        taxonomy = local.taxonomy
+      }
     }
   }
 
   return {
     concepts: [...conceptsByName.values()],
     markers: [...markersByName.values()],
+    taxonomy,
   }
 }

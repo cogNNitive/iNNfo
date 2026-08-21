@@ -311,6 +311,7 @@ export interface MetamodelMarker {
 export interface LocalMetamodel {
   concepts: MetamodelConcept[]
   markers: MetamodelMarker[]
+  taxonomy: TaxonomyEdge[]
 }
 
 /**

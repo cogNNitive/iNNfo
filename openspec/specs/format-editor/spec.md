@@ -170,6 +170,23 @@ The `selectedItemName` behavior (expanding the matching instance sheet) MUST rem
 
 The existing resize handle at the right edge of the sidebar MUST continue to work. Sidebar width persistence is handled by the session-persistence spec.
 
+### Requirement: LeftSidebar — Concept Hierarchy Inherited from Template
+
+The sidebar's concept tree (`getConceptsForModel`) MUST source its hierarchy primarily from the level-2 template resolved via the model's `parent_spec` chain, the same resolution mechanism already used for `concepts`/`markers` inheritance (`SpecResolverService`, `resolveEffectiveMetamodel`): a template's own `# NN index` block is parsed once into `taxonomy` edges on its `localMetamodel` and carried through unchanged (wholesale, not merged per-edge) to every model that resolves that template as its parent. A model's own `# NN index` block, if present, remains a legacy/fallback source used only when no resolved template contributes a taxonomy.
+
+A workspace `specs/` folder MAY declare a specialized level-2 template (its own `parent_spec` pointing at the base template) that overrides the inherited hierarchy by declaring its own complete `# NN index`; whichever template a model actually resolves as parent wins outright, with no merging against a grandparent template's index.
+
+#### Scenario: Model inherits hierarchy from its template
+
+- GIVEN a level-3 model with no `# NN index` of its own
+- AND its `parent_spec` resolves to a level-2 template that declares a `# NN index`
+- THEN the sidebar's concept tree nests according to the template's index
+
+#### Scenario: Specialized template overrides the base template's hierarchy
+
+- GIVEN a level-3 model whose `parent_spec` resolves to a specialized level-2 template with its own `# NN index`, different from the base template it forks from
+- THEN the sidebar's concept tree uses the resolved (specialized) template's index, not the base template's
+
 ### Requirement: ConceptTreeNode — Colored Pills, Popups, Ghost States
 
 `ConceptTreeNode.vue` MUST be extended with:

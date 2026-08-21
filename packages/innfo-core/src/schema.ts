@@ -1,4 +1,4 @@
-import type { Concept, ConceptField, Marker, MatrixDecl, ParsedModel } from './types'
+import type { Concept, ConceptField, Marker, MatrixDecl, ParsedModel, TaxonomyEdge } from './types'
 import { parseModel } from './parser'
 
 /**
@@ -40,6 +40,7 @@ export interface TemplateSchema {
   concepts: Concept[]
   markers: Marker[]
   matrices: MatrixDecl[]
+  taxonomy: TaxonomyEdge[]
 }
 
 function asString(v: unknown): string | undefined {
@@ -124,7 +125,7 @@ export function extractTemplateSchema(parsed: ParsedModel): TemplateSchema {
     return decl
   })
 
-  return { concepts, markers, matrices }
+  return { concepts, markers, matrices, taxonomy: parsed.taxonomy }
 }
 
 /**

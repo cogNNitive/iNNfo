@@ -211,7 +211,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { ModelNode, MetamodelConcept } from '../../model/types'
-import { parseModel, parseFrontmatter } from '@cognnitive/innfo-core'
+import { parseFrontmatter } from '@cognnitive/innfo-core'
 import { parseFormatFilename, compareSemVer, type SemVer } from '../../utils/version'
 import { resolveEffectiveMetamodel } from '../../model/metamodel'
 import {
@@ -608,6 +608,7 @@ function getConceptsForModel(rootId: string): TreeGroup[] {
 
   // Resolve template concepts specifically for THIS model
   let modelConcepts: MetamodelConcept[] = []
+  let taxonomyEdges: Array<{ parent: string; child: string }> = []
   if (rootNode.rawContent) {
     try {
       const fm = parseFrontmatter(rootNode.rawContent) as any
@@ -621,6 +622,7 @@ function getConceptsForModel(rootId: string): TreeGroup[] {
         })
         if (specNode?.localMetamodel?.concepts) {
           modelConcepts = specNode.localMetamodel.concepts
+          taxonomyEdges = specNode.localMetamodel?.taxonomy ?? []
         }
       }
     } catch {
@@ -628,9 +630,19 @@ function getConceptsForModel(rootId: string): TreeGroup[] {
     }
   }
 
-  if (modelConcepts.length === 0) {
+  // Taxonomy is resolved independently from concepts: a resolved template
+  // may declare concepts without (yet) declaring a taxonomy, in which case
+  // the effective-metamodel fallback (which also covers a model's own
+  // legacy self-authored index, since toLocalMetamodel now attaches
+  // taxonomy to every root node) must still run for taxonomy alone.
+  if (modelConcepts.length === 0 || taxonomyEdges.length === 0) {
     const effective = resolveEffectiveMetamodel(rootId, modelStore.nodes, [rootId])
-    modelConcepts = effective.concepts
+    if (modelConcepts.length === 0) {
+      modelConcepts = effective.concepts
+    }
+    if (taxonomyEdges.length === 0) {
+      taxonomyEdges = effective.taxonomy ?? []
+    }
   }
 
   if (modelConcepts.length === 0) {
@@ -655,17 +667,6 @@ function getConceptsForModel(rootId: string): TreeGroup[] {
       return true
     }
     return false
-  }
-
-  // Parse taxonomy edges from this model
-  let taxonomyEdges: Array<{ parent: string; child: string }> = []
-  if (rootNode && rootNode.rawContent) {
-    try {
-      const parsed = parseModel(rootNode.rawContent)
-      taxonomyEdges.push(...(parsed.taxonomy ?? []))
-    } catch {
-      // Graceful fallback
-    }
   }
 
   // Build taxonomy tree: parent → children names

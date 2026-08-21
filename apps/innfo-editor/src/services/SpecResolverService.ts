@@ -319,7 +319,7 @@ export async function resolveParentSpecs(
         childIds: [],
         type: 'category',
         kind: 'root' as const,
-        localMetamodel: { concepts, markers } as LocalMetamodel,
+        localMetamodel: { concepts, markers, taxonomy: schema.taxonomy } as LocalMetamodel,
         fields: {},
         markers: {},
         relationships: [],
