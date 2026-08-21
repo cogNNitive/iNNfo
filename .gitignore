@@ -29,3 +29,7 @@ scratch_*.mjs
 # Generated exports (AI agent output)
 traNNsform/outputs/*
 !/traNNsform/outputs/.gitkeep
+# Local Windows shortcut
+_NN.lnk
+# Local scratch / demo preview
+temp/
