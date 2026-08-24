@@ -66,9 +66,6 @@ export function normalizeSingleModel(
     return { nodes: ctx.nodes, issues: ctx.issues }
   }
 
-  // Determine asset mode (FR-004, default centralized)
-  const assetMode = parsed.frontmatter.asset_mode ?? 'centralized'
-
   // Create root node for this model
   const qualifiedId = ctx.identity.register(null, refName)
   const rootNode: ModelNode = {
@@ -81,7 +78,6 @@ export function normalizeSingleModel(
     fields: toFieldValues(parsed.frontmatter as Record<string, unknown>),
     markers: {},
     relationships: [],
-    assetMode,
     rawSections: parsed.rawSections ?? {},
     rawContent: content,
     localMetamodel: toLocalMetamodel(parsed),

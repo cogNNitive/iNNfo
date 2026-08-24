@@ -7,7 +7,6 @@ parent:
   url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/procedures_V_0-1-1_NN.md"
 model_version: "V_0-0-1"
 title: "Song Recording Workflow"
-asset_mode: "centralized"
 ---
 
 > [!NOTE]

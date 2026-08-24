@@ -157,7 +157,8 @@ export function normalizeElementsIntoGraph(
 
 /**
  * Resolve asset paths for elements whose concept fields are of type
- * image/file/video/audio. Paths are constructed according to asset_mode.
+ * image/file/video/audio. Paths follow the single canonical storage
+ * convention: `{modelDir}/assets/{element-slug}/{filename}`.
  */
 export function resolveElementAssets(
   parsed: ParsedModel,
@@ -183,9 +184,6 @@ export function resolveElementAssets(
 
   if (assetFieldsByConcept.size === 0) return
 
-  // Determine asset mode from root node
-  const rootNode = ctx.nodes[rootId]
-  const assetMode = rootNode?.assetMode ?? 'centralized'
   const modelDir = sourcePath.replace(/\/?[^/]+$/, '') // directory of the model file
 
   for (const [conceptName, elementNodes] of parsed.elements.entries()) {
@@ -202,8 +200,7 @@ export function resolveElementAssets(
       for (const fieldDef of assetFields) {
         const fieldValue = el.fields[fieldDef.name]
         if (typeof fieldValue === 'string' && fieldValue.trim()) {
-          const assetDir =
-            assetMode === 'per-element' && el.slug ? `${modelDir}/${el.slug}` : `${modelDir}/assets`
+          const assetDir = el.slug ? `${modelDir}/assets/${el.slug}` : `${modelDir}/assets`
           paths.push(`${assetDir}/${fieldValue.trim()}`)
         }
       }

@@ -1,4 +1,4 @@
-# Delta: Widget Registry — 14 New Widget Types
+# Widget Registry
 
 ## Purpose
 

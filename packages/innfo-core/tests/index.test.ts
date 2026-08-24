@@ -1490,64 +1490,10 @@ describe('ConceptField.type with asset types (FR-003)', () => {
   })
 })
 
-/* ── FR-004: asset_mode ─────────────────────────────────────── */
+/* ── Storage convention (single, canonical) ────────────────────── */
 
-describe('asset_mode (FR-004)', () => {
-  it('defaults to centralized when absent from frontmatter', () => {
-    const content = [
-      '---',
-      'spec_version: "V_0-1-3"',
-      'level: 3',
-      'model_version: "V_0-0-1"',
-      'title: "Asset Mode Test"',
-      'parent_spec:',
-      '  name: "test_V_0-1-1"',
-      '  url: "https://example.com/test"',
-      '---',
-      '',
-      '# NN index',
-      '* [[TestEl]]',
-      '',
-      '# NN Components',
-      '',
-      '## NN Components: TestEl',
-      '  A test.',
-      '',
-    ].join('\n')
-
-    const model = parseModel(content)
-    expect(model.frontmatter.asset_mode).toBeUndefined()
-    // The default is handled at the recursiveParser level
-  })
-
-  it('accepts explicit centralized mode', () => {
-    const content = [
-      '---',
-      'spec_version: "V_0-1-3"',
-      'level: 3',
-      'model_version: "V_0-0-1"',
-      'title: "Asset Mode Test"',
-      'parent_spec:',
-      '  name: "test_V_0-1-1"',
-      '  url: "https://example.com/test"',
-      'asset_mode: centralized',
-      '---',
-      '',
-      '# NN index',
-      '* [[TestEl]]',
-      '',
-      '# NN Components',
-      '',
-      '## NN Components: TestEl',
-      '  A test.',
-      '',
-    ].join('\n')
-
-    const model = parseModel(content)
-    expect(model.frontmatter.asset_mode).toBe('centralized')
-  })
-
-  it('accepts per-element mode', () => {
+describe('asset storage convention', () => {
+  it('ignores a stray asset_mode field in frontmatter (no such field exists)', () => {
     const content = [
       '---',
       'spec_version: "V_0-1-3"',
@@ -1570,11 +1516,13 @@ describe('asset_mode (FR-004)', () => {
       '',
     ].join('\n')
 
+    // asset_mode is not part of SpecFrontmatter; it is preserved as an
+    // unrecognized field but never consulted by the parser.
     const model = parseModel(content)
     expect(model.frontmatter.asset_mode).toBe('per-element')
   })
 
-  it('resolves asset paths in centralized mode correctly', async () => {
+  it('resolves asset paths under {modelDir}/assets/{element-slug}/{filename}', async () => {
     const { recursiveParse } = await import('../src/recursiveParser')
 
     const fakeFile = (name: string, content: string) => ({
@@ -1605,7 +1553,6 @@ describe('asset_mode (FR-004)', () => {
       'parent_spec:',
       '  name: "test_V_0-1-1"',
       '  url: "https://example.com/test"',
-      'asset_mode: centralized',
       '---',
       '',
       '# NN Concept Definition',
@@ -1653,11 +1600,11 @@ describe('asset_mode (FR-004)', () => {
     // graph nodes, so filter by name).
     const screenshotNode = Object.values(result.nodes).find((n) => n.name === 'ScreenshotOne')
     expect(screenshotNode).toBeDefined()
-    // The asset path for centralized: <model-dir>/assets/photo.png
-    // model-dir is '' (no directory prefix in the test), so path is 'assets/photo.png'
+    // The single canonical convention: <model-dir>/assets/<element-slug>/<filename>
+    // model-dir is '' (no directory prefix in the test), so path is 'assets/screenshotone/photo.png'
     expect(screenshotNode!.assets).toBeDefined()
     expect(screenshotNode!.assets!.length).toBeGreaterThan(0)
-    expect(screenshotNode!.assets![0]).toContain('assets/photo.png')
+    expect(screenshotNode!.assets![0]).toContain('assets/screenshotone/photo.png')
   })
 })
 

@@ -1,4 +1,4 @@
-﻿# Delta: File System Operations â€” Directory Picker, Auto-Backup, URL Loading, Folder Init
+﻿# File System Ops
 
 ## Purpose
 

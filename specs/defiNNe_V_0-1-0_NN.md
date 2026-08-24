@@ -1,6 +1,6 @@
 ---
-specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
+spec_version: "V_0-1-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 level: 0
 title: "defiNNe — The Definition of Definitions"
 description: "Meta-specification for the CogNNitive ecosystem. Defines the structure, versioning, normative language, terminology discipline, and dependency resolution for all derived specifications."
@@ -20,7 +20,7 @@ status: "Draft"
 defiNNe is built on four foundational values:
 
 1. **Hierarchical Consistency**: Every specification belongs to a level in a defined hierarchy. Each level inherits the constraints of the levels above it and adds its own.
-2. **Explicit Dependencies via Parent Chain**: Every specification declares its parent with an exact name and immutable URL. From any document, the full chain up to level 0 is resolvable.
+2. **Explicit Dependencies via Parent Chain**: Every specification declares a reference to its parent, resolvable to an exact document and immutable URL. From any document, the full chain up to level 0 is resolvable.
 3. **Rich Specs, Lean Models**: Specification documents (levels 0–2) are semantically rich — they carry Philosophy, Objectives, full specification text. Models (level 3) are lightweight — they carry only data and a pointer to their parent template.
 4. **Cacheable Resolution**: The parent chain can be resolved at load time and cached locally, making any model functionally self-contained without duplicating specification content.
 
@@ -47,8 +47,9 @@ defiNNe is built on four foundational values:
 Rules:
 
 - A level N specification MUST declare `level: N` in its frontmatter.
-- A level N specification (N > 0) MUST declare `parent` as a string containing the URL, pointing to its level N-1 parent.
-- A level 0 specification MUST NOT declare a `parent`.
+- A level 1 specification MUST declare `parent` as a string containing the URL, pointing to its level 0 parent.
+- A level 2 or level 3 specification MUST declare `parent_spec` as an object with `name` and `url` fields, pointing to its parent (the level 1 specification for a level 2 template; the level 2 template for a level 3 model).
+- A level 0 specification MUST NOT declare a `parent` or `parent_spec`.
 - Each level ADDS constraints. It MUST NOT relax constraints from the level above.
 
 ### Terminology Discipline
@@ -64,17 +65,30 @@ each throughout its normative text. This applies to all derived specifications:
 
 The canonical entity vocabulary for semantic models is defined by iNNfo (level 1).
 
-### Parent Field
+### Parent Reference Fields
 
-The `parent` field is a string containing the URL of the parent document:
+The field used to point to the parent document differs by level:
 
-```yaml
-parent: "<immutable-URL-to-the-parent-document>"
-```
+- **Level 1** uses `parent`, a string containing the URL of the parent document:
 
-- `parent`: an immutable URL (RECOMMENDED: git tag-based) pointing to the raw parent document. The application resolves this URL to find the parent.
+  ```yaml
+  parent: "<immutable-URL-to-the-parent-document>"
+  ```
 
-A level 0 specification MUST NOT include `parent`.
+  - `parent`: an immutable URL (RECOMMENDED: git tag-based) pointing to the raw parent document. The application resolves this URL to find the parent.
+
+- **Level 2 and level 3** use `parent_spec`, an object with `name` and `url`:
+
+  ```yaml
+  parent_spec:
+    name: "<parent-document-name>"
+    url: "<immutable-URL-to-the-parent-document>"
+  ```
+
+  - `parent_spec.name`: an identifier for the parent document. The application uses this as the resolved document's identity in the parent chain (not merely re-derived from the URL).
+  - `parent_spec.url`: an immutable URL (RECOMMENDED: git tag-based) pointing to the raw parent document. The application resolves this URL to find the parent.
+
+A level 0 specification MUST NOT include `parent` or `parent_spec`.
 
 ### Spec Resolver Protocol
 
@@ -82,12 +96,12 @@ A level 0 specification MUST NOT include `parent`.
 
 When an application loads a level 3 model, it SHOULD resolve the full parent chain:
 
-1. Read the model's `parent` URL.
+1. Read the model's `parent_spec.url`.
 2. If the parent file is NOT already cached in a `specs/` subdirectory next to the model, download it from the URL.
 3. Save it to `specs/<parent_basename>_NN.md` (where `parent_basename` is derived from the URL, stripping directories and suffixes).
-4. Read the downloaded spec's `parent` URL and repeat until reaching level 0 (no parent).
+4. Read the downloaded spec's parent reference — `parent_spec.url` if it is a level 2 template, or `parent` if it is the level 1 specification — and repeat until reaching level 0 (no parent).
 5. On subsequent loads, check `specs/` first. Only download missing files.
-6. If the model's `parent` changes (version bump), the application detects the mismatch and downloads the new parent.
+6. If the model's `parent_spec.url` changes (version bump), the application detects the mismatch and downloads the new parent.
 
 The cached directory structure:
 
@@ -122,8 +136,8 @@ All specifications MUST begin with a YAML frontmatter block.
 
 ```yaml
 ---
-specification_version: "V_x-y-z"
-specification_url: "<immutable-URL>"
+spec_version: "V_x-y-z"
+spec_url: "<immutable-URL>"
 level: 0
 title: "..."
 description: "..."
@@ -132,14 +146,14 @@ status: "Draft | Stable | Deprecated"
 ---
 ```
 
-No `parent`.
+No `parent` or `parent_spec`.
 
 **Level 1 (concrete specifications)**
 
 ```yaml
 ---
-specification_version: "V_x-y-z"
-specification_url: "<immutable-URL>"
+spec_version: "V_x-y-z"
+spec_url: "<immutable-URL>"
 level: 1
 parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 title: "..."
@@ -151,10 +165,12 @@ description: "..."
 
 ```yaml
 ---
-specification_version: "V_x-y-z"
-specification_url: "<immutable-URL>"
+spec_version: "V_x-y-z"
+spec_url: "<immutable-URL>"
 level: 2
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
+parent_spec:
+  name: "iNNfo_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 title: "..."
 concepts: [...]
 markers: [...]
@@ -168,13 +184,15 @@ relationship_types: {...}
 ```yaml
 ---
 level: 3
-parent: "<immutable-URL-to-template>"
+parent_spec:
+  name: "<template-name>"
+  url: "<immutable-URL-to-template>"
 model_version: "V_x-y-z"
 title: "..."
 ---
 ```
 
-A level 3 model MUST NOT inline the template definition; it MUST rely on the `parent` URL + spec resolver to obtain its schema.
+A level 3 model MUST NOT inline the template definition; it MUST rely on the `parent_spec.url` + spec resolver to obtain its schema.
 
 **Frontmatter Extensibility**
 
@@ -244,7 +262,7 @@ specs/
 
 ### Specification URL Persistence
 
-- The `specification_url` MUST point to an immutable version of the specification.
+- The `spec_url` MUST point to an immutable version of the specification.
 - RECOMMENDED: use a git tag: `https://raw.githubusercontent.com/cogNNitive/<repo>/v<version>/<path>`
 - Once a version is published under a given URL, its content MUST NOT change.
 - Corrections and errata MUST be published as a new PATCH version.
@@ -284,10 +302,10 @@ Internal cross-references MUST use stable heading names, not section numbers. Se
 A document is defiNNe-compliant only if ALL of the following hold:
 
 1. Filename matches the level convention (see **File Naming Convention**).
-2. Frontmatter contains `specification_version` in `V_MAJOR-MINOR-PATCH` form (see **Versioning**).
-3. Frontmatter contains a resolvable `specification_url` (see **Specification URL Persistence**).
+2. Frontmatter contains `spec_version` in `V_MAJOR-MINOR-PATCH` form (see **Versioning**).
+3. Frontmatter contains a resolvable `spec_url` (see **Specification URL Persistence**).
 4. Frontmatter contains `level`.
-5. If level > 0: frontmatter contains `parent` as a string URL.
+5. If level = 1: frontmatter contains `parent` as a string URL. If level = 2 or 3: frontmatter contains `parent_spec` as an object with `name` and `url`.
 6. If level ≤ 2: body contains the required sections in order (see **Required Body Sections**).
 7. If level = 3: body does NOT contain the required sections.
 8. Body begins with the required Document Notice (see **Document Notice**).
@@ -301,7 +319,9 @@ A document is defiNNe-compliant only if ALL of the following hold:
 ```markdown
 ---
 level: 3
-parent: "<immutable-url-to-template>"
+parent_spec:
+  name: "<template-name>"
+  url: "<immutable-url-to-template>"
 model_version: "V_x-y-z"
 title: "Model Name"
 ---
@@ -324,10 +344,14 @@ From the sample model `specs/templates/business/samples/Ghostbusters_V_0-1-0_bus
 
 ```yaml
 # Ghostbusters (level 3)
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
+parent_spec:
+  name: "business_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
 
 # business_V_0-1-0 (level 2)
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
+parent_spec:
+  name: "iNNfo_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 
 # iNNfo_V_0-1-0 (level 1)
 parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"

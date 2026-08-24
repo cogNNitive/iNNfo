@@ -1,6 +1,6 @@
 ---
-specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
+spec_version: "V_0-1-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
 level: 2
 parent_spec:
   name: "iNNfo_V_0-1-0"
@@ -50,37 +50,37 @@ weight:: 90
 
 ## NN Concept Definition: Stakeholders
 icon:: users
-type:: weight
+type:: importance
 color:: blue
 weight:: 80
 
 ## NN Concept Definition: Segments
 icon:: pie-chart
-type:: weight
+type:: importance
 color:: blue
 weight:: 70
 
 ## NN Concept Definition: Profiles
 icon:: user
-type:: weight
+type:: importance
 color:: blue
 weight:: 80
 
 ## NN Concept Definition: Persona
 icon:: user-round
-type:: weight
+type:: importance
 color:: blue
 weight:: 50
 
 ## NN Concept Definition: Segmentation
 icon:: split
-type:: weight
+type:: importance
 color:: blue
 weight:: 60
 
 ## NN Concept Definition: Market trends
 icon:: trending-up
-type:: weight
+type:: importance
 color:: blue
 weight:: 20
 
@@ -92,55 +92,55 @@ weight:: 50
 
 ## NN Concept Definition: Competition
 icon:: swords
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Roles
 icon:: user-cog
-type:: weight
+type:: importance
 color:: blue
 weight:: 30
 
 ## NN Concept Definition: Problems
 icon:: circle-alert
-type:: weight
+type:: importance
 color:: blue
 weight:: 85
 
 ## NN Concept Definition: Value propositions
 icon:: gem
-type:: weight
+type:: importance
 color:: blue
 weight:: 70
 
 ## NN Concept Definition: Messages
 icon:: message-square
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Channels
 icon:: share-2
-type:: weight
+type:: importance
 color:: blue
 weight:: 70
 
 ## NN Concept Definition: Perceptions
 icon:: eye
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Emotions
 icon:: heart
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Behaviors
 icon:: activity
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
@@ -158,7 +158,7 @@ weight:: 90
 
 ## NN Concept Definition: Offerings
 icon:: shopping-bag
-type:: weight
+type:: importance
 color:: blue
 weight:: 80
 
@@ -170,13 +170,13 @@ weight:: 95
 
 ## NN Concept Definition: Features
 icon:: sparkles
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Components
 icon:: boxes
-type:: weight
+type:: importance
 color:: blue
 weight:: 75
 
@@ -248,13 +248,13 @@ weight:: 60
 
 ## NN Concept Definition: Inspiration
 icon:: sparkles
-type:: weight
+type:: importance
 color:: blue
 weight:: 50
 
 ## NN Concept Definition: Opportunity
 icon:: door-open
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
@@ -278,13 +278,13 @@ weight:: 40
 
 ## NN Concept Definition: Organizational values
 icon:: compass
-type:: weight
+type:: importance
 color:: blue
 weight:: 35
 
 ## NN Concept Definition: Organizational goals
 icon:: flag
-type:: weight
+type:: importance
 color:: blue
 weight:: 60
 
@@ -296,19 +296,19 @@ weight:: 50
 
 ## NN Concept Definition: Activities
 icon:: list-checks
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Functions
 icon:: workflow
-type:: weight
+type:: importance
 color:: blue
 weight:: 30
 
 ## NN Concept Definition: Resources
 icon:: boxes
-type:: weight
+type:: importance
 color:: blue
 weight:: 30
 
@@ -320,37 +320,37 @@ weight:: 70
 
 ## NN Concept Definition: Persons
 icon:: user-check
-type:: weight
+type:: importance
 color:: blue
 weight:: 80
 
 ## NN Concept Definition: Contributions
 icon:: gift
-type:: weight
+type:: importance
 color:: blue
 weight:: 60
 
 ## NN Concept Definition: Compensations
 icon:: coins
-type:: weight
+type:: importance
 color:: blue
 weight:: 60
 
 ## NN Concept Definition: Positions
 icon:: contact
-type:: weight
+type:: importance
 color:: blue
 weight:: 20
 
 ## NN Concept Definition: Skills
 icon:: award
-type:: weight
+type:: importance
 color:: blue
 weight:: 30
 
 ## NN Concept Definition: Goals
 icon:: goal
-type:: weight
+type:: importance
 color:: blue
 weight:: 30
 
@@ -374,7 +374,7 @@ weight:: 10
 
 ## NN Concept Definition: Metrics
 icon:: gauge
-type:: weight
+type:: importance
 color:: blue
 weight:: 50
 
@@ -386,13 +386,13 @@ weight:: 70
 
 ## NN Concept Definition: Revenue
 icon:: coins
-type:: weight
+type:: importance
 color:: blue
 weight:: 65
 
 ## NN Concept Definition: Costs
 icon:: receipt
-type:: weight
+type:: importance
 color:: blue
 weight:: 50
 
@@ -404,19 +404,19 @@ weight:: 25
 
 ## NN Concept Definition: Funding sources
 icon:: landmark
-type:: weight
+type:: importance
 color:: blue
 weight:: 25
 
 ## NN Concept Definition: Shareholders
 icon:: pie-chart
-type:: weight
+type:: importance
 color:: blue
 weight:: 20
 
 ## NN Concept Definition: Projections
 icon:: line-chart
-type:: weight
+type:: importance
 color:: blue
 weight:: 20
 
@@ -428,13 +428,13 @@ weight:: 40
 
 ## NN Concept Definition: Legal issues
 icon:: gavel
-type:: weight
+type:: importance
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Contracts
 icon:: scroll-text
-type:: weight
+type:: importance
 color:: blue
 weight:: 10
 
@@ -446,25 +446,25 @@ weight:: 80
 
 ## NN Concept Definition: Assumptions
 icon:: circle-help
-type:: weight
+type:: importance
 color:: red
 weight:: 50
 
 ## NN Concept Definition: Risks
 icon:: shield-alert
-type:: weight
+type:: importance
 color:: red
 weight:: 90
 
 ## NN Concept Definition: Challenges
 icon:: mountain
-type:: weight
+type:: importance
 color:: red
 weight:: 70
 
 ## NN Concept Definition: Suggestions
 icon:: messages-square
-type:: weight
+type:: importance
 color:: red
 weight:: 30
 
@@ -482,7 +482,7 @@ weight:: 10
 
 ## NN Concept Definition: Keys
 icon:: key-round
-type:: weight
+type:: importance
 color:: red
 weight:: 50
 
@@ -494,13 +494,13 @@ weight:: 90
 
 ## NN Concept Definition: Coherence
 icon:: link
-type:: weight
+type:: importance
 color:: green
 weight:: 25
 
 ## NN Concept Definition: Experiments
 icon:: flask-conical
-type:: weight
+type:: importance
 color:: green
 weight:: 40
 
@@ -622,7 +622,7 @@ description:: Instrucciones detalladas de prompt para que el agente ejecute la g
 
 # NN Marker Definition
 
-## NN Marker Definition: weight
+## NN Marker Definition: importance
 symbol:: *
 icon:: plus
 color:: blue
@@ -752,7 +752,7 @@ The Business Template is designed for modeling complete business strategies in a
 
 1. Provide a comprehensive set of concepts covering all major business domains: market, strategy, operations, finance, team, legal, and validation.
 2. Enable relationship mapping between concepts via evaluable matrices (Problems↔Value Propositions, Assumptions↔Risks, etc.).
-3. Support both narrative (text-type) and scored (weight-type) concepts for mixed qualitative/quantitative modeling.
+3. Support both narrative (text-type) and scored (importance-type) concepts for mixed qualitative/quantitative modeling.
 4. Serve as the default template for business model authoring in the iNNfo ecosystem.
 
 ## Specification
@@ -780,7 +780,7 @@ Each concept has a `type` that determines its representation:
 | Type | Behavior |
 |---|---|
 | `text` | Single-instance, free-form Markdown |
-| `weight` | Multi-instance list with numeric weight marker |
+| `importance` | Multi-instance list with numeric importance marker |
 | `category` | Grouping concept for sub-concepts |
 | `steps` | Ordered sequence of steps |
 | `sequence` | Ordered list of events |
@@ -789,7 +789,7 @@ Each concept has a `type` that determines its representation:
 
 | Marker | Symbol | Purpose |
 |---|---|---|
-| `weight` | `*` | Core importance score (1–10) |
+| `importance` | `*` | Core importance score (1–10) |
 | `completion` | `>` | Progress indicator |
 | `certainty` | `?` | Confidence level (1–5) |
 | `priority` | `!` | Urgency flag |
@@ -4239,7 +4239,7 @@ Patent databases like those maintained by the U.S. Patent and Trademark Office o
 
 ---
 
-## weight
+## importance
 
 ### Summary
 *No summary provided.*

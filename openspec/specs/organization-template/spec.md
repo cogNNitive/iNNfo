@@ -1,8 +1,8 @@
-# Delta for organization-template
+# Organization Template
 
 Introduces a Level 2 Organization template and sample model to capture organizational structure separately from processes.
 
-## ADDED Requirements
+## Requirements
 
 ### R-ORG-01: Organization Level 2 Template Schema
 The system MUST define the `Organization` template (`organization_NN.md` and versioned equivalent) with:

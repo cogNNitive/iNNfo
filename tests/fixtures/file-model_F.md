@@ -7,7 +7,6 @@ parent:
   url: "https://raw.githubusercontent.com/cogNNitive/cogNNitive/v0.1.1/specs/business_V_0-1-1_NN.md"
 model_version: "V_0-0-2"
 title: "Prueba FILE"
-asset_mode: "centralized"
 ---
 
 > [!NOTE]

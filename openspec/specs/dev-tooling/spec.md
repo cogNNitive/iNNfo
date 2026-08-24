@@ -1,4 +1,4 @@
-# Delta: Dev Tooling â€” Lint, Format, and CI Quality Gate
+# Dev Tooling
 
 ## Purpose
 

@@ -157,6 +157,21 @@ function extractVersionRefs(relPath, content) {
       const urlVer = pu[1].match(/V_\d+-\d+-\d+/)
       if (urlVer) refs.push({ field: 'parent.url', value: urlVer[0], location: relPath })
     }
+
+    // parent_spec block â€” name
+    const psn = fm.match(/^parent_spec:\s*\n\s+name:\s*['"]?([^\s'"]+_V_\d+-\d+-\d+[^\s'"]*)['"]?\s*$/m)
+    if (psn) {
+      const parentSpecVer = psn[1].match(/V_\d+-\d+-\d+/)
+      if (parentSpecVer)
+        refs.push({ field: 'parent_spec.name', value: parentSpecVer[0], location: relPath })
+    }
+
+    // parent_spec block â€” url
+    const psu = fm.match(/^parent_spec:\s*\n(?:\s+.*\n)*?\s+url:\s*['"](https?:\/\/[^'"]+)['"]\s*$/m)
+    if (psu) {
+      const urlVer = psu[1].match(/V_\d+-\d+-\d+/)
+      if (urlVer) refs.push({ field: 'parent_spec.url', value: urlVer[0], location: relPath })
+    }
   }
 
   return refs

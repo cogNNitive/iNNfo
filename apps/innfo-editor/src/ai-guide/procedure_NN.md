@@ -1,10 +1,10 @@
 ---
-specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.1.0/level1/iNNfo_V_0-1-0_NN.md"
+spec_version: "V_0-1-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 level: 3
 parent_spec:
-  name: "procedures_V_0-1-2"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/v0.1.0/level2/procedures/procedures_V_0-1-2_NN.md"
+  name: "procedures_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/procedures/procedures_V_0-1-0_NN.md"
 model_version: "V_0-1-0"
 title: "Use iNNfo with AI"
 ---

@@ -1,4 +1,4 @@
-# Delta: Tree Navigation — Colored Pills, Counters, Popups, Ghost States, Virtual Grouping
+# Tree Navigation
 
 ## Purpose
 
@@ -53,12 +53,11 @@ The popup MUST position itself below the trigger element, matching its left edge
 - AND the `completion` marker icon renders with score-3 styling
 - AND the popup closes when `X` is clicked
 
-### R-TN-04: Ghost State for Empty Nodes and Concept Groups
+### R-TN-04: Ghost State for Empty Leaf Nodes
 
 A leaf node with no description, no non-empty fields, and no child instances (instance count === 0) MUST render in a "ghost" visual state: lowered opacity (`opacity: 0.45`), italicized name, and a muted "Empty" label appended to the row. Ghost leaf nodes MUST still be interactive (clickable, collapsible).
 
-A concept group node whose template concept has zero instances in the model MUST render as a ghost group with `opacity: 0.55`, a dashed left border (`2px dashed` in concept color), italicized name, and an "Add first element" indicator.
-(Previously: only covered leaf-node ghost state for individual empty nodes)
+> Ghost state for concept groups (template concepts with zero instances) is owned by `template-ghost-concepts` (R-TGC-01, R-TGC-05), not by this requirement.
 
 #### Scenario: Empty leaf node renders ghost (unchanged)
 
@@ -66,13 +65,6 @@ A concept group node whose template concept has zero instances in the model MUST
 - WHEN the tree renders
 - THEN the node row has `opacity: 0.45` and an italic "Empty" label suffix
 - AND clicking still selects the node
-
-#### Scenario: Ghost concept group renders in sidebar
-
-- GIVEN a template concept `Milestone` with zero instances in the model
-- AND the filter mode is `All` or `Template only`
-- WHEN the sidebar renders the concept group
-- THEN the group header has `opacity: 0.55`, a `2px dashed` left border in the concept color, italicized name, and an "Add first element" indicator
 
 ### R-TN-05: Improved VirtualGroupNode Styling
 
@@ -110,14 +102,31 @@ This slice MUST NOT introduce changes to the serializer, IndexedDB for tree stat
 - THEN all nodes return to their default expanded state
 - AND no IndexedDB write occurs for tree state
 
-### R-TN-08: Filter Toggle Control in Sidebar
+> The sidebar's filter toggle control (`Model only` / `Template only` / `All`, backed by `uiStore.ghostFilterMode`) is owned by `template-ghost-concepts` (R-TGC-03).
 
-The `LeftSidebar.vue` tree section MUST include a filter toggle control above the model tree that cycles through three view modes: `Model only`, `Template only`, and `All`. The current mode MUST be stored in `uiStore.ghostFilterMode`. Changing the mode MUST re-render the tree to show the corresponding subset of concepts.
+### R-TN-09: LeftSidebar — Concept Hierarchy Inherited from Template
 
-#### Scenario: Filter toggle cycles through view modes
+The sidebar's concept tree (`getConceptsForModel`) MUST source its hierarchy primarily from the level-2 template resolved via the model's `parent_spec` chain, the same resolution mechanism already used for `concepts`/`markers` inheritance (`SpecResolverService`, `resolveEffectiveMetamodel`): a template's own `# NN index` block is parsed once into `taxonomy` edges on its `localMetamodel` and carried through unchanged (wholesale, not merged per-edge) to every model that resolves that template as its parent. A model's own `# NN index` block, if present, remains a legacy/fallback source used only when no resolved template contributes a taxonomy.
 
-- GIVEN the sidebar filter toggle is set to `Model only`
-- WHEN the user clicks the toggle
-- THEN the mode changes to `Template only` — only ghost concepts visible
-- AND a second click changes to `All` — both present and ghost concepts visible
-- AND a third click returns to `Model only` — only present concepts visible
+A workspace `specs/` folder MAY declare a specialized level-2 template (its own `parent_spec` pointing at the base template) that overrides the inherited hierarchy by declaring its own complete `# NN index`; whichever template a model actually resolves as parent wins outright, with no merging against a grandparent template's index.
+
+#### Scenario: Model inherits hierarchy from its template
+
+- GIVEN a level-3 model with no `# NN index` of its own
+- AND its `parent_spec` resolves to a level-2 template that declares a `# NN index`
+- THEN the sidebar's concept tree nests according to the template's index
+
+#### Scenario: Specialized template overrides the base template's hierarchy
+
+- GIVEN a level-3 model whose `parent_spec` resolves to a specialized level-2 template with its own `# NN index`, different from the base template it forks from
+- THEN the sidebar's concept tree uses the resolved (specialized) template's index, not the base template's
+
+### R-TN-10: metamodelStore — Taxonomy and Perspectives
+
+`metamodelStore` MUST be extended with:
+
+- `taxonomyEdges` computed property — taxonomy edges parsed from root node frontmatter `taxonomy` field
+- `conceptTree` computed property — hierarchical tree from edges, feeding the sidebar's concept tree (R-TN-09)
+- `getNeighborhood(conceptName)` function — returns parents, children, and perspective
+
+The existing `concepts`, `markers`, `getConceptByName`, `getConceptFields`, documentation, and guidance accessors MUST remain unchanged.

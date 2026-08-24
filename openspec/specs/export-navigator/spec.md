@@ -2,23 +2,23 @@
 
 ## Purpose
 
-Provide a view that discovers export files in `traNNsform/outputs/`, reads their embedded metadata, compares export version against the current model version, and lets the user open exports or regenerate outdated ones.
+Provide a view that discovers export files in `traNNsform/output/`, reads their embedded metadata, compares export version against the current model version, and lets the user open exports or regenerate outdated ones.
 
 ## Requirements
 
 ### Requirement: Export directory scanning
 
-The system MUST scan `traNNsform/outputs/` inside the workspace directory and list all `.html` files found there.
+The system MUST scan `traNNsform/output/` inside the workspace directory and list all `.html` files found there.
 
-#### Scenario: Scan outputs when workspace has traNNsform/outputs/
+#### Scenario: Scan outputs when workspace has traNNsform/output/
 
-- GIVEN a workspace with a `traNNsform/outputs/` directory containing `Ghostbusters_V0-1-2_business_visualizer.html`
+- GIVEN a workspace with a `traNNsform/output/` directory containing `Ghostbusters_V0-1-2_business_visualizer.html`
 - WHEN the Navigator view is active
 - THEN the file is listed with its filename
 
 #### Scenario: Empty state when no outputs exist
 
-- GIVEN a workspace with a `traNNsform/outputs/` directory that is empty
+- GIVEN a workspace with a `traNNsform/output/` directory that is empty
 - WHEN the Navigator view is active
 - THEN a message is shown: "No exports found. Use AI Guide to generate one."
 

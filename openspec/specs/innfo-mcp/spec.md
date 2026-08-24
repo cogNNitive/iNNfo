@@ -91,6 +91,8 @@ The `validateModel()` function MUST resolve the template exclusively via `getTem
 - WHEN `validateModel` is called
 - THEN `template` remains `null`, validation proceeds structurally, and the result includes a warning: "No template resolved; structural validation only"
 
+> This is a deliberately tolerant, non-blocking downgrade of the same underlying failure that `model-validation-warnings` (R-MVW-03) reports as the blocking `[PARENT_RESOLUTION_FAILED]` diagnostic. The distinction is by caller: `innfo-mcp`'s `validateModel()`/`validate_model_url` here perform broader structural model validation that stays meaningful without a resolved template, so an unresolvable `parent_spec.url` becomes a warning, not a hard error. A caller that also needs `model-validation-warnings`' concept-documentation-completeness checks (which require the resolved template's content) MUST still surface `[PARENT_RESOLUTION_FAILED]` as blocking for that purpose.
+
 #### Scenario: Explicit templateUrl provided
 
 - GIVEN a model with no `parent_spec.url` but the caller supplies `templateUrl`

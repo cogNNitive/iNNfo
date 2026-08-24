@@ -1,6 +1,6 @@
-# Delta for spec-resolution
+# Spec Resolution
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: R-LSR-01: Local Spec Search
 In Node.js environments, the resolver MUST recursively search the 'specs/' directory for the target spec name or versioned file. In browser environments, when a workspace handle is active, the resolver MUST search the workspace's local 'specs/' directory first before making any network requests. If found in either environment, it MUST load the local file.

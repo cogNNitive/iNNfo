@@ -45,14 +45,14 @@ every filename already carries its version, no versionless path can violate it.
 ### Requirement: R-SV-03: `template_version` Field on L2 Templates
 
 Every L2 template file MUST declare a `template_version` frontmatter field carrying
-its own filename-encoded version, independent of `specification_version` (which
+its own filename-encoded version, independent of `spec_version` (which
 tracks L1 compliance, not template identity). `template_version` MUST change only
 when the template's filename changes.
 
 #### Scenario: Template declares its own version independent of the parent spec
 - GIVEN a `business` template file compliant with L1 spec `V_0-1-0`
 - WHEN the template is authored at its own third revision
-- THEN its frontmatter declares both `specification_version: "V_0-1-0"` and `template_version: "V_0-1-2"`, differing independently
+- THEN its frontmatter declares both `spec_version: "V_0-1-0"` and `template_version: "V_0-1-2"`, differing independently
 
 ### Requirement: R-SV-04: `parent_spec` Remains a `{name, url}` Object
 

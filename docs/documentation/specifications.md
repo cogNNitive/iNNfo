@@ -24,13 +24,16 @@ The **iNNfo** specification. Every model is a single `_NN.md` document with opti
 
 ## Level 2 — Templates
 
-Domain-specific templates. Each declares concepts, markers, matrices, and relationship types for a specific domain, and its own `template_version` (independent of `specification_version`).
+Domain-specific templates. Each declares concepts, markers, matrices, and relationship types for a specific domain, and its own `template_version` (independent of `spec_version`).
 
 | Template | Source |
 |----------|--------|
+| **Blank** | [`specs/templates/blank/blank_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/blank/blank_V_0-1-0_NN.md) |
 | **Business** | [`specs/templates/business/business_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business/business_V_0-1-0_NN.md) |
-| **Procedures** | [`specs/templates/procedures/procedures_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/procedures_V_0-1-0_NN.md) |
+| **cogNNitive** | [`specs/templates/cogNNitive/cogNNitive_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/cogNNitive/cogNNitive_V_0-1-0_NN.md) |
 | **Organization** | [`specs/templates/organization/organization_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/organization/organization_V_0-1-0_NN.md) |
+| **Procedures** | [`specs/templates/procedures/procedures_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/procedures_V_0-1-0_NN.md) |
+| **Projects** | [`specs/templates/projects/projects_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/projects/projects_V_0-1-0_NN.md) |
 
 ## Level 3 — Sample models
 
@@ -41,6 +44,7 @@ Concrete data instances. Lightweight — just data and a parent pointer to their
 | **Ghostbusters** | business | [`specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md) |
 | **Code Review Process** | procedures | [`specs/templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md) |
 | **Engineering Team** | organization | [`specs/templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md) |
+| **Software Release Project** | projects | [`specs/templates/projects/samples/SoftwareReleaseProject_V_0-1-0_projects_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/projects/samples/SoftwareReleaseProject_V_0-1-0_projects_NN.md) |
 
 ## Related Standards
 

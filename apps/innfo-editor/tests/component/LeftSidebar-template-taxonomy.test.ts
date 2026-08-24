@@ -188,4 +188,63 @@ title: My Specialized Business
     expect(alphaGroup).toBeTruthy()
     expect(alphaGroup!.text()).toContain('Bravo')
   })
+
+  it('does not treat a model file as a template even if it ends with _spec_NN.md, if level: 3 is declared', async () => {
+    const modelStore = useModelStore()
+    modelStore.setGraph(
+      {
+        'DeLoreanTimeTravel_V_0-1-0_spec_NN.md': makeNode('DeLoreanTimeTravel_V_0-1-0_spec_NN.md', {
+          source: { path: 'models/DeLoreanTimeTravel_V_0-1-0_spec_NN.md' },
+          childIds: ['bravo1'],
+          rawContent: `---
+level: 3
+parent_spec:
+  name: "biz_template_V_0-1-0_NN"
+title: DeLorean Time Travel Ventures
+---
+
+> [!NOTE]
+> This is an **iNNfo document**.
+
+# NN Bravo
+## NN Bravo: First Bravo
+`,
+        }),
+        bravo1: makeNode('bravo1', {
+          name: 'First Bravo',
+          parentId: 'DeLoreanTimeTravel_V_0-1-0_spec_NN.md',
+          type: 'Bravo',
+          kind: 'element',
+          source: { path: 'models/DeLoreanTimeTravel_V_0-1-0_spec_NN.md' },
+        }),
+        'spec:biz_template_V_0-1-0': makeNode('spec:biz_template_V_0-1-0', {
+          name: 'biz_template_V_0-1-0',
+          kind: 'root' as const,
+          sourceMode: 'structural' as const,
+          localMetamodel: {
+            concepts: [
+              { name: 'Alpha', type: 'category' },
+              { name: 'Bravo', type: 'weight' },
+            ],
+            markers: [],
+            taxonomy: [
+              { parent: '', child: 'Alpha' },
+              { parent: 'Alpha', child: 'Bravo' },
+            ],
+          },
+        }),
+      },
+      ['DeLoreanTimeTravel_V_0-1-0_spec_NN.md', 'spec:biz_template_V_0-1-0'],
+    )
+
+    const wrapper = mount(LeftSidebar, {
+      attachTo: document.body,
+    })
+
+    await wrapper.find('[data-testid="expand-all"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // It should render the model in the sidebar
+    expect(wrapper.text()).toContain('DeLoreanTimeTravel_V_0-1-0_spec_NN.md')
+  })
 })

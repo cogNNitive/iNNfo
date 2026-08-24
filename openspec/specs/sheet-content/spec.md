@@ -1,4 +1,4 @@
-# Delta: Sheet Content — Full Markdown, Graph, Relationships, Matrix Summary, Media, Field Viewer, Detail Tabs, Attachments
+# Sheet Content
 
 ## Purpose
 
@@ -138,3 +138,12 @@ This slice MUST NOT introduce a relationship editor UI, cross-boundary wikilink 
 - WHEN the sheet renders the relationships section
 - THEN there is no add/edit/delete control for relationships
 - AND relationships display as read-only labeled links
+
+### R-SC-11: modelStore — Asset Field Support
+
+`modelStore` MUST support the node fields that `NodeMedia` (R-SC-05) and the file attachments section (R-SC-08) rely on:
+
+- `assets?: string[]` on `ModelNode` — already exists in the type definition but may not be populated by the current parser. The parser MUST NOT be modified to populate it; store actions must handle `assets` if present.
+- `assetMode?: 'centralized' | 'per-element'` — already exists in `ModelNode` type.
+
+No new store actions are needed. The existing `upsertNode`, `markDirty`, `getNode`, `getChildren`, `getRoots` continue to work.

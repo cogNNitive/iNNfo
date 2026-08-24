@@ -79,8 +79,6 @@ export interface SpecFrontmatter {
   relationship_declarations?: Partial<Record<RelationshipType, RelationshipDecl>>
   model_version?: string
   last_updated?: string
-  /** Asset storage mode: 'centralized' (default) or 'per-element'. */
-  asset_mode?: 'centralized' | 'per-element'
   [key: string]: unknown
 }
 
@@ -364,8 +362,6 @@ export interface ModelNode {
   conceptBinding?: { name: string; source: 'metamodel' | 'structural' }
   /** Optional slug derived from element YAML `slug` or auto-derived from name. */
   slug?: string
-  /** Asset storage mode for this node's subtree. */
-  assetMode?: 'centralized' | 'per-element'
   source: { path: string } // FS location for write-back
   /**
    * Indicates how this node was produced:

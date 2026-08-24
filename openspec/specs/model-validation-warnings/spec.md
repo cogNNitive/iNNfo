@@ -27,6 +27,8 @@ For each concept defined in the level-2 template spec, the template's markdown M
 
 When the validator fails to load or resolve a parent specification (level-1 spec or level-2 template), the validator MUST emit a diagnostic error with the distinct error code `[PARENT_RESOLUTION_FAILED]`. It MUST NOT mask the resolution failure as downstream missing concept validation warnings.
 
+This blocking severity applies specifically to this spec's concept-documentation-completeness validation (R-MVW-01, R-MVW-02): those checks require the resolved template's markdown content to verify headings, so an unresolvable parent spec means the check cannot run at all and must fail loudly rather than silently report "no warnings." This is distinct from `innfo-mcp`'s `validateModel()`/`validate_model_url` (see `innfo-mcp` spec's "Model without a resolvable `parent_spec.url`" scenario), which performs broader structural model validation that remains meaningful without a resolved template, and therefore downgrades the same underlying resolution failure to a non-blocking warning instead of `[PARENT_RESOLUTION_FAILED]`. Both behaviors are legitimate for their respective callers; a caller that needs concept-documentation-completeness guarantees MUST treat `[PARENT_RESOLUTION_FAILED]` as blocking.
+
 #### Scenario: Parent spec cannot be resolved or loaded
 
 - GIVEN a model referencing a `parent_spec.url` that cannot be resolved or loaded

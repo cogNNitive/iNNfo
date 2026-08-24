@@ -1,4 +1,4 @@
-# Delta: Matrix Virtual Scrolling — Rows and Columns in MatricesGrid
+# Matrix Virtual Scrolling
 
 ## Purpose
 

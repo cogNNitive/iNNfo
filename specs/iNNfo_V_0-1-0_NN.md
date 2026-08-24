@@ -1,6 +1,6 @@
 ---
-specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
+spec_version: "V_0-1-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 level: 1
 parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 title: "iNNfo Meta-template Specification"
@@ -255,8 +255,8 @@ iNNfo is a level 1 specification. Its `parent` points to defiNNe:
 parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"
 ```
 
-All templates (level 2) MUST declare `parent` pointing to iNNfo. All models
-(level 3) MUST declare `parent` pointing to their template. Resolution follows the
+All templates (level 2) MUST declare `parent_spec` pointing to iNNfo. All models
+(level 3) MUST declare `parent_spec` pointing to their template. Resolution follows the
 Spec Resolver Protocol defined in defiNNe.
 
 ## Template Inline Restriction
@@ -269,7 +269,9 @@ parent chain. The model frontmatter is limited to:
 ```yaml
 ---
 level: 3
-parent: "<immutable-url>"
+parent_spec:
+  name: "<template-name>"
+  url: "<immutable-url>"
 model_version: "V_x-y-z"
 title: "..."
 ---
@@ -462,15 +464,17 @@ names defined in the template:
 
 ## Level 2 Template Structure (Metaplantilla)
 
-A template is a level-2 iNNfo document. Its frontmatter declares only identity, parent,
+A template is a level-2 iNNfo document. Its frontmatter declares only identity, parent_spec,
 and relationship settings; its body instantiates the four root primitives.
 
 ```yaml
 ---
-specification_version: "V_0-1-0"
-specification_url: "<immutable-url>"
+spec_version: "V_0-1-0"
+spec_url: "<immutable-url>"
 level: 2
-parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
+parent_spec:
+  name: "iNNfo_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 title: "<Template Name>"
 template_version: "V_x-y-z"
 specializes: "<base-template-name>"
@@ -479,7 +483,7 @@ relationship_types: {...}
 ```
 
 `template_version` is the template's own immutable identity, independent of
-`specification_version` (which tracks the template's L1-compliance level, not the
+`spec_version` (which tracks the template's L1-compliance level, not the
 template's own revision history). It is filename-encoded — a bump always produces a
 new file (e.g. `procedures_V_0-1-0_NN.md` → `procedures_V_0-2-0_NN.md`); the old
 file is never edited in place or deleted while any model still references it.
@@ -532,10 +536,12 @@ widget:: set
 
 ```yaml
 ---
-specification_version: "V_0-1-0"
-specification_url: "<immutable-url>"
+spec_version: "V_0-1-0"
+spec_url: "<immutable-url>"
 level: 3
-parent: "<immutable-url>"
+parent_spec:
+  name: "<template-name>"
+  url: "<immutable-url>"
 model_version: "V_x-y-z"
 title: "..."
 ---

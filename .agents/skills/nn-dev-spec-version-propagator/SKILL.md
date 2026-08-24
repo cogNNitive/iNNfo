@@ -110,9 +110,9 @@ sync here):
 
 | Category | Typical location | What version field is checked |
 |---|---|---|
-| Spec (L0/L1) | `specs/*_NN.md` | filename, `specification_version`, `parent` |
-| Template (L2) | `specs/templates/{name}/*_NN.md` | filename, `specification_version`, `template_version`, `parent` |
-| Model / Sample | `specs/templates/{name}/samples/*_NN.md`, `apps/**/tests/fixtures/**/*.md` | filename, `model_version`, `parent` |
+| Spec (L0/L1) | `specs/*_NN.md` | filename, `spec_version`, `parent` (L1 only — a string URL pointing to its L0 parent; L0 has no parent) |
+| Template (L2) | `specs/templates/{name}/*_NN.md` | filename, `spec_version`, `template_version`, `parent_spec` |
+| Model / Sample | `specs/templates/{name}/samples/*_NN.md`, `apps/**/tests/fixtures/**/*.md` | filename, `model_version`, `parent_spec` |
 | Test | `**/*.test.ts`, `**/*.spec.ts` | inline frontmatter strings |
 | Source | `apps/**/src/**/*.{ts,vue}`, `packages/**/src/**/*.ts` | `DEFAULT_INNFO_VERSION`, hardcoded template/sample URLs |
 | Docs | `docs/**/*.md` | version string references |
@@ -121,7 +121,7 @@ sync here):
 ## URL Format
 
 ```
-spec_url / parent / specification_url:
+spec_url / parent / parent_spec.url:
   "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
   "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
 ```

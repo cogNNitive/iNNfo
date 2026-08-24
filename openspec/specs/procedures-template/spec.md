@@ -1,8 +1,8 @@
-# Delta for procedures-template
+# Procedures Template
 
 Modifies the Procedures template to decouple organizational concepts, focusing purely on workflow RACI mapping.
 
-## MODIFIED Requirements
+## Requirements
 
 ### R-PRC-01: Stripped Procedures Schema
 The system MUST remove `Person` and `Position` concepts, and `positions-roles` and `persons-positions` matrices, from the `Procedures` template (`procedures_NN.md` and versioned equivalent).

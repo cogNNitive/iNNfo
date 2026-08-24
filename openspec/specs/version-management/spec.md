@@ -1,4 +1,4 @@
-# Delta: Version Management — Version Panel, Semver Bump, Frontmatter Update, Filename Generation
+# Version Management
 
 ## Purpose
 

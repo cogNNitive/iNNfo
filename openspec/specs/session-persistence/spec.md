@@ -1,4 +1,4 @@
-# Delta: Session Persistence — IndexedDB for Last File, Tree State, Sidebar Widths
+# Session Persistence
 
 ## Purpose
 

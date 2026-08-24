@@ -11,7 +11,7 @@ Relationship edges on normalized Blocks (`ModelNode.relationships`) carry a requ
 | R1 | Origin on every edge | MUST | Every relationship carries a required `origin` in {matrix, field, mention, graph_edge}; none emitted without one. |
 | R2 | Matrix edges unchanged | MUST | Current label/value preserved; only `origin: 'matrix'` added. |
 | R3 | Field edges | MUST | Template `reference` fields and inline `[[...]]` in string values → `origin: 'field'`, label = field name. |
-| R4 | Mention edges | MUST | `[[...]]` in Element description or root `rawSections.description`/`rawContent` → `origin: 'mention'`, label `mentions`, no value. |
+| R4 | Mention edges | MUST | `[[...]]` in Element description or root `rawSections.description` (never `rawContent`) → `origin: 'mention'`, label `mentions`, no value. |
 | R5 | Model-wide resolution | MUST | Targets resolve against model-wide Element names, case-insensitive; only matches create edges. |
 | R6 | Dangling policy | MUST | Unmatched targets skipped (no edge), non-fatal, `warning` issue, path `${sourcePath}#${ElementName}`. |
 | R7 | Empty wikilinks | MUST | `[[]]`/whitespace-only targets skipped silently — no edge, no issue. |
