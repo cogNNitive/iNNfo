@@ -2,6 +2,7 @@ import { ParsedModel, SpecDocument, ValidationResult, ValidationError } from '..
 import { parseModel } from '../parser'
 import { extractTemplateSchema } from '../schema'
 import { validateReferences, validateElementFieldReferences } from './references'
+import { validateTaxonomyHierarchy } from './hierarchy'
 
 /**
  * Validates model contents against template specification (level 2).
@@ -232,6 +233,12 @@ export function validateModel(
   // reject legitimate published templates. Field-level references above are
   // the hard errors; matrix label drift stays visible but non-blocking.
   for (const diag of validateReferences(model)) {
+    warnings.push(diag)
+  }
+
+  // Cross-check the # NN index taxonomy against reference-typed element
+  // fields (e.g. parent_component). WARNING only — see hierarchy.ts.
+  for (const diag of validateTaxonomyHierarchy(model, templateConcepts)) {
     warnings.push(diag)
   }
 

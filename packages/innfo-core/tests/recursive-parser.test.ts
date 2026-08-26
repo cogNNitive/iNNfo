@@ -570,4 +570,45 @@ En España fallecieron 439.146 personas en 2024 (INE).
     expect(issues.some((i) => i.message.includes('spec_version'))).toBe(true)
     expect(issues.some((i) => i.path === 'broken_NN.md')).toBe(true)
   })
+
+  it('resolves a matrix relationship whose header differs only by dash character, emitting a warning issue (Fix 3)', () => {
+    const modelContent =
+      '---\n' +
+      'spec_version: "V_0-1-2"\n' +
+      'level: 3\n' +
+      'model_version: "V_0-0-1"\n' +
+      'title: "Dash Test"\n' +
+      'parent: { name: "business_V_0-1-1", url: "https://example.com/business" }\n' +
+      'matrices:\n' +
+      '  - name: "revenue-roles matrix"\n' +
+      '    source: "Work"\n' +
+      '    target: "Roles"\n' +
+      '---\n' +
+      '\n' +
+      '# NN index\n' +
+      '* [[Revenue-Cost Structure]]\n' +
+      '* [[Reviewer]]\n' +
+      '\n' +
+      '# NN Work\n' +
+      '## NN Work: Revenue-Cost Structure\n' +
+      '\n' +
+      '# NN Roles\n' +
+      '## NN Roles: Reviewer\n' +
+      '\n' +
+      '# NN matrices: revenue-roles matrix\n' +
+      '| Work \\ Roles | Reviewer |\n' +
+      '| --- | --- |\n' +
+      '| Revenue—Cost Structure | ✅ |\n'
+
+    const { nodes, issues } = normalizeSingleModel(modelContent, 'dash_NN.md', 'dash_NN')
+
+    const warning = issues.find((i) => i.message.includes('separator character differs'))
+    expect(warning).toBeDefined()
+    expect(issues.some((i) => i.message.toLowerCase().includes('dangling'))).toBe(false)
+
+    const sourceNode = Object.values(nodes).find((n) => n.name === 'Revenue-Cost Structure')
+    expect(sourceNode).toBeDefined()
+    expect(sourceNode!.relationships.length).toBeGreaterThan(0)
+    expect(sourceNode!.relationships[0].label).toBe('revenue-roles matrix')
+  })
 })

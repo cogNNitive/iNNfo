@@ -1,4 +1,5 @@
 import type { Concept, ParsedModel } from '../types'
+import { normalizeSeparators } from '../parser/slug'
 
 export interface ReferenceDiagnostic {
   path: string
@@ -15,6 +16,40 @@ function collectElementNames(model: ParsedModel): Set<string> {
     }
   }
   return names
+}
+
+/**
+ * Map from separator-normalized + lowercased element name -> original element
+ * name, used as a fallback lookup when an exact (case-insensitive) match
+ * fails, to tolerate hyphen/dash typographic variants (Fix 3).
+ */
+function collectNormalizedElementNames(model: ParsedModel): Map<string, string> {
+  const names = new Map<string, string>()
+  for (const [, elements] of model.elements.entries()) {
+    for (const el of elements) {
+      const key = normalizeSeparators(el.name.toLowerCase())
+      if (!names.has(key)) names.set(key, el.name)
+    }
+  }
+  return names
+}
+
+/**
+ * Resolves a reference value against the known element names. Returns the
+ * exact-match result when found; otherwise falls back to a separator-
+ * normalized match (hyphen vs en/em dash/minus) and flags it as inexact so
+ * callers can emit a WARNING instead of treating it as a clean match.
+ */
+function resolveElementName(
+  value: string,
+  elementNames: Set<string>,
+  normalizedElementNames: Map<string, string>,
+): { found: boolean; exact: boolean; matchedName?: string } {
+  const lower = value.toLowerCase()
+  if (elementNames.has(lower)) return { found: true, exact: true }
+  const normalizedMatch = normalizedElementNames.get(normalizeSeparators(lower))
+  if (normalizedMatch) return { found: true, exact: false, matchedName: normalizedMatch }
+  return { found: false, exact: false }
 }
 
 /** Map from lowercased element name → set of concept names containing it. */
@@ -38,22 +73,41 @@ function conceptsByElementName(model: ParsedModel): Map<string, Set<string>> {
 export function validateReferences(model: ParsedModel): ReferenceDiagnostic[] {
   const diagnostics: ReferenceDiagnostic[] = []
   const elementNames = collectElementNames(model)
+  const normalizedElementNames = collectNormalizedElementNames(model)
 
   for (const matrix of model.matrices) {
     for (const cell of matrix.cells) {
-      if (cell.row && !elementNames.has(cell.row.toLowerCase())) {
-        diagnostics.push({
-          path: `matrices.${matrix.name}.row`,
-          message: `Dangling reference: matrix "${matrix.name}" row "${cell.row}" does not match any element name`,
-          severity: 'error',
-        })
+      if (cell.row) {
+        const resolved = resolveElementName(cell.row, elementNames, normalizedElementNames)
+        if (!resolved.found) {
+          diagnostics.push({
+            path: `matrices.${matrix.name}.row`,
+            message: `Dangling reference: matrix "${matrix.name}" row "${cell.row}" does not match any element name`,
+            severity: 'error',
+          })
+        } else if (!resolved.exact) {
+          diagnostics.push({
+            path: `matrices.${matrix.name}.row`,
+            message: `Matrix reference "${cell.row}" doesn't exactly match element "${resolved.matchedName}" — separator character differs (hyphen vs dash). Consider using the exact same character.`,
+            severity: 'warning',
+          })
+        }
       }
-      if (cell.col && !elementNames.has(cell.col.toLowerCase())) {
-        diagnostics.push({
-          path: `matrices.${matrix.name}.col`,
-          message: `Dangling reference: matrix "${matrix.name}" column "${cell.col}" does not match any element name`,
-          severity: 'error',
-        })
+      if (cell.col) {
+        const resolved = resolveElementName(cell.col, elementNames, normalizedElementNames)
+        if (!resolved.found) {
+          diagnostics.push({
+            path: `matrices.${matrix.name}.col`,
+            message: `Dangling reference: matrix "${matrix.name}" column "${cell.col}" does not match any element name`,
+            severity: 'error',
+          })
+        } else if (!resolved.exact) {
+          diagnostics.push({
+            path: `matrices.${matrix.name}.col`,
+            message: `Matrix reference "${cell.col}" doesn't exactly match element "${resolved.matchedName}" — separator character differs (hyphen vs dash). Consider using the exact same character.`,
+            severity: 'warning',
+          })
+        }
       }
     }
   }

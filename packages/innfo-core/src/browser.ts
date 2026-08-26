@@ -7,6 +7,7 @@ export {
   parseIndexBlock,
   parseMarkdownTable,
   getSectionType,
+  normalizeSeparators,
 } from './parser'
 export {
   CONCEPT_DEFINITION,

@@ -1,4 +1,5 @@
 import { computed, type ComputedRef, type Ref } from 'vue'
+import { normalizeSeparators } from '@cognnitive/innfo-core'
 import { useModelStore } from '../../../stores/modelStore'
 import { commitFieldValue } from '../../../shared/provenance'
 import type { MatrixDef } from '../../../composables/useMatrixDefinitions'
@@ -31,7 +32,7 @@ export function useMatrixCells(
 
   function matrixCellKey(row: string, col: string): string {
     if (!activeMatrix.value) return ''
-    return `${activeMatrix.value.name}||${row}||${col}`
+    return `${activeMatrix.value.name}||${normalizeSeparators(row)}||${normalizeSeparators(col)}`
   }
 
   function getVal(row: string, col: string): string | number | boolean {

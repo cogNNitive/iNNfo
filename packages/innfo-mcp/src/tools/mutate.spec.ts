@@ -140,6 +140,59 @@ describe('mutate tools', () => {
       expect(result.errors).toEqual([])
     })
 
+    it('resolves a RELATIVE parent_spec.url against the workspace root in content mode, same as id mode (Fix 5a)', async () => {
+      // Business template lives at a relative, non-`specs/` path — the model's
+      // parent_spec.url is a workspace-relative path (no scheme, no leading
+      // slash), which must resolve against rootDir just like it does when the
+      // model itself is loaded from disk by id.
+      await stubSpecChain()
+      await mkdir(join(rootDir, 'custom-templates'), { recursive: true })
+      await writeFile(
+        join(rootDir, 'custom-templates', 'business_V_0-2-0_NN.md'),
+        [
+          '---',
+          'spec_version: "V_0-2-0"',
+          'level: 2',
+          'title: "Local Business Template"',
+          'parent_spec:',
+          '  name: "iNNfo_V_0-1-0"',
+          '  url: "https://example.com/iNNfo_V_0-1-0_NN.md"',
+          '---',
+          '',
+          '# NN Concept Definition',
+          '',
+          '## NN Concept Definition: Work',
+          'type:: list',
+          '',
+        ].join('\n'),
+        'utf-8',
+      )
+
+      const contentWithRelativeParent = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 3',
+        'model_version: "V_0-0-1"',
+        'title: "Test"',
+        'parent_spec:',
+        '  name: "business_V_0-2-0"',
+        '  url: "custom-templates/business_V_0-2-0_NN.md"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Work]]',
+        '',
+        '# NN Work',
+        '## NN Work: Triage',
+        '  First element.',
+        '',
+      ].join('\n')
+
+      const result = await validateModel(rootDir, undefined, contentWithRelativeParent)
+      expect(result.valid).toBe(true)
+      expect(result.errors).toEqual([])
+    })
+
     it('delegates level-2 content to validateTemplate (D1 auto-detection)', async () => {
       // Level 2 with no parent_spec.url triggers the PARENT_RESOLUTION_FAILED diagnostic
       // that is specific to validateTemplate — this only fires if validateModel truly
@@ -344,6 +397,43 @@ describe('mutate tools', () => {
       expect(result.errors?.[0].message).toMatch(/Invalid version args/)
       const onDisk = await readFile(filePath, 'utf-8')
       expect(onDisk).toBe(MUTABLE_MODEL_CONTENT)
+    })
+
+    it('bump_version updates index.md references (bare filename and models/<filename> forms) to the new filename (Fix 5b)', async () => {
+      await stubBusinessTemplate()
+      const oldPath = join(rootDir, 'Versioned_V_0-0-1_NN.md')
+      await writeFile(oldPath, MUTABLE_MODEL_CONTENT, 'utf-8')
+
+      const oldFilename = 'Versioned_V_0-0-1_NN.md'
+      const newFilename = 'Versioned_V_0-5-0_NN.md'
+      await writeFile(
+        join(rootDir, 'index.md'),
+        [
+          '---',
+          'spec_version: "V_0-1-2"',
+          'level: 0',
+          'title: "Workspace Index"',
+          '---',
+          '',
+          '# NN index',
+          `* [${oldFilename}](./${oldFilename})`,
+          `* [models version](models/${oldFilename})`,
+          '',
+        ].join('\n'),
+        'utf-8',
+      )
+
+      const result = await applyChange(rootDir, 'Versioned_V_0-0-1', 'bump_version', {
+        version: 'V_0-5-0',
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.newPath).toBe(join(rootDir, newFilename))
+
+      const indexContent = await readFile(join(rootDir, 'index.md'), 'utf-8')
+      expect(indexContent).toContain(newFilename)
+      expect(indexContent).toContain(`models/${newFilename}`)
+      expect(indexContent).not.toContain(oldFilename)
     })
 
     it('bump_version rejects an unknown bump level without touching the file', async () => {

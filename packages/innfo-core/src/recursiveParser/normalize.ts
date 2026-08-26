@@ -1,5 +1,6 @@
 import type { ElementNode, ParsedModel, FieldValue, LocalMetamodel, ModelNode } from '../types'
 import { extractTemplateSchema } from '../schema'
+import { normalizeSeparators } from '../parser/slug'
 import type { ParseContext } from './types'
 
 export function nowIso(): string {
@@ -140,11 +141,33 @@ export function normalizeElementsIntoGraph(
   }
 
   // Attach relationships from matrices between named elements, once all
-  // qualified ids are known.
+  // qualified ids are known. Falls back to a separator-normalized lookup
+  // (hyphen vs en/em dash/minus) when the exact name isn't found, emitting a
+  // warning issue rather than silently treating it as a clean match.
+  const normalizedNameById = new Map<string, { id: string; originalName: string }>()
+  for (const [name, id] of qualifiedIdByElementName.entries()) {
+    const key = normalizeSeparators(name)
+    if (!normalizedNameById.has(key)) {
+      normalizedNameById.set(key, { id, originalName: name })
+    }
+  }
+  function resolveMatrixEndpoint(name: string, matrixName: string, side: 'row' | 'col'): string | undefined {
+    const exact = qualifiedIdByElementName.get(name)
+    if (exact) return exact
+    const normalized = normalizedNameById.get(normalizeSeparators(name))
+    if (normalized) {
+      ctx.issues.push({
+        path: `${sourcePath}#matrices.${matrixName}.${side}`,
+        message: `Matrix reference "${name}" doesn't exactly match element "${normalized.originalName}" — separator character differs (hyphen vs dash). Consider using the exact same character.`,
+      })
+      return normalized.id
+    }
+    return undefined
+  }
   for (const matrix of parsed.matrices) {
     for (const cell of matrix.cells) {
-      const sourceId = qualifiedIdByElementName.get(cell.row)
-      const targetId = qualifiedIdByElementName.get(cell.col)
+      const sourceId = resolveMatrixEndpoint(cell.row, matrix.name, 'row')
+      const targetId = resolveMatrixEndpoint(cell.col, matrix.name, 'col')
       if (sourceId && targetId && ctx.nodes[sourceId]) {
         ctx.nodes[sourceId].relationships.push({ targetId, label: matrix.name, value: cell.value })
       }

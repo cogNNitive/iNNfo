@@ -999,6 +999,46 @@ describe('validateReferences (R-IE-04)', () => {
     const result = validateReferences(parsed)
     expect(result.length).toBe(0)
   })
+
+  it('resolves a matrix reference that differs only by dash character, as a WARNING not an ERROR (Fix 3)', () => {
+    const parsed = parseModel([
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'model_version: "V_0-0-1"',
+      'title: "Ref Test"',
+      'parent_spec:',
+      '  name: "test_V_0-1-1"',
+      '  url: "https://example.com/test"',
+      'matrices:',
+      '  - name: "revenue-roles matrix"',
+      '    source: "Work"',
+      '    target: "Roles"',
+      '---',
+      '',
+      '# NN index',
+      '* [[Revenue-Cost Structure]]',
+      '* [[Reviewer]]',
+      '',
+      '# NN Work',
+      '## NN Work: Revenue-Cost Structure',
+      '',
+      '# NN Roles',
+      '## NN Roles: Reviewer',
+      '',
+      '# NN matrices: revenue-roles matrix',
+      '| Work \\ Roles | Reviewer |',
+      '| --- | --- |',
+      '| Revenue—Cost Structure | ✅ |',
+      '',
+    ].join('\n'))
+
+    const result = validateReferences(parsed)
+    expect(result.some((d) => d.severity === 'error')).toBe(false)
+    expect(result.some((d) => d.severity === 'warning' && d.message.includes('separator character differs'))).toBe(
+      true,
+    )
+  })
 })
 
 describe('reference-typed element fields via validateModel (R-IE-04)', () => {
@@ -2130,6 +2170,112 @@ describe('implicit and explicit reference validation (P1)', () => {
     expect(err).toBeDefined()
     expect(err!.message).toContain('target_concepts')
     expect(err!.message).toContain('Mesa de jardín')
+  })
+})
+
+describe('taxonomy hierarchy cross-check (Fix 4)', () => {
+  function buildHierarchyTemplate(): any {
+    return {
+      name: 'hier_V_1-0-0',
+      level: 2,
+      parentName: 'iNNfo_V_0-3-0',
+      frontmatter: {
+        spec_version: 'V_0-3-0',
+        spec_url: 'https://example.com/hier',
+        level: 2,
+      },
+      rawContent: [
+        '# NN Concept Definition',
+        '',
+        '## NN Concept Definition: Market',
+        'type:: list',
+        '',
+        '## NN Concept Definition: Stakeholders',
+        'type:: list',
+        '',
+        '## NN Concept Definition: Unrelated',
+        'type:: list',
+        '',
+      ].join('\n'),
+    }
+  }
+
+  it('does not warn when the reference resolves to the taxonomy parent concept (coherent)', () => {
+    const model = parseModel(
+      [
+        '---',
+        'spec_version: "V_0-3-0"',
+        'level: 3',
+        'model_version: "V_1-0-0"',
+        'title: "Hierarchy Model"',
+        'parent_spec:',
+        '  name: "hier_V_1-0-0"',
+        '  url: "https://example.com/hier_V_1-0-0_NN.md"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Market]]',
+        '  * [[Stakeholders]]',
+        '* [[Unrelated]]',
+        '',
+        '# NN Market',
+        '## NN Market: Retail Market',
+        '',
+        '# NN Stakeholders',
+        '## NN Stakeholders: Alice',
+        'parent_component:: Retail Market',
+        '',
+        '# NN Unrelated',
+        '## NN Unrelated: Something',
+        '',
+      ].join('\n'),
+    )
+
+    const result = validateModel(model, buildHierarchyTemplate(), null)
+    const hierarchyWarnings = result.warnings.filter((w) => w.message.includes('Hierarchy inconsistency'))
+    expect(hierarchyWarnings).toHaveLength(0)
+  })
+
+  it('warns when an element references an unrelated concept that contradicts the index taxonomy (incoherent)', () => {
+    const model = parseModel(
+      [
+        '---',
+        'spec_version: "V_0-3-0"',
+        'level: 3',
+        'model_version: "V_1-0-0"',
+        'title: "Hierarchy Model"',
+        'parent_spec:',
+        '  name: "hier_V_1-0-0"',
+        '  url: "https://example.com/hier_V_1-0-0_NN.md"',
+        '---',
+        '',
+        '# NN index',
+        '* [[Market]]',
+        '  * [[Stakeholders]]',
+        '* [[Unrelated]]',
+        '',
+        '# NN Market',
+        '## NN Market: Retail Market',
+        '',
+        '# NN Stakeholders',
+        '## NN Stakeholders: Alice',
+        'parent_component:: Something',
+        '',
+        '# NN Unrelated',
+        '## NN Unrelated: Something',
+        '',
+      ].join('\n'),
+    )
+
+    const result = validateModel(model, buildHierarchyTemplate(), null)
+    expect(result.valid).toBe(true) // WARNING only, never ERROR
+    const hierarchyWarnings = result.warnings.filter((w) => w.message.includes('Hierarchy inconsistency'))
+    expect(hierarchyWarnings).toHaveLength(1)
+    const message = hierarchyWarnings[0].message
+    expect(message).toContain('Stakeholders')
+    expect(message).toContain('Alice')
+    expect(message).toContain('Market')
+    expect(message).toContain('Unrelated')
   })
 })
 

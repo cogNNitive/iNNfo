@@ -78,6 +78,8 @@ export function applyMutation(
         return setMarker(model, args)
       case 'add_element':
         return addElement(model, args)
+      case 'update_field':
+        return updateField(model, args)
       case 'remove_element':
         return removeElement(model, args)
       case 'rename_concept':
@@ -204,6 +206,30 @@ function addElement(model: ParsedModel, args: Record<string, unknown>): Mutation
     markers: {},
   }
   existingElements.push(newElement)
+  model.elements.set(conceptName, existingElements)
+  return { success: true }
+}
+
+/** Edits a single field on an already-existing element (overwrite semantics). */
+function updateField(model: ParsedModel, args: Record<string, unknown>): MutationResult {
+  const req = requireArgs(args, ['conceptName', 'elementName', 'fieldName'])
+  if (!req.ok) return req.result
+  const { conceptName, elementName, fieldName } = req.values
+  if (args.value === undefined) {
+    return { success: false, errors: [{ path: '', message: 'value is required' }] }
+  }
+
+  const existingElements = model.elements.get(conceptName)
+  if (!existingElements) {
+    return { success: false, errors: [{ path: '', message: `Concept "${conceptName}" not found` }] }
+  }
+
+  const element = existingElements.find((e) => e.name.toLowerCase() === elementName.toLowerCase())
+  if (!element) {
+    return { success: false, errors: [{ path: '', message: `Element "${elementName}" not found in concept "${conceptName}"` }] }
+  }
+
+  element.fields[fieldName] = args.value
   model.elements.set(conceptName, existingElements)
   return { success: true }
 }

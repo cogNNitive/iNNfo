@@ -10,6 +10,7 @@ export {
   getSectionType,
   slugify,
   uniqueSlugify,
+  normalizeSeparators,
   deriveElementSlugs,
 } from './parser'
 

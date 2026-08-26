@@ -38,3 +38,13 @@ export function uniqueSlugify(name: string, existingSlugs: Set<string>): string 
   existingSlugs.add(unique)
   return unique
 }
+
+/**
+ * Normalizes Unicode dash/minus variants (hyphen, non-breaking hyphen, figure
+ * dash, en dash, em dash, horizontal bar, minus sign) to a plain ASCII
+ * hyphen `-`. Used to tolerate typographic autocorrect (e.g. "Revenue –
+ * Cost" vs "Revenue - Cost") when matching element/reference names.
+ */
+export function normalizeSeparators(s: string): string {
+  return s.replace(/[‐-―−]/g, '-')
+}
