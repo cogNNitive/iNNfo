@@ -261,7 +261,7 @@ describe('recursiveParse (index.md-driven)', () => {
     })
 
     it('resolves markdown-link references with ./ paths (films index.md case)', async () => {
-      const markdownDir = fakeDir('markdown', [
+      const nnDir = fakeDir('nn', [
         [
           'Casablanca.md',
           fakeFile('Casablanca.md', '# Casablanca\n\nPlain source document, not a model.'),
@@ -277,15 +277,15 @@ describe('recursiveParse (index.md-driven)', () => {
           fakeFile('FilmCatalog_V_0-3-0_film_NN.md', makeModel('Film Catalog')),
         ],
       ])
-      const sourcesDir = fakeDir('sources', [['markdown', markdownDir]])
+      const sourcesDir = fakeDir('sources', [['nn', nnDir]])
       const root = fakeDir('workspace', [
         [
           'index.md',
           fakeFile(
             'index.md',
             makeIndexWithMdLinks([
-              'sources/markdown/Casablanca.md',
-              'sources/markdown/The_Goonies.md',
+              'sources/nn/Casablanca.md',
+              'sources/nn/The_Goonies.md',
               'models/FilmCatalog_V_0-3-0_film_NN.md',
             ]),
           ),
