@@ -287,7 +287,7 @@ describe('validateFormatContent index block elements check', () => {
     expect(check!.passed).toBe(true)
   })
 
-  it('warns when index contains Elements', () => {
+  it('fails when index contains Elements', () => {
     const content = [
       '---',
       'spec_version: "V_0-3-0"',
@@ -317,8 +317,38 @@ describe('validateFormatContent index block elements check', () => {
     const check = report.checks.find((c) => c.id === 'index-no-elements')
     expect(check).toBeDefined()
     expect(check!.passed).toBe(false)
+    expect(check!.severity).toBe('error')
     expect(check!.message).toContain('Element')
     expect(check!.message).toContain('customer')
+  })
+
+  it('fails when level 3 model has inline schema in frontmatter', () => {
+    const content = [
+      '---',
+      'spec_version: "V_0-3-0"',
+      'level: 3',
+      'model_version: "V_0-1-0"',
+      'title: "Test Model"',
+      'parent_spec:',
+      '  name: "business_V_0-3-0"',
+      '  url: "https://example.com/business"',
+      'matrices:',
+      '  - name: "test-matrix"',
+      '---',
+      '',
+      '# NN index',
+      '* [[Stakeholders]]',
+      '',
+      '# NN Stakeholders',
+      '## NN Stakeholders: Customer',
+      '',
+    ].join('\n')
+
+    const report = validateFormatContent(content, 'test_NN.md')
+    const check = report.checks.find((c) => c.id === 'fm-no-inline-schema')
+    expect(check).toBeDefined()
+    expect(check!.passed).toBe(false)
+    expect(check!.severity).toBe('error')
   })
   it('handles field definitions with duplicate names scoped to different concepts without slug collisions', () => {
     const specContent = [

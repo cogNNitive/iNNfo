@@ -79,6 +79,27 @@ export function validateFormatContent(
         : `Expected level 3, got ${fm.level}`,
   })
 
+  // 1b. R-IE-03: No inline schema in level 3 models
+  if (levelOk) {
+    const hasInlineSchema =
+      fm.matrices !== undefined ||
+      fm.concepts !== undefined ||
+      fm.markers !== undefined ||
+      fm.relationship_types !== undefined
+    checks.push({
+      id: 'fm-no-inline-schema',
+      label: 'No inline schema in frontmatter',
+      description:
+        'Level 3 models must not declare inline schema (matrices, concepts, markers, relationship_types) in their frontmatter',
+      category: 'frontmatter',
+      severity: 'error',
+      passed: !hasInlineSchema,
+      message: hasInlineSchema
+        ? 'Inline schema fields (matrices, concepts, markers, relationship_types) found in frontmatter. Move them to the template.'
+        : undefined,
+    })
+  }
+
   // 2. parent_spec
   const parentOk = !!(
     fm.parent_spec &&
@@ -357,7 +378,7 @@ export function validateFormatContent(
       description:
         'The # NN index block MUST list only Concepts, not Elements. Elements are declared within their Concept sections using ## NN headings.',
       category: 'body',
-      severity: 'warning',
+      severity: 'error',
       passed: elementsInIndex.length === 0,
       message:
         elementsInIndex.length > 0

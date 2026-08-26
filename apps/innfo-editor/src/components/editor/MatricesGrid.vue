@@ -206,7 +206,7 @@
               <div
                 v-for="vRow in rowVirtualizer.getVirtualItems()"
                 :key="'row-' + String(vRow.key)"
-                class="absolute left-0 right-0 flex items-center px-4 py-2.5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs text-xs"
+                class="absolute left-0 right-0 flex items-center px-2 py-1 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs text-xs"
                 :style="{
                   top: 0,
                   height: ROW_HEIGHT + 'px',
@@ -224,6 +224,8 @@
                   :fields="getNodeFields(rows[vRow.index])"
                   :concept-fields="getConceptFields(activeMatrix.source)"
                   hide-empty
+                  :full-width="true"
+                  :lines="2"
                 />
               </div>
             </div>
@@ -413,7 +415,7 @@ import {
 } from './composables/useMatrixColors'
 
 // ── Constants ──
-const ROW_HEIGHT = 48
+const ROW_HEIGHT = 56
 const HEADER_LABEL_ROTATION = -45
 const FIRST_COL_WIDTH = 180
 const MIN_COL_WIDTH = 48

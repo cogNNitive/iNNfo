@@ -32,12 +32,27 @@ export function validateModel(
       severity: 'error',
     })
   }
-  if (fm.level === 3 && !fm.model_version) {
-    errors.push({
-      path: 'frontmatter.model_version',
-      message: 'Missing model_version',
-      severity: 'error',
-    })
+  if (fm.level === 3) {
+    if (!fm.model_version) {
+      errors.push({
+        path: 'frontmatter.model_version',
+        message: 'Missing model_version',
+        severity: 'error',
+      })
+    }
+    if (
+      fm.matrices !== undefined ||
+      fm.concepts !== undefined ||
+      fm.markers !== undefined ||
+      fm.relationship_types !== undefined
+    ) {
+      errors.push({
+        path: 'frontmatter',
+        message:
+          'Level 3 models MUST NOT declare schema components (matrices, concepts, markers, relationship_types) in their frontmatter. Move them to the template.',
+        severity: 'error',
+      })
+    }
   }
 
   // D4: Slug/name collisions are validation ERRORs per N1 specification (Identity & Naming)

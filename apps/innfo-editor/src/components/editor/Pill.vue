@@ -9,7 +9,7 @@
     @mouseleave="showInfoIcon = false"
   >
     <!-- Identity row: icon + name + active markers -->
-    <div class="flex items-center gap-1.5 w-full min-w-0">
+    <div class="flex items-center w-full min-w-0" :class="props.lines ? 'gap-1' : 'gap-1.5'">
       <!-- Scanned image thumbnail (first discovered image, small) -->
       <img
         v-if="thumbnailUrl"
@@ -25,7 +25,12 @@
       <component v-else :is="visuals.typeIcon.value" class="shrink-0 w-3.5 h-3.5 text-current/70" />
       <span
         class="leading-tight text-left flex-1 min-w-0"
-        :class="{ italic: isEmpty, 'text-slate-400': isEmpty }"
+        :class="{
+          italic: isEmpty,
+          'text-slate-400': isEmpty,
+          truncate: props.lines === 1,
+          'line-clamp-2': props.lines === 2,
+        }"
       >
         <slot>
           <template v-if="conceptLabel">
@@ -192,6 +197,8 @@ const props = withDefaults(
     showMarkers?: boolean
     /** Suppress the "Empty" indicator (used for structural concept pills in matrix headers). */
     hideEmpty?: boolean
+    /** Truncate the name text after a specific number of lines (0 or undefined for no truncation). */
+    lines?: number
   }>(),
   {
     selected: false,
@@ -201,6 +208,7 @@ const props = withDefaults(
     kind: 'instance',
     showMarkers: true,
     conceptFields: () => [],
+    lines: 0,
   },
 )
 
@@ -332,7 +340,8 @@ function getTemplateImageValue(fieldsRecord: Record<string, any> | undefined): s
   for (const field of props.conceptFields) {
     if (field?.type !== 'image') continue
     const raw = fieldsRecord[field.name]
-    const value = typeof raw === 'object' && raw !== null && 'value' in raw ? (raw as any).value : raw
+    const value =
+      typeof raw === 'object' && raw !== null && 'value' in raw ? (raw as any).value : raw
     if (typeof value === 'string' && value.trim()) return value.trim()
   }
   return null
@@ -347,7 +356,11 @@ watch(
     const explicitImg = getTemplateImageValue(node?.fields || props.fields)
     if (!explicitImg) return
 
-    if (explicitImg.startsWith('http') || explicitImg.startsWith('data:') || explicitImg.startsWith('blob:')) {
+    if (
+      explicitImg.startsWith('http') ||
+      explicitImg.startsWith('data:') ||
+      explicitImg.startsWith('blob:')
+    ) {
       thumbnailUrl.value = explicitImg
       return
     }
@@ -358,7 +371,11 @@ watch(
 )
 
 async function resolveThumbnailUrlPath(relativePath: string): Promise<string | null> {
-  if (relativePath.startsWith('http') || relativePath.startsWith('data:') || relativePath.startsWith('blob:')) {
+  if (
+    relativePath.startsWith('http') ||
+    relativePath.startsWith('data:') ||
+    relativePath.startsWith('blob:')
+  ) {
     return relativePath
   }
   const ws = useWorkspaceStore()
@@ -460,7 +477,12 @@ const pillStyle = computed(() => {
   // always carry their own complete Tailwind-based styling from
   // containerClasses, regardless of nodeId — never override with inline
   // YIQ tinting, which is reserved for the default (instance/soft-outline) tier.
-  if (props.kind === 'concept' || props.kind === 'model' || props.kind === 'source' || props.kind === 'artifact') {
+  if (
+    props.kind === 'concept' ||
+    props.kind === 'model' ||
+    props.kind === 'source' ||
+    props.kind === 'artifact'
+  ) {
     return {}
   }
 
@@ -476,8 +498,12 @@ const pillStyle = computed(() => {
 const pillClasses = computed(() => {
   const baseClasses = [
     props.fullWidth ? 'flex w-full items-center' : 'inline-flex items-center max-w-full',
-    'px-2 py-1.5 text-xs gap-1',
-    'rounded-lg font-normal whitespace-normal break-words transition-all duration-200 select-none min-w-0',
+    props.lines ? 'px-1.5 py-1 text-[11px] gap-0.5' : 'px-2 py-1.5 text-xs gap-1',
+    props.lines === 1
+      ? 'rounded-lg font-normal whitespace-nowrap overflow-hidden transition-all duration-200 select-none min-w-0'
+      : props.lines && props.lines > 1
+        ? 'rounded-lg font-normal whitespace-normal overflow-hidden transition-all duration-200 select-none min-w-0'
+        : 'rounded-lg font-normal whitespace-normal break-words transition-all duration-200 select-none min-w-0',
     props.interactive
       ? 'cursor-pointer active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1'
       : '',
