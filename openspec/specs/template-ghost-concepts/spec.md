@@ -25,31 +25,31 @@ Template concepts with zero instances in the model MUST render as ghost groups i
 ### R-TGC-02: Type-Aware Presence Detection
 
 The system MUST determine concept "presence" using type-specific rules:
-- `text`: present if a `# _NN <Concept>` raw section exists in the model root
-- `weight`/`list`/`steps`/`sequence`: present if one or more graph nodes of that concept type exist
-- `category`: present if any child concept is present
+- `text`: present if a `# NN <Concept>` raw section exists on a root Element, or (as a fallback) if any Element's type matches the concept
+- `weight`/`list`/`steps`/`sequence`: present if one or more Elements of that concept type exist
+- `category`: present if one or more Elements of that concept type exist and at least one of them has children
 
 #### Scenario: Text concept detected via raw section
 
-- GIVEN a `text` concept `Goal` with a `# _NN Goal` raw section
+- GIVEN a `text` concept `Goal` with a `# NN Goal` raw section on a root Element
 - WHEN presence is computed
 - THEN `Goal` is NOT listed as a ghost
 
-#### Scenario: List concept detected via graph nodes
+#### Scenario: List concept detected via its Elements
 
-- GIVEN a `list` concept `Milestone` with one or more graph nodes of type `Milestone`
+- GIVEN a `list` concept `Milestone` with one or more Elements of type `Milestone`
 - WHEN presence is computed
 - THEN `Milestone` is NOT listed as a ghost
 
-#### Scenario: Category present when child present
+#### Scenario: Category present when an Element of that type has children
 
-- GIVEN a `category` concept `Main` with at least one present child concept
+- GIVEN a `category` concept `Main` with an Element of type `Main` that has one or more children
 - WHEN presence is computed
 - THEN `Main` is NOT listed as a ghost
 
-#### Scenario: Category ghost when all children absent
+#### Scenario: Category ghost when no Element of that type has children
 
-- GIVEN a `category` concept `EmptyCat` with no present child concepts
+- GIVEN a `category` concept `EmptyCat` where no Element of type `EmptyCat` has children (or no such Element exists)
 - WHEN presence is computed
 - THEN `EmptyCat` IS listed as a ghost
 

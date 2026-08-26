@@ -209,20 +209,26 @@ All specification and model files use the `_NN.md` suffix.
 | 2 | `<Template>_V_x-y-z_NN.md` | `business_V_0-1-0_NN.md` |
 | 3 | `<Model>_V_x-y-z_<Template>_NN.md` | `Ghostbusters_V_0-1-0_business_NN.md` |
 
-Files are organized by level within each version directory:
+Files live in a single flat `specs/` tree, with no per-version snapshot directories:
 
 ```
-v<version>/
-├── level0/         ← level 0 specs
-├── level1/         ← level 1 specs
-└── level2/         ← level 2 templates
+specs/
+├── defiNNe_V_x-y-z_NN.md      ← level 0 specs, directly at the root
+├── iNNfo_V_x-y-z_NN.md        ← level 1 specs, directly at the root
+└── templates/                 ← level 2 templates
     ├── <template>/
     │   ├── <template>_V_x-y-z_NN.md
     │   └── samples/
+    │       └── <Model>_V_x-y-z_<template>_NN.md
     └── ...
 ```
 
-The `latest/` directory mirrors this structure but uses stable filenames without version numbers (e.g. `defiNNe_NN.md` instead of `defiNNe_V_0-1-0_NN.md`).
+Level 0 and level 1 specifications sit directly under `specs/` — there is no
+`level0/`/`level1/` subfolder. Each level 2 template lives under
+`specs/templates/<template-name>/`, and that template's shipped samples live
+under `specs/templates/<template-name>/samples/`. There is no `latest/` alias:
+every file already carries its own version in its filename (see
+**Versioning**), so a consumer always resolves an exact, versioned path.
 
 ### Versioning
 
@@ -234,31 +240,20 @@ All versions use Semantic Versioning with hyphen separators: `V_MAJOR-MINOR-PATC
 | **MINOR** | Backward-compatible addition |
 | **PATCH** | Bug fix, clarification, examples |
 
-Specification versions are stored in versioned directories under `specs/`:
+Versioning is filename-encoded and immutable: a specification's version is the
+`V_x-y-z` segment already present in its own filename (see **File Naming
+Convention**) — not a directory it is copied into.
 
-```
-specs/
-├── CHANGELOG.md
-├── v0.2.0/
-│   ├── INDEX.md
-│   ├── level0/
-│   │   └── defiNNe_V_0-2-0_NN.md
-│   ├── level1/
-│   │   └── iNNfo_V_0-2-0_NN.md
-│   └── level2/
-│       ├── business/
-│       │   ├── business_V_0-2-0_NN.md
-│       │   └── samples/
-│       ├── organization/
-│       │   ├── organization_V_0-2-0_NN.md
-│       │   └── samples/
-│       └── procedures/
-└── latest/         ← stable filenames, mirrors the current version
-```
-
-- Each `vMAJOR.MINOR.PATCH/` directory is **frozen and immutable** once published.
-- `latest/` is a convenience alias with stable filenames (no version in name) that mirrors the new version.
-- To publish a new version, create a new directory (e.g., `v0.3.0/`), populate it with the updated specs, sync to `latest/`, and create a corresponding git tag.
+- A version bump MUST always create a new file (e.g.
+  `specs/templates/procedures/procedures_V_0-2-0_NN.md` alongside the existing
+  `procedures_V_0-1-0_NN.md`). It MUST NOT rename or overwrite the previous
+  version's file in place.
+- Once published, a specification file MUST NOT be edited or deleted while any
+  model still references it. Corrections and errata are published as a new
+  PATCH version, not as an in-place edit.
+- There is no `latest/` alias and no parallel version-snapshot directory (e.g.
+  `v0.2.0/`, `v0.2.1/`). A `parent_spec.url` or `parent` reference MUST always
+  point at a specific versioned filename.
 
 ### Specification URL Persistence
 
