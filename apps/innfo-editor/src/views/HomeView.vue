@@ -88,6 +88,29 @@ onMounted(async () => {
     showWizard.value = true
     router.replace({ query: {} })
   }
+
+  // Auto-reopen most recent workspace if deep link parameters are present
+  if (route.query.model && history.value.length > 0) {
+    const entry = history.value[0]
+    try {
+      const handle = await getStoredHandle(entry.handleKey)
+      if (handle) {
+        const status = await (
+          handle as unknown as { queryPermission?: (opts: { mode: string }) => Promise<string> }
+        ).queryPermission?.({ mode: 'read' })
+        if (status === 'granted') {
+          await workspace.open(handle, { force: true })
+          await router.push({
+            path: '/workspace',
+            query: route.query,
+            hash: route.hash,
+          })
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to auto-reopen workspace:', e)
+    }
+  }
 })
 
 watch(
@@ -132,7 +155,7 @@ async function reopenFolder(entry: FolderHistoryEntry): Promise<void> {
     }
 
     await workspace.open(handle, { force: true })
-    await router.push('/workspace')
+    await router.push({ path: '/workspace', query: route.query, hash: route.hash })
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err)
   } finally {
@@ -187,7 +210,7 @@ async function openWorkspace(): Promise<void> {
       }
       await addToHistory(handle.name, handle)
       history.value = await loadHistory()
-      await router.push('/workspace')
+      await router.push({ path: '/workspace', query: route.query, hash: route.hash })
     } else {
       error.value = 'Your browser does not support the File System Access API. Using fallback folder picker (read-only).'
       folderInputRef.value?.click()
@@ -237,7 +260,7 @@ async function onFolderInputChange(event: Event): Promise<void> {
     const dirName = relPath.split('/')[0] || 'workspace'
     await addToHistory(dirName, null as unknown as any, relPath)
     history.value = await loadHistory()
-    router.push('/workspace')
+    router.push({ path: '/workspace', query: route.query, hash: route.hash })
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err)
   } finally {

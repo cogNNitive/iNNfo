@@ -40,7 +40,7 @@ router.beforeEach((to: RouteLocationNormalized) => {
   if (to.meta?.requiresHandle) {
     const workspaceStore = useWorkspaceStore()
     if (!workspaceStore.hasHandle && !workspaceStore.hasParsed) {
-      return { name: 'home' }
+      return { name: 'home', query: to.query, hash: to.hash }
     }
   }
   return true
