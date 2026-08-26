@@ -19,6 +19,8 @@
 | `validate_model` | Validate a model (by id or inline content) against its resolved template |
 | `apply_change` | Apply an intent-level change to a model and re-validate it |
 | `validate_model_url` | Validate a model fetched from a URL, without writing to disk |
+| `validate_template` | Validate a Level 2 template against its Level 1 parent spec, with parent-resolution failure diagnostics |
+| `init_model` | Initialize or repair a model file with missing or corrupt frontmatter |
 
 ### `apply_change` operations
 
@@ -28,9 +30,12 @@
 - `add_field`
 - `set_marker`
 - `add_element`
+- `update_field`
 - `remove_element`
 - `rename_concept`
 - `rename_element`
+- `generate_index`
+- `bump_version`
 
 Each call re-validates the model and returns either the updated model or the validation errors that blocked the change.
 
