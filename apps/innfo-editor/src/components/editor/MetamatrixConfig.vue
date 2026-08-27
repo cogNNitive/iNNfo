@@ -59,6 +59,11 @@
             <th
               class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
             >
+              Widget config (JSON)
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+            >
               Description
             </th>
             <th
@@ -128,8 +133,21 @@
               <input
                 v-model="row.params"
                 @input="saveDefs"
-                placeholder="e.g. min:1;max:5 or colWidth:140"
+                placeholder="e.g. colWidth:140"
                 class="border border-slate-200 dark:border-slate-600 rounded px-2 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-slate-800 dark:text-slate-300"
+              />
+            </td>
+            <td class="px-4 py-2.5">
+              <input
+                :value="widgetConfigText(row)"
+                @change="onWidgetConfigInput(row, ($event.target as HTMLInputElement).value)"
+                :placeholder="widgetConfigPlaceholder(row.widgetType)"
+                class="border rounded px-2 py-1 text-xs w-full outline-none focus:ring-1 focus:ring-primary bg-white dark:bg-slate-800 dark:text-slate-300"
+                :class="
+                  widgetConfigError(row)
+                    ? 'border-rose-400 dark:border-rose-600'
+                    : 'border-slate-200 dark:border-slate-600'
+                "
               />
             </td>
             <td class="px-4 py-2.5">
@@ -152,7 +170,7 @@
           </tr>
           <tr v-if="!matrixDefs.length">
             <td
-              colspan="9"
+              colspan="10"
               class="text-center text-slate-400 dark:text-slate-500 text-xs italic py-6"
             >
               No relational matrices configured. Click "+ Add New Matrix Config" to define one.
@@ -215,6 +233,55 @@ function onValuesInput(row: MatrixDef, rawValue: string): void {
     .map((s) => s.trim())
     .filter(Boolean)
   saveDefs()
+}
+
+// ── widget_config (bounded inline JSON object, keys fixed per widget) ──
+const widgetConfigErrors = new WeakMap<MatrixDef, boolean>()
+
+function widgetConfigText(row: MatrixDef): string {
+  const cfg = row.widgetConfig
+  return cfg && Object.keys(cfg).length > 0 ? JSON.stringify(cfg) : ''
+}
+
+function widgetConfigError(row: MatrixDef): boolean {
+  return widgetConfigErrors.get(row) ?? false
+}
+
+function widgetConfigPlaceholder(widget?: string): string {
+  switch (widget) {
+    case 'scale':
+      return '{"min":1,"max":10,"step":1}'
+    case 'cycle':
+      return '{"order":["a","b","c"]}'
+    case 'set':
+      return '{"max_selections":2}'
+    case 'text':
+      return '{"max_length":120}'
+    default:
+      return '(no config)'
+  }
+}
+
+function onWidgetConfigInput(row: MatrixDef, raw: string): void {
+  const trimmed = raw.trim()
+  if (!trimmed) {
+    delete row.widgetConfig
+    widgetConfigErrors.delete(row)
+    saveDefs()
+    return
+  }
+  try {
+    const parsed = JSON.parse(trimmed)
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      row.widgetConfig = parsed as Record<string, unknown>
+      widgetConfigErrors.delete(row)
+      saveDefs()
+      return
+    }
+    widgetConfigErrors.set(row, true)
+  } catch {
+    widgetConfigErrors.set(row, true)
+  }
 }
 
 function addMatrixRow() {

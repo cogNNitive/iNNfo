@@ -1,16 +1,22 @@
 import { ParsedModel, SpecDocument, ValidationResult, ValidationError } from '../types'
-import { parseModel } from '../parser'
-import { extractTemplateSchema } from '../schema'
+import { checkElementsAgainstSchema, resolveTemplateSchema } from '../schema'
+import type { IncludeResolver } from '../schema'
 import { validateReferences, validateElementFieldReferences } from './references'
 import { validateTaxonomyHierarchy } from './hierarchy'
 
 /**
  * Validates model contents against template specification (level 2).
+ *
+ * `resolveInclude` is an optional callback that returns the raw content of a
+ * template named in the resolved template's `includes` list (supplied by the
+ * host — innfo-mcp / the editor — which owns spec I/O). When omitted, `includes`
+ * composition is skipped and only the template's own definitions are used.
  */
 export function validateModel(
   model: ParsedModel,
   template: SpecDocument | null,
   _formatSpec: SpecDocument | null,
+  resolveInclude?: IncludeResolver,
 ): ValidationResult {
   const errors: ValidationError[] = []
   const warnings: ValidationError[] = []
@@ -100,8 +106,14 @@ export function validateModel(
   const templateFm = template.frontmatter
   // Level-2 templates declare their schema as body elements that instantiate
   // `Concept Definition` / `Field Definition` / `Matrix Definition` /
-  // `Marker Definition`. There is no frontmatter fallback.
-  const bodySchema = extractTemplateSchema(parseModel(template.rawContent))
+  // `Marker Definition`. There is no frontmatter fallback. When the template
+  // declares `includes`, the effective schema is the additive union of every
+  // composed template plus its own definitions.
+  const composed = resolveTemplateSchema(template.rawContent, resolveInclude)
+  for (const diag of composed.errors) {
+    ;(diag.severity === 'error' ? errors : warnings).push({ ...diag, path: `parent.${diag.path}` })
+  }
+  const bodySchema = composed.schema
   const templateConcepts = bodySchema.concepts
   const templateMarkers = bodySchema.markers
   const templateMatrices = bodySchema.matrices
@@ -150,6 +162,7 @@ export function validateModel(
     }
   }
 
+  const knownConceptGroups: Array<[string, Array<{ name: string; fields: Record<string, unknown> }>]> = []
   for (const [conceptName, elements] of model.elements) {
     const conceptDef = templateConcepts.find(
       (c) => c.name.toLowerCase() === conceptName.toLowerCase(),
@@ -172,22 +185,21 @@ export function validateModel(
       })
     }
 
-    for (const el of elements) {
-      if (conceptDef.fields && conceptDef.fields.length > 0) {
-        for (const fieldDef of conceptDef.fields) {
-          if (fieldDef.type === 'select' && fieldDef.options && el.fields[fieldDef.name]) {
-            const val = String(el.fields[fieldDef.name])
-            if (!fieldDef.options.includes(val)) {
-              errors.push({
-                path: `elements.${conceptName}.${el.name}.fields.${fieldDef.name}`,
-                message: `Invalid value "${val}" for field "${fieldDef.name}". Allowed: ${fieldDef.options.join(', ')}`,
-                severity: 'error',
-              })
-            }
-          }
-        }
-      }
-    }
+    knownConceptGroups.push([conceptDef.name, elements])
+  }
+
+  // Shared property/enum conformance pass — the same check `validateTemplate`
+  // runs against the level-1 metaschema. Values outside a `select` field's
+  // `options` are ERRORs. Undeclared properties are NOT flagged at the model
+  // level: extra per-element metadata (notes, custom keys) is a legitimate
+  // authoring pattern here, unlike at the template-definition boundary.
+  for (const diag of checkElementsAgainstSchema(knownConceptGroups, templateConcepts, {
+    unknownProperty: 'ignore',
+  })) {
+    ;(diag.severity === 'error' ? errors : warnings).push({
+      ...diag,
+      path: `elements.${diag.path}`,
+    })
   }
 
   for (const matrix of model.matrices) {
@@ -222,14 +234,50 @@ export function validateModel(
     }
   }
 
+  const conceptNameSet = new Set(templateConcepts.map((c) => c.name.toLowerCase()))
   for (const [itemName, markers] of Object.entries(model.nodeMarkers)) {
-    for (const markerName of Object.keys(markers)) {
-      if (!templateMarkers.find((m) => m.name === markerName)) {
+    // A row in the `item-markers matrix` may be an Element or a Concept.
+    const rowScope: 'Concept' | 'Element' = conceptNameSet.has(itemName.toLowerCase())
+      ? 'Concept'
+      : 'Element'
+    for (const [markerName, score] of Object.entries(markers)) {
+      const decl = templateMarkers.find((m) => m.name.toLowerCase() === markerName.toLowerCase())
+      if (!decl) {
         warnings.push({
           path: `nodeMarkers.${itemName}.${markerName}`,
           message: `Marker "${markerName}" is not defined in template`,
           severity: 'warning',
         })
+        continue
+      }
+
+      // `applies_to` (default `[Element]`) gates which entities may be scored.
+      // A row whose scope is not permitted is a validation ERROR (iNNfo
+      // "Marker Definition").
+      const appliesTo = (decl.applies_to && decl.applies_to.length > 0
+        ? decl.applies_to
+        : ['Element']
+      ).map((s) => s.toLowerCase())
+      if (!appliesTo.includes(rowScope.toLowerCase())) {
+        errors.push({
+          path: `nodeMarkers.${itemName}.${markerName}`,
+          message: `Marker "${markerName}" is scored on ${rowScope} "${itemName}", but its applies_to is [${(decl.applies_to ?? ['Element']).join(', ')}]`,
+          severity: 'error',
+        })
+      }
+
+      // When the Marker declares a `values` set, scores must belong to it
+      // (empty cell `-` is already dropped at parse time).
+      if (decl.values && decl.values.length > 0) {
+        const raw = String(score)
+        const allowed = decl.values.map((v) => v.toLowerCase())
+        if (raw !== '-' && raw !== '' && !allowed.includes(raw.toLowerCase())) {
+          warnings.push({
+            path: `nodeMarkers.${itemName}.${markerName}`,
+            message: `Marker "${markerName}" score "${raw}" on "${itemName}" is not in its declared value set: ${decl.values.join(', ')}`,
+            severity: 'warning',
+          })
+        }
       }
     }
   }

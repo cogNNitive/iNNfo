@@ -32,6 +32,24 @@ export function parseFrontmatter(content: string): SpecFrontmatter | null {
   if ((parsed as any).specification_url && !(parsed as any).spec_url) {
     ;(parsed as any).spec_url = (parsed as any).specification_url
   }
+  // Normalize `includes` entries: a bare string is shorthand for a name with
+  // no explicit URL (resolved locally by name). Objects pass through.
+  const includes = (parsed as any).includes
+  if (Array.isArray(includes)) {
+    ;(parsed as any).includes = includes
+      .map((entry: unknown) => {
+        if (typeof entry === 'string') {
+          const name = entry.replace(/\.(md|markdown)$/i, '').replace(/_(NN|FORMAT|F)$/i, '')
+          return { name, url: '' }
+        }
+        if (entry && typeof entry === 'object') {
+          const e = entry as Record<string, unknown>
+          return { name: String(e.name ?? ''), url: String(e.url ?? '') }
+        }
+        return null
+      })
+      .filter((e: unknown): e is { name: string; url: string } => !!e && !!(e as any).name)
+  }
   // Normalize legacy matrix params → values (R-MM-08 / 4.5 reader tolerance)
   const matrices = (parsed as any).matrices
   if (Array.isArray(matrices)) {

@@ -88,6 +88,27 @@ export const useModelStore = defineStore('model', {
         const fileName = path.split('/').pop() || path || 'unknown.md'
         const report = validateFormatContent(rootNode.rawContent, fileName)
 
+        // Merge schema-conformance diagnostics (model vs. its composed template),
+        // computed by the spec resolver, as additional checks so one report
+        // covers both document hygiene and schema conformance.
+        const sv = rootNode.schemaValidation
+        if (sv) {
+          for (const diag of [...sv.errors, ...sv.warnings]) {
+            report.checks.push({
+              id: `schema:${diag.path}`,
+              label: 'Schema conformance',
+              description: 'Model element/property against the resolved template schema',
+              category: 'body',
+              severity: diag.severity === 'error' ? 'error' : 'warning',
+              passed: false,
+              message: diag.message,
+            })
+          }
+          report.summary.total += sv.errors.length + sv.warnings.length
+          report.summary.errors += sv.errors.length
+          report.summary.warnings += sv.warnings.length
+        }
+
         reports[rootId] = report
 
         if (!combinedReport) {

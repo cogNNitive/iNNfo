@@ -1,5 +1,5 @@
 import { computed, type ComputedRef, type Ref } from 'vue'
-import { normalizeSeparators } from '@cognnitive/innfo-core'
+import { normalizeSeparators, scaleRangeFor } from '@cognnitive/innfo-core'
 import { useModelStore } from '../../../stores/modelStore'
 import { commitFieldValue } from '../../../shared/provenance'
 import type { MatrixDef } from '../../../composables/useMatrixDefinitions'
@@ -92,22 +92,16 @@ export function useMatrixCells(
       .filter((s) => s.length > 0)
   }
 
-  /** Derived purely from activeMatrix — used by isOutOfSetValue's 'scale' branch. */
+  /** Derived purely from activeMatrix — used by isOutOfSetValue's 'scale' branch.
+   *  Honors `widget_config` ({min,max,step}) first (iNNfo "Widget Configuration"),
+   *  then a numeric `values` array, then the legacy `min:N;max:N` params string. */
   const scaleRange = computed<number[]>(() => {
     if (!activeMatrix.value) return []
-    const values = activeMatrix.value.values
-    if (Array.isArray(values) && values.length > 0) {
-      const numeric = values.map(Number).filter((n) => !Number.isNaN(n))
-      if (numeric.length === values.length) return numeric
-    }
-    const params = activeMatrix.value.params
-    const minMatch = params.match(/min:(\d+)/)
-    const maxMatch = params.match(/max:(\d+)/)
-    const min = minMatch ? parseInt(minMatch[1]) : 1
-    const max = maxMatch ? parseInt(maxMatch[1]) : 5
-    const range: number[] = []
-    for (let i = min; i <= max; i++) range.push(i)
-    return range
+    return scaleRangeFor({
+      widgetConfig: activeMatrix.value.widgetConfig,
+      values: activeMatrix.value.values,
+      params: activeMatrix.value.params,
+    })
   })
 
   function isOutOfSetValue(value: string | number | boolean): boolean {
@@ -121,10 +115,16 @@ export function useMatrixCells(
     return false
   }
 
+  function cycleOrder(): string[] {
+    const order = activeMatrix.value?.widgetConfig?.order
+    if (Array.isArray(order) && order.length > 0) return order.map(String)
+    return getSetOptionsList()
+  }
+
   function rotateCycle(row: string, col: string): void {
     if (!activeMatrix.value) return
     const current = getVal(row, col)
-    const options = getSetOptionsList()
+    const options = cycleOrder()
     if (options.length === 0) {
       // Default cycle: 1-2-3-4-5
       const defaultCycle = ['1', '2', '3', '4', '5']

@@ -173,7 +173,9 @@ parent_spec:
   url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 title: "..."
 template_version: "V_x-y-z"
-includes: ["<base-template>"]   # OPTIONAL — additive schema composition
+includes:                        # OPTIONAL — additive schema composition
+  - name: "<base-template>"
+    url: "<immutable-URL>"
 relationship_types: {...}
 ---
 ```
@@ -181,6 +183,8 @@ relationship_types: {...}
 A level 2 template's `concepts`, `fields`, `markers`, and `matrices` are NOT
 frontmatter blocks. They are declared in the body as elements that instantiate
 the four root primitives defined by iNNfo (level 1); see the iNNfo specification.
+`includes` composes the schemas of peer templates additively — it is horizontal
+(template ∪ template), unlike the vertical `parent_spec` chain; see iNNfo.
 
 **Level 3 (models) — Lightweight**
 

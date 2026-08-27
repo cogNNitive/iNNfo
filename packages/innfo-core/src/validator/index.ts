@@ -1,4 +1,6 @@
 export { validateModel } from './model'
+export { validateDocument } from './document'
+export type { DocumentValidation } from './document'
 export { validateFormatContent } from './content'
 export { validateFormatSyntax } from './syntax'
 export { validateReferences, validateElementFieldReferences } from './references'

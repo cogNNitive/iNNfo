@@ -78,6 +78,17 @@ export interface SpecFrontmatter {
   level: SpecLevel
   parent?: string | ParentRef
   parent_spec?: ParentRef
+  /**
+   * Level-2 only. Names + URLs of peer templates whose Concept / Field /
+   * Marker / Matrix Definitions are composed into this template's effective
+   * schema **additively** (see iNNfo "Level 2 Template Structure"). Distinct
+   * from `parent_spec` (the vertical conformance chain) and from the inert
+   * `specializes` field. Bare-string entries are tolerated on read and
+   * normalized to `{ name, url: '' }`.
+   */
+  includes?: ParentRef[]
+  /** Reserved, inert. Named base template for future structural inheritance. */
+  specializes?: string
   title?: string
   description?: string
   author?: string
@@ -333,6 +344,19 @@ export interface ModelNode {
   type: string // resolved concept type
   fields: Record<string, FieldValue>
   markers: Record<string, number | string>
+  /**
+   * Concept-scoped Marker scores (Markers whose `applies_to` includes
+   * `Concept`), keyed by Concept name. Present only on the document root;
+   * element-scoped scores live in `markers` on each element node.
+   */
+  conceptMarkers?: Record<string, Record<string, number | string>>
+  /**
+   * Schema-conformance result for this model against its resolved Template
+   * (including everything the Template `includes`). Populated by the host's
+   * spec resolver so a synchronous validation pass can surface it without
+   * re-resolving. Present only on document roots.
+   */
+  schemaValidation?: { errors: ValidationError[]; warnings: ValidationError[] }
   relationships: ModelRelationship[]
   rawSections: Record<string, string> // round-trip fidelity
   /**

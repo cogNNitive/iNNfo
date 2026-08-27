@@ -18,12 +18,26 @@ export {
   extractTemplateSchemaFromContent,
   extractMetaschema,
   validateTemplateAgainstMetaschema,
+  checkElementsAgainstSchema,
+  checkWidgetConfig,
+  resolveTemplateSchema,
 } from './schema'
-export type { TemplateSchema } from './schema'
-export { validateModel, validateFormatContent, validateFormatSyntax } from './validator'
+export type {
+  TemplateSchema,
+  SchemaCheckOptions,
+  IncludeResolver,
+  ResolvedTemplateSchema,
+} from './schema'
+export {
+  validateModel,
+  validateDocument,
+  validateFormatContent,
+  validateFormatSyntax,
+} from './validator'
+export type { DocumentValidation } from './validator'
 export { applyMutation, updateReferenceString } from './mutate'
 export type { MutationResult } from './mutate'
-export { deriveMatrixWidgetType, normalizeMatrixDecl } from './matrix'
+export { deriveMatrixWidgetType, normalizeMatrixDecl, scaleRangeFor } from './matrix'
 export type { MatrixWidgetType } from './matrix'
 export * from './identity'
 export * from './metamodel'

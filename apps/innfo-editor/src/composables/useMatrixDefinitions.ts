@@ -30,6 +30,8 @@ export interface MatrixDef {
   widgetType: MatrixWidgetType
   params: string
   values?: string[]
+  /** Widget-specific configuration (iNNfo "Widget Configuration"). */
+  widgetConfig?: Record<string, unknown>
   description?: string
   min_color?: string
   max_color?: string

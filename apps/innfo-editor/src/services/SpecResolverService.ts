@@ -1,7 +1,7 @@
-import { parseFrontmatter } from '@cognnitive/innfo-core'
+import { parseFrontmatter, parseModel, validateModel } from '@cognnitive/innfo-core'
 import { normalizeMatrixDecl } from '@cognnitive/innfo-core'
-import { extractTemplateSchemaFromContent } from '@cognnitive/innfo-core'
-import type { LocalMetamodel } from '@cognnitive/innfo-core'
+import { extractTemplateSchemaFromContent, resolveTemplateSchema } from '@cognnitive/innfo-core'
+import type { LocalMetamodel, ParentRef } from '@cognnitive/innfo-core'
 import type { ModelNode } from '../model/types'
 import type { DirectoryHandleLike, FileHandleLike } from '../model/fs-types'
 import { MATRIX_DEFS_KEY } from '../composables/useMatrixDefinitions'
@@ -102,6 +102,63 @@ async function tryDevLocalTemplate(parentName: string): Promise<string | null> {
   } catch {
     return null
   }
+}
+
+/** Resolve one `includes` ref's raw text: workspace `specs/` by name, then the
+ *  url (local path or dev-served), then the network. */
+async function fetchIncludeText(
+  ref: ParentRef,
+  handle?: DirectoryHandleLike,
+): Promise<string | null> {
+  if (handle) {
+    try {
+      const dirHandle = await handle.getDirectoryHandle('specs')
+      const r = await findLocalSpecInHandle(dirHandle, ref.name)
+      if (r) return r.content
+    } catch {
+      /* no specs/ dir */
+    }
+  }
+  if (handle && ref.url && !isHttpUrl(ref.url)) {
+    try {
+      const direct = await resolvePathInHandle(handle, stripLocalUrlPrefix(ref.url))
+      if (direct) return await (await direct.getFile()).text()
+    } catch {
+      /* not a resolvable local path */
+    }
+  }
+  const dev = await tryDevLocalTemplate(ref.name)
+  if (dev) return dev
+  if (ref.url && isHttpUrl(ref.url)) {
+    try {
+      const resp = await fetch(ref.url)
+      if (resp.ok) return await resp.text()
+    } catch {
+      /* unreachable */
+    }
+  }
+  return null
+}
+
+/** Recursively resolve a template's `includes` into a `name → raw text` map. */
+async function buildIncludeMap(
+  templateText: string,
+  handle?: DirectoryHandleLike,
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>()
+  const seen = new Set<string>()
+  const queue: ParentRef[] = [...((parseFrontmatter(templateText)?.includes as ParentRef[]) ?? [])]
+  while (queue.length > 0) {
+    const ref = queue.shift()!
+    const key = ref.name.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    const inc = await fetchIncludeText(ref, handle)
+    if (!inc) continue
+    out.set(ref.name, inc)
+    for (const nested of (parseFrontmatter(inc)?.includes as ParentRef[]) ?? []) queue.push(nested)
+  }
+  return out
 }
 
 /**
@@ -264,10 +321,32 @@ export async function resolveParentSpecs(
 
     try {
       // Templates declare their schema as body elements that instantiate the
-      // root primitives (Concept/Field/Marker/Matrix Definition) — there is no
-      // frontmatter `concepts` block anymore.
-      const schema = extractTemplateSchemaFromContent(text)
+      // root primitives (Concept/Field/Marker/Matrix Definition). When the
+      // template declares `includes`, compose the peer templates' schemas in
+      // additively so their Concepts/Markers/Matrices render too.
+      const includeMap = await buildIncludeMap(text, handle)
+      const resolveInclude = (r: { name: string }) => includeMap.get(r.name) ?? null
+      const schema = includeMap.size
+        ? resolveTemplateSchema(text, resolveInclude).schema
+        : extractTemplateSchemaFromContent(text)
       if (!schema.concepts.length && !schema.matrices.length) continue
+
+      // Schema conformance of the model against its (composed) template, so the
+      // synchronous store validation pass can surface it without re-resolving.
+      if (root.rawContent) {
+        try {
+          const templateDoc = {
+            name: parentName,
+            level: 2 as const,
+            frontmatter: parseFrontmatter(text) ?? ({} as any),
+            rawContent: text,
+          }
+          const r = validateModel(parseModel(root.rawContent), templateDoc, null, resolveInclude)
+          root.schemaValidation = { errors: r.errors, warnings: r.warnings }
+        } catch {
+          /* schema validation is best-effort here */
+        }
+      }
 
       // Propagate template matrix declarations to the model root node. Template
       // declarations are authoritative: when the model already carries defs

@@ -200,7 +200,7 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'init_model',
-    description: 'Initialize or repair a model file with missing or corrupt frontmatter by writing a standard YAML frontmatter block',
+    description: 'Initialize or repair a level-3 model file: writes canonical YAML frontmatter and, when the file has no concept sections and the template resolves, scaffolds a starter body (index block + one section per Concept) from the template schema. Returns templateResolved / scaffolded / warnings.',
     inputSchema: {
       type: 'object',
       properties: {

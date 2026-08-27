@@ -8,11 +8,11 @@
 
 import { readFile, writeFile, rm, stat, rename } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
-import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation, validateTemplateAgainstMetaschema, SpecResolutionError } from '@cognnitive/innfo-core'
+import { parseModel, serializeModel, validateDocument, validateModel as coreValidate, applyMutation as coreApplyMutation, validateTemplateAgainstMetaschema, resolveTemplateSchema, SpecResolutionError } from '@cognnitive/innfo-core'
 import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/innfo-core'
 
-import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec, normalizeId } from './spec.js'
-import { isLocalPath, toLocalFilePath, saveSpecOnce } from './resolver-node.js'
+import { resolveTemplateWithCache, findModelFile, deriveNameFromUrl, getSpec, normalizeId } from './spec.js'
+import { isLocalPath, toLocalFilePath, saveSpecOnce, buildIncludeContentMap } from './resolver-node.js'
 
 /* ── Types ───────────────────────────────────────────────────── */
 
@@ -33,12 +33,13 @@ export interface ApplyChangeResult {
 async function resolveTemplateForModel(
   rootDir: string,
   model: ParsedModel,
-): Promise<SpecDocument | null> {
+): Promise<{ template: SpecDocument | null; resolveInclude: (ref: { name: string; url: string }) => string | null }> {
   const parent = model.frontmatter.parent_spec
   if (parent?.url && parent?.name) {
-    return getTemplateFromUrl(rootDir, parent.url, parent.name)
+    const r = await resolveTemplateWithCache(rootDir, parent.url, parent.name)
+    return { template: r.template, resolveInclude: r.resolveInclude }
   }
-  return null
+  return { template: null, resolveInclude: () => null }
 }
 
 /**
@@ -101,13 +102,27 @@ export async function validateModel(
   }
 
   // Resolve the template only from the model's parent_spec.url, or from an
-  // explicit templateUrl supplied by the caller. Never from a constant.
+  // explicit templateUrl supplied by the caller. Never from a constant. The
+  // resolved cache also carries every template named by the template's
+  // `includes`, exposed here as an `IncludeResolver` for additive composition.
   let template: SpecDocument | null = null
+  let resolveInclude: (ref: { name: string; url: string }) => string | null = () => null
   let resolutionDetail: string | null = null
+  const parentRef = model.frontmatter.parent_spec
   try {
-    template = await resolveTemplateForModel(rootDir, model)
+    if (parentRef?.url && parentRef?.name) {
+      const resolved = await resolveTemplateWithCache(rootDir, parentRef.url, parentRef.name)
+      template = resolved.template
+      resolveInclude = resolved.resolveInclude
+    }
     if (!template && templateUrl) {
-      template = await getTemplateFromUrl(rootDir, templateUrl, deriveNameFromUrl(templateUrl))
+      const resolved = await resolveTemplateWithCache(
+        rootDir,
+        templateUrl,
+        deriveNameFromUrl(templateUrl),
+      )
+      template = resolved.template
+      resolveInclude = resolved.resolveInclude
     }
   } catch (err) {
     if (
@@ -118,7 +133,15 @@ export async function validateModel(
     }
   }
 
-  const result = coreValidate(model, template, null)
+  // One door: hygiene (validateFormatContent) + schema conformance
+  // (validateModel, with `includes` composition) in a single pass.
+  const fileNameForCheck = id ? basename((await findModelFile(rootDir, id)) ?? id) : 'inline_NN.md'
+  const doc = validateDocument(model.rawContent, {
+    fileName: fileNameForCheck,
+    template,
+    resolveInclude,
+  })
+  const result = { valid: doc.valid, errors: [...doc.errors], warnings: [...doc.warnings] }
   const warnings: ValidationError[] = [...result.warnings]
   if (!template) {
     const parentUrl = (model.frontmatter as any)?.parent_spec?.url
@@ -299,15 +322,18 @@ async function bumpVersion(
 
   // Validate BEFORE writing/deleting anything.
   let template: SpecDocument | null
+  let resolveInclude: (ref: { name: string; url: string }) => string | null = () => null
   try {
-    template = await resolveTemplateForModel(rootDir, model)
+    const r = await resolveTemplateForModel(rootDir, model)
+    template = r.template
+    resolveInclude = r.resolveInclude
   } catch (err) {
     return {
       success: false,
       errors: [{ path: 'parent_spec', message: err instanceof Error ? err.message : String(err) }],
     }
   }
-  const validationResult = coreValidate(model, template, null)
+  const validationResult = coreValidate(model, template, null, resolveInclude)
   if (!validationResult.valid) {
     return {
       success: false,
@@ -407,13 +433,18 @@ export async function applyChange(
   }
 
   if (op === 'generate_index') {
-    let template: SpecDocument | null = null
     try {
-      template = await resolveTemplateForModel(rootDir, model)
-    } catch {}
-    if (template) {
-      const parsedTemplate = parseModel(template.rawContent)
-      args.taxonomy = parsedTemplate.taxonomy
+      const { template: idxTemplate, resolveInclude: idxInclude } =
+        await resolveTemplateForModel(rootDir, model)
+      if (idxTemplate) {
+        // Compose the taxonomy across `includes` too, not just the composite.
+        const { schema } = resolveTemplateSchema(idxTemplate.rawContent, idxInclude)
+        args.taxonomy = schema.taxonomy.length
+          ? schema.taxonomy
+          : parseModel(idxTemplate.rawContent).taxonomy
+      }
+    } catch {
+      /* template not resolvable — generate_index falls back to model taxonomy */
     }
   }
 
@@ -424,16 +455,22 @@ export async function applyChange(
   }
 
   // Validate after mutation — template resolved only from parent_spec.url.
+  // Schema + structural conformance only (mutations are structurally enforced
+  // by the core engine above); document-hygiene is the job of `validate_model`
+  // / `init_model` on the resulting file, not of every intermediate mutation.
   let template: SpecDocument | null
+  let resolveInclude: (ref: { name: string; url: string }) => string | null = () => null
   try {
-    template = await resolveTemplateForModel(rootDir, model)
+    const r = await resolveTemplateForModel(rootDir, model)
+    template = r.template
+    resolveInclude = r.resolveInclude
   } catch (err) {
     return {
       success: false,
       errors: [{ path: 'parent_spec', message: err instanceof Error ? err.message : String(err) }],
     }
   }
-  const validationResult = coreValidate(model, template, null)
+  const validationResult = coreValidate(model, template, null, resolveInclude)
 
   if (!validationResult.valid) {
     // Reject without writing
@@ -633,6 +670,20 @@ export async function validateTemplate(
     ;(diag.severity === 'error' ? errors : warnings).push(diag)
   }
 
+  // `includes` composition: resolve every referenced template and surface any
+  // name collision (a Definition declared by two sources) as an ERROR.
+  const includeRefs = fm?.includes ?? []
+  if (includeRefs.length > 0) {
+    const includeMap = await buildIncludeContentMap(rootDir, includeRefs)
+    const composed = resolveTemplateSchema(
+      templateContent,
+      (ref) => includeMap.get(ref.name) ?? null,
+    )
+    for (const diag of composed.errors) {
+      ;(diag.severity === 'error' ? errors : warnings).push(diag)
+    }
+  }
+
   const templatePath = id ? (await findModelFile(rootDir, id)) ?? id : 'inline'
   const decoratedErrors = errors.map((e) => ({ ...e, filePath: templatePath }))
   const decoratedWarnings = warnings.map((w) => ({ ...w, filePath: templatePath }))
@@ -646,6 +697,75 @@ export async function validateTemplate(
 
 /* ── All mutation operations delegated to innfo-core engine ─── */
 
+/**
+ * Build a starter level-3 body from a resolved template schema: an index
+ * block, one `# NN <Concept>` section per concept (a prose stub for `text`
+ * concepts, one placeholder Element with its declared fields for the rest),
+ * a seeded `# NN matrices:` block per declared Matrix (example row/column
+ * from the source/target Concepts), and an `item-markers matrix` seeded with
+ * the declared Marker columns when any Marker is declared.
+ */
+function scaffoldBodyFromSchema(schema: {
+  concepts: Array<{ name: string; type: string; fields?: Array<{ name: string; type: string; options?: string[] }> }>
+  markers?: Array<{ name: string }>
+  matrices: Array<{ name: string; source?: string; target?: string }>
+}): string {
+  const lines: string[] = []
+  const exampleFor = (concept?: string): string => (concept ? `Example ${concept}` : 'Example')
+  const listConcepts = schema.concepts.filter((c) => c.type !== 'text')
+
+  lines.push(
+    '> [!NOTE]',
+    '> This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).',
+    '',
+  )
+  if (schema.concepts.length > 0) {
+    lines.push('# NN index')
+    for (const c of schema.concepts) lines.push(`* [[${c.name}]]`)
+    lines.push('')
+  }
+  for (const c of schema.concepts) {
+    lines.push(`# NN ${c.name}`)
+    if (c.type === 'text') {
+      lines.push(`_Describe ${c.name} here._`, '')
+      continue
+    }
+    lines.push(`## NN ${c.name}: ${exampleFor(c.name)}`)
+    for (const f of c.fields ?? []) {
+      const hint =
+        f.type === 'select' && f.options && f.options.length > 0
+          ? f.options[0]
+          : f.type === 'reference'
+            ? '[[Target Element]]'
+            : `<${f.type}>`
+      lines.push(`${f.name}:: ${hint}`)
+    }
+    lines.push('')
+  }
+  for (const m of schema.matrices) {
+    const row = exampleFor(m.source)
+    const col = exampleFor(m.target)
+    lines.push(
+      `# NN matrices: ${m.name}`,
+      `| ${m.source ?? 'Row'} \\ ${m.target ?? 'Col'} | ${col} |`,
+      '| :--- | :---: |',
+      `| ${row} | - |`,
+      '',
+    )
+  }
+  const markerNames = (schema.markers ?? []).map((mk) => mk.name)
+  if (markerNames.length > 0 && listConcepts.length > 0) {
+    lines.push(
+      '# NN matrices: item-markers matrix',
+      `| Item \\ Marker | ${markerNames.join(' | ')} |`,
+      `| :--- | ${markerNames.map(() => ':---:').join(' | ')} |`,
+      `| ${exampleFor(listConcepts[0].name)} | ${markerNames.map(() => '-').join(' | ')} |`,
+      '',
+    )
+  }
+  return lines.join('\n').trimEnd() + '\n'
+}
+
 export async function initModel(
   rootDir: string,
   id: string,
@@ -655,10 +775,19 @@ export async function initModel(
     title?: string
     model_version?: string
   }
-): Promise<{ success: boolean; filePath: string; content: string }> {
+): Promise<{
+  success: boolean
+  filePath: string
+  content: string
+  templateResolved: boolean
+  scaffolded: boolean
+  warnings: string[]
+  validation: { valid: boolean; errors: ValidationError[]; warnings: ValidationError[] }
+}> {
   const cleanId = normalizeId(id)
+  const warnings: string[] = []
   let filePath = await findModelFile(rootDir, id)
-  
+
   if (!filePath) {
     const modelsDir = join(rootDir, 'models')
     let useModelsDir = false
@@ -667,7 +796,9 @@ export async function initModel(
       if (st.isDirectory()) {
         useModelsDir = true
       }
-    } catch {}
+    } catch {
+      /* no models/ dir — write beside the repo root */
+    }
     filePath = useModelsDir ? join(modelsDir, `${cleanId}_NN.md`) : join(rootDir, `${cleanId}_NN.md`)
   }
 
@@ -675,7 +806,38 @@ export async function initModel(
   try {
     const currentContent = await readFile(filePath, 'utf-8')
     body = currentContent.replace(/^---[\s\S]*?---\n?/, '').trim()
-  } catch {}
+  } catch {
+    /* new file — no existing body to preserve */
+  }
+
+  // Resolve the template so we can (a) confirm it exists and (b) scaffold a
+  // starter body when the file has none.
+  let templateResolved = false
+  let scaffolded = false
+  let template: SpecDocument | null = null
+  let resolveInclude: (ref: { name: string; url: string }) => string | null = () => null
+  try {
+    const resolved = await resolveTemplateWithCache(rootDir, args.template_url, args.template_name)
+    template = resolved.template
+    resolveInclude = resolved.resolveInclude
+    if (resolved.template) {
+      templateResolved = true
+      const hasConceptSections = /^#\s+NN\s+(?!index\b)\S/im.test(body)
+      if (!hasConceptSections) {
+        const composed = resolveTemplateSchema(resolved.template.rawContent, resolved.resolveInclude)
+        for (const e of composed.errors) warnings.push(`${e.path}: ${e.message}`)
+        const scaffold = scaffoldBodyFromSchema(composed.schema)
+        body = body ? `${scaffold}\n${body}` : scaffold
+        scaffolded = true
+      }
+    } else {
+      warnings.push(
+        `Template "${args.template_name}" could not be resolved from "${args.template_url}" — frontmatter written, body not scaffolded.`,
+      )
+    }
+  } catch (err) {
+    warnings.push(`Template resolution failed: ${err instanceof Error ? err.message : String(err)}`)
+  }
 
   const notice = `> [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).`
@@ -688,8 +850,8 @@ export async function initModel(
   const title = args.title || cleanId
 
   const frontmatter = `---
-specification_version: "V_0-1-0"
-specification_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
+spec_version: "V_0-1-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 level: 3
 parent_spec:
   name: "${args.template_name}"
@@ -698,12 +860,24 @@ model_version: "${modelVersion}"
 title: "${title}"
 ---`
 
-  const newContent = frontmatter + '\n\n' + body + '\n'
+  const newContent = frontmatter + '\n\n' + body.trim() + '\n'
   await writeFile(filePath, newContent, 'utf-8')
+
+  // Validate what we just wrote (hygiene + schema) so the caller does not have
+  // to make a second round-trip.
+  const doc = validateDocument(newContent, {
+    fileName: basename(filePath),
+    template,
+    resolveInclude,
+  })
 
   return {
     success: true,
+    templateResolved,
+    scaffolded,
+    warnings,
     filePath,
-    content: newContent
+    content: newContent,
+    validation: { valid: doc.valid, errors: doc.errors, warnings: doc.warnings },
   }
 }

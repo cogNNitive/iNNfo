@@ -192,8 +192,10 @@ values:: [Max, Very High, High]
 
 `widget_config` is an OPTIONAL inline JSON object that parameterizes the cell
 interaction `widget` of a Matrix Definition or a Marker Definition. Its keys are
-fixed per `widget` value. An application MUST ignore unknown keys and MUST NOT
-accept a semicolon- or comma-delimited string DSL in its place (the removed
+fixed per `widget` value (see the table). An application SHOULD warn on a key not
+listed for the declared `widget`, MUST treat a missing `min`/`max` under
+`widget:: scale` as an ERROR, MUST otherwise ignore unrecognized keys, and MUST
+NOT accept a semicolon- or comma-delimited string DSL in its place (the removed
 `params: "a;b;c"` form).
 
 | `widget` | `widget_config` keys | Meaning |
@@ -527,8 +529,10 @@ parent_spec:
   url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 title: "<Template Name>"
 template_version: "V_x-y-z"
-specializes: "<base-template-name>"
-includes: ["<base-template-name>"]   # OPTIONAL — additive schema composition
+specializes: "<base-template-name>"          # reserved, inert
+includes:                                    # OPTIONAL — additive schema composition
+  - name: "<base-template-name>"
+    url: "<immutable-url>"
 relationship_types: {...}
 ---
 ```
@@ -545,9 +549,11 @@ resolver, validator, or mutation tool — it is a no-op today, kept deliberately
 distinct from `template_version` so specialization and versioning are never
 conflated into the same mechanism again.
 
-`includes` is an OPTIONAL array of template names whose schemas are composed into
-this template **additively**. When an application resolves a Template that
-declares `includes: ["<template>", ...]`:
+`includes` is an OPTIONAL array of `{ name, url }` entries naming peer templates
+whose schemas are composed into this template **additively**. A bare string
+entry is tolerated on read as shorthand for `{ name, url: "" }` (resolved
+locally by name). When an application resolves a Template that declares
+`includes`:
 
 1. It resolves each included Template first — itself resolved through its own
    parent chain and its own `includes`, depth-first, left to right.
@@ -555,11 +561,30 @@ declares `includes: ["<template>", ...]`:
    and `Matrix Definition` elements.
 3. It then applies this Template's own definitions on top.
 
+**How `includes` relates to the parent chain and `specializes`.** These are three
+independent axes:
+
+| Axis | Question | Direction | Cardinality |
+|---|---|---|---|
+| `parent_spec` (parent chain) | Which schema level do I conform to? | Vertical — L3 → L2 → L1 → L0 | Exactly one |
+| `includes` | Which *peer* templates do I borrow Definitions from? | Horizontal — L2 ∪ L2 | Zero or more |
+| `specializes` | Which base template will I *override* (future)? | Horizontal, by substitution | Zero or one — **inert today** |
+
+A level-2 template's `parent_spec` is always the level-1 iNNfo spec, never
+another template. The template that declares `includes` is the **composite** —
+the one a Model names as its `parent_spec`; the included templates are ordinary
+standalone templates used as ingredients, not a lower tier. `includes` is only
+valid on level-2 templates; a level-3 Model composes through its template's
+`includes`, never its own.
+
 Composition is **purely additive**. A definition MUST NOT override or remove an
 inherited one. A name collision — between an included definition and a local one,
 or between two included definitions — is a validation ERROR that MUST name both
-source documents. `includes` is distinct from `specializes` (which stays inert)
-and from `template_version`; an application MUST NOT conflate the three.
+source documents. For example, composing both `projects` and `organization`
+(each of which declares a `Roles` Concept) is an ERROR until one side renames.
+`includes` is distinct from `specializes` (which stays inert) and from
+`template_version`; an application MUST NOT conflate the three, and `includes`
+does not read or interact with `specializes`.
 
 Body:
 
@@ -677,10 +702,14 @@ The following are NOT part of iNNfo:
 The four root primitives are described by the prose tables above **and** expressed
 mechanically, in iNNfo's own syntax, by the metaschema below. An application MUST
 be able to validate any level-2 Template by resolving this metaschema and checking
-the Template's `… Definition` elements against it — the *same* code path it uses to
-validate a level-3 Model against its level-2 Template. Validation is therefore
-**level-agnostic**: L2-against-L1 and L3-against-L2 differ only in which schema
-document is resolved.
+the Template's `… Definition` elements against it.
+
+The **property/enum conformance pass** (steps 4–5 below) is shared: L2-against-L1
+and L3-against-L2 run the *same* check, differing only in which schema document is
+resolved. The remaining passes are level-specific — reference-field resolution and
+matrix-cell validation apply only to level-3 Models, and the Concept `type` enum
+is enforced only at the L2-against-L1 boundary (a level-3 Model has no analogous
+per-Concept `type` field).
 
 ### Schema Resolution Algorithm
 
@@ -697,15 +726,18 @@ To validate a document `D` against a schema document `S`:
    check every `key:: value` property against that Concept's Field schema: the
    value's type, its membership in `options` when the Field is `select`, and
    WikiLink form when the Field is `reference`.
-5. Report any element whose Concept is absent from the schema, any property not
-   declared on its Concept, and any value that violates its Field's type or
-   `options`.
+5. Report any value that violates its Field's type or `options` (ERROR) and any
+   missing required property (ERROR). An element whose Concept is absent from the
+   schema is an ERROR. A property not declared on its Concept is a WARNING when
+   `D` is a level-2 Template (an undeclared property on a `… Definition` is
+   always a mistake); at level 3 it is allowed — extra per-Element metadata is a
+   legitimate authoring pattern.
 
 When `D` is a level-2 Template, `S` is this metaschema and `D`'s Concepts are the
-reserved primitive names below. When `D` is a level-3 Model, `S` is `D`'s level-2
-Template. The `type` enum of a Concept Definition (`text | category | weight |
-list | steps | sequence`) is enforced by this same pass — a value outside the set
-is an ERROR, not a warning.
+reserved primitive names below; the `type` enum of a Concept Definition
+(`text | category | weight | list | steps | sequence`) is enforced by this pass —
+a value outside the set is an ERROR. When `D` is a level-3 Model, `S` is `D`'s
+resolved level-2 Template (its own Definitions plus everything it `includes`).
 
 ### The Metaschema
 

@@ -27,7 +27,9 @@ const availableModels = computed(() => {
           if (fm?.title) title = fm.title
           if (fm?.model_version) version = fm.model_version
           if (fm?.parent_spec?.name) templateName = fm.parent_spec.name
-        } catch {}
+        } catch {
+          /* unparseable frontmatter — fall back to defaults */
+        }
       }
       return { id, filename, title, version, templateName }
     })

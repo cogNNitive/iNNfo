@@ -157,6 +157,46 @@ export async function getTemplateFromUrl(
 }
 
 /**
+ * Like `getTemplateFromUrl`, but also returns the full resolved `SpecCache`
+ * (parent chain + every `includes` target) and an `IncludeResolver` bound to
+ * it — so a caller can pass template composition through to innfo-core's
+ * `validateModel` / `resolveTemplateSchema` without re-reading anything.
+ */
+export async function resolveTemplateWithCache(
+  rootDir: string,
+  url: string,
+  name: string,
+): Promise<{
+  template: SpecDocument | null
+  cache: SpecCache | null
+  resolveInclude: (ref: { name: string; url: string }) => string | null
+}> {
+  let cache: SpecCache | null = null
+  try {
+    cache = await resolveParentChainNode(rootDir, url, name)
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      (err.name === 'SpecResolutionError' || err instanceof SpecResolutionError)
+    ) {
+      throw err
+    }
+    cache = null
+  }
+  const template = cache ? coreGetTemplate(cache) ?? cache.specs.get(name) ?? null : null
+  const resolveInclude = (ref: { name: string; url: string }): string | null => {
+    if (!cache) return null
+    const direct = cache.specs.get(ref.name)
+    if (direct) return direct.rawContent
+    for (const doc of cache.specs.values()) {
+      if (doc.name.toLowerCase() === ref.name.toLowerCase()) return doc.rawContent
+    }
+    return null
+  }
+  return { template, cache, resolveInclude }
+}
+
+/**
  * Resolve a template from a loaded model, deriving the URL from its
  * `parent_spec.url`. Returns null when the model declares no parent.
  */

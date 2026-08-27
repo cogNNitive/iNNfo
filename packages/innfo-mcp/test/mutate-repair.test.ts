@@ -25,7 +25,7 @@ describe('MCP model repair tools', () => {
 
     expect(res.success).toBe(true)
     const content = await readFile(res.filePath, 'utf-8')
-    expect(content).toContain('specification_version: "V_0-1-0"')
+    expect(content).toContain('spec_version: "V_0-1-0"')
     expect(content).toContain('model_version: "V_0-5-1"')
     expect(content).toContain('title: "Arenzano Residential"')
     expect(content).toContain('> [!NOTE]')
@@ -42,7 +42,7 @@ describe('MCP model repair tools', () => {
 
     expect(res.success).toBe(true)
     const content = await readFile(res.filePath, 'utf-8')
-    expect(content).toContain('specification_version: "V_0-1-0"')
+    expect(content).toContain('spec_version: "V_0-1-0"')
     expect(content).toContain('# NN ConceptA')
     expect(content).toContain('## NN ConceptA: Element1')
   })

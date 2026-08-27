@@ -140,6 +140,21 @@ export function normalizeElementsIntoGraph(
     }
   }
 
+  // Concept-scoped Marker scores (an `item-markers matrix` row whose subject
+  // is a Concept name, permitted when the Marker's `applies_to` includes
+  // `Concept`). There is no Concept node in the graph to hang these on, so
+  // they are preserved on the document root for a future consumer rather than
+  // dropped. Element-scoped rows are already attached to their element above.
+  const rootNode = ctx.nodes[rootId]
+  if (rootNode) {
+    for (const [subject, scores] of Object.entries(parsed.nodeMarkers)) {
+      if (!qualifiedIdByElementName.has(subject)) {
+        rootNode.conceptMarkers = rootNode.conceptMarkers ?? {}
+        rootNode.conceptMarkers[subject] = { ...scores }
+      }
+    }
+  }
+
   // Attach relationships from matrices between named elements, once all
   // qualified ids are known. Falls back to a separator-normalized lookup
   // (hyphen vs en/em dash/minus) when the exact name isn't found, emitting a

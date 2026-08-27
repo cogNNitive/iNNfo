@@ -297,5 +297,103 @@ export async function resolveParentChainNode(
     throw new Error(`Circular parent chain detected at depth ${maxDepth}`)
   }
 
+  // Additive composition: pull in every template named by a resolved level-2
+  // template's `includes` list (recursively), so `resolveTemplateSchema` in
+  // innfo-core can compose their schemas offline. Best-effort — an
+  // unresolvable include is left out and surfaces later as a validation error.
+  await resolveIncludesInto(specs, specsDir, timeout)
+
   return { specs, chain }
+}
+
+/** Resolve one spec's raw content: local specs dir first, then network. */
+async function fetchSpecContent(
+  name: string,
+  url: string | undefined,
+  specsDir: string,
+  timeout: number,
+): Promise<string | null> {
+  if (url && isLocalPath(url)) {
+    const localPath = toLocalFilePath(url, specsDir.replace(/[/\\]specs[/\\]?$/, ''))
+    const direct = await readFile(localPath, 'utf-8').catch(() => null)
+    if (direct !== null) return direct
+  }
+  const local = await findLocalSpec(specsDir, name)
+  if (local) return readFile(local, 'utf-8').catch(() => null)
+  if (url && /^https?:\/\//i.test(url)) {
+    try {
+      const content = await download(url, timeout)
+      await saveSpecOnce(specsDir, `${canonicalSpecFilename(name, content)}_NN.md`, content).catch(
+        () => {},
+      )
+      return content
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+/**
+ * Resolve a set of `includes` refs (recursively following nested `includes`)
+ * into a `name → raw content` map, for building an innfo-core `IncludeResolver`.
+ * `specsBaseDir` is the repo root; templates are looked up under its `specs/`.
+ */
+export async function buildIncludeContentMap(
+  specsBaseDir: string,
+  refs: Array<{ name: string; url: string }>,
+  timeout = 10000,
+): Promise<Map<string, string>> {
+  const specsDir = join(specsBaseDir, 'specs')
+  const out = new Map<string, string>()
+  const seen = new Set<string>()
+  const queue = [...refs]
+  while (queue.length > 0) {
+    const ref = queue.shift()!
+    const key = ref.name.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    const content = await fetchSpecContent(ref.name, ref.url || undefined, specsDir, timeout)
+    if (content === null) continue
+    out.set(ref.name, content)
+    const fm = parseFrontmatter(content)
+    for (const nested of fm?.includes ?? []) queue.push(nested)
+  }
+  return out
+}
+
+/**
+ * Walk every resolved level-2 template's `includes` and add the referenced
+ * templates to `specs` (keyed by include name), recursively. Mutates `specs`.
+ */
+export async function resolveIncludesInto(
+  specs: Map<string, SpecDocument>,
+  specsDir: string,
+  timeout: number,
+  seen: Set<string> = new Set(),
+): Promise<void> {
+  const queue: SpecDocument[] = [...specs.values()]
+  while (queue.length > 0) {
+    const doc = queue.shift()!
+    const includes = doc.frontmatter?.includes ?? []
+    for (const ref of includes) {
+      const key = ref.name.toLowerCase()
+      if (seen.has(key) || specs.has(ref.name)) continue
+      seen.add(key)
+      const content = await fetchSpecContent(ref.name, ref.url || undefined, specsDir, timeout)
+      if (content === null) continue
+      const fm = parseFrontmatter(content)
+      if (fm === null) continue
+      const included: SpecDocument = {
+        name: ref.name,
+        level: fm.level ?? 2,
+        parentName: fm.parent_spec?.name,
+        parentUrl: fm.parent_spec?.url,
+        frontmatter: fm,
+        rawContent: content,
+      }
+      specs.set(ref.name, included)
+      queue.push(included)
+    }
+  }
 }

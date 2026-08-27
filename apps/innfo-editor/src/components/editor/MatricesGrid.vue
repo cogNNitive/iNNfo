@@ -364,6 +364,7 @@
                   <input
                     v-else-if="activeMatrix.widgetType === 'text'"
                     type="text"
+                    :maxlength="textMaxLength"
                     :value="
                       getVal(rows[vRow.index], columns[vCol.index]) === '-'
                         ? ''
@@ -513,6 +514,13 @@ const colWidth = computed(() => {
   const match = params?.match(/colWidth:(\d+)/)
   const w = match ? parseInt(match[1]) : 120
   return Math.max(w, MIN_COL_WIDTH)
+})
+
+// ── Free-text widget max length from widget_config.max_length ──
+const textMaxLength = computed(() => {
+  const raw = activeMatrix.value?.widgetConfig?.max_length
+  const n = typeof raw === 'number' ? raw : typeof raw === 'string' ? Number(raw) : NaN
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : undefined
 })
 
 // ── Adaptive header height: sized so the widest rotated column pill fits ──

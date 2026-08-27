@@ -154,6 +154,150 @@ export function extractTemplateSchemaFromContent(content: string): TemplateSchem
   return extractTemplateSchema(parseModel(content))
 }
 
+/* ── Additive template composition (`includes`) ─────────────────
+ *
+ * A level-2 template MAY declare `includes: [{ name, url }, ...]` naming peer
+ * templates whose Concept / Field / Marker / Matrix Definitions are merged
+ * into its effective schema **additively** (iNNfo "Level 2 Template
+ * Structure"). Resolution is depth-first, left to right; each included
+ * template is itself composed through its own `includes`. Composition never
+ * overrides or removes an inherited Definition — a name collision between two
+ * sources is a validation ERROR that names both. `includes` is orthogonal to
+ * the vertical `parent_spec` chain and to the inert `specializes` field.
+ */
+
+/** Resolve the raw content of an included template by name (and optionally
+ *  URL). Returns null when it cannot be resolved. Supplied by the host
+ *  (innfo-mcp / the editor) so this module stays I/O-free. */
+export type IncludeResolver = (ref: { name: string; url: string }) => string | null
+
+export interface ResolvedTemplateSchema {
+  schema: TemplateSchema
+  /** Collisions, cycles and unresolved includes encountered while composing. */
+  errors: ValidationError[]
+}
+
+function mergeSchemaInto(
+  acc: TemplateSchema,
+  incoming: TemplateSchema,
+  incomingSource: string,
+  provenance: {
+    concept: Map<string, string>
+    marker: Map<string, string>
+    matrix: Map<string, string>
+    field: Map<string, string>
+  },
+  errors: ValidationError[],
+): void {
+  for (const c of incoming.concepts) {
+    const key = c.name.toLowerCase()
+    const prior = provenance.concept.get(key)
+    if (prior) {
+      errors.push({
+        path: `includes.Concept.${c.name}`,
+        message: `Concept Definition "${c.name}" is declared by both "${prior}" and "${incomingSource}" — \`includes\` composition is additive and MUST NOT redeclare a Definition`,
+        severity: 'error',
+      })
+      continue
+    }
+    provenance.concept.set(key, incomingSource)
+    acc.concepts.push(c)
+    for (const f of c.fields ?? []) {
+      provenance.field.set(`${key}.${f.name.toLowerCase()}`, incomingSource)
+    }
+  }
+  for (const m of incoming.markers) {
+    const key = m.name.toLowerCase()
+    const prior = provenance.marker.get(key)
+    if (prior) {
+      errors.push({
+        path: `includes.Marker.${m.name}`,
+        message: `Marker Definition "${m.name}" is declared by both "${prior}" and "${incomingSource}" — \`includes\` composition is additive`,
+        severity: 'error',
+      })
+      continue
+    }
+    provenance.marker.set(key, incomingSource)
+    acc.markers.push(m)
+  }
+  for (const mx of incoming.matrices) {
+    const key = mx.name.toLowerCase()
+    const prior = provenance.matrix.get(key)
+    if (prior) {
+      errors.push({
+        path: `includes.Matrix.${mx.name}`,
+        message: `Matrix Definition "${mx.name}" is declared by both "${prior}" and "${incomingSource}" — \`includes\` composition is additive`,
+        severity: 'error',
+      })
+      continue
+    }
+    provenance.matrix.set(key, incomingSource)
+    acc.matrices.push(mx)
+  }
+  for (const edge of incoming.taxonomy) acc.taxonomy.push(edge)
+}
+
+/**
+ * Resolve a level-2 template's effective schema, composing every template it
+ * `includes` (recursively, depth-first, left to right) on top of a base of
+ * the included schemas. Returns the merged schema plus any composition
+ * errors (name collisions, cycles, unresolved includes). When the template
+ * declares no `includes`, or no resolver is supplied, this is just
+ * `extractTemplateSchema` with an empty error list.
+ */
+export function resolveTemplateSchema(
+  templateContent: string,
+  resolveInclude?: IncludeResolver,
+  _seen: Set<string> = new Set(),
+): ResolvedTemplateSchema {
+  const parsed = parseModel(templateContent)
+  const local = extractTemplateSchema(parsed)
+  const includes = parsed.frontmatter?.includes ?? []
+  if (!resolveInclude || includes.length === 0) {
+    return { schema: local, errors: [] }
+  }
+
+  const selfLabel = String(parsed.frontmatter?.title ?? 'this template')
+  const errors: ValidationError[] = []
+  const base: TemplateSchema = { concepts: [], markers: [], matrices: [], taxonomy: [] }
+  const provenance = {
+    concept: new Map<string, string>(),
+    marker: new Map<string, string>(),
+    matrix: new Map<string, string>(),
+    field: new Map<string, string>(),
+  }
+
+  for (const ref of includes) {
+    const key = ref.name.toLowerCase()
+    if (_seen.has(key)) {
+      errors.push({
+        path: `includes.${ref.name}`,
+        message: `Cyclic \`includes\`: "${ref.name}" is already being composed further up the chain`,
+        severity: 'error',
+      })
+      continue
+    }
+    const content = resolveInclude(ref)
+    if (content === null) {
+      errors.push({
+        path: `includes.${ref.name}`,
+        message: `Included template "${ref.name}" could not be resolved${ref.url ? ` from "${ref.url}"` : ''}`,
+        severity: 'error',
+      })
+      continue
+    }
+    const nested = resolveTemplateSchema(content, resolveInclude, new Set([..._seen, key]))
+    errors.push(...nested.errors)
+    const includedLabel = String(parseModel(content).frontmatter?.title ?? ref.name)
+    mergeSchemaInto(base, nested.schema, includedLabel, provenance, errors)
+  }
+
+  // The composite template's own definitions apply on top of the union.
+  mergeSchemaInto(base, local, selfLabel, provenance, errors)
+
+  return { schema: base, errors }
+}
+
 /* ── Metaschema (Self-Description) ──────────────────────────────
  *
  * The level-1 iNNfo spec carries, under its "## Metaschema (Self-Description)"
@@ -184,6 +328,151 @@ const REQUIRED_BY_PRIMITIVE: Record<string, string[]> = {
   [MATRIX_DEFINITION]: ['source', 'target'],
 }
 
+export interface SchemaCheckOptions {
+  /** How to report a property no Field Definition declares. Default `warning`. */
+  unknownProperty?: 'error' | 'warning' | 'ignore'
+  /** `<concept name>` → field names that MUST be present on every element. */
+  requiredByConcept?: Record<string, string[]>
+  /** Also flag element groups whose Concept is absent from the schema. */
+  reportUnknownConcept?: boolean
+}
+
+/**
+ * The one property/enum conformance pass shared by every level boundary.
+ * Given element groups (`Concept name` → elements) and a resolved schema
+ * (`Concept[]` with their `fields`), it reports:
+ *   - properties not declared by any Field Definition of the owning Concept,
+ *   - values outside a `select` Field's `options`,
+ *   - missing required properties.
+ * Level-2-against-L1 (primitive elements vs the metaschema) and
+ * level-3-against-L2 (model elements vs the template) call this with the same
+ * signature — they differ only in which schema is passed. Reference and
+ * matrix-cell checks are model-only and layered on top by `validateModel`.
+ */
+export function checkElementsAgainstSchema(
+  elementGroups: Iterable<[string, Array<{ name: string; fields: Record<string, unknown> }>]>,
+  concepts: Concept[],
+  opts: SchemaCheckOptions = {},
+): ValidationError[] {
+  const unknownProperty = opts.unknownProperty ?? 'warning'
+  const conceptByName = new Map(concepts.map((c) => [c.name.toLowerCase(), c]))
+  const diagnostics: ValidationError[] = []
+
+  for (const [conceptName, elements] of elementGroups) {
+    const def = conceptByName.get(conceptName.toLowerCase())
+    if (!def) {
+      if (opts.reportUnknownConcept) {
+        diagnostics.push({
+          path: `${conceptName}`,
+          message: `Concept "${conceptName}" is not defined in the schema`,
+          severity: 'error',
+        })
+      }
+      continue
+    }
+    const fieldByName = new Map((def.fields ?? []).map((f) => [f.name.toLowerCase(), f]))
+    const required = opts.requiredByConcept?.[def.name] ?? opts.requiredByConcept?.[conceptName] ?? []
+
+    for (const el of elements) {
+      for (const key of required) {
+        const v = el.fields[key]
+        if (v === undefined || v === null || v === '') {
+          diagnostics.push({
+            path: `${def.name}.${el.name}.${key}`,
+            message: `${def.name} "${el.name}" is missing required property "${key}"`,
+            severity: 'error',
+          })
+        }
+      }
+
+      for (const [key, rawVal] of Object.entries(el.fields)) {
+        const fieldDef = fieldByName.get(key.toLowerCase())
+        if (!fieldDef) {
+          if (unknownProperty !== 'ignore') {
+            diagnostics.push({
+              path: `${def.name}.${el.name}.${key}`,
+              message: `Property "${key}" is not declared on ${def.name} in the schema`,
+              severity: unknownProperty,
+            })
+          }
+          continue
+        }
+        if (fieldDef.type === 'select' && fieldDef.options && fieldDef.options.length > 0) {
+          const val = String(rawVal)
+          if (!fieldDef.options.includes(val)) {
+            diagnostics.push({
+              path: `${def.name}.${el.name}.${key}`,
+              message: `Invalid value "${val}" for "${key}". Allowed: ${fieldDef.options.join(', ')}`,
+              severity: 'error',
+            })
+          }
+        }
+      }
+    }
+  }
+
+  return diagnostics
+}
+
+/** Allowed `widget_config` keys per `widget` value (iNNfo "Widget Configuration"). */
+const WIDGET_CONFIG_KEYS: Record<string, string[]> = {
+  scale: ['min', 'max', 'step'],
+  cycle: ['order'],
+  set: ['max_selections'],
+  text: ['max_length'],
+  boolean: [],
+}
+
+/**
+ * Validate the `widget` / `widget_config` pair on Marker/Matrix Definition
+ * elements: unknown keys for the declared widget are WARNINGs, a `scale`
+ * missing `min`/`max` is an ERROR, `widget_config` without `widget` is a
+ * WARNING.
+ */
+export function checkWidgetConfig(
+  elementGroups: Iterable<[string, Array<{ name: string; fields: Record<string, unknown> }>]>,
+): ValidationError[] {
+  const diagnostics: ValidationError[] = []
+  for (const [primitive, elements] of elementGroups) {
+    for (const el of elements) {
+      const widget = asString(el.fields['widget'])
+      const cfg = asObject(el.fields['widget_config'])
+      if (!cfg) continue
+      if (!widget) {
+        diagnostics.push({
+          path: `${primitive}.${el.name}.widget_config`,
+          message: `"${el.name}" declares widget_config but no widget`,
+          severity: 'warning',
+        })
+        continue
+      }
+      const allowed = WIDGET_CONFIG_KEYS[widget.toLowerCase()]
+      if (!allowed) continue
+      for (const key of Object.keys(cfg)) {
+        if (!allowed.includes(key)) {
+          diagnostics.push({
+            path: `${primitive}.${el.name}.widget_config.${key}`,
+            message: `"${key}" is not a widget_config key for widget "${widget}". Allowed: ${allowed.join(', ') || '(none)'}`,
+            severity: 'warning',
+          })
+        }
+      }
+      if (widget.toLowerCase() === 'scale') {
+        for (const req of ['min', 'max']) {
+          if (cfg[req] === undefined || cfg[req] === null || cfg[req] === '') {
+            diagnostics.push({
+              path: `${primitive}.${el.name}.widget_config.${req}`,
+              message: `widget "scale" requires widget_config.${req}`,
+              severity: 'error',
+            })
+          }
+        }
+      }
+    }
+  }
+  return diagnostics
+}
+
 /**
  * Validate a level-2 template's root-primitive elements against the level-1
  * metaschema. `metaschemaSpecContent` is the raw content of the resolved
@@ -195,7 +484,6 @@ export function validateTemplateAgainstMetaschema(
   templateContent: string,
   metaschemaSpecContent: string,
 ): ValidationError[] {
-  const diagnostics: ValidationError[] = []
   const metaMarkdown = extractMetaschema(metaschemaSpecContent)
   if (!metaMarkdown) {
     return [
@@ -210,48 +498,21 @@ export function validateTemplateAgainstMetaschema(
 
   const metaConcepts = extractTemplateSchema(parseModel(metaMarkdown)).concepts
   const template = parseModel(templateContent)
+  const groups: Array<[string, Array<{ name: string; fields: Record<string, unknown> }>]> = [
+    CONCEPT_DEFINITION,
+    FIELD_DEFINITION,
+    MARKER_DEFINITION,
+    MATRIX_DEFINITION,
+  ].map((primitive) => [primitive, template.elements.get(primitive) ?? []])
 
-  for (const primitive of [CONCEPT_DEFINITION, FIELD_DEFINITION, MARKER_DEFINITION, MATRIX_DEFINITION]) {
-    const primDef = metaConcepts.find((c) => c.name === primitive)
-    if (!primDef || !primDef.fields || primDef.fields.length === 0) continue
-    const allowed = new Map(primDef.fields.map((f) => [f.name, f]))
-    const required = REQUIRED_BY_PRIMITIVE[primitive] ?? []
-
-    for (const el of template.elements.get(primitive) ?? []) {
-      for (const key of required) {
-        const v = el.fields[key]
-        if (v === undefined || v === null || v === '') {
-          diagnostics.push({
-            path: `${primitive}.${el.name}.${key}`,
-            message: `${primitive} "${el.name}" is missing required property "${key}"`,
-            severity: 'error',
-          })
-        }
-      }
-
-      for (const [key, rawVal] of Object.entries(el.fields)) {
-        const fieldDef = allowed.get(key)
-        if (!fieldDef) {
-          diagnostics.push({
-            path: `${primitive}.${el.name}.${key}`,
-            message: `Property "${key}" is not declared on ${primitive} in the metaschema`,
-            severity: 'warning',
-          })
-          continue
-        }
-        if (fieldDef.type === 'select' && fieldDef.options && fieldDef.options.length > 0) {
-          const val = String(rawVal)
-          if (!fieldDef.options.includes(val)) {
-            diagnostics.push({
-              path: `${primitive}.${el.name}.${key}`,
-              message: `Invalid value "${val}" for "${key}". Allowed: ${fieldDef.options.join(', ')}`,
-              severity: 'error',
-            })
-          }
-        }
-      }
-    }
-  }
-
-  return diagnostics
+  return [
+    ...checkElementsAgainstSchema(groups, metaConcepts, {
+      unknownProperty: 'warning',
+      requiredByConcept: REQUIRED_BY_PRIMITIVE,
+    }),
+    ...checkWidgetConfig([
+      [MARKER_DEFINITION, template.elements.get(MARKER_DEFINITION) ?? []],
+      [MATRIX_DEFINITION, template.elements.get(MATRIX_DEFINITION) ?? []],
+    ]),
+  ]
 }

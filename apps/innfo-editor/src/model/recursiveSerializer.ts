@@ -221,6 +221,9 @@ function serializeNodeContent(node: ModelNode): {
       params: m.params,
       values: m.values,
       widgetType: m.widgetType,
+      ...(m.widgetConfig && Object.keys(m.widgetConfig).length > 0
+        ? { widget_config: m.widgetConfig }
+        : {}),
       description: m.description,
       min_color: m.min_color,
       max_color: m.max_color,

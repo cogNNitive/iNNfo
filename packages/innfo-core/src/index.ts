@@ -23,8 +23,16 @@ export {
   extractTemplateSchemaFromContent,
   extractMetaschema,
   validateTemplateAgainstMetaschema,
+  checkElementsAgainstSchema,
+  checkWidgetConfig,
+  resolveTemplateSchema,
 } from './schema'
-export type { TemplateSchema } from './schema'
+export type {
+  TemplateSchema,
+  SchemaCheckOptions,
+  IncludeResolver,
+  ResolvedTemplateSchema,
+} from './schema'
 
 export {
   getSpecForLevel,
@@ -37,12 +45,13 @@ export type { SpecResolver } from './resolver'
 
 export {
   validateModel,
+  validateDocument,
   validateFormatContent,
   validateFormatSyntax,
   validateReferences,
   validateElementFieldReferences,
 } from './validator'
-export type { ReferenceDiagnostic } from './validator'
+export type { ReferenceDiagnostic, DocumentValidation } from './validator'
 
 export * from './identity'
 export * from './metamodel'
@@ -52,5 +61,5 @@ export { listModels, resolveSpecVersionFromFilename } from './helpers'
 export type { ModelInfo } from './helpers'
 export { applyMutation, updateReferenceString } from './mutate'
 export type { MutationResult } from './mutate'
-export { deriveMatrixWidgetType, normalizeMatrixDecl } from './matrix'
+export { deriveMatrixWidgetType, normalizeMatrixDecl, scaleRangeFor } from './matrix'
 export type { MatrixWidgetType } from './matrix'
