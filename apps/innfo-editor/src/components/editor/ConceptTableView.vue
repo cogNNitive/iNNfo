@@ -103,9 +103,25 @@
               v-for="field in conceptFields"
               :key="field.name"
               @click.stop
+              @dblclick="!isEditMode && handleFieldDblClick(child.id, field)"
               class="px-3 py-2 text-sm text-slate-700 dark:text-slate-300"
+              :class="{ 'cursor-zoom-in hover:bg-slate-50 dark:hover:bg-slate-700/20 select-text': !isEditMode && isTruncatableType(field.type) }"
             >
+              <div
+                v-if="!isEditMode && isTruncatableType(field.type)"
+                class="max-w-[300px] line-clamp-3 overflow-hidden text-ellipsis break-words"
+                title="Double click to view full content"
+              >
+                <WidgetField
+                  :node-id="child.id"
+                  :field-key="field.name"
+                  :widget-type="field.type || 'string'"
+                  :field-definition="field"
+                  :readonly="true"
+                />
+              </div>
               <WidgetField
+                v-else
                 :node-id="child.id"
                 :field-key="field.name"
                 :widget-type="field.type || 'string'"
@@ -144,6 +160,16 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Field Detail Modal -->
+    <FieldDetailModal
+      :is-open="isModalOpen"
+      :node-id="selectedNodeId"
+      :field-key="selectedFieldKey"
+      :field-type="selectedFieldType"
+      :field-definition="selectedFieldDefinition"
+      @close="isModalOpen = false"
+    />
   </div>
 </template>
 
@@ -155,6 +181,7 @@ import { useConfirmStore } from '../../stores/confirmStore'
 import { useUiStore } from '../../stores/uiStore'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
 import Pill from './Pill.vue'
+import FieldDetailModal from './FieldDetailModal.vue'
 import type { FieldValue } from '@cognnitive/innfo-core'
 
 const props = defineProps<{
@@ -354,5 +381,24 @@ function addElement(): void {
   if (newId) {
     isEditMode.value = true
   }
+}
+
+const isModalOpen = ref(false)
+const selectedNodeId = ref('')
+const selectedFieldKey = ref('')
+const selectedFieldType = ref('')
+const selectedFieldDefinition = ref<any>(null)
+
+function isTruncatableType(type?: string): boolean {
+  const t = type || 'string'
+  return t === 'string' || t === 'markdown_inline' || t === 'markdown_file' || t === 'markdown'
+}
+
+function handleFieldDblClick(nodeId: string, field: any): void {
+  selectedNodeId.value = nodeId
+  selectedFieldKey.value = field.name
+  selectedFieldType.value = field.type || 'string'
+  selectedFieldDefinition.value = field
+  isModalOpen.value = true
 }
 </script>

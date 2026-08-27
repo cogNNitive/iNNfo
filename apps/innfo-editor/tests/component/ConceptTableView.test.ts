@@ -137,4 +137,50 @@ describe('ConceptTableView.vue — Reactivity and element addition', () => {
     // Check store reordered children:
     expect(modelStore.nodes['Root'].childIds).toEqual(['Root/ItemC', 'Root/ItemA', 'Root/ItemB'])
   })
+
+  it('opens FieldDetailModal on double click on a cell with a truncatable field type when not in edit mode', async () => {
+    const modelStore = useModelStore()
+    const root = makeNode('Root', {
+      childIds: ['Root/ItemA'],
+    })
+    const itemA = makeNode('Root/ItemA', {
+      parentId: 'Root',
+      name: 'ItemA',
+      type: 'Problems',
+      kind: 'element',
+      fields: {
+        description: {
+          value: 'This is a very long description that should be truncated in the table cell view.',
+        },
+      },
+    })
+    modelStore.setGraph({ Root: root, 'Root/ItemA': itemA }, ['Root'])
+
+    const wrapper = mount(ConceptTableView, {
+      props: {
+        nodeId: 'virtual:Root:Problems',
+        conceptType: 'Problems',
+        conceptFields: [
+          { name: 'description', type: 'string' }
+        ],
+      },
+    })
+
+    const cells = wrapper.findAll('tbody tr td')
+    expect(cells).toHaveLength(3)
+
+    const descriptionCell = cells[1]
+    expect(descriptionCell.classes()).toContain('cursor-zoom-in')
+
+    const modal = wrapper.findComponent({ name: 'FieldDetailModal' })
+    expect(modal.exists()).toBe(true)
+    expect(modal.props('isOpen')).toBe(false)
+
+    await descriptionCell.trigger('dblclick')
+
+    expect(modal.props('isOpen')).toBe(true)
+    expect(modal.props('nodeId')).toBe('Root/ItemA')
+    expect(modal.props('fieldKey')).toBe('description')
+    expect(modal.props('fieldType')).toBe('string')
+  })
 })
