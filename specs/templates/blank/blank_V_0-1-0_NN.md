@@ -44,6 +44,7 @@ description:: Free-form one-line summary or label for the content block.
 # NN Marker Definition
 
 ## NN Marker Definition: importance
+applies_to:: [Element]
 symbol:: *
 icon:: plus
 color:: blue

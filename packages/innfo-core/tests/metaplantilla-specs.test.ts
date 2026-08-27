@@ -58,7 +58,7 @@ describe('Metaplantilla Nivel 1 (specs/)', () => {
     expect(businessSummary.icon).toBe('file-text')
 
     const stakeholders = schema.concepts.find((c) => c.name === 'Stakeholders')!
-    expect(stakeholders.type).toBe('importance')
+    expect(stakeholders.type).toBe('weight')
     expect(stakeholders.fields!.map((f) => f.name)).toEqual(['relationship_model'])
     expect(stakeholders.fields![0].type).toBe('string')
 

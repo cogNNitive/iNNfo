@@ -184,6 +184,7 @@ description:: ISO-8601 timestamp of the procedure run.
 # NN Marker Definition
 
 ## NN Marker Definition: verified
+applies_to:: [Element]
 symbol:: >
 icon:: shield-check
 color:: green

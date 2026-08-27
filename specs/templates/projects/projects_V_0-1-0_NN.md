@@ -138,6 +138,7 @@ options:: [internal, external]
 # NN Marker Definition
 
 ## NN Marker Definition: health
+applies_to:: [Element, Concept]
 icon:: activity
 color:: green
 weight:: 50

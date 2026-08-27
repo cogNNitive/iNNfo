@@ -8,7 +8,7 @@
 
 import { readFile, writeFile, rm, stat, rename } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
-import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation, SpecResolutionError } from '@cognnitive/innfo-core'
+import { parseModel, serializeModel, validateModel as coreValidate, applyMutation as coreApplyMutation, validateTemplateAgainstMetaschema, SpecResolutionError } from '@cognnitive/innfo-core'
 import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/innfo-core'
 
 import { getTemplateFromUrl, findModelFile, deriveNameFromUrl, getSpec, normalizeId } from './spec.js'
@@ -624,6 +624,13 @@ export async function validateTemplate(
       message: 'Missing title in template frontmatter',
       severity: 'error',
     })
+  }
+
+  // Schema-driven: check the template's root-primitive elements
+  // (Concept/Field/Marker/Matrix Definition) against the level-1 metaschema
+  // resolved from the parent spec. Same code path as level-3-against-template.
+  for (const diag of validateTemplateAgainstMetaschema(templateContent, parentSpec.rawContent)) {
+    ;(diag.severity === 'error' ? errors : warnings).push(diag)
   }
 
   const templatePath = id ? (await findModelFile(rootDir, id)) ?? id : 'inline'

@@ -1,4 +1,4 @@
-import type { Concept, ConceptField, Marker, MatrixDecl, ParsedModel, TaxonomyEdge } from './types'
+import type { Concept, ConceptField, Marker, MatrixDecl, ParsedModel, TaxonomyEdge, ValidationError } from './types'
 import { parseModel } from './parser'
 
 /**
@@ -58,6 +58,10 @@ function asNumber(v: unknown): number | undefined {
   return undefined
 }
 
+function asObject(v: unknown): Record<string, unknown> | undefined {
+  return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : undefined
+}
+
 /**
  * Extracts a template schema from a parsed document's body elements.
  * Returns empty arrays when the document does not instantiate the root
@@ -101,13 +105,24 @@ export function extractTemplateSchema(parsed: ParsedModel): TemplateSchema {
     if (fields && fields.length > 0) concept.fields = fields
   }
 
-  const markers: Marker[] = (parsed.elements.get(MARKER_DEFINITION) ?? []).map((el) => ({
-    name: el.name,
-    symbol: asString(el.fields['symbol']),
-    icon: asString(el.fields['icon']),
-    color: asString(el.fields['color']),
-    weight: asNumber(el.fields['weight']),
-  }))
+  const markers: Marker[] = (parsed.elements.get(MARKER_DEFINITION) ?? []).map((el) => {
+    const marker: Marker = {
+      name: el.name,
+      symbol: asString(el.fields['symbol']),
+      icon: asString(el.fields['icon']),
+      color: asString(el.fields['color']),
+      weight: asNumber(el.fields['weight']),
+    }
+    const appliesTo = asStringArray(el.fields['applies_to'])
+    if (appliesTo) marker.applies_to = appliesTo
+    const values = asStringArray(el.fields['values'])
+    if (values) marker.values = values
+    const widget = asString(el.fields['widget'])
+    if (widget) marker.widgetType = widget
+    const widgetConfig = asObject(el.fields['widget_config'])
+    if (widgetConfig) marker.widgetConfig = widgetConfig
+    return marker
+  })
 
   const matrices: MatrixDecl[] = (parsed.elements.get(MATRIX_DEFINITION) ?? []).map((el) => {
     const values = asStringArray(el.fields['values'])
@@ -120,6 +135,8 @@ export function extractTemplateSchema(parsed: ParsedModel): TemplateSchema {
     }
     if (values) decl.values = values
     if (widget) decl.widgetType = widget as MatrixDecl['widgetType']
+    const widgetConfig = asObject(el.fields['widget_config'])
+    if (widgetConfig) decl.widgetConfig = widgetConfig
     const description = asString(el.fields['description'])
     if (description) decl.description = description
     return decl
@@ -135,4 +152,106 @@ export function extractTemplateSchema(parsed: ParsedModel): TemplateSchema {
  */
 export function extractTemplateSchemaFromContent(content: string): TemplateSchema {
   return extractTemplateSchema(parseModel(content))
+}
+
+/* ── Metaschema (Self-Description) ──────────────────────────────
+ *
+ * The level-1 iNNfo spec carries, under its "## Metaschema (Self-Description)"
+ * section, a fenced ```markdown block that expresses the four root primitives
+ * in iNNfo's own syntax. `validateTemplateAgainstMetaschema` resolves that
+ * block and checks a level-2 template's `… Definition` elements against it —
+ * the same code path (`extractTemplateSchema` + per-Field checks) used to
+ * validate a level-3 Model against its level-2 Template.
+ */
+
+/**
+ * Pull the fenced ```markdown block that follows the "The Metaschema" heading
+ * inside the level-1 iNNfo spec content. Returns null when absent.
+ */
+export function extractMetaschema(specContent: string): string | null {
+  const anchor = specContent.search(/^#{1,6}\s+The Metaschema\s*$/m)
+  const region = anchor >= 0 ? specContent.slice(anchor) : specContent
+  const fence = region.match(/```(?:markdown|md)?\s*\n([\s\S]*?)\n```/)
+  return fence ? fence[1] : null
+}
+
+/** Field names REQUIRED on each primitive — transcribed from the "(required)"
+ *  markers in the iNNfo spec's Metaschema section (source of truth). */
+const REQUIRED_BY_PRIMITIVE: Record<string, string[]> = {
+  [CONCEPT_DEFINITION]: ['type'],
+  [FIELD_DEFINITION]: ['concept', 'type'],
+  [MARKER_DEFINITION]: [],
+  [MATRIX_DEFINITION]: ['source', 'target'],
+}
+
+/**
+ * Validate a level-2 template's root-primitive elements against the level-1
+ * metaschema. `metaschemaSpecContent` is the raw content of the resolved
+ * level-1 iNNfo spec. Unknown properties are warnings; bad enum values and
+ * missing required properties are errors. When the spec carries no resolvable
+ * metaschema block, a single warning is returned and the check is skipped.
+ */
+export function validateTemplateAgainstMetaschema(
+  templateContent: string,
+  metaschemaSpecContent: string,
+): ValidationError[] {
+  const diagnostics: ValidationError[] = []
+  const metaMarkdown = extractMetaschema(metaschemaSpecContent)
+  if (!metaMarkdown) {
+    return [
+      {
+        path: 'metaschema',
+        message:
+          'Resolved level-1 spec has no "The Metaschema" block; template primitive validation skipped',
+        severity: 'warning',
+      },
+    ]
+  }
+
+  const metaConcepts = extractTemplateSchema(parseModel(metaMarkdown)).concepts
+  const template = parseModel(templateContent)
+
+  for (const primitive of [CONCEPT_DEFINITION, FIELD_DEFINITION, MARKER_DEFINITION, MATRIX_DEFINITION]) {
+    const primDef = metaConcepts.find((c) => c.name === primitive)
+    if (!primDef || !primDef.fields || primDef.fields.length === 0) continue
+    const allowed = new Map(primDef.fields.map((f) => [f.name, f]))
+    const required = REQUIRED_BY_PRIMITIVE[primitive] ?? []
+
+    for (const el of template.elements.get(primitive) ?? []) {
+      for (const key of required) {
+        const v = el.fields[key]
+        if (v === undefined || v === null || v === '') {
+          diagnostics.push({
+            path: `${primitive}.${el.name}.${key}`,
+            message: `${primitive} "${el.name}" is missing required property "${key}"`,
+            severity: 'error',
+          })
+        }
+      }
+
+      for (const [key, rawVal] of Object.entries(el.fields)) {
+        const fieldDef = allowed.get(key)
+        if (!fieldDef) {
+          diagnostics.push({
+            path: `${primitive}.${el.name}.${key}`,
+            message: `Property "${key}" is not declared on ${primitive} in the metaschema`,
+            severity: 'warning',
+          })
+          continue
+        }
+        if (fieldDef.type === 'select' && fieldDef.options && fieldDef.options.length > 0) {
+          const val = String(rawVal)
+          if (!fieldDef.options.includes(val)) {
+            diagnostics.push({
+              path: `${primitive}.${el.name}.${key}`,
+              message: `Invalid value "${val}" for "${key}". Allowed: ${fieldDef.options.join(', ')}`,
+              severity: 'error',
+            })
+          }
+        }
+      }
+    }
+  }
+
+  return diagnostics
 }

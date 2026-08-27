@@ -152,7 +152,7 @@ target_concepts:: [Person]
 
 ## NN Field Definition: opportunityPriority
 concept:: Opportunity
-type:: number
+type:: string
 
 ## NN Field Definition: opportunityStatus
 concept:: Opportunity
@@ -242,7 +242,7 @@ type:: string
 
 ## NN Field Definition: initiativeBudget
 concept:: Initiative
-type:: number
+type:: string
 
 ## NN Field Definition: initiativeResources
 concept:: Initiative
@@ -275,11 +275,13 @@ type:: string
 # NN Marker Definition
 
 ## NN Marker Definition: priority
+applies_to:: [Element]
 symbol:: !
 icon:: flag
 color:: red
 
 ## NN Marker Definition: certainty
+applies_to:: [Element, Concept]
 symbol:: ?
 icon:: help-circle
 color:: green

@@ -16,6 +16,8 @@ export {
   MATRIX_DEFINITION,
   extractTemplateSchema,
   extractTemplateSchemaFromContent,
+  extractMetaschema,
+  validateTemplateAgainstMetaschema,
 } from './schema'
 export type { TemplateSchema } from './schema'
 export { validateModel, validateFormatContent, validateFormatSyntax } from './validator'

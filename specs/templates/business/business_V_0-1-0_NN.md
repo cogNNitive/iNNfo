@@ -50,37 +50,37 @@ weight:: 90
 
 ## NN Concept Definition: Stakeholders
 icon:: users
-type:: importance
+type:: weight
 color:: blue
 weight:: 80
 
 ## NN Concept Definition: Segments
 icon:: pie-chart
-type:: importance
+type:: weight
 color:: blue
 weight:: 70
 
 ## NN Concept Definition: Profiles
 icon:: user
-type:: importance
+type:: weight
 color:: blue
 weight:: 80
 
 ## NN Concept Definition: Persona
 icon:: user-round
-type:: importance
+type:: weight
 color:: blue
 weight:: 50
 
 ## NN Concept Definition: Segmentation
 icon:: split
-type:: importance
+type:: weight
 color:: blue
 weight:: 60
 
 ## NN Concept Definition: Market trends
 icon:: trending-up
-type:: importance
+type:: weight
 color:: blue
 weight:: 20
 
@@ -92,55 +92,55 @@ weight:: 50
 
 ## NN Concept Definition: Competition
 icon:: swords
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Roles
 icon:: user-cog
-type:: importance
+type:: weight
 color:: blue
 weight:: 30
 
 ## NN Concept Definition: Problems
 icon:: circle-alert
-type:: importance
+type:: weight
 color:: blue
 weight:: 85
 
 ## NN Concept Definition: Value propositions
 icon:: gem
-type:: importance
+type:: weight
 color:: blue
 weight:: 70
 
 ## NN Concept Definition: Messages
 icon:: message-square
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Channels
 icon:: share-2
-type:: importance
+type:: weight
 color:: blue
 weight:: 70
 
 ## NN Concept Definition: Perceptions
 icon:: eye
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Emotions
 icon:: heart
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Behaviors
 icon:: activity
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
@@ -158,7 +158,7 @@ weight:: 90
 
 ## NN Concept Definition: Offerings
 icon:: shopping-bag
-type:: importance
+type:: weight
 color:: blue
 weight:: 80
 
@@ -170,13 +170,13 @@ weight:: 95
 
 ## NN Concept Definition: Features
 icon:: sparkles
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Components
 icon:: boxes
-type:: importance
+type:: weight
 color:: blue
 weight:: 75
 
@@ -248,13 +248,13 @@ weight:: 60
 
 ## NN Concept Definition: Inspiration
 icon:: sparkles
-type:: importance
+type:: weight
 color:: blue
 weight:: 50
 
 ## NN Concept Definition: Opportunity
 icon:: door-open
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
@@ -278,13 +278,13 @@ weight:: 40
 
 ## NN Concept Definition: Organizational values
 icon:: compass
-type:: importance
+type:: weight
 color:: blue
 weight:: 35
 
 ## NN Concept Definition: Organizational goals
 icon:: flag
-type:: importance
+type:: weight
 color:: blue
 weight:: 60
 
@@ -296,19 +296,19 @@ weight:: 50
 
 ## NN Concept Definition: Activities
 icon:: list-checks
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Functions
 icon:: workflow
-type:: importance
+type:: weight
 color:: blue
 weight:: 30
 
 ## NN Concept Definition: Resources
 icon:: boxes
-type:: importance
+type:: weight
 color:: blue
 weight:: 30
 
@@ -320,37 +320,37 @@ weight:: 70
 
 ## NN Concept Definition: Persons
 icon:: user-check
-type:: importance
+type:: weight
 color:: blue
 weight:: 80
 
 ## NN Concept Definition: Contributions
 icon:: gift
-type:: importance
+type:: weight
 color:: blue
 weight:: 60
 
 ## NN Concept Definition: Compensations
 icon:: coins
-type:: importance
+type:: weight
 color:: blue
 weight:: 60
 
 ## NN Concept Definition: Positions
 icon:: contact
-type:: importance
+type:: weight
 color:: blue
 weight:: 20
 
 ## NN Concept Definition: Skills
 icon:: award
-type:: importance
+type:: weight
 color:: blue
 weight:: 30
 
 ## NN Concept Definition: Goals
 icon:: goal
-type:: importance
+type:: weight
 color:: blue
 weight:: 30
 
@@ -374,7 +374,7 @@ weight:: 10
 
 ## NN Concept Definition: Metrics
 icon:: gauge
-type:: importance
+type:: weight
 color:: blue
 weight:: 50
 
@@ -386,13 +386,13 @@ weight:: 70
 
 ## NN Concept Definition: Revenue
 icon:: coins
-type:: importance
+type:: weight
 color:: blue
 weight:: 65
 
 ## NN Concept Definition: Costs
 icon:: receipt
-type:: importance
+type:: weight
 color:: blue
 weight:: 50
 
@@ -404,19 +404,19 @@ weight:: 25
 
 ## NN Concept Definition: Funding sources
 icon:: landmark
-type:: importance
+type:: weight
 color:: blue
 weight:: 25
 
 ## NN Concept Definition: Shareholders
 icon:: pie-chart
-type:: importance
+type:: weight
 color:: blue
 weight:: 20
 
 ## NN Concept Definition: Projections
 icon:: line-chart
-type:: importance
+type:: weight
 color:: blue
 weight:: 20
 
@@ -428,13 +428,13 @@ weight:: 40
 
 ## NN Concept Definition: Legal issues
 icon:: gavel
-type:: importance
+type:: weight
 color:: blue
 weight:: 40
 
 ## NN Concept Definition: Contracts
 icon:: scroll-text
-type:: importance
+type:: weight
 color:: blue
 weight:: 10
 
@@ -446,25 +446,25 @@ weight:: 80
 
 ## NN Concept Definition: Assumptions
 icon:: circle-help
-type:: importance
+type:: weight
 color:: red
 weight:: 50
 
 ## NN Concept Definition: Risks
 icon:: shield-alert
-type:: importance
+type:: weight
 color:: red
 weight:: 90
 
 ## NN Concept Definition: Challenges
 icon:: mountain
-type:: importance
+type:: weight
 color:: red
 weight:: 70
 
 ## NN Concept Definition: Suggestions
 icon:: messages-square
-type:: importance
+type:: weight
 color:: red
 weight:: 30
 
@@ -482,7 +482,7 @@ weight:: 10
 
 ## NN Concept Definition: Keys
 icon:: key-round
-type:: importance
+type:: weight
 color:: red
 weight:: 50
 
@@ -494,13 +494,13 @@ weight:: 90
 
 ## NN Concept Definition: Coherence
 icon:: link
-type:: importance
+type:: weight
 color:: green
 weight:: 25
 
 ## NN Concept Definition: Experiments
 icon:: flask-conical
-type:: importance
+type:: weight
 color:: green
 weight:: 40
 
@@ -623,26 +623,31 @@ description:: Instrucciones detalladas de prompt para que el agente ejecute la g
 # NN Marker Definition
 
 ## NN Marker Definition: importance
+applies_to:: [Element]
 symbol:: *
 icon:: plus
 color:: blue
 
 ## NN Marker Definition: completion
+applies_to:: [Element]
 symbol:: >
 icon:: check
 color:: blue
 
 ## NN Marker Definition: certainty
+applies_to:: [Element, Concept]
 symbol:: ?
 icon:: help-circle
 color:: green
 
 ## NN Marker Definition: priority
+applies_to:: [Element]
 symbol:: !
 icon:: flag
 color:: red
 
 ## NN Marker Definition: rating
+applies_to:: [Element]
 symbol:: +
 icon:: star
 color:: green

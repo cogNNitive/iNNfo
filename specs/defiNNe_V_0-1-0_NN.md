@@ -172,12 +172,15 @@ parent_spec:
   name: "iNNfo_V_0-1-0"
   url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 title: "..."
-concepts: [...]
-markers: [...]
-matrices: [...]
+template_version: "V_x-y-z"
+includes: ["<base-template>"]   # OPTIONAL — additive schema composition
 relationship_types: {...}
 ---
 ```
+
+A level 2 template's `concepts`, `fields`, `markers`, and `matrices` are NOT
+frontmatter blocks. They are declared in the body as elements that instantiate
+the four root primitives defined by iNNfo (level 1); see the iNNfo specification.
 
 **Level 3 (models) — Lightweight**
 

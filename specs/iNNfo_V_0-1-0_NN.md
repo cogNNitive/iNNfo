@@ -134,18 +134,35 @@ Declares an evaluative Marker scored per Element or Concept via the reserved `it
 
 | Property | Type | Description |
 |---|---|---|
+| `applies_to` | array of `Element` \| `Concept` | Which entities may be scored on this Marker. Defaults to `[Element]`. An `item-markers matrix` row whose subject is not permitted by `applies_to` is a validation ERROR. |
+| `values` | array | Allowed scores for this Marker (empty cell `-` is always accepted). Omit for a free numeric Marker constrained only by `widget_config`. |
+| `widget` | `boolean` \| `cycle` \| `scale` \| `set` \| `text` | Cell interaction widget for this Marker's `item-markers matrix` column. |
+| `widget_config` | object | Widget-specific configuration — see Widget Configuration. |
 | `symbol` | string | Display symbol (e.g. `*`, `!`, `?`) |
 | `icon` | string | Lucide icon identifier |
 | `color` | string | Theme color |
-| `weight` | number | Display priority |
+| `weight` | number | Display priority (higher = more prominent). This is NOT a score. |
+
+Scoring a Marker is mechanically an `evaluable_matrix` relationship (`Elements` or
+`Concepts` × `Markers`), so a Marker Definition shares the `values` / `widget` /
+`widget_config` vocabulary of a Matrix Definition. The Marker Definition remains a
+distinct root primitive; it is not rewritten as a Matrix Definition.
 
 ```markdown
 # NN Marker Definition
 
 ## NN Marker Definition: priority
+applies_to:: [Element]
 symbol:: !
 icon:: flag
 color:: red
+
+## NN Marker Definition: certainty
+applies_to:: [Element, Concept]
+widget:: scale
+widget_config:: {"min": 0, "max": 100, "step": 5}
+icon:: help-circle
+color:: green
 ```
 
 ### Matrix Definition
@@ -155,9 +172,10 @@ Declares an evaluable Matrix. The Element name is the Matrix name. Allowed prope
 | Property | Type | Description |
 |---|---|---|
 | `source` | string | Source Concept (rows) — required |
-| `target` | string | Target Concept (columns) — required |
+| `target` | string | Target Concept or reserved pseudo-Concept (columns) — required |
 | `values` | array | Allowed cell values (empty cell `-` and boolean marker `X` are always accepted) |
 | `widget` | `boolean` \| `cycle` \| `scale` \| `set` \| `text` | Cell interaction widget |
+| `widget_config` | object | Widget-specific configuration — see Widget Configuration |
 | `description` | string | Human-readable explanation |
 
 ```markdown
@@ -170,9 +188,41 @@ widget:: set
 values:: [Max, Very High, High]
 ```
 
+### Widget Configuration
+
+`widget_config` is an OPTIONAL inline JSON object that parameterizes the cell
+interaction `widget` of a Matrix Definition or a Marker Definition. Its keys are
+fixed per `widget` value. An application MUST ignore unknown keys and MUST NOT
+accept a semicolon- or comma-delimited string DSL in its place (the removed
+`params: "a;b;c"` form).
+
+| `widget` | `widget_config` keys | Meaning |
+|---|---|---|
+| `scale` | `min` (number, required), `max` (number, required), `step` (number, default `1`) | Numeric range of the slider |
+| `cycle` | `order` (array) | Explicit cycle order; defaults to `values` order |
+| `set` | `max_selections` (number, default unbounded) | Maximum simultaneously-selected values |
+| `text` | `max_length` (number) | Maximum character count |
+| `boolean` | — | No configuration |
+
+```markdown
+## NN Matrix Definition: effort-impact matrix
+source:: Initiatives
+target:: Outcomes
+widget:: scale
+widget_config:: {"min": 1, "max": 10, "step": 1}
+```
+
 ### Resolving a Template Schema
 
 An application resolves a Template's schema by parsing its body: the effective `concepts` are the elements of its `Concept Definition` sections, each Field Definition is attached to the Concept named by its `concept` property, and so on for Markers and Matrices. There is no other declaration format.
+
+The primitives' own schema — which properties each `… Definition` element may
+carry, and their allowed values — is itself an iNNfo document: the **Metaschema**
+(see Metaschema (Self-Description)). An application validates a level-2 Template
+against the Metaschema with the same Schema Resolution Algorithm it uses to
+validate a level-3 Model against its Template. If the Template declares
+`includes`, the composed schema is the additive union described under Level 2
+Template Structure.
 
 ## Entity Glossary
 
@@ -197,7 +247,7 @@ attribute MUST NOT be used as substitutes for the entities below.
 |---|---|
 | **Marker** | A named evaluative dimension (e.g. weight, certainty, priority) scored per Element or Concept. |
 | **Relationship** | A typed connection between Elements. Its subtypes are the Relationship Types. |
-| **Matrix** | The tabular representation of certain Relationship Types. Not a separate semantic entity. |
+| **Matrix** | A first-class entity that realizes the `evaluable_matrix` Relationship Type: a table of Elements (rows) against Elements or a reserved pseudo-Concept (columns), each cell scored on a declared value set. Declared by a Matrix Definition. |
 
 **Definitional layer:**
 
@@ -360,7 +410,7 @@ relationship_types:
 | Type | Meaning | Representation |
 |---|---|---|
 | `hierarchy` | Parent-child taxonomy | The `# NN index` block (see Index Block) |
-| `evaluable_matrix` | N-to-M relationship on a value set | A Matrix table with a declared `values` set |
+| `evaluable_matrix` | N-to-M relationship on a value set | A **Matrix** (see Entity Glossary), declared by a Matrix Definition |
 | `graph_edge` | Labeled/weighted graph edge | frontmatter `graph_edges` array |
 | `sequence` | Ordered steps or events | Concept of type `steps` or `sequence` |
 
@@ -478,6 +528,7 @@ parent_spec:
 title: "<Template Name>"
 template_version: "V_x-y-z"
 specializes: "<base-template-name>"
+includes: ["<base-template-name>"]   # OPTIONAL — additive schema composition
 relationship_types: {...}
 ---
 ```
@@ -493,6 +544,22 @@ future structural inheritance. It MUST NOT be interpreted or enforced by any
 resolver, validator, or mutation tool — it is a no-op today, kept deliberately
 distinct from `template_version` so specialization and versioning are never
 conflated into the same mechanism again.
+
+`includes` is an OPTIONAL array of template names whose schemas are composed into
+this template **additively**. When an application resolves a Template that
+declares `includes: ["<template>", ...]`:
+
+1. It resolves each included Template first — itself resolved through its own
+   parent chain and its own `includes`, depth-first, left to right.
+2. It unions their `Concept Definition`, `Field Definition`, `Marker Definition`,
+   and `Matrix Definition` elements.
+3. It then applies this Template's own definitions on top.
+
+Composition is **purely additive**. A definition MUST NOT override or remove an
+inherited one. A name collision — between an included definition and a local one,
+or between two included definitions — is a validation ERROR that MUST name both
+source documents. `includes` is distinct from `specializes` (which stays inert)
+and from `template_version`; an application MUST NOT conflate the three.
 
 Body:
 
@@ -605,8 +672,192 @@ The following are NOT part of iNNfo:
 - **`* _NN` element bullets and fenced ```yaml property blocks** — replaced by the
   unified `## NN` headings and `key:: value` properties.
 
+## Metaschema (Self-Description)
+
+The four root primitives are described by the prose tables above **and** expressed
+mechanically, in iNNfo's own syntax, by the metaschema below. An application MUST
+be able to validate any level-2 Template by resolving this metaschema and checking
+the Template's `… Definition` elements against it — the *same* code path it uses to
+validate a level-3 Model against its level-2 Template. Validation is therefore
+**level-agnostic**: L2-against-L1 and L3-against-L2 differ only in which schema
+document is resolved.
+
+### Schema Resolution Algorithm
+
+To validate a document `D` against a schema document `S`:
+
+1. Parse `S`'s `Concept Definition` elements into the set of allowed Concepts.
+2. For each `Field Definition` element in `S`, attach `{type, options,
+   target_concepts, description}` to the Concept named by its `concept` property.
+   Field Definition element names are keyed **per owning Concept**, not globally —
+   two Concepts may each declare a Field named `type`.
+3. For each `Marker Definition` / `Matrix Definition` element in `S`, record its
+   allowed property set likewise.
+4. Walk `D`'s elements. For each, resolve its owning Concept in the schema and
+   check every `key:: value` property against that Concept's Field schema: the
+   value's type, its membership in `options` when the Field is `select`, and
+   WikiLink form when the Field is `reference`.
+5. Report any element whose Concept is absent from the schema, any property not
+   declared on its Concept, and any value that violates its Field's type or
+   `options`.
+
+When `D` is a level-2 Template, `S` is this metaschema and `D`'s Concepts are the
+reserved primitive names below. When `D` is a level-3 Model, `S` is `D`'s level-2
+Template. The `type` enum of a Concept Definition (`text | category | weight |
+list | steps | sequence`) is enforced by this same pass — a value outside the set
+is an ERROR, not a warning.
+
+### The Metaschema
+
+```markdown
+# NN Concept Definition
+
+## NN Concept Definition: Concept Definition
+type:: list
+
+## NN Concept Definition: Field Definition
+type:: list
+
+## NN Concept Definition: Marker Definition
+type:: list
+
+## NN Concept Definition: Matrix Definition
+type:: list
+
+# NN Field Definition
+
+## NN Field Definition: type
+concept:: Concept Definition
+type:: select
+options:: [text, category, weight, list, steps, sequence]
+description:: Representation of the Concept (required).
+
+## NN Field Definition: icon
+concept:: Concept Definition
+type:: string
+description:: Lucide icon identifier.
+
+## NN Field Definition: color
+concept:: Concept Definition
+type:: string
+description:: Theme color.
+
+## NN Field Definition: weight
+concept:: Concept Definition
+type:: string
+description:: Display priority (higher = more prominent).
+
+## NN Field Definition: concept
+concept:: Field Definition
+type:: string
+description:: Name of the owning Concept Definition (required).
+
+## NN Field Definition: type
+concept:: Field Definition
+type:: select
+options:: [string, select, reference, markdown_inline, markdown_file, image, file, video, audio]
+description:: Field type (required).
+
+## NN Field Definition: options
+concept:: Field Definition
+type:: string
+description:: Allowed values for select fields (inline array).
+
+## NN Field Definition: target_concepts
+concept:: Field Definition
+type:: string
+description:: Target concepts for reference fields (inline array).
+
+## NN Field Definition: description
+concept:: Field Definition
+type:: string
+description:: Human-readable explanation.
+
+## NN Field Definition: applies_to
+concept:: Marker Definition
+type:: string
+description:: Inline array of Element and/or Concept — which entities may be scored. Default [Element].
+
+## NN Field Definition: values
+concept:: Marker Definition
+type:: string
+description:: Allowed scores (inline array). Omit for a free numeric scale.
+
+## NN Field Definition: widget
+concept:: Marker Definition
+type:: select
+options:: [boolean, cycle, scale, set, text]
+description:: Cell interaction widget for the item-markers matrix column.
+
+## NN Field Definition: widget_config
+concept:: Marker Definition
+type:: string
+description:: Widget-specific configuration (inline JSON object).
+
+## NN Field Definition: symbol
+concept:: Marker Definition
+type:: string
+description:: Display symbol.
+
+## NN Field Definition: icon
+concept:: Marker Definition
+type:: string
+description:: Lucide icon identifier.
+
+## NN Field Definition: color
+concept:: Marker Definition
+type:: string
+description:: Theme color.
+
+## NN Field Definition: weight
+concept:: Marker Definition
+type:: string
+description:: Display priority. Not a score.
+
+## NN Field Definition: source
+concept:: Matrix Definition
+type:: string
+description:: Source Concept (rows) — required.
+
+## NN Field Definition: target
+concept:: Matrix Definition
+type:: string
+description:: Target Concept or reserved pseudo-Concept (columns) — required.
+
+## NN Field Definition: values
+concept:: Matrix Definition
+type:: string
+description:: Allowed cell values (inline array). Empty cell - and boolean marker X are always accepted.
+
+## NN Field Definition: widget
+concept:: Matrix Definition
+type:: select
+options:: [boolean, cycle, scale, set, text]
+description:: Cell interaction widget.
+
+## NN Field Definition: widget_config
+concept:: Matrix Definition
+type:: string
+description:: Widget-specific configuration (inline JSON object).
+
+## NN Field Definition: description
+concept:: Matrix Definition
+type:: string
+description:: Human-readable explanation.
+```
+
+### Bootstrap Axiom
+
+The metaschema is written in the very syntax it constrains. Its own conformance is
+the single irreducible axiom of the system: an application **asserts** — it does
+not derive — that the metaschema's `Field Definition` elements are valid
+`Field Definition` instances. Every other conformance check in the ecosystem
+(L2 against L1, L3 against L2) is mechanical and follows from it. This mirrors MOF
+being defined in MOF and `Ecore.ecore` describing Ecore.
+
 ## Self-Description
 
 This document (`iNNfo_V_0-1-0_NN.md`) is itself a level 1 specification following
 defiNNe. It declares `parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V_0-1-0_NN.md"` and defines
-the four root primitives that every level-2 template instantiates.
+the four root primitives — plus the mechanical metaschema above — that every
+level-2 template instantiates.

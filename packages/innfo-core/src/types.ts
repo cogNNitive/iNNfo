@@ -28,6 +28,14 @@ export interface Marker {
   symbol?: string
   color?: string
   weight?: number
+  /** Which entities may be scored on this Marker. Defaults to ['Element']. */
+  applies_to?: string[]
+  /** Allowed scores (inline array). Omitted for a free numeric scale. */
+  values?: string[]
+  /** Cell interaction widget for the item-markers matrix column. */
+  widgetType?: string
+  /** Widget-specific configuration (inline JSON object). See iNNfo "Widget Configuration". */
+  widgetConfig?: Record<string, unknown>
 }
 
 export interface MatrixDecl {
@@ -39,6 +47,8 @@ export interface MatrixDecl {
   values?: string[]
   /** Widget type for matrix cell interaction: 'boolean' | 'cycle' | 'scale' | 'set' | 'text'. */
   widgetType?: string
+  /** Widget-specific configuration (inline JSON object). See iNNfo "Widget Configuration". */
+  widgetConfig?: Record<string, unknown>
   /** Optional human-readable explanation of what the matrix represents. */
   description?: string
   /** Min heatmap color (CSS color) */

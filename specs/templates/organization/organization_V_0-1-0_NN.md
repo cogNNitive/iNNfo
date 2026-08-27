@@ -65,6 +65,7 @@ options:: [internal, external]
 # NN Marker Definition
 
 ## NN Marker Definition: complexity
+applies_to:: [Element, Concept]
 icon:: gauge
 color:: green
 weight:: 50
