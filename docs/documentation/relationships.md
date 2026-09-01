@@ -2,7 +2,7 @@
 
 El modelo de datos de **iNNfo** no se limita a almacenar bloques jerárquicos o páginas independientes: constituye una **Red de Conocimiento (Knowledge Graph)** donde las entidades interactúan entre sí.
 
-En iNNfo, las relaciones entre elementos y conceptos se clasifican en **4 niveles formales** (alineados con la Especificación Nivel 1 `iNNfo_V_0-1-0_NN.md`), dependiendo de su origen y grado de estructuración.
+En iNNfo, las relaciones entre elementos y conceptos se clasifican en **4 niveles formales** (alineados con la Especificación Nivel 1 `iNNfo_V_0-2-0_NN.md`), dependiendo de su origen y grado de estructuración.
 
 ---
 
