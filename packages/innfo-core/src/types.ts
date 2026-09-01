@@ -20,6 +20,7 @@ export interface Concept {
   color?: string
   weight?: number
   fields?: ConceptField[]
+  tags?: string[]
 }
 
 export interface Marker {
@@ -111,6 +112,7 @@ export interface ElementNode {
   markers: Record<string, number | string>
   /** Optional slug derived from YAML `slug` field or auto-derived from name. */
   slug?: string
+  tags?: string[]
 }
 
 export interface MatrixCell {
@@ -192,6 +194,8 @@ export interface ParsedModel {
   slugCollisions?: Array<{ slug: string; elements: string[]; concept: string }>
   /** Non-fatal parse warnings (e.g. deprecated features). */
   parseWarnings?: string[]
+  /** Tags applied to Concept sections directly (not individual elements) */
+  conceptTags?: Record<string, string[]>
 }
 
 export interface SpecCache {
@@ -310,6 +314,7 @@ export interface MetamodelConcept {
   color?: string
   weight?: number
   fields?: { name: string; type: string; options?: string[]; target_concepts?: string[] }[]
+  tags?: string[]
 }
 
 /** A single marker declaration, as declared in a document's frontmatter `markers:` list. */
@@ -344,6 +349,8 @@ export interface ModelNode {
   type: string // resolved concept type
   fields: Record<string, FieldValue>
   markers: Record<string, number | string>
+  tags?: string[]
+  conceptTags?: Record<string, string[]>
   /**
    * Concept-scoped Marker scores (Markers whose `applies_to` includes
    * `Concept`), keyed by Concept name. Present only on the document root;

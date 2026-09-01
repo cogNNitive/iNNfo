@@ -144,8 +144,14 @@ export function serializeModel(model: ParsedModel): string {
 
   for (const [conceptName, elementNodes] of model.elements.entries()) {
     lines.push(`# NN ${conceptName}`)
+    if (model.conceptTags?.[conceptName] && model.conceptTags[conceptName].length > 0) {
+      lines.push(`tags:: ${model.conceptTags[conceptName].join(', ')}`)
+    }
     for (const node of elementNodes) {
       lines.push(`## NN ${conceptName}: ${node.name}`)
+      if (node.tags && node.tags.length > 0) {
+        lines.push(`  tags:: ${node.tags.join(', ')}`)
+      }
       for (const [k, v] of Object.entries(node.fields)) {
         lines.push(`  ${k}:: ${serializePropertyValue(v)}`)
       }

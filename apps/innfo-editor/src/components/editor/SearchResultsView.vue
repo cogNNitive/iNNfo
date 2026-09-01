@@ -29,7 +29,7 @@ function setCollapsed(nodeId: string, val: boolean): void {
 const matchingNodes = computed(() => {
   const query = uiStore.searchQuery.trim().toLowerCase()
 
-  if (query.length < 3) {
+  if (query.length < 3 && uiStore.selectedTagFilters.length === 0) {
     return []
   }
 
@@ -46,17 +46,44 @@ const matchingNodes = computed(() => {
       continue
     }
 
+    // Calculate effective tags (node tags + concept-level tags from root)
+    const rootNode = modelStore.activeModelRootId ? modelStore.getNode(modelStore.activeModelRootId) : null
+    const conceptTags = rootNode?.conceptTags?.[conceptName] || []
+    const effectiveTags = Array.from(new Set([...(node.tags || []), ...conceptTags]))
+
+    // Apply UI Tags Filter
+    if (uiStore.selectedTagFilters.length > 0) {
+      const hasAllTags = uiStore.selectedTagFilters.every(tag => effectiveTags.includes(tag))
+      if (!hasAllTags) continue
+    }
+
+    // Parse Text Search Query for #tags
+    const queryParts = query.split(' ')
+    const queryTags = queryParts.filter(p => p.startsWith('#')).map(p => p.slice(1).toLowerCase())
+    const queryText = queryParts.filter(p => !p.startsWith('#')).join(' ')
+
+    if (queryTags.length > 0) {
+      const hasQueryTags = queryTags.every(tag => effectiveTags.includes(tag))
+      if (!hasQueryTags) continue
+    }
+
+    // If there is no text query but we matched tags, include and skip text match
+    if (!queryText && (queryTags.length > 0 || uiStore.selectedTagFilters.length > 0)) {
+      results.push(node)
+      continue
+    }
+
     // Apply Text Search Query
-    const nameMatch = node.name?.toLowerCase().includes(query)
-    const typeMatch = node.type?.toLowerCase().includes(query)
-    const conceptMatch = conceptName.toLowerCase().includes(query)
-    const descMatch = node.rawSections?.description?.toLowerCase().includes(query)
+    const nameMatch = node.name?.toLowerCase().includes(queryText)
+    const typeMatch = node.type?.toLowerCase().includes(queryText)
+    const conceptMatch = conceptName.toLowerCase().includes(queryText)
+    const descMatch = node.rawSections?.description?.toLowerCase().includes(queryText)
 
     let fieldMatch = false
     if (node.fields) {
       for (const [key, fv] of Object.entries(node.fields)) {
         const valStr = String((fv as any)?.value ?? fv).toLowerCase()
-        if (key.toLowerCase().includes(query) || valStr.includes(query)) {
+        if (key.toLowerCase().includes(queryText) || valStr.includes(queryText)) {
           fieldMatch = true
           break
         }
@@ -129,10 +156,10 @@ function handleNavigate(nodeId: string) {
 
     <!-- Query too short state -->
     <div
-      v-if="uiStore.searchQuery.trim().length < 3"
+      v-if="uiStore.searchQuery.trim().length < 3 && uiStore.selectedTagFilters.length === 0"
       class="text-center py-16 text-slate-400 dark:text-slate-500 italic text-sm bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700"
     >
-      Ingresá al menos 3 caracteres para iniciar la búsqueda.
+      Ingresá al menos 3 caracteres para iniciar la búsqueda o seleccioná una etiqueta.
     </div>
 
     <!-- Empty state -->

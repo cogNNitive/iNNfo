@@ -167,6 +167,7 @@ function serializeNodeContent(node: ModelNode): {
         fields: elFields,
         markers: child.markers || {},
         slug: child.slug,
+        tags: child.tags,
       })
     }
     parsed.elements = elementsMap
@@ -205,30 +206,52 @@ function serializeNodeContent(node: ModelNode): {
     parsed.nodeMarkers = nodeMarkers
   }
 
+  // Preserve concept-level tags from root node
+  if (node.kind === 'root' && node.conceptTags) {
+    parsed.conceptTags = { ...(parsed.conceptTags ?? {}), ...node.conceptTags }
+  }
+
   // Apply any edited `text`-concept sections (rawSections) onto the parsed
   // model so they round-trip back to disk.
   if (node.rawSections && Object.keys(node.rawSections).length > 0) {
     parsed.rawSections = { ...(parsed.rawSections ?? {}), ...node.rawSections }
   }
 
-  // Synchronize dynamic relational matrices declarations (__matrix_defs) to frontmatter
+  // Synchronize dynamic relational matrices declarations (__matrix_defs)
   const matrixDefs = (node.fields['__matrix_defs'] as any)?.value
   if (Array.isArray(matrixDefs)) {
-    parsed.frontmatter.matrices = matrixDefs.map((m: any) => ({
-      name: m.name,
-      source: m.source,
-      target: m.target,
-      params: m.params,
-      values: m.values,
-      widgetType: m.widgetType,
-      ...(m.widgetConfig && Object.keys(m.widgetConfig).length > 0
-        ? { widget_config: m.widgetConfig }
-        : {}),
-      description: m.description,
-      min_color: m.min_color,
-      max_color: m.max_color,
-      label: m.label,
-    }))
+    const isLevel3 = parsed.frontmatter?.level === 3
+    if (!isLevel3) {
+      parsed.frontmatter.matrices = matrixDefs.map((m: any) => ({
+        name: m.name,
+        source: m.source,
+        target: m.target,
+        params: m.params,
+        values: m.values,
+        widgetType: m.widgetType,
+        ...(m.widgetConfig && Object.keys(m.widgetConfig).length > 0
+          ? { widget_config: m.widgetConfig }
+          : {}),
+        description: m.description,
+        min_color: m.min_color,
+        max_color: m.max_color,
+        label: m.label,
+      }))
+    } else {
+      for (const def of matrixDefs) {
+        const existing = parsed.matrices.find((m) => m.name.toLowerCase() === String(def.name).toLowerCase())
+        if (!existing) {
+          parsed.matrices.push({
+            name: def.name,
+            source: def.source || '',
+            target: def.target || '',
+            widgetType: def.widgetType,
+            params: def.params,
+            cells: [],
+          })
+        }
+      }
+    }
   }
 
   // Apply matrix cell edits from node.fields into parsed.matrices

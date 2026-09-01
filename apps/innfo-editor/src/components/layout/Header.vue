@@ -121,6 +121,14 @@
             </button>
           </div>
 
+          <!-- Tags Filter -->
+          <div class="px-0.5 mt-1 mb-2">
+            <span class="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
+              Etiquetas
+            </span>
+            <TagInput v-model="uiStore.selectedTagFilters" />
+          </div>
+
           <!-- Concept Picklist Header: Title + Select All / Deselect All -->
           <div v-if="availableConcepts.length > 0" class="flex items-center justify-between px-0.5">
             <span class="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
@@ -229,16 +237,20 @@
           <!-- Save Dropdown -->
           <div
             v-if="saveDropdownOpen"
-            class="absolute right-0 top-full mt-1.5 w-72 rounded-lg bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-600 py-2 z-50"
+            class="absolute right-0 top-full mt-1.5 w-80 rounded-lg bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-600 py-2.5 z-50"
           >
-            <div class="px-3 pt-1">
-              <div class="flex items-center justify-between mb-1.5">
+            <div class="px-3.5 pt-0.5">
+              <div v-if="activeModelName" class="mb-2 pb-1.5 border-b border-slate-100 dark:border-slate-700/60">
+                <span class="text-2xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Target Model</span>
+                <span class="font-mono text-xs font-bold text-slate-800 dark:text-slate-100 break-all select-all block leading-snug" :title="activeModelName">{{ activeModelName }}</span>
+              </div>
+              <div class="flex items-center justify-between mb-2">
                 <span
                   class="flex items-center gap-1 text-2xs font-bold text-slate-400 dark:text-slate-505 uppercase tracking-wider"
                 >
-                  Model Version
+                  Current Version
                 </span>
-                <span class="font-mono text-xs font-semibold text-primary">{{ modelVersion }}</span>
+                <span class="font-mono text-xs font-extrabold text-primary">{{ modelVersion }}</span>
               </div>
               <p
                 v-if="bumpError"
@@ -307,6 +319,7 @@ import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
 import { useToast } from '../../shared/useToast'
 import Pill from '../editor/Pill.vue'
+import TagInput from '../ui/TagInput.vue'
 import { getConceptMeta } from '../../composables/useConceptVisuals'
 
 
@@ -505,6 +518,12 @@ const specFileName = computed(() => {
 const modelVersion = computed(() => {
   const node = rootNode.value
   return (node?.fields?.version?.value ?? node?.fields?.model_version?.value ?? '—') as string
+})
+
+const activeModelName = computed(() => {
+  const node = rootNode.value
+  if (!node) return ''
+  return node.name || (node.fields?.title?.value as string) || 'Model'
 })
 
 const unsavedChanges = computed(() => modelStore.dirtyIds.size > 0)

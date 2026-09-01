@@ -125,6 +125,7 @@ export function normalizeElementsIntoGraph(
         slug: el.slug,
         fields: toFieldValues(el.fields),
         markers: { ...(parsed.nodeMarkers[el.name] ?? {}) },
+        tags: el.tags,
         relationships: [],
         rawSections: el.description ? { description: el.description } : {},
         source: { path: sourcePath },

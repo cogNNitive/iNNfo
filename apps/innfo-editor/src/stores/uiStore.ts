@@ -38,6 +38,7 @@ export const useUiStore = defineStore('ui', () => {
   const searchQuery = ref('')
   const searchConceptFilter = ref('all')
   const selectedConceptFilters = ref<string[]>(['all'])
+  const selectedTagFilters = ref<string[]>([])
   const sidebarMode = ref<SidebarMode>('workspace')
   const focusedModelId = ref<string | null>(null)
 
@@ -45,6 +46,15 @@ export const useUiStore = defineStore('ui', () => {
     return selectedConceptFilters.value.includes('all')
   })
 
+  function toggleTagFilter(tag: string) {
+    const index = selectedTagFilters.value.indexOf(tag)
+    if (index === -1) selectedTagFilters.value.push(tag)
+    else selectedTagFilters.value.splice(index, 1)
+  }
+
+  function clearTagFilters() {
+    selectedTagFilters.value = []
+  }
 
   function isConceptSelected(conceptName: string): boolean {
     if (isAllConceptsSelected.value) return true
@@ -162,6 +172,7 @@ export const useUiStore = defineStore('ui', () => {
     searchQuery.value = ''
     searchConceptFilter.value = 'all'
     selectedConceptFilters.value = ['all']
+    clearTagFilters()
   }
 
   function setSidebarMode(mode: SidebarMode, modelId?: string | null): void {
@@ -198,6 +209,7 @@ export const useUiStore = defineStore('ui', () => {
     searchQuery,
     searchConceptFilter,
     selectedConceptFilters,
+    selectedTagFilters,
     sidebarMode,
     focusedModelId,
     isAllConceptsSelected,
@@ -205,6 +217,8 @@ export const useUiStore = defineStore('ui', () => {
     selectAllConcepts,
     deselectAllConcepts,
     toggleConceptFilter,
+    toggleTagFilter,
+    clearTagFilters,
     setActiveModel,
     setActiveConcept,
     setActiveView,

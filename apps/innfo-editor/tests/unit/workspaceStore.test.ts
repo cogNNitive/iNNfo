@@ -150,6 +150,61 @@ describe('workspaceStore.open()', () => {
     expect(updatedChild?.source.path).toBe('Test_V_1-0-1_business_NN.md')
   })
 
+  it('preserves directory path (e.g. models/) when performing a version bump', async () => {
+    const workspaceStore = useWorkspaceStore()
+    const modelStore = useModelStore()
+
+    const rootId = 'models/arenzano_V_1-3-0_business_NN.md'
+    modelStore.setGraph(
+      {
+        [rootId]: {
+          id: rootId,
+          name: 'arenzano_V_1-3-0_business',
+          parentId: null,
+          childIds: ['child-1'],
+          kind: 'concept',
+          type: 'root',
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          rawContent: '---\nmodel_version: "V_1-3-0"\n---\n# Arenzano',
+          source: { path: rootId },
+        },
+        'child-1': {
+          id: 'child-1',
+          name: 'Child 1',
+          parentId: rootId,
+          childIds: [],
+          kind: 'element',
+          type: 'WORK',
+          fields: {},
+          markers: {},
+          relationships: [],
+          rawSections: {},
+          source: { path: rootId },
+        },
+      },
+      [rootId],
+    )
+
+    const handle = buildFakeTree('workspace', {
+      models: {
+        'arenzano_V_1-3-0_business_NN.md': '---\nmodel_version: "V_1-3-0"\n---\n# Arenzano',
+      },
+    })
+
+    workspaceStore.handle = handle
+
+    await workspaceStore.saveActiveFileWithVersionBump('patch', rootId)
+
+    const updatedRoot = modelStore.getNode(rootId)
+    const updatedChild = modelStore.getNode('child-1')
+
+    expect(updatedRoot?.source.path).toBe('models/arenzano_V_1-3-1_business_NN.md')
+    expect(updatedChild?.source.path).toBe('models/arenzano_V_1-3-1_business_NN.md')
+  })
+
   it('saveActiveFile writes dirty nodes back to handle when driver is null', async () => {
     const workspaceStore = useWorkspaceStore()
     const modelStore = useModelStore()

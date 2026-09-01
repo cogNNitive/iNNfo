@@ -47,6 +47,31 @@ export const useModelStore = defineStore('model', {
         .filter(Boolean),
 
     /**
+     * Aggregates and deduplicates all unique tags across all model nodes (concepts and elements).
+     */
+    allTags: (state): string[] => {
+      const tagsSet = new Set<string>()
+      for (const node of Object.values(state.nodes)) {
+        if (node.tags && Array.isArray(node.tags)) {
+          for (const tag of node.tags) {
+            if (tag) tagsSet.add(tag)
+          }
+        }
+        // Also include concept-level tags if they exist on the root node
+        if (node.kind === 'root' && node.conceptTags) {
+          for (const tags of Object.values(node.conceptTags)) {
+            if (Array.isArray(tags)) {
+              for (const tag of tags) {
+                if (tag) tagsSet.add(tag)
+              }
+            }
+          }
+        }
+      }
+      return Array.from(tagsSet).sort()
+    },
+
+    /**
      * Returns the active model root node id or the first root node id as fallback.
      */
     activeNodeId: (state): string | null => {
