@@ -25,7 +25,10 @@ export function serializeModel(model: ParsedModel): string {
   const fm = model.frontmatter
   lines.push('---')
   if (fm.level !== 3 || fm.spec_version) {
-    lines.push(`spec_version: "${fm.spec_version || 'V_0-1-0'}"`)
+    // Fallback only reached for a non-level-3 doc that somehow lacks an
+    // explicit spec_version; track the adopted L1 (iNNfo_V_0-2-0), not the
+    // superseded one.
+    lines.push(`spec_version: "${fm.spec_version || 'V_0-2-0'}"`)
   }
   if (fm.spec_url) {
     lines.push(`spec_url: "${fm.spec_url}"`)
