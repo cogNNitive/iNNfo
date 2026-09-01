@@ -56,3 +56,23 @@ jobs:
 
       - name: Build app
         run: npm --prefix apps/innfo-editor run build
+
+  spec-integrity:
+    name: Spec URL & version integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Every hardcoded raw.githubusercontent.com/cogNNitive/iNNfo URL in the
+      # source tree must point at a spec file that actually exists. specs/ is
+      # immutable and filename-encoded, so a dangling URL means a bad reference,
+      # not a race. No deps needed — the checker is zero-dependency Node.
+      - name: Check spec URLs resolve
+        run: npm run check:spec-urls
+
+      - name: Spec version inventory (informational)
+        run: npm run check:spec-version -- --inventory
