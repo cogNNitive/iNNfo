@@ -1,5 +1,25 @@
 ﻿# Changelog
 
+## Unreleased (2026-09-01)
+
+### iNNfo L1 spec — `iNNfo_V_0-2-0`
+- New immutable spec version `specs/iNNfo_V_0-2-0_NN.md` (copy of `V_0-1-0` + one
+  additive rule). `iNNfo_V_0-1-0_NN.md` stays frozen; existing templates keep
+  pointing at it.
+- **`includes` duplicate-name rule.** When two composition sources declare a
+  Definition of the same primitive with the same name, an **AST-identical** body
+  is now silently merged into a single entry (previously any duplicate name was an
+  ERROR). Bodies that differ are still an ERROR naming both sources. This lets two
+  independent templates each carry a shared Definition (e.g. two slices of a
+  former template both declaring the same `importance` Marker) and still compose.
+
+### Core (`@cognnitive/innfo-core`)
+- `resolveTemplateSchema` / `mergeSchemaInto`: same-named Definitions from
+  different `includes` sources are compared by a new `canonicalizeDefinition`
+  (exported) — property order, surrounding whitespace and the order of set-like
+  arrays (`applies_to` / `options` / `target_concepts`) do not count. Identical →
+  merged; different → collision ERROR (unchanged for the differing case).
+
 ## Unreleased (2026-08-19)
 
 ### Spec tree consolidation

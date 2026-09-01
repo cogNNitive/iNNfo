@@ -26,6 +26,7 @@ export {
   checkElementsAgainstSchema,
   checkWidgetConfig,
   resolveTemplateSchema,
+  canonicalizeDefinition,
 } from './schema'
 export type {
   TemplateSchema,

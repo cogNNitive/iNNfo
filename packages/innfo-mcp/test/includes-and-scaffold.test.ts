@@ -37,16 +37,18 @@ describe('MCP — includes composition + init_model scaffolding', () => {
     return pathToFileURL(file).href
   }
 
-  it('validate_template reports an includes name collision as an error', async () => {
+  it('validate_template reports a *diverging* includes name collision as an error', async () => {
+    // iNNfo_V_0-2-0: a same-named Definition with a DIFFERENT body across two
+    // sources is still a collision ERROR (naming both sources).
     await writeTemplate(
       'base_roles_a',
       '# NN Concept Definition\n## NN Concept Definition: Roles\ntype:: list\n',
     )
     await writeTemplate(
       'base_roles_b',
-      '# NN Concept Definition\n## NN Concept Definition: Roles\ntype:: list\n',
+      '# NN Concept Definition\n## NN Concept Definition: Roles\ntype:: weight\n',
     )
-    const compositeUrl = await writeTemplate(
+    await writeTemplate(
       'composite_roles',
       '# NN Concept Definition\n## NN Concept Definition: Extra\ntype:: list\n',
       'includes:\n  - name: "base_roles_a"\n    url: ""\n  - name: "base_roles_b"\n    url: ""\n',
@@ -64,7 +66,34 @@ describe('MCP — includes composition + init_model scaffolding', () => {
     expect(
       byContent.errors.some((e) => /Roles/.test(e.message) && /base_roles/i.test(e.message)),
     ).toBe(true)
-    void compositeUrl
+  })
+
+  it('validate_template silently merges an AST-identical duplicate across includes', async () => {
+    // iNNfo_V_0-2-0: two sources declaring a byte-identical Definition merge
+    // into one entry — no collision error.
+    await writeTemplate(
+      'twin_roles_a',
+      '# NN Concept Definition\n## NN Concept Definition: Roles\ntype:: list\n',
+    )
+    await writeTemplate(
+      'twin_roles_b',
+      '# NN Concept Definition\n## NN Concept Definition: Roles\ntype:: list\n',
+    )
+    await writeTemplate(
+      'composite_twin_roles',
+      '# NN Concept Definition\n## NN Concept Definition: Extra\ntype:: list\n',
+      'includes:\n  - name: "twin_roles_a"\n    url: ""\n  - name: "twin_roles_b"\n    url: ""\n',
+    )
+
+    const byContent = await validateTemplate(
+      root,
+      undefined,
+      await readFile(join(specsDir, 'composite_twin_roles_NN.md'), 'utf-8'),
+      undefined,
+    )
+    expect(byContent.errors.some((e) => /Roles/.test(e.message) && /includes/i.test(e.path))).toBe(
+      false,
+    )
   })
 
   it('init_model scaffolds a body (index, sections, markers) and validates its output', async () => {

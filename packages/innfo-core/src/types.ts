@@ -406,4 +406,11 @@ export interface ModelNode {
   sourceMode?: 'parsed' | 'structural'
   /** Relative paths of physical assets for this node. */
   assets?: string[]
+  /**
+   * Workspace-scoped author/owner of this model, propagated from the `author::`
+   * field on the workspace manifest's `## NN ModelRef:` entry. Not stored in the
+   * model file itself — it is metadata of the workspace that references it.
+   * Present only on root nodes reached through a workspace manifest.
+   */
+  author?: string
 }
