@@ -132,12 +132,15 @@ describe('buildMigrationPrompt', () => {
 
 describe('useTemplateVersionNotice', () => {
   it('sets notice when the workspace scan finds a newer template version', async () => {
+    // Use `analysis`: it ships V_0-1-0 in SHIPPED_TEMPLATE_VERSIONS, so this
+    // case isolates the workspace-scan path (a `business` pin now resolves
+    // latest from the bundled map, which ships V_0-2-0 after the adoption).
     const handle = buildFakeTree('workspace', {
-      specs: { 'business_V_0-1-2_NN.md': '---\nlevel: 2\n---\n' },
+      specs: { 'analysis_V_0-1-2_NN.md': '---\nlevel: 2\n---\n' },
     })
     const { notice, refresh } = useTemplateVersionNotice({
-      templateName: ref('business_V_0-1-0'),
-      modelFileName: ref('Ghostbusters_V_0-1-2_business_NN.md'),
+      templateName: ref('analysis_V_0-1-0'),
+      modelFileName: ref('StartupValidation_V_0-1-2_analysis_NN.md'),
       handle: ref(handle),
     })
 
@@ -151,12 +154,13 @@ describe('useTemplateVersionNotice', () => {
   })
 
   it('leaves notice null when the model already pins the newest known version', async () => {
+    // `analysis` ships V_0-1-0 in the bundled map, matching the pin here.
     const handle = buildFakeTree('workspace', {
-      specs: { 'business_V_0-1-0_NN.md': '---\nlevel: 2\n---\n' },
+      specs: { 'analysis_V_0-1-0_NN.md': '---\nlevel: 2\n---\n' },
     })
     const { notice, refresh } = useTemplateVersionNotice({
-      templateName: ref('business_V_0-1-0'),
-      modelFileName: ref('Ghostbusters_NN.md'),
+      templateName: ref('analysis_V_0-1-0'),
+      modelFileName: ref('StartupValidation_NN.md'),
       handle: ref(handle),
     })
 
@@ -172,5 +176,17 @@ describe('useTemplateVersionNotice', () => {
 
     await refresh()
     expect(notice.value).toBeNull()
+  })
+
+  it('fires from the bundled SHIPPED_TEMPLATE_VERSIONS map alone (no workspace handle) for a stale procedures pin', async () => {
+    const { notice, refresh } = useTemplateVersionNotice({
+      templateName: ref('procedures_V_0-1-0'),
+      modelFileName: ref('CodeReviewProcess_V_0-1-0_procedures_NN.md'),
+    })
+
+    await refresh()
+    expect(notice.value).not.toBeNull()
+    expect(notice.value?.current).toBe('V_0-1-0')
+    expect(notice.value?.latest).toBe('V_0-2-0')
   })
 })

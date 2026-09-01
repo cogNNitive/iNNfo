@@ -210,7 +210,7 @@ const toolDefinitions: Tool[] = [
         template_url: { type: 'string', description: 'Immutable URL of the parent template' },
         template_name: { type: 'string', description: 'Name of the parent template (e.g. cogNNitive_V_0-1-0)' },
         title: { type: 'string', description: 'Logical title of the model (defaults to ID)' },
-        model_version: { type: 'string', description: 'Initial version of the model (e.g. V_0-1-0, defaults to V_0-1-0)' },
+        model_version: { type: 'string', description: 'Initial version of the model (e.g. V_0-1-0, defaults to V_0-1-0). The model is scaffolded against the adopted L1 spec iNNfo_V_0-2-0.' },
         root: { type: 'string', description: 'Optional models root directory override' },
       },
       required: ['id', 'template_url', 'template_name'],

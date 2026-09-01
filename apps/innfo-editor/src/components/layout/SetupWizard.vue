@@ -50,7 +50,7 @@ const samples: SampleInfo[] = [
     templateLabel: 'Business',
     sampleName: 'Ghostbusters',
     description: 'Ghost-catching franchise: SWOT, risks, market, finance, legal, and operations.',
-    url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-1-0_business_NN.md`,
+    url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-2-0_business_NN.md`,
   },
   {
     id: 'sample-procedures',
@@ -59,7 +59,7 @@ const samples: SampleInfo[] = [
     sampleName: 'Code Review Process',
     description:
       'PR-based code reviews: roles, step-by-step workflow, tool bindings, and hotfix path.',
-    url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md`,
+    url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_0-2-0_procedures_NN.md`,
   },
   {
     id: 'sample-organization',
@@ -67,7 +67,7 @@ const samples: SampleInfo[] = [
     templateLabel: 'Organization',
     sampleName: 'Engineering Team',
     description: 'Team structure: positions, roles, members, reporting lines, and skills matrix.',
-    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`,
+    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md`,
   },
 ]
 
@@ -211,10 +211,10 @@ async function finishWizard(): Promise<void> {
     if (templateChoice.value === 'blank') {
       const loader = useUrlDocLoader()
       const frontmatter = {
-        spec_version: 'V_0-1-5',
+        spec_version: 'V_0-2-0',
         model_version: 'V_0-1-0',
         title: name,
-        template: { name: 'business', version: 'V_0-1-0' },
+        template: { name: 'business', version: 'V_0-2-0' },
         concepts: [{ name: 'Topic', type: 'topic', icon: 'wrench', color: '#059669' }],
         markers: [],
       }

@@ -245,17 +245,17 @@ export function getStarterByTemplate(tpl: TemplateChoice) {
     {
       id: 'starter-business',
       templateName: 'business',
-      url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-1-0_business_NN.md`,
+      url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-2-0_business_NN.md`,
     },
     {
       id: 'starter-procedures',
       templateName: 'procedures',
-      url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md`,
+      url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_0-2-0_procedures_NN.md`,
     },
     {
       id: 'starter-organization',
       templateName: 'organization',
-      url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`,
+      url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md`,
     },
   ]
   return starters.find((s) => s.templateName === tpl)

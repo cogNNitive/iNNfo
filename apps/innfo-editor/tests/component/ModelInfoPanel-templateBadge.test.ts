@@ -24,19 +24,20 @@ function makeNode(id: string, overrides: Partial<ModelNode> = {}): ModelNode {
   }
 }
 
-// Same model content for all cases: it pins `business_V_0-1-0`. Whether the
-// badge fires depends only on what the workspace/shipped map say is newest
-// (see each test's handle setup below).
+// Same model content for all cases: it pins `analysis_V_0-1-0`. `analysis`
+// ships V_0-1-0 in SHIPPED_TEMPLATE_VERSIONS (unlike `business`, which ships
+// V_0-2-0 after the adoption), so whether the badge fires depends only on what
+// the workspace scan says is newest (see each test's handle setup below).
 const rootContent = `---
 spec_version: "V_0-3-0"
 parent_spec:
-  name: "business_V_0-1-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business/business_V_0-1-0_NN.md"
+  name: "analysis_V_0-1-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/analysis/analysis_V_0-1-0_NN.md"
 model_version: "V_1-0-0"
-title: "Ghostbusters"
+title: "StartupValidation"
 ---
 
-# _F Ghostbusters
+# _F StartupValidation
 `
 
 describe('ModelInfoPanel.vue — Template Version Badge (D3)', () => {
@@ -62,8 +63,8 @@ describe('ModelInfoPanel.vue — Template Version Badge (D3)', () => {
     workspaceStore.handle = buildFakeTree('workspace', {
       specs: {
         templates: {
-          business: {
-            'business_V_0-1-2_NN.md': '---\nlevel: 2\n---\n',
+          analysis: {
+            'analysis_V_0-1-2_NN.md': '---\nlevel: 2\n---\n',
           },
         },
       },
@@ -99,14 +100,14 @@ describe('ModelInfoPanel.vue — Template Version Badge (D3)', () => {
     )
 
     // No newer version anywhere: the bundled SHIPPED_TEMPLATE_VERSIONS map
-    // also pins "business" at V_0-1-0 (see config/samples.ts), matching the
+    // also pins "analysis" at V_0-1-0 (see config/samples.ts), matching the
     // model's own pinned version.
     const workspaceStore = useWorkspaceStore()
     workspaceStore.handle = buildFakeTree('workspace', {
       specs: {
         templates: {
-          business: {
-            'business_V_0-1-0_NN.md': '---\nlevel: 2\n---\n',
+          analysis: {
+            'analysis_V_0-1-0_NN.md': '---\nlevel: 2\n---\n',
           },
         },
       },

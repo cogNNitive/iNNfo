@@ -29,8 +29,15 @@ export const SAMPLE_BASE: string = import.meta.env.DEV ? '/specs/templates' : RE
  * this entry whenever a shipped template's `template_version` is bumped.
  */
 export const SHIPPED_TEMPLATE_VERSIONS: Record<string, string> = {
-  business: 'V_0-1-0',
-  procedures: 'V_0-1-0',
-  organization: 'V_0-1-0',
-  projects: 'V_0-1-0',
+  analysis: 'V_0-1-0', // spec_version V_0-2-0, template_version still V_0-1-0 (R-SV-03)
+  blank: 'V_0-2-0',
+  business: 'V_0-2-0',
+  'business-model': 'V_0-1-0', // same split as analysis
+  cogNNitive: 'V_0-2-0',
+  innovation: 'V_0-2-0',
+  organization: 'V_0-2-0',
+  procedures: 'V_0-2-0',
+  projects: 'V_0-2-0',
+  // workspace_spec is intentionally omitted: its filename carries no
+  // `_V_x-y-z_` segment, so `parseVersionedFilename` can never resolve it.
 }

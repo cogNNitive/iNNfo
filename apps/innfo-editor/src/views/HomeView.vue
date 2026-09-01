@@ -59,7 +59,7 @@ const samples: ExampleModel[] = [
     description:
       'Procedure for PR-based code reviews: roles, step-by-step workflow, tool bindings, and hotfix path.',
     templateName: 'procedures',
-    url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md`,
+    url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_0-2-0_procedures_NN.md`,
     supportsStandalone: true,
   },
   {
@@ -68,7 +68,7 @@ const samples: ExampleModel[] = [
     description:
       'Business model for a fictional ghost-catching franchise: SWOT, risks, market segments, finance, legal, and operations.',
     templateName: 'business',
-    url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-1-0_business_NN.md`,
+    url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-2-0_business_NN.md`,
   },
   {
     id: 'sample-engineering-team',
@@ -76,7 +76,7 @@ const samples: ExampleModel[] = [
     description:
       'Organization structure: positions, roles, members, reporting lines, and a skills matrix.',
     templateName: 'organization',
-    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`,
+    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md`,
   },
 ]
 
@@ -173,7 +173,7 @@ async function clearAllHistory(): Promise<void> {
   history.value = await loadHistory()
 }
 
-const sandboxUrl = `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`
+const sandboxUrl = `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md`
 const sandboxBusy = ref(false)
 const showSandbox = ref(!localStorage.getItem('nn_hide_sandbox'))
 const showWizard = ref(false)
