@@ -6,7 +6,7 @@ parent: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/defiNNe_V
 title: "iNNfo Meta-template Specification"
 description: "Level-1 meta-template defining the four root primitives (Concept Definition, Field Definition, Matrix Definition, Marker Definition) and the unified NN syntax: `# NN` sections, `## NN` elements, and `key:: value` properties."
 author: "innV0 Team"
-status: "Draft"
+status: "Stable"
 ---
 
 > [!NOTE]
