@@ -120,7 +120,7 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
     await rm(rootDir, { recursive: true, force: true })
   })
 
-  it('lists all 9 tools with names matching the dispatcher', async () => {
+  it('lists all 11 tools with names matching the dispatcher', async () => {
     const { tools } = await client.listTools()
     const names = tools.map((t) => t.name).sort()
     expect(names).toEqual(
@@ -128,8 +128,10 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
         'apply_change',
         'get_spec',
         'get_template',
+        'hydrate_template',
         'init_model',
         'list_models',
+        'list_templates',
         'read_model',
         'validate_model',
         'validate_model_url',
@@ -431,4 +433,23 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
       expect(parsed.filePath).toContain('test_model_NN.md')
     })
   })
+
+  describe('list_templates and hydrate_template', () => {
+    it('list_templates returns array of available templates', async () => {
+      const result = await client.callTool({ name: 'list_templates', arguments: { root: rootDir } })
+      expect(result.isError).toBeFalsy()
+      const parsed = JSON.parse(textOf(result as CallToolResult))
+      expect(Array.isArray(parsed)).toBe(true)
+    })
+
+    it('hydrate_template returns error when template is missing', async () => {
+      const result = await client.callTool({
+        name: 'hydrate_template',
+        arguments: { template_name: 'non_existent_spec_xyz', root: rootDir }
+      })
+      expect(result.isError).toBe(true)
+      expect(textOf(result as CallToolResult)).toContain('Unresolved template')
+    })
+  })
 })
+

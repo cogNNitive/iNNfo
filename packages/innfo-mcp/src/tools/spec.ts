@@ -12,7 +12,16 @@
 
 import { join, basename } from 'node:path'
 import { readFile, stat } from 'node:fs/promises'
-import { getTemplate as coreGetTemplate, getFormatSpec, parseFrontmatter, SpecResolutionError } from '@cognnitive/innfo-core'
+import {
+  getTemplate as coreGetTemplate,
+  getFormatSpec,
+  parseFrontmatter,
+  SpecResolutionError,
+  resolveTemplatePath,
+  UnresolvedTemplateError,
+} from '@cognnitive/innfo-core'
+import { mkdir, copyFile, readdir } from 'node:fs/promises'
+import { homedir } from 'node:os'
 import type { SpecDocument, SpecCache } from '@cognnitive/innfo-core'
 import { resolveParentChainNode } from './resolver-node.js'
 
@@ -226,3 +235,117 @@ export async function getTemplateFromModel(
   if (!parent) return null
   return getTemplateFromUrl(rootDir, parent.url, parent.name)
 }
+
+export interface DiscoveredTemplate {
+  name: string
+  version: string
+  source: 'workspace' | 'global' | string
+  filePath: string
+  skillName?: string
+}
+
+export async function listTemplates(
+  rootDir: string,
+  opts?: { globalDir?: string; skillsDir?: string },
+): Promise<DiscoveredTemplate[]> {
+  const globalDir = opts?.globalDir ?? join(homedir(), '.agents', 'templates')
+  const skillsDir = opts?.skillsDir ?? join(homedir(), '.agents', 'skills')
+
+  const discovered: DiscoveredTemplate[] = []
+  const seenNames = new Set<string>()
+
+  const scanDir = async (dir: string, source: 'workspace' | 'global' | 'skill', skillName?: string) => {
+    try {
+      const files = await readdir(dir, { withFileTypes: true })
+      for (const file of files) {
+        if (file.isFile() && file.name.endsWith('.md')) {
+          const filePath = join(dir, file.name)
+          const stem = file.name.replace(/\.md$/i, '')
+          if (seenNames.has(stem)) continue
+          seenNames.add(stem)
+
+          let version = 'V_0-1-0'
+          try {
+            const content = await readFile(filePath, 'utf-8')
+            const fm = parseFrontmatter(content)
+            if (fm?.version) version = String(fm.version)
+            else if (fm?.spec_version) version = String(fm.spec_version)
+          } catch {}
+
+          discovered.push({
+            name: stem,
+            version,
+            source: source === 'skill' ? `skill:${skillName}` : source,
+            filePath,
+            ...(skillName ? { skillName } : {}),
+          })
+        }
+      }
+    } catch {}
+  }
+
+  await scanDir(join(rootDir, 'templates'), 'workspace')
+  await scanDir(join(rootDir, 'specs'), 'workspace')
+  await scanDir(globalDir, 'global')
+
+  try {
+    const skillEntries = await readdir(skillsDir, { withFileTypes: true })
+    for (const entry of skillEntries) {
+      if (entry.isDirectory()) {
+        await scanDir(join(skillsDir, entry.name, 'templates'), 'skill', entry.name)
+        await scanDir(join(skillsDir, entry.name), 'skill', entry.name)
+      }
+    }
+  } catch {}
+
+  return discovered
+}
+
+export interface HydrateTemplateResult {
+  success: boolean
+  templateName: string
+  targetPath: string
+  source: string
+  message?: string
+}
+
+export async function hydrateTemplate(
+  rootDir: string,
+  templateName: string,
+  opts?: { targetDir?: string; globalDir?: string; skillsDir?: string },
+): Promise<HydrateTemplateResult> {
+  const globalTemplatesDir = opts?.globalDir ?? join(homedir(), '.agents', 'templates')
+  const skillsDir = opts?.skillsDir ?? join(homedir(), '.agents', 'skills')
+
+  const location = await resolveTemplatePath(templateName, {
+    workspaceDir: rootDir,
+    globalTemplatesDir,
+    skillsDir,
+  })
+
+  if (!location) {
+    const checkedPaths = [
+      join(rootDir, 'templates', `${templateName}.md`),
+      join(globalTemplatesDir, `${templateName}.md`),
+      join(skillsDir, '*', 'templates', `${templateName}.md`),
+    ]
+    throw new UnresolvedTemplateError(templateName, checkedPaths)
+  }
+
+  const targetDir = opts?.targetDir ?? join(rootDir, 'templates')
+  await mkdir(targetDir, { recursive: true })
+
+  const fileName = templateName.endsWith('.md') ? templateName : `${templateName}.md`
+  const targetPath = join(targetDir, fileName)
+
+  await copyFile(location.filePath, targetPath)
+
+  return {
+    success: true,
+    templateName,
+    targetPath,
+    source: location.source,
+    message: `Hydrated template ${templateName} from ${location.source} to ${targetPath}`,
+  }
+}
+

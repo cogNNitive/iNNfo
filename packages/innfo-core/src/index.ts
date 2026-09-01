@@ -40,8 +40,11 @@ export {
   getFormatSpec,
   getDefiNNe,
   SpecResolutionError,
+  resolveTemplatePath,
+  resolveTemplatePathSync,
+  UnresolvedTemplateError,
 } from './resolver'
-export type { SpecResolver } from './resolver'
+export type { SpecResolver, MultiStoreResolverOptions, SpecTemplateLocation } from './resolver'
 
 export {
   validateModel,

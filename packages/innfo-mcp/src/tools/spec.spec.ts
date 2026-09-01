@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { join } from 'node:path'
 import { rm, mkdir, writeFile } from 'node:fs/promises'
-import { getSpec, getTemplateFromUrl, getTemplateFromModel } from './spec'
+import { getSpec, getTemplateFromUrl, getTemplateFromModel, listTemplates, hydrateTemplate } from './spec'
 import { validateModel } from './mutate'
 
 const rootDir = join(import.meta.dirname!, '..', '..', 'temp-test-spec')
@@ -176,4 +176,42 @@ describe('Spec Tools Integration (URL- and model-derived, no hardcoding)', () =>
 
     expect(result.warnings.some((w) => /no template resolved/i.test(w.message))).toBe(true)
   })
+
+  it('listTemplates discovers templates across workspace, global, and skill stores', async () => {
+    const globalDir = join(rootDir, 'global_templates')
+    const skillsDir = join(rootDir, 'skills')
+    await mkdir(join(rootDir, 'templates'), { recursive: true })
+    await mkdir(globalDir, { recursive: true })
+    await mkdir(join(skillsDir, 'nn-innfo', 'templates'), { recursive: true })
+
+    await writeFile(join(rootDir, 'templates', 'ws_tmpl.md'), '---\nversion: V_1-0-0\n---')
+    await writeFile(join(globalDir, 'global_tmpl.md'), '---\nversion: V_1-0-0\n---')
+    await writeFile(join(skillsDir, 'nn-innfo', 'templates', 'skill_tmpl.md'), '---\nversion: V_1-0-0\n---')
+
+    const discovered = await listTemplates(rootDir, { globalDir, skillsDir })
+
+    expect(discovered.some((t) => t.name === 'ws_tmpl' && t.source === 'workspace')).toBe(true)
+    expect(discovered.some((t) => t.name === 'global_tmpl' && t.source === 'global')).toBe(true)
+    expect(discovered.some((t) => t.name === 'skill_tmpl' && t.source === 'skill:nn-innfo')).toBe(true)
+  })
+
+  it('hydrateTemplate copies template from global or skill store into workspace ./templates/', async () => {
+    const globalDir = join(rootDir, 'global_templates')
+    const skillsDir = join(rootDir, 'skills')
+    await mkdir(globalDir, { recursive: true })
+
+    await writeFile(join(globalDir, 'workspace_spec_NN.md'), '# NN concept: Workspace\n* type:: text')
+
+    const res = await hydrateTemplate(rootDir, 'workspace_spec_NN', { globalDir, skillsDir })
+
+    expect(res.success).toBe(true)
+    expect(res.templateName).toBe('workspace_spec_NN')
+    expect(res.source).toBe('global')
+
+    const targetFile = join(rootDir, 'templates', 'workspace_spec_NN.md')
+    const { stat: statFs } = await import('node:fs/promises')
+    const st = await statFs(targetFile)
+    expect(st.isFile()).toBe(true)
+  })
 })
+

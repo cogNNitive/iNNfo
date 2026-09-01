@@ -27,6 +27,8 @@ import {
   getTemplateFromUrl,
   getTemplateFromModel,
   deriveNameFromUrl,
+  listTemplates,
+  hydrateTemplate,
 } from './tools/spec.js'
 import { validateModel, validateModelUrl, applyChange, validateTemplate, initModel } from './tools/mutate.js'
 import { findRepoRoot } from './tools/repo-root.js'
@@ -214,6 +216,31 @@ const toolDefinitions: Tool[] = [
       required: ['id', 'template_url', 'template_name'],
     },
   },
+  {
+    name: 'list_templates',
+    description:
+      'List all available Level 2 spec templates across local workspace, global environment, and installed skills',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        root: { type: 'string', description: 'Optional workspace root directory override' },
+      },
+    },
+  },
+  {
+    name: 'hydrate_template',
+    description:
+      'Hydrate (copy) a Level 2 spec template from global or skill store into active workspace templates directory',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        template_name: { type: 'string', description: 'Name of template to hydrate (e.g. workspace_spec_NN)' },
+        root: { type: 'string', description: 'Optional workspace root directory override' },
+        target_dir: { type: 'string', description: 'Optional target directory override (defaults to ./templates/)' },
+      },
+      required: ['template_name'],
+    },
+  },
 ]
 
 /* ── Tool call dispatcher ────────────────────────────────────── */
@@ -239,6 +266,10 @@ async function dispatchTool(name: string, args: Record<string, unknown>): Promis
         return await handleValidateTemplate(args)
       case 'init_model':
         return await handleInitModel(args)
+      case 'list_templates':
+        return await handleListTemplates(args)
+      case 'hydrate_template':
+        return await handleHydrateTemplate(args)
       default:
         return errorResult(`Unknown tool: ${name}`)
     }
@@ -341,6 +372,21 @@ async function handleInitModel(args: Record<string, unknown>): Promise<CallToolR
     return errorResult('Missing required arguments: id, template_url, template_name')
   }
   const result = await initModel(root, id, { template_url, template_name, title, model_version })
+  return textResult(JSON.stringify(result, null, 2))
+}
+
+async function handleListTemplates(args: Record<string, unknown>): Promise<CallToolResult> {
+  const root = (args.root as string) || ROOT_DIR
+  const templates = await listTemplates(root)
+  return textResult(JSON.stringify(templates, null, 2))
+}
+
+async function handleHydrateTemplate(args: Record<string, unknown>): Promise<CallToolResult> {
+  const templateName = args.template_name as string
+  if (!templateName) return errorResult('Missing required argument: template_name')
+  const root = (args.root as string) || ROOT_DIR
+  const targetDir = args.target_dir as string | undefined
+  const result = await hydrateTemplate(root, templateName, { targetDir })
   return textResult(JSON.stringify(result, null, 2))
 }
 
