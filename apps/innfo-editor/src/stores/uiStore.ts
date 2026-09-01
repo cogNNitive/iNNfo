@@ -14,6 +14,8 @@ export type ActiveView =
 
 export type ExplorerFilterMode = 'all' | 'models' | 'sources' | 'artifacts'
 
+export type SidebarMode = 'workspace' | 'focused_model'
+
 /**
  * UI-only state that does not belong in modelStore.
  *
@@ -36,6 +38,8 @@ export const useUiStore = defineStore('ui', () => {
   const searchQuery = ref('')
   const searchConceptFilter = ref('all')
   const selectedConceptFilters = ref<string[]>(['all'])
+  const sidebarMode = ref<SidebarMode>('workspace')
+  const focusedModelId = ref<string | null>(null)
 
   const isAllConceptsSelected = computed(() => {
     return selectedConceptFilters.value.includes('all')
@@ -160,6 +164,24 @@ export const useUiStore = defineStore('ui', () => {
     selectedConceptFilters.value = ['all']
   }
 
+  function setSidebarMode(mode: SidebarMode, modelId?: string | null): void {
+    sidebarMode.value = mode
+    if (modelId !== undefined) {
+      focusedModelId.value = modelId
+    }
+  }
+
+  function focusModel(modelId: string): void {
+    focusedModelId.value = modelId
+    sidebarMode.value = 'focused_model'
+    activeModelId.value = modelId
+  }
+
+  function returnToWorkspaceOverview(): void {
+    sidebarMode.value = 'workspace'
+    focusedModelId.value = null
+  }
+
   return {
     activeModelId,
     activeConcept,
@@ -176,6 +198,8 @@ export const useUiStore = defineStore('ui', () => {
     searchQuery,
     searchConceptFilter,
     selectedConceptFilters,
+    sidebarMode,
+    focusedModelId,
     isAllConceptsSelected,
     isConceptSelected,
     selectAllConcepts,
@@ -196,6 +220,9 @@ export const useUiStore = defineStore('ui', () => {
     setSearchQuery,
     setSearchConceptFilter,
     clearSearch,
+    setSidebarMode,
+    focusModel,
+    returnToWorkspaceOverview,
   }
 })
 

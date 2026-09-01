@@ -4,6 +4,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import FieldViewer from '../../src/components/editor/FieldViewer.vue'
 import FileRefPill from '../../src/components/editor/FileRefPill.vue'
 import { useModelStore } from '../../src/stores/modelStore'
+import { useUiStore } from '../../src/stores/uiStore'
 import type { ModelNode } from '../../src/model/types'
 
 function makeNode(id: string, fieldValues: Record<string, unknown>): ModelNode {
@@ -205,5 +206,34 @@ describe('FieldViewer.vue — R-SC-06', () => {
     expect(pills).toHaveLength(2)
     expect(wrapper.text()).toContain('The_Goonies.md')
     expect(wrapper.text()).toContain('interview.md')
+  })
+
+  it('renders interactive model pill for type:: model field and triggers focusModel on click', async () => {
+    const modelStore = useModelStore()
+    const uiStore = useUiStore()
+    modelStore.setGraph(
+      {
+        Root: makeNode('Root', {
+          submodel: 'models/auth_01.md',
+        }),
+      },
+      ['Root'],
+    )
+
+    const wrapper = mount(FieldViewer, {
+      props: {
+        nodeId: 'Root',
+        fieldDefinitions: [{ name: 'submodel', type: 'model' }],
+        readonly: true,
+      },
+    })
+
+    const modelPill = wrapper.find('[data-testid="model-field-pill"]')
+    expect(modelPill.exists()).toBe(true)
+    expect(modelPill.text()).toContain('models/auth_01.md')
+
+    await modelPill.trigger('click')
+    expect(uiStore.sidebarMode).toBe('focused_model')
+    expect(uiStore.focusedModelId).toBe('models/auth_01.md')
   })
 })

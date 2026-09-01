@@ -41,6 +41,17 @@
               {{ entry.displayValue }}
             </span>
           </template>
+          <template v-else-if="entry.def.type === 'model'">
+            <button
+              type="button"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 cursor-pointer transition-colors"
+              @click="handleModelPillClick(entry.displayValue)"
+              data-testid="model-field-pill"
+            >
+              <Boxes class="w-3.5 h-3.5 shrink-0" />
+              <span>{{ entry.displayValue }}</span>
+            </button>
+          </template>
           <template v-else-if="entry.def.type === 'reference'">
             <Pill
               v-if="entry.refNode"
@@ -106,6 +117,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Boxes } from 'lucide-vue-next'
 import WidgetField from '../../shared/widgets/WidgetField.vue'
 import { useModelStore } from '../../stores/modelStore'
 import { useUiStore } from '../../stores/uiStore'
@@ -114,6 +126,26 @@ import Pill from './Pill.vue'
 import FileRefPill from './FileRefPill.vue'
 import { parseSourceRef } from '../../utils/sourceRef'
 import { isImageFieldValue } from '../../utils/imageDetection'
+
+function handleModelPillClick(val: unknown): void {
+  if (!val || typeof val !== 'string') return
+  const clean = val.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '').trim()
+  const matchingNode = Object.values(modelStore.nodes).find((n) => {
+    const path = n.source?.path || ''
+    const baseName = path.split('/').pop()?.split('\\').pop()?.replace(/\.md$/i, '') || ''
+    return (
+      n.id.toLowerCase() === clean.toLowerCase() ||
+      n.name.toLowerCase() === clean.toLowerCase() ||
+      path.toLowerCase() === clean.toLowerCase() ||
+      baseName.toLowerCase() === clean.toLowerCase()
+    )
+  })
+  if (matchingNode) {
+    uiStore.focusModel(matchingNode.id)
+  } else {
+    uiStore.focusModel(clean)
+  }
+}
 
 function cleanReferenceName(val: unknown): string {
   if (typeof val !== 'string') return ''

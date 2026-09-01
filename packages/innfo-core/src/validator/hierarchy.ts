@@ -1,4 +1,4 @@
-import type { Concept, ParsedModel } from '../types'
+import type { Concept, ParsedModel, TaxonomyEdge } from '../types'
 import type { ReferenceDiagnostic } from './references'
 
 const IMPLICIT_REF_FIELDS = new Set(['location', 'room', 'component', 'parent_component'])
@@ -33,12 +33,15 @@ function conceptsByElementName(model: ParsedModel): Map<string, Set<string>> {
 export function validateTaxonomyHierarchy(
   model: ParsedModel,
   templateConcepts: Concept[],
+  templateTaxonomy?: TaxonomyEdge[],
 ): ReferenceDiagnostic[] {
   const diagnostics: ReferenceDiagnostic[] = []
 
+  const effectiveTaxonomy = model.taxonomy.length > 0 ? model.taxonomy : (templateTaxonomy ?? [])
+
   // child concept (lowercased) -> parent concept name, from index nesting.
   const parentOfConcept = new Map<string, string>()
-  for (const edge of model.taxonomy) {
+  for (const edge of effectiveTaxonomy) {
     if (edge.parent) parentOfConcept.set(edge.child.toLowerCase(), edge.parent)
   }
   if (parentOfConcept.size === 0) return diagnostics

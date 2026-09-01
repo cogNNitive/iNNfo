@@ -143,7 +143,7 @@ export function validateElementFieldReferences(
         )
 
         const isRef =
-          (fieldDef && fieldDef.type === 'reference') ||
+          (fieldDef && (fieldDef.type === 'reference' || fieldDef.type === 'model')) ||
           IMPLICIT_REF_FIELDS.has(fieldName.toLowerCase())
         if (!isRef) continue
 
@@ -166,10 +166,12 @@ export function validateElementFieldReferences(
             isCrossModel = true
           } else if (value.includes('::')) {
             isCrossModel = true
+          } else if (fieldDef?.type === 'model' && (value.endsWith('.md') || value.includes('/') || value.includes('\\'))) {
+            isCrossModel = true
           }
 
           if (isCrossModel) {
-            // Bypass validation for cross-model references as they reside outside the current model
+            // Bypass validation for cross-model / external submodel file references as they reside outside the current model
             continue
           }
 

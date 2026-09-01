@@ -61,6 +61,43 @@
         </button>
       </div>
 
+      <!-- Breadcrumb navigation for Focused Model Mode -->
+      <div
+        v-if="uiStore.sidebarMode === 'focused_model'"
+        class="flex items-center gap-2 px-2.5 py-2 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800 text-xs font-semibold cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+        @click="uiStore.returnToWorkspaceOverview()"
+        data-testid="breadcrumb-back-workspace"
+      >
+        <ArrowLeft class="w-3.5 h-3.5 shrink-0" />
+        <span>Back to Workspace Overview</span>
+      </div>
+
+      <!-- Workspace Mode summary metrics -->
+      <div
+        v-if="uiStore.sidebarMode === 'workspace' && uiStore.activeView !== 'explorer'"
+        class="p-2.5 bg-white dark:bg-slate-800/80 rounded-lg border border-slate-200 dark:border-slate-700 space-y-2"
+        data-testid="workspace-overview-panel"
+      >
+        <div class="flex items-center justify-between">
+          <span class="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            Workspace Mode
+          </span>
+          <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary">
+            {{ totalModelCount }} Models
+          </span>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Active: {{ activeSubmodelCount }}</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>Draft: {{ draftSubmodelCount }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Explorer View -->
       <WorkspaceExplorer v-if="uiStore.activeView === 'explorer'" />
 
@@ -224,6 +261,8 @@ import {
   Database,
   ChevronDown,
   FolderTree,
+  ArrowLeft,
+  Boxes,
 } from 'lucide-vue-next'
 import { useModelStore } from '../../stores/modelStore'
 import { useMetamodelStore } from '../../stores/metamodelStore'
@@ -325,7 +364,65 @@ const visibleRootIds = computed(() => {
   }
 
   const keptIds = new Set([...bestByBaseName.values()].map((v) => v.id))
-  return nonTemplateRootIds.filter((id) => keptIds.has(id))
+  const deduplicatedRoots = nonTemplateRootIds.filter((id) => keptIds.has(id))
+
+  if (uiStore.sidebarMode === 'focused_model') {
+    const focused = uiStore.focusedModelId || uiStore.activeModelId
+    if (focused && deduplicatedRoots.includes(focused)) {
+      return [focused]
+    }
+    if (focused) {
+      const match = deduplicatedRoots.find((id) => {
+        const node = modelStore.getNode(id)
+        if (id.toLowerCase() === focused.toLowerCase()) return true
+        if (node?.name?.toLowerCase() === focused.toLowerCase()) return true
+        if (node?.source?.path?.toLowerCase() === focused.toLowerCase()) return true
+        const baseName = node?.source?.path?.split('/').pop()?.replace(/\.md$/i, '')
+        return baseName?.toLowerCase() === focused.toLowerCase()
+      })
+      if (match) return [match]
+    }
+    return deduplicatedRoots.slice(0, 1)
+  }
+
+  return deduplicatedRoots
+})
+
+const totalModelCount = computed(() => {
+  return modelStore.rootIds.filter((id) => {
+    const node = modelStore.getNode(id)
+    return node && !isTemplateNode(node)
+  }).length
+})
+
+const activeSubmodelCount = computed(() => {
+  let count = 0
+  for (const rootId of visibleRootIds.value) {
+    const node = modelStore.getNode(rootId)
+    if (!node?.rawContent) continue
+    try {
+      const fm = parseFrontmatter(node.rawContent) as any
+      if (fm?.status === 'active' || !fm?.status) count++
+    } catch {
+      count++
+    }
+  }
+  return count
+})
+
+const draftSubmodelCount = computed(() => {
+  let count = 0
+  for (const rootId of visibleRootIds.value) {
+    const node = modelStore.getNode(rootId)
+    if (!node?.rawContent) continue
+    try {
+      const fm = parseFrontmatter(node.rawContent) as any
+      if (fm?.status === 'draft') count++
+    } catch {
+      // silent
+    }
+  }
+  return count
 })
 
 const { width, startResize } = useResizablePanel({
@@ -339,7 +436,7 @@ const { width, startResize } = useResizablePanel({
 const activeModelId = computed(() => uiStore.activeModelId || visibleRootIds.value[0] || null)
 
 function selectModelHeader(rootId: string): void {
-  uiStore.setActiveModel(rootId)
+  uiStore.focusModel(rootId)
   uiStore.selectNode(rootId)
   toggleModel(rootId)
 }

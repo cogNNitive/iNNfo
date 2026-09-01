@@ -50,6 +50,7 @@ export {
   validateFormatSyntax,
   validateReferences,
   validateElementFieldReferences,
+  validateTaxonomyHierarchy,
 } from './validator'
 export type { ReferenceDiagnostic, DocumentValidation } from './validator'
 

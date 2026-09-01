@@ -1,4 +1,4 @@
-import type { ElementNode, ParsedModel, FieldValue, LocalMetamodel, ModelNode } from '../types'
+import type { ElementNode, ParsedModel, FieldValue, LocalMetamodel, ModelNode, TaxonomyEdge } from '../types'
 import { extractTemplateSchema } from '../schema'
 import { normalizeSeparators } from '../parser/slug'
 import type { ParseContext } from './types'
@@ -47,8 +47,10 @@ export function normalizeElementsIntoGraph(
   rootId: string,
   sourcePath: string,
   ctx: ParseContext,
+  templateTaxonomy?: TaxonomyEdge[],
 ): void {
-  const parentOfTaxonomy = buildTaxonomyParentMap(parsed)
+  const effectiveTaxonomy = parsed.taxonomy.length > 0 ? parsed.taxonomy : (templateTaxonomy ?? [])
+  const parentOfTaxonomy = buildTaxonomyParentMap({ ...parsed, taxonomy: effectiveTaxonomy })
   const qualifiedIdByElementName = new Map<string, string>()
 
   // Collect all elements in declaration order, grouped by concept.
@@ -59,13 +61,13 @@ export function normalizeElementsIntoGraph(
     }
   }
 
-  // Re-sort elements by their position in the NN index (if present).
+  // Re-sort elements by their position in the NN index (if present or inherited from template).
   // The index defines both hierarchy AND display order; elements not listed
   // in the index get a high sort value so they appear after indexed ones.
-  if (parsed.taxonomy.length > 0) {
+  if (effectiveTaxonomy.length > 0) {
     const indexOrder = new Map<string, number>()
     let orderIdx = 0
-    for (const edge of parsed.taxonomy) {
+    for (const edge of effectiveTaxonomy) {
       if (!indexOrder.has(edge.parent)) indexOrder.set(edge.parent, orderIdx++)
       if (!indexOrder.has(edge.child)) indexOrder.set(edge.child, orderIdx++)
     }

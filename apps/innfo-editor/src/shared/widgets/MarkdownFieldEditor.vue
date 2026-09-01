@@ -49,7 +49,9 @@ const loadError = ref('')
 const fileName = computed(() => {
   if (!isFileMode.value) return ''
   const raw = props.modelValue || ''
-  return raw.split('/').pop() || raw
+  const str = Array.isArray(raw) ? raw[0] : typeof raw === 'string' ? raw : String(raw)
+  const cleanStr = str.split('#')[0].trim()
+  return cleanStr.split('/').pop() || cleanStr
 })
 
 // ── File I/O helpers (File System Access API) ───────────────────
@@ -96,13 +98,17 @@ async function resolveMarkdownHandle(
 async function resolveExistingHandle(
   nodeId: string,
   fieldKey: string,
-  storedPath: string,
+  storedPath: unknown,
 ): Promise<FileHandleLike | null> {
   const ws = useWorkspaceStore()
   const rootHandle = ws.handle
   if (!rootHandle) return null
 
-  const parts = storedPath.split('/').filter(Boolean)
+  const rawPath = Array.isArray(storedPath) ? storedPath[0] : storedPath
+  if (typeof rawPath !== 'string' || !rawPath) return null
+
+  const cleanPath = rawPath.split('#')[0].trim()
+  const parts = cleanPath.split('/').filter(Boolean)
   if (parts.length === 0) return null
 
   try {
@@ -117,7 +123,7 @@ async function resolveExistingHandle(
 }
 
 async function loadFromFile(): Promise<void> {
-  if (!props.nodeId || !props.modelValue) {
+  if (!props.nodeId || !props.modelValue || (Array.isArray(props.modelValue) && props.modelValue.length === 0)) {
     fileContent.value = ''
     return
   }
@@ -128,7 +134,8 @@ async function loadFromFile(): Promise<void> {
   try {
     const handle = await resolveExistingHandle(props.nodeId, props.fieldKey, props.modelValue)
     if (!handle) {
-      loadError.value = `File not found: ${props.modelValue}`
+      const displayPath = Array.isArray(props.modelValue) ? props.modelValue.join(', ') : props.modelValue
+      loadError.value = `File not found: ${displayPath}`
       fileContent.value = ''
       return
     }

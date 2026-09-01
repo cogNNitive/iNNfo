@@ -560,4 +560,51 @@ describe('mutate tools', () => {
       expect(result.valid).toBe(true)
     })
   })
+
+  describe('type:: model mutations', () => {
+    it('supports adding and mutating type:: model concepts and fields', async () => {
+      await stubBusinessTemplate()
+      const workspaceContent = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 3',
+        'model_version: "V_0-0-1"',
+        'title: "Workspace Model"',
+        'parent_spec:',
+        '  name: "business_V_0-2-0"',
+        '  url: "https://example.com/business_V_0-2-0_NN.md"',
+        '---',
+        '',
+        '# NN ModelRef',
+        '## NN ModelRef: AuthSubsystem',
+        'path:: models/auth_01.md',
+        '',
+      ].join('\n')
+      await writeFile(join(rootDir, 'workspace_01.md'), workspaceContent, 'utf-8')
+
+      const templateContent = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 2',
+        'title: "Workspace Spec"',
+        'parent_spec:',
+        '  name: "iNNfo_V_0-1-0"',
+        '  url: "https://example.com/iNNfo_V_0-1-0_NN.md"',
+        '---',
+        '# NN Concept Definition',
+        '## NN Concept Definition: ModelRef',
+        'type:: model',
+      ].join('\n')
+      await writeFile(join(specsDir, 'business_V_0-2-0_NN.md'), templateContent, 'utf-8')
+
+      const updateRes = await applyChange(rootDir, 'workspace_01', 'update_field', {
+        conceptName: 'ModelRef',
+        elementName: 'AuthSubsystem',
+        fieldName: 'path',
+        value: 'models/auth_v2.md',
+      })
+      expect(updateRes.success).toBe(true)
+      expect(updateRes.model?.elements.get('ModelRef')?.[0].fields['path']).toBe('models/auth_v2.md')
+    })
+  })
 })

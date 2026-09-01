@@ -62,6 +62,24 @@ export async function findModelFile(rootDir: string, id: string): Promise<string
       }
     }
   }
+
+  if (cleanId.toLowerCase().startsWith('workspace') || id.toLowerCase().startsWith('workspace')) {
+    const { readdir } = await import('node:fs/promises')
+    for (const dir of searchDirs) {
+      try {
+        const files = await readdir(dir)
+        const wsFile = files.find(
+          (f) => f.toLowerCase().startsWith('workspace') && f.toLowerCase().endsWith('.md'),
+        )
+        if (wsFile) {
+          return join(dir, wsFile)
+        }
+      } catch {
+        continue
+      }
+    }
+  }
+
   return null
 }
 

@@ -1,4 +1,4 @@
-export type ConceptType = 'text' | 'list' | 'category' | 'weight' | 'steps' | 'sequence'
+export type ConceptType = 'text' | 'list' | 'category' | 'weight' | 'steps' | 'sequence' | 'model'
 export type SpecLevel = 0 | 1 | 2 | 3
 
 export interface ParentRef {
@@ -8,7 +8,7 @@ export interface ParentRef {
 
 export interface ConceptField {
   name: string
-  type: 'string' | 'select' | 'reference' | 'image' | 'file' | 'video' | 'audio' | 'markdown_inline' | 'markdown_file'
+  type: 'string' | 'select' | 'reference' | 'image' | 'file' | 'video' | 'audio' | 'markdown_inline' | 'markdown_file' | 'model'
   options?: string[]
   target_concepts?: string[]
 }

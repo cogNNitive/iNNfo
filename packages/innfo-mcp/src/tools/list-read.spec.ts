@@ -111,4 +111,30 @@ describe('readModel', () => {
     const model = await readModel(rootDir, 'Sample_NN')
     expect(model?.frontmatter.title).toBe('Readable Model')
   })
+
+  it('discovers workspace_01.md entrypoints and parses type:: model submodels', async () => {
+    const wsContent = [
+      '---',
+      'spec_version: "V_0-2-0"',
+      'level: 3',
+      'title: "Root Workspace"',
+      '---',
+      '',
+      '# NN ModelRef',
+      '## NN ModelRef: Auth Subsystem',
+      'path:: models/auth_01.md',
+      'type:: model',
+      '',
+    ].join('\n')
+    await writeFile(join(rootDir, 'workspace_01.md'), wsContent, 'utf-8')
+
+    const models = await listModels(rootDir)
+    expect(models.some((m) => m.id === 'workspace_01')).toBe(true)
+
+    const model = await readModel(rootDir, 'workspace')
+    expect(model?.frontmatter.title).toBe('Root Workspace')
+    const modelRefs = model?.elements.get('ModelRef')
+    expect(modelRefs).toHaveLength(1)
+    expect(modelRefs?.[0].fields['path']).toBe('models/auth_01.md')
+  })
 })

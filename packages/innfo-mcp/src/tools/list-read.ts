@@ -86,6 +86,25 @@ export async function readModel(rootDir: string, id: string): Promise<ParsedMode
     }
   }
 
+  if (cleanId.toLowerCase().startsWith('workspace') || id.toLowerCase().startsWith('workspace')) {
+    const { readdir } = await import('node:fs/promises')
+    for (const dir of searchDirs) {
+      try {
+        const files = await readdir(dir)
+        const wsFile = files.find(
+          (f) => f.toLowerCase().startsWith('workspace') && f.toLowerCase().endsWith('.md'),
+        )
+        if (wsFile) {
+          const filePath = join(dir, wsFile)
+          const content = await readFile(filePath, 'utf-8')
+          return parseModel(content)
+        }
+      } catch {
+        continue
+      }
+    }
+  }
+
   return null
 }
 

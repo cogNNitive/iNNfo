@@ -29,6 +29,10 @@ function setCollapsed(nodeId: string, val: boolean): void {
 const matchingNodes = computed(() => {
   const query = uiStore.searchQuery.trim().toLowerCase()
 
+  if (query.length < 3) {
+    return []
+  }
+
   const results: ModelNode[] = []
 
   for (const node of Object.values(modelStore.nodes)) {
@@ -43,26 +47,24 @@ const matchingNodes = computed(() => {
     }
 
     // Apply Text Search Query
-    if (query) {
-      const nameMatch = node.name?.toLowerCase().includes(query)
-      const typeMatch = node.type?.toLowerCase().includes(query)
-      const conceptMatch = conceptName.toLowerCase().includes(query)
-      const descMatch = node.rawSections?.description?.toLowerCase().includes(query)
+    const nameMatch = node.name?.toLowerCase().includes(query)
+    const typeMatch = node.type?.toLowerCase().includes(query)
+    const conceptMatch = conceptName.toLowerCase().includes(query)
+    const descMatch = node.rawSections?.description?.toLowerCase().includes(query)
 
-      let fieldMatch = false
-      if (node.fields) {
-        for (const [key, fv] of Object.entries(node.fields)) {
-          const valStr = String((fv as any)?.value ?? fv).toLowerCase()
-          if (key.toLowerCase().includes(query) || valStr.includes(query)) {
-            fieldMatch = true
-            break
-          }
+    let fieldMatch = false
+    if (node.fields) {
+      for (const [key, fv] of Object.entries(node.fields)) {
+        const valStr = String((fv as any)?.value ?? fv).toLowerCase()
+        if (key.toLowerCase().includes(query) || valStr.includes(query)) {
+          fieldMatch = true
+          break
         }
       }
+    }
 
-      if (!nameMatch && !typeMatch && !conceptMatch && !descMatch && !fieldMatch) {
-        continue
-      }
+    if (!nameMatch && !typeMatch && !conceptMatch && !descMatch && !fieldMatch) {
+      continue
     }
 
     results.push(node)
@@ -125,9 +127,17 @@ function handleNavigate(nodeId: string) {
       </span>
     </div>
 
+    <!-- Query too short state -->
+    <div
+      v-if="uiStore.searchQuery.trim().length < 3"
+      class="text-center py-16 text-slate-400 dark:text-slate-500 italic text-sm bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700"
+    >
+      Ingresá al menos 3 caracteres para iniciar la búsqueda.
+    </div>
+
     <!-- Empty state -->
     <div
-      v-if="matchingNodes.length === 0"
+      v-else-if="matchingNodes.length === 0"
       class="text-center py-16 text-slate-400 dark:text-slate-500 italic text-sm bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700"
     >
       No se encontraron conceptos ni elementos que coincidan con la búsqueda.

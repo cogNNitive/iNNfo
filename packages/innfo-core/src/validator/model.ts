@@ -301,7 +301,7 @@ export function validateModel(
 
   // Cross-check the # NN index taxonomy against reference-typed element
   // fields (e.g. parent_component). WARNING only — see hierarchy.ts.
-  for (const diag of validateTaxonomyHierarchy(model, templateConcepts)) {
+  for (const diag of validateTaxonomyHierarchy(model, templateConcepts, bodySchema.taxonomy)) {
     warnings.push(diag)
   }
 
