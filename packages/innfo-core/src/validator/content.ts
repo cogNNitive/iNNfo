@@ -45,6 +45,63 @@ export function validateFormatContent(
     })
   }
 
+  // ── Template concept hierarchy validation (parent integrity & cycles) ──
+  const conceptDefs = parsed.elements.get(CONCEPT_DEFINITION) ?? []
+  if (conceptDefs.length > 0) {
+    const conceptNames = new Set(conceptDefs.map((c) => c.name.toLowerCase()))
+    const parentMap = new Map<string, string>()
+
+    for (const el of conceptDefs) {
+      const rawParent = el.fields['parent']
+      if (rawParent !== undefined && rawParent !== null && String(rawParent).trim() !== '') {
+        let parentName = String(rawParent).trim()
+        if (parentName.startsWith('[[') && parentName.endsWith(']]')) {
+          parentName = parentName.slice(2, -2).trim()
+        }
+        if (parentName !== '') {
+          const childLower = el.name.toLowerCase()
+          const parentLower = parentName.toLowerCase()
+          parentMap.set(childLower, parentLower)
+
+          if (!conceptNames.has(parentLower)) {
+            checks.push({
+              id: 'template-parent-not-found',
+              label: 'Parent concept exists in template',
+              description: 'The parent concept referenced in parent:: must be defined in the template',
+              category: 'body',
+              severity: 'error',
+              passed: false,
+              message: `Concept "${el.name}" references non-existent parent concept "${parentName}"`,
+            })
+          }
+        }
+      }
+    }
+
+    // Cycle detection
+    for (const start of parentMap.keys()) {
+      const path = [start]
+      let curr = parentMap.get(start)
+      while (curr && conceptNames.has(curr)) {
+        if (path.includes(curr)) {
+          const cyclePath = [...path.slice(path.indexOf(curr)), curr].join(' -> ')
+          checks.push({
+            id: 'template-parent-cycle',
+            label: 'No circular taxonomy hierarchy',
+            description: 'Concept parent hierarchy must not contain cycles',
+            category: 'body',
+            severity: 'error',
+            passed: false,
+            message: `Circular taxonomy detected in concept hierarchy: ${cyclePath}`,
+          })
+          break
+        }
+        path.push(curr)
+        curr = parentMap.get(curr)
+      }
+    }
+  }
+
   // ── FR-007: Reject FOLDER mode ────────────────────────────────
 
   if (fm.mode === 'FOLDER') {
@@ -209,19 +266,38 @@ export function validateFormatContent(
     })
   }
 
-  // 8. Index section (recommended — without it, concepts render in front matter order)
+  // 8. Index section / taxonomy check
   const hasIndex = parsed.taxonomy.length > 0
-  checks.push({
-    id: 'body-index',
-    label: 'Taxonomy index section',
-    description: 'Models should have a # NN index section with [[wikilinks]] to control ordering and hierarchy',
-    category: 'body',
-    severity: 'warning',
-    passed: hasIndex || isLevel3,
-    message: (hasIndex || isLevel3)
-      ? undefined
-      : 'No NN index section found — concepts will render in front matter declaration order. Add a # NN index section to control ordering and hierarchy.',
-  })
+  if (isLevel3 && hasIndex) {
+    checks.push({
+      id: 'l3-index-ignored',
+      label: 'Level 3 models should not declare an NN index',
+      description:
+        'Taxonomy and concept hierarchy belong to the Level 2 template. The # NN index in Level 3 models will not override template taxonomy.',
+      category: 'body',
+      severity: 'warning',
+      passed: false,
+      message:
+        'Level 3 model contains an # NN index section. Taxonomy hierarchy is owned by the parent template and will not be overridden.',
+    })
+  } else {
+    const hasConceptsWithParent = (parsed.elements.get(CONCEPT_DEFINITION) ?? []).some(
+      (el) => el.fields['parent'] !== undefined && el.fields['parent'] !== '',
+    )
+    const indexPassed = hasIndex || isLevel3 || hasConceptsWithParent
+    checks.push({
+      id: 'body-index',
+      label: 'Taxonomy index or parent hierarchy',
+      description:
+        'Templates should have a # NN index section or concept parent:: declarations to control ordering and hierarchy',
+      category: 'body',
+      severity: 'warning',
+      passed: indexPassed,
+      message: indexPassed
+        ? undefined
+        : 'No NN index section or parent:: hierarchy found — concepts will render in front matter declaration order. Add parent:: to concepts or a # NN index section to control ordering and hierarchy.',
+    })
+  }
 
   // 9. Concept section markers
   const sectionMatches = [...content.matchAll(SECTION_NN_RE)]

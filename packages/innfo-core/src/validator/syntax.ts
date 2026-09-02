@@ -28,13 +28,17 @@ export function validateFormatSyntax(content: string): SyntaxCheck[] {
   // Document structure checks (recommended — ordering defaults to front matter order)
   const hasIndex = parsed.taxonomy.length > 0
   const isLevel3 = parsed.frontmatter.level === 3
+  const hasParentField = (parsed.elements.get('Concept Definition') ?? []).some(
+    (el) => el.fields['parent'] !== undefined && el.fields['parent'] !== '',
+  )
+  const passedIndex = hasIndex || isLevel3 || hasParentField
   checks.push({
     id: 'syntax-index',
-    label: 'NN index section present (recommended)',
-    passed: hasIndex || isLevel3,
-    message: (hasIndex || isLevel3)
+    label: 'NN index or parent hierarchy present (recommended)',
+    passed: passedIndex,
+    message: passedIndex
       ? undefined
-      : 'No NN index found — concepts will render in declaration order. Add one to control hierarchy and ordering.',
+      : 'No NN index or parent:: hierarchy found — concepts will render in declaration order. Add one to control hierarchy and ordering.',
   })
 
   const hasConcepts = parsed.elements.size > 0

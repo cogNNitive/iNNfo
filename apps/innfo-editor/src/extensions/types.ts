@@ -1,3 +1,5 @@
+import type { ModelNode } from '../model/types'
+
 export interface ExtensionManifestView {
   id: string
   label: string

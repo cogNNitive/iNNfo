@@ -72,7 +72,12 @@ export function parseModel(content: string): ParsedModel {
     } else if (type === 'concept') {
       const parsed = parseConceptSection(name, bodyContent)
       if (parsed.elements.length > 0) {
-        elements.set(name, parsed.elements)
+        const existing = elements.get(name)
+        if (existing) {
+          existing.push(...parsed.elements)
+        } else {
+          elements.set(name, parsed.elements)
+        }
       }
       if (parsed.tags) {
         conceptTags[name] = parsed.tags
