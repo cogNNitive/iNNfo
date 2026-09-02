@@ -107,6 +107,31 @@ export function parseFrontmatter(content: string): SpecFrontmatter | null {
         (s: unknown): s is { name: string; repo: string; path: string } => !!s && !!(s as any).name,
       )
   }
+  // Normalize `viewers` block
+  const viewers = (parsed as any).viewers
+  if (Array.isArray(viewers)) {
+    ;(parsed as any).viewers = viewers
+      .map((v: unknown) => {
+        if (v && typeof v === 'object' && v !== null) {
+          const obj = v as Record<string, unknown>
+          const viewType = String(obj.view_type ?? obj.type ?? '')
+          return {
+            id: String(obj.id ?? ''),
+            view_type: viewType,
+            ...(obj.target_concept ? { target_concept: String(obj.target_concept) } : {}),
+            ...(obj.label ? { label: String(obj.label) } : {}),
+            ...(obj.icon ? { icon: String(obj.icon) } : {}),
+            ...(obj.description ? { description: String(obj.description) } : {}),
+            ...(obj.source_template ? { source_template: String(obj.source_template) } : {}),
+          }
+        }
+        return null
+      })
+      .filter(
+        (v: unknown): v is { id: string; view_type: string } =>
+          !!v && !!(v as any).id && !!(v as any).view_type,
+      )
+  }
   // Normalize top-level `alias` block
   const topAlias = (parsed as any).alias
   if (topAlias && typeof topAlias === 'object' && topAlias !== null) {

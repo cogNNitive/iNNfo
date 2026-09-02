@@ -16,6 +16,12 @@ relationship_types:
     enabled: false
   sequence:
     enabled: true
+viewers:
+  - id: "guided-procedure"
+    view_type: "fsm-stepper"
+    target_concept: "Work"
+    label: "Guided Procedure Execution"
+    icon: "play-circle"
 ---
 
 > [!NOTE]
@@ -63,11 +69,13 @@ options:: [task, decision, event]
 
 ## NN Field Definition: parent
 concept:: Work
-type:: string
+type:: reference
+target_concepts:: [Work]
 
 ## NN Field Definition: next
 concept:: Work
-type:: string
+type:: reference
+target_concepts:: [Work]
 
 ## NN Field Definition: condition
 concept:: Work
@@ -226,7 +234,7 @@ validate and render your model.
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/templates/procedures/samples/CodeReviewProcess_V_0-2-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Code Review Process → Emergency Hotfix Process), element properties (parent, step_type, next, I/O, tool), and the `work-roles` RACI matrix across both procedures.
+The official sample for this template is at `specs/templates/procedures/samples/Ghostbusters_V_0-2-0_procedures_NN.md`. It exercises the hierarchical Work tree with two root procedures (Standard Ghost Containment Protocol → Subterranean Containment Grid Shutdown Recovery), element properties (parent, step_type, next, I/O, tool), and the RACI, tools, and artifacts matrices.
 
 ### Parent Chain
 

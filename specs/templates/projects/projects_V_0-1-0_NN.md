@@ -83,7 +83,8 @@ options:: [critical, high, medium, low]
 
 ## NN Field Definition: depends_on
 concept:: Task
-type:: string
+type:: reference
+target_concepts:: [Task, Milestone]
 
 ## NN Field Definition: duration
 concept:: Task

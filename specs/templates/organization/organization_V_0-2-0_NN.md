@@ -28,59 +28,45 @@ relationship_types:
 * [[Roles]]
 * [[Position]]
 * [[Person]]
-  * [[Contributions]]
-  * [[Compensations]]
 * [[Skills]]
 * [[Functions]]
 
 # NN Concept Definition
 
 ## NN Concept Definition: Organization
-icon:: building
+icon:: building-2
 type:: text
 color:: blue
 weight:: 100
 
 ## NN Concept Definition: Roles
-icon:: users
+icon:: user-check
 type:: list
 color:: green
 weight:: 60
 
 ## NN Concept Definition: Functions
-icon:: git-branch
+icon:: workflow
 type:: list
-color:: green
+color:: purple
 weight:: 55
 
 ## NN Concept Definition: Position
-icon:: briefcase
+icon:: contact
 type:: list
-color:: green
+color:: teal
 weight:: 50
 
 ## NN Concept Definition: Person
 icon:: user
 type:: list
-color:: green
+color:: cyan
 weight:: 40
-
-## NN Concept Definition: Contributions
-icon:: gift
-type:: weight
-color:: green
-weight:: 35
-
-## NN Concept Definition: Compensations
-icon:: hand-coins
-type:: weight
-color:: green
-weight:: 25
 
 ## NN Concept Definition: Skills
 icon:: award
 type:: list
-color:: green
+color:: indigo
 weight:: 30
 
 # NN Field Definition
@@ -120,11 +106,13 @@ weight:: 50
 source:: Position
 target:: Roles
 values:: [Assumes]
+widget:: boolean
 
 ## NN Matrix Definition: persons-positions matrix
 source:: Person
 target:: Position
 values:: [Occupies]
+widget:: boolean
 
 ## NN Matrix Definition: Functions-Positions Matrix
 source:: Functions
@@ -276,7 +264,7 @@ validate and render your model.
 
 ### Canonical Sample
 
-The official sample for this template is at `specs/templates/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md`. It exercises all concept types, lists, and the positions-roles, persons-positions, and functions-positions matrices.
+The official sample for this template is at `specs/templates/organization/samples/Ghostbusters_V_0-2-0_organization_NN.md`. It exercises all concept types, lists, and the positions-roles, persons-positions, and functions-positions matrices.
 
 # Concept Guidance Documentation
 
@@ -288,6 +276,14 @@ Description of the overall organization structure and objectives.
 ### Description
 The Organization concept is the canonical home for a prose description of the enterprise or team: what it is responsible for, how it is structured at a high level, and the objectives that shape its shape. It is a single `text` block — the roles, functions, positions, persons, and skills that give the organization its structure are modeled as their own concepts and related through the matrices.
 
+### Methodologies
+**Organizational Chart & Functional Breakdown**
+Standard structural modeling mapping top-level enterprise divisions to underlying operational roles and positions.
+
+### Prompts
+`Describe the primary mission and high-level structure of the organization.`
+`Outline the key operational divisions and executive reporting lines.`
+
 ## Roles
 
 ### Summary
@@ -295,6 +291,14 @@ Functional responsibilities or actors within the organization, each scoped as in
 
 ### Description
 A Role is a functional responsibility — a named way of acting within the organization — independent of who performs it or which seat carries it. Decoupling roles from positions and persons means that reorganizations, hiring, and title changes do not invalidate the descriptions of how work is done. Each Role carries a `scope` of `internal` or `external`, and Positions are related to the Roles they assume through the positions-roles matrix.
+
+### Methodologies
+**RACI Responsibility Assignment Matrix**
+A structured framework for identifying actors as Responsible, Accountable, Consulted, or Informed for organizational functions.
+
+### Prompts
+`Enumerate the core functional roles required to operate the business.`
+`Specify whether each role is internal to the firm or external.`
 
 ## Functions
 
@@ -343,89 +347,29 @@ Job titles or seats within the organization that assume roles and take responsib
 ### Description
 A Position is an organizational seat — a job title that exists whether or not it is currently filled. Positions assume Roles (via the positions-roles matrix), are held responsible for Functions (via the Functions-Positions matrix), and are occupied by Persons (via the persons-positions matrix). Modeling positions separately from persons keeps the org chart stable across personnel changes.
 
+### Methodologies
+**Job Architecture & Position Classification**
+Defining formal seats, title bands, and job descriptions within an enterprise structure.
+
+### Prompts
+`List the formal positions and job titles within the organization.`
+`Map each position to the roles it assumes and the functions it oversees.`
+
 ## Person
 
 ### Summary
 Named individuals occupying positions, with their compensation and contributions recorded.
 
 ### Description
-A Person is a physical individual who occupies a Position. Beyond the occupancy relationship, a Person carries `position_ref` (a reference to the held Position), `compensation` (the remuneration structure), and `contributions` (the primary deliverables and role dedication). Persons are related to their Skills so the organization can reason about the competencies it holds. `Contributions` and `Compensations` are also modeled as concepts in their own right, for organizations that need to enumerate and relate them beyond the per-person string fields.
-
-## Contributions
-
-### Summary
-The multiple resources or inputs that an individual provides to the company, highlighting the variety and range of valuable assets they bring to the organization's operations and growth.
-
-### Description
-"Contributions" in business modeling refers to the specific individuals, assets, or resources that play a vital role in the value creation process within a business model. These contributors are not random elements but carefully identified as having a direct impact on business operations, performance, and outcomes.
-
-In a business model, "Contributions" are fundamental components as they enable the execution of key activities. They may involve carrying out specific tasks, providing necessary resources, or supporting critical functions. The performance or quality of these contributors directly influences the overall success of the business.
-
-The identification of "Contributions" varies depending on the nature of the business and its activities. It includes not only roles such as employees, suppliers, or partners but also tangible and intangible assets like equipment, technology, intellectual property, or data. Each contributor—whether a person, resource, or asset—fulfills a specific role and responsibility, requiring a coordinated effort to achieve business objectives.
-
-For example, in a manufacturing business, "Contributions" might include roles like production managers, machine operators, and raw material suppliers, as well as resources like manufacturing equipment, logistics systems, and production facilities. Each of these elements is crucial for producing and delivering high-quality products to customers.
-
-"Contributions" goes beyond merely identifying the people or resources involved in business operations. It is about understanding their roles, responsibilities, and their specific contributions to the value creation process. It emphasizes creating a system where individuals, assets, and resources collaborate effectively to drive business success.
-
-In conclusion, the "Contributions" concept in business modeling highlights the importance of identifying and understanding the key individuals, assets, and resources essential to the value creation process. By integrating these contributors cohesively, businesses can ensure the effective execution of activities and achieve their strategic goals.
+A Person is a physical individual who occupies a Position. Beyond the occupancy relationship, a Person carries `position_ref` (a reference to the held Position), `compensation` (the remuneration structure), and `contributions` (the primary deliverables and role dedication). Persons are related to their Skills so the organization can reason about the competencies it holds.
 
 ### Methodologies
-**Business Model Canvas**
-In the Business Model Canvas, "Key Resources" and "Key Activities" are two of the nine key components that directly relate to the "Person/Inputs" in a business model. Key Resources refers to the most important assets required to make a business model work, which can include human resources or individuals contributing to the value creation process. Key Activities, on the other hand, are the most important things a company must do to make its business model work, which can also involve the tasks performed by individuals.
-**Value Chain Analysis**
-This tool, developed by Michael Porter, is used to analyze the activities that a company performs in order to deliver a valuable product or service. The "Primary Activities" in the value chain, such as inbound logistics, operations, outbound logistics, marketing and sales, and service, all involve the contribution of individuals or resources to the value creation process.
-**SWOT Analysis**
-The SWOT analysis can be used to evaluate the strengths and weaknesses of the individuals or resources contributing to the value creation process, as well as to identify opportunities for improvement or potential threats.
-**Resource-Based View (RBV)**
-The Resource-Based View is a method for analyzing and identifying a firm's strategic advantages based on the examination of its unique bundle of resources and capabilities. This includes the individuals or resources that contribute to the value creation process.
-**Balanced Scorecard**
-The Balanced Scorecard is a strategic planning and management system that organizations use to align business activities to the vision and strategy of the organization, improve internal and external communications, and monitor organization performance against strategic goals. It includes perspectives such as "Learning and Growth" which focuses on employee training and corporate cultural attitudes related to both individual and corporate self-improvement.
-**Six Sigma**
-Six Sigma is a set of techniques and tools for process improvement. It seeks to improve the quality of the output of a process by identifying and removing the causes of defects and minimizing variability in manufacturing and business processes. It uses a set of quality management methods, mainly empirical, statistical methods, and creates a special infrastructure of people within the organization who are experts in these methods.
+**Talent Allocation & Human Resource Information Systems (HRIS)**
+Tracking individual team members, seat assignments, performance contributions, and compensation packages.
 
 ### Prompts
-`Describe the unique contributions of each key team member to strategic goals.`
-`Map individual strengths to project or functional needs.`
-`Identify opportunities for team members to expand their contributions.`
-`Propose recognition or incentive mechanisms to reward high contributions.`
-`Outline a process to document and share individual learnings across the team.`
-
-## Compensations
-
-### Summary
-The various forms of remuneration, benefits, and rewards that a company provides to an individual in exchange for their contributions. This can include salary, bonuses, stock options, health benefits, retirement plans, and other perks that constitute the total compensation package offered to employees or collaborators for their valuable inputs to the company.
-
-### Description
-"Compensations" in business modeling refers to the various forms of retribution or rewards that team members or contributors receive in exchange for their contributions to the business. This concept encompasses all types of compensations, whether financial, non-financial, tangible, or intangible, that recognize and reciprocate the value provided by individuals or entities.
-
-In this context, the "Person" represents an individual or entity contributing to the business's success. These contributors might include employees, contractors, partners, or even customers whose actions or resources add value to the business model.
-
-"Compensations" are the rewards provided to these contributors in return for their input. These can include salaries, bonuses, equity, benefits, recognition, access to resources, or other forms of value that acknowledge their contributions. The nature and structure of these compensations can vary widely depending on the business model, the role of the contributor, and the mutual agreement between the parties involved.
-
-For example: In a manufacturing business, employees operating the production line might receive monetary wages and benefits as compensations for their work. In a consulting business, consultants may be compensated with project-based fees, performance bonuses, or professional development opportunities in exchange for the solutions they deliver to clients. "Compensations" emphasizes the reciprocal nature of the relationship between a business and its contributors. It highlights the importance of not only identifying the value provided by individuals or entities but also ensuring that their contributions are recognized and rewarded in a way that sustains motivation, engagement, and long-term collaboration.
-
-In essence, integrating "Compensations" into business modeling ensures that the value exchange within the organization is fair, transparent, and aligned with the strategic goals of the business. It fosters a balanced system where contributors feel valued and are incentivized to continue driving the business's success.
-
-### Methodologies
-**Business Model Canvas**
-In the Business Model Canvas, "Key Activities" and "Key Resources" often refer to the people or entities that generate value for the business. These could be employees, partners, or even customers themselves (in the case of user-generated content, for example). The "Value Propositions" and "Customer Relationships" components also often involve people as they are about the value delivered to customers and the type of relationship the company establishes with them.
-**Value Chain Analysis**
-This tool, developed by Michael Porter, breaks down the activities of a company into a series of value-generating steps. People are often involved in many of these steps, either as employees performing tasks or as customers receiving the output of these tasks.
-**Job-To-Be-Done Framework**
-This tool focuses on understanding the jobs that customers are trying to get done in their lives, and how a company's product or service can help them do these jobs. The "job executor" in this framework is the person or entity that generates value for the business by using the product or service to get a job done.
-**Stakeholder Analysis**
-This tool identifies and analyzes the people or groups that have a stake in a business or project. These stakeholders often generate value for the business, either directly (as employees or partners) or indirectly (as customers, regulators, or community members).
-**Lean Startup Methodology**
-This methodology, developed by Eric Ries, emphasizes the importance of learning from customers through a build-measure-learn feedback loop. In this context, customers (the "people" component) generate value for the business by providing feedback on the product or service, which can then be used to improve it.
-**User Persona**
-This tool involves creating fictional characters based on your real and potential customers. These personas help businesses understand their customers' needs, experiences, behaviors and goals, which in turn helps in creating value for both the business and the customers.
-
-### Prompts
-`Design a compensation framework combining base salary, variable pay, and benefits.`
-`Benchmark compensation levels against industry standards.`
-`Define performance metrics linked to bonus or equity awards.`
-`Recommend non-monetary perks (e.g., flexible hours, training) to enhance retention.`
-`Explain how compensation reviews will be conducted and communicated.`
+`Identify key personnel and their assigned position references.`
+`Detail individual contributions and compensation structures.`
 
 ## Skills
 

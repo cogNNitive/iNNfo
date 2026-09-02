@@ -31,6 +31,16 @@ export interface TemplateSkill {
   source_template?: string
 }
 
+export interface TemplateViewer {
+  id: string
+  view_type: string
+  target_concept?: string
+  label?: string
+  icon?: string
+  description?: string
+  source_template?: string
+}
+
 export interface ResolvedTemplatePackage {
   name: string
   version: string
@@ -141,6 +151,7 @@ export interface SpecFrontmatter {
   includes?: IncludedTemplateRef[]
   procedures?: TemplateProcedure[]
   skills?: TemplateSkill[]
+  viewers?: TemplateViewer[]
   alias?: AliasMap
   /** Reserved, inert. Named base template for future structural inheritance. */
   specializes?: string

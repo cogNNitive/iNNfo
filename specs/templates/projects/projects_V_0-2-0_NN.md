@@ -17,6 +17,12 @@ relationship_types:
     enabled: false
   sequence:
     enabled: true
+viewers:
+  - id: "gantt-chart"
+    view_type: "gantt-timeline"
+    target_concept: "Task"
+    label: "Gantt Timeline Chart"
+    icon: "calendar-range"
 ---
 
 > [!NOTE]
@@ -90,7 +96,8 @@ options:: [critical, high, medium, low]
 
 ## NN Field Definition: depends_on
 concept:: Task
-type:: string
+type:: reference
+target_concepts:: [Task, Milestone]
 
 ## NN Field Definition: duration
 concept:: Task
@@ -329,10 +336,21 @@ scope:: internal
 | Task 2 | Responsible |
 ```
 
+## Examples
+
+### Canonical Sample
+
+The official sample for this template is at `specs/templates/projects/samples/Ghostbusters_V_0-2-0_projects_NN.md`. It exercises project phases, milestones, deliverables, task dependencies (`depends_on`), risk mitigation, and RACI matrices.
+
 # Concept Guidance Documentation
 
 ## Project
+
+### Summary
 Overall vision, objective, and executive summary of the project.
+
+### Description
+The Project concept is the root container for defining strategic goals, project scope, budget constraints, and overall success metrics for a business or technical initiative.
 
 ## Phases
 
@@ -340,52 +358,44 @@ Overall vision, objective, and executive summary of the project.
 The distinct, ordered stages a project moves through — from framing to close-out — each with its own objectives, deliverables, and entrance/exit criteria.
 
 ### Description
-"Phases" break the project lifecycle into a sequence of stages that structure planning, execution, and control. Typical stages are:
-
-- Idea / Initiation: the project need is framed, the value it delivers is defined, sponsors and constraints are identified. This stage sets the foundation for everything that follows.
-
-- Planning / Design: the approach is designed — scope, activities, resources, schedule, budget, and risk response. The plan aligns the work with the project's objectives.
-
-- Implementation / Execution: the plan is put into action — the product or service is built, partnerships are established, and work packages are delivered. Success here is critical to the project's viability.
-
-- Evaluation / Verification: performance is assessed against the plan — key indicators are tracked, results are analysed, and stakeholder feedback is gathered. This stage surfaces where the project is off course.
-
-- Close-out / Evolution: the project is adjusted or wound down based on the evaluation — scope is re-baselined, lessons are captured, and outputs are handed over to operations.
-
-Phases are ordered (`type:: sequence`); a project advances through them, and `Milestone` checkpoints are typically anchored inside a phase. Use `phase_status`, `start_date`, and `end_date` to track each stage.
-
-### Methodologies
-**Waterfall / Stage-Gate**
-A sequential model where progress flows through defined phases (conception, initiation, analysis, design, construction, testing, deployment, maintenance) with a review gate between each. It provides a structured, auditable path from start to finish.
-**PRINCE2 (Projects IN Controlled Environments)**
-A process-based method organised into management stages, each with its own plan, controls, and end-stage assessment before the project board authorises the next stage.
-**Agile Delivery**
-An iterative approach where phases (Requirements, Design, Development, Testing, Deployment, Review) are revisited every increment in response to feedback, keeping the plan aligned with reality.
-**Lean Startup (Build-Measure-Learn)**
-Turns work into increments, measures the response, and decides whether to pivot or persevere — repeating the loop until product/market fit is reached.
-**Design Thinking (Empathize-Define-Ideate-Prototype-Test)**
-Starts from user needs, frames the problem, generates ideas, prototypes, and tests solutions, iterating as many times as necessary.
-**Blue Ocean Strategy**
-Sequences strategic moves — Reconstruct Market Boundaries, Focus on the Big Picture, Reach Beyond Existing Demand, Get the Strategic Sequence Right — developed by W. Chan Kim and Renée Mauborgne.
-
-### Prompts
-`Break the project into phases with clear objectives and deliverables for each.`
-`Assign start/end dates and responsible teams to every phase.`
-`Describe entrance and exit criteria required to move between phases.`
-`Identify phase-specific risks and mitigation measures.`
-`Outline phase review processes and stakeholder approval checkpoints.`
+Phases break the project lifecycle into a sequence of stages that structure planning, execution, and control. Typical stages are Initiation, Planning, Implementation, Verification, and Close-out. Phases are ordered (`type:: sequence`); a project advances through them, and Milestone checkpoints are typically anchored inside a phase. Use `phase_status`, `start_date`, and `end_date` to track each stage.
 
 ## Milestone
+
+### Summary
 Key date checkpoints and gates marking significant progress points in the project schedule.
 
+### Description
+A Milestone marks a zero-duration checkpoint or critical decision gate in the project timeline. Used to evaluate progress, unlock phase transitions, and verify major deliverable completion.
+
 ## Deliverable
+
+### Summary
 Specific artifacts or outcomes that must be completed to achieve project goals.
 
+### Description
+A Deliverable is a tangible output, document, software build, or physical asset created by project tasks and verified against acceptance criteria before project sign-off.
+
 ## Task
-Actionable work units. Use `depends_on` and `duration` to construct task dependency networks for Critical Path Method (CPM) calculations.
+
+### Summary
+Actionable work units with priorities, durations, and dependency sequences.
+
+### Description
+A Task represents an individual unit of work performed by project roles. Tasks use `depends_on` and `duration` to construct task dependency networks for Critical Path Method (CPM) calculations and Gantt timeline visualization.
 
 ## Risk
+
+### Summary
 Uncertain events that could negatively affect project goals, including probability, impact, and mitigation strategies.
 
+### Description
+A Risk identifies potential threats to schedule, budget, quality, or scope. Each Risk records `impact`, `probability`, and `mitigation` strategies, and maps to Milestones via the risks-milestones matrix.
+
 ## Project roles
+
+### Summary
 Functional responsibilities and team positions mapped to tasks via RACI.
+
+### Description
+Project roles define the functional actors participating in project execution. Roles carry an internal or external `scope` and are assigned to tasks through the task-roles matrix (Responsible, Accountable, Consulted, Informed).

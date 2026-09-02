@@ -1,11 +1,11 @@
 ---
-spec_version: "V_0-1-0"
-spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business-model/business-model_V_0-1-0_NN.md"
+spec_version: "V_0-2-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business-model/business-model_V_0-2-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
-template_version: "V_0-1-0"
+  name: "iNNfo_V_0-2-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-2-0_NN.md"
+template_version: "V_0-2-0"
 title: "Business Model Template"
 relationship_types:
   hierarchy:
@@ -820,7 +820,7 @@ To create a business model, create a level 3 FILE mode document with:
 level: 3
 parent_spec:
   name: "business-model_V_0-1-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business-model/business-model_V_0-1-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business-model/business-model_V_0-2-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Your Business Name>"
 ---
@@ -3860,3 +3860,4 @@ Patent databases like those maintained by the U.S. Patent and Trademark Office o
   * [[Task]]
   * [[Risk]]
   * [[Project roles]]
+

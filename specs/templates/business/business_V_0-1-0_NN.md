@@ -7,6 +7,15 @@ parent_spec:
   url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
 template_version: "V_0-1-0"
 title: "Business Template"
+includes:
+  - name: "business-model"
+    url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/business-model/business-model_V_0-1-0_NN.md"
+  - name: "analysis"
+    url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/analysis/analysis_V_0-1-0_NN.md"
+  - name: "organization"
+    url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/organization/organization_V_0-1-0_NN.md"
+  - name: "projects"
+    url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/projects/projects_V_0-1-0_NN.md"
 relationship_types:
   hierarchy:
     enabled: true

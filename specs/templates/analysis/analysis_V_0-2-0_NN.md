@@ -1,11 +1,11 @@
 ---
-spec_version: "V_0-1-0"
-spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/analysis/analysis_V_0-1-0_NN.md"
+spec_version: "V_0-2-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/analysis/analysis_V_0-2-0_NN.md"
 level: 2
 parent_spec:
-  name: "iNNfo_V_0-1-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
-template_version: "V_0-1-0"
+  name: "iNNfo_V_0-2-0"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-2-0_NN.md"
+template_version: "V_0-2-0"
 title: "Analysis Template"
 relationship_types:
   hierarchy:
@@ -220,7 +220,7 @@ To create an analysis model, create a level 3 FILE mode document with:
 level: 3
 parent_spec:
   name: "analysis_V_0-1-0"
-  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/analysis/analysis_V_0-1-0_NN.md"
+  url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/templates/analysis/analysis_V_0-2-0_NN.md"
 model_version: "V_x-y-z"
 title: "<Analysis Name>"
 ---
@@ -584,3 +584,4 @@ Growth Hacking is a marketing strategy that focuses on rapid experimentation acr
 `Plan a pilot program to evaluate operational feasibility in a small market.`
 `What metrics will measure experiment success, and how will we collect the data?`
 `How should we iterate on the experiment based on initial results?`
+

@@ -567,8 +567,13 @@ const { show } = useToast()
 
 const availableExtensions = computed(() => {
   const tName = fullTemplateName.value || templateName.value || ''
+  const templateNode = modelStore.rootIds
+    .map((id) => modelStore.getNode(id))
+    .find((n) => n && (n.fields?.spec_version || (n as any)?.frontmatter?.viewers))
+  const fm = (templateNode as any)?.frontmatter ?? (rootNode.value as any)?.frontmatter
+
   const ext = extensionRegistry.getExtension(tName)
-  const views = ext ? ext.views : {}
+  const views = extensionRegistry.getExtensionViews(tName, fm)
   const manifest = ext ? ext.manifest : null
   return {
     templateName: tName,

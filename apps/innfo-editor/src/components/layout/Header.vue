@@ -534,8 +534,14 @@ const fullTemplateName = computed(() => {
 
 const hasGuidedProcedureExtension = computed(() => {
   const tName = fullTemplateName.value || templateName.value || ''
-  const views = extensionRegistry.getExtensionViews(tName)
-  return 'guided-procedure' in views
+  const templateNode = modelStore.rootIds
+    .map((id) => modelStore.getNode(id))
+    .find((n) => n && (n.fields?.spec_version || (n as any)?.frontmatter?.viewers))
+  const fm = (templateNode as any)?.frontmatter ?? (rootNode.value as any)?.frontmatter
+  return extensionRegistry.hasViewTypeForTemplate('fsm-stepper', {
+    frontmatter: fm,
+    templateName: tName,
+  })
 })
 
 const modelFileName = computed(() => {

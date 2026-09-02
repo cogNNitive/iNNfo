@@ -63,11 +63,13 @@ options:: [task, decision, event]
 
 ## NN Field Definition: parent
 concept:: Work
-type:: string
+type:: reference
+target_concepts:: [Work]
 
 ## NN Field Definition: next
 concept:: Work
-type:: string
+type:: reference
+target_concepts:: [Work]
 
 ## NN Field Definition: condition
 concept:: Work
