@@ -4,6 +4,7 @@ import { setActivePinia, createPinia } from 'pinia'
 import Header from '../../src/components/layout/Header.vue'
 import { useModelStore } from '../../src/stores/modelStore'
 import type { ModelNode } from '../../src/model/types'
+import pkg from '../../package.json'
 
 function makeNode(id: string, fields: Record<string, any>): ModelNode {
   return {
@@ -43,7 +44,7 @@ describe('Header.vue', () => {
     expect(text).toContain('iNNfo Modeler')
     const versionBadge = wrapper.find('[data-testid="header-version-badge"]')
     expect(versionBadge.exists()).toBe(true)
-    expect(versionBadge.text()).toContain('v0.1.0')
+    expect(versionBadge.text()).toContain(`v${pkg.version}`)
   })
 
   it('does not render Spec, Template, Model pills in header directly', () => {
