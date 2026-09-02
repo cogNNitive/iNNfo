@@ -42,7 +42,7 @@ export {
   getDefiNNe,
   SpecResolutionError,
   resolveTemplatePath,
-  resolveTemplatePathSync,
+  getTemplateSearchPaths,
   UnresolvedTemplateError,
 } from './resolver'
 export type { SpecResolver, MultiStoreResolverOptions, SpecTemplateLocation } from './resolver'

@@ -1,7 +1,11 @@
 import { SpecCache, SpecDocument, ResolverOptions } from './types'
 
 export interface SpecResolver {
-  resolveParentChain(parentUrl: string, parentName: string, options?: ResolverOptions): Promise<SpecCache>
+  resolveParentChain(
+    parentUrl: string,
+    parentName: string,
+    options?: ResolverOptions,
+  ): Promise<SpecCache>
 }
 
 export class SpecResolutionError extends Error {
@@ -57,10 +61,25 @@ export function getDefiNNe(cache: SpecCache): SpecDocument | undefined {
   return getSpecForLevel(cache, 0)
 }
 
-export async function resolveTemplatePath(
+interface TemplateCandidate {
+  filePath: string
+  source: 'workspace' | 'global' | 'skill'
+  skillName?: string
+}
+
+/**
+ * Builds the ordered list of paths that template resolution will check, in
+ * precedence order: workspace, then global user templates, then the templates
+ * bundled with each installed skill.
+ *
+ * Resolution and the "searched:" diagnostics in `UnresolvedTemplateError` both
+ * read from this one list, so the precedence order cannot drift between where
+ * a template is actually found and where we claim to have looked.
+ */
+async function buildTemplateCandidates(
   templateName: string,
   options?: MultiStoreResolverOptions,
-): Promise<SpecTemplateLocation | null> {
+): Promise<TemplateCandidate[]> {
   const fs = await import('node:fs/promises')
   const path = await import('node:path')
   const os = await import('node:os')
@@ -74,133 +93,82 @@ export async function resolveTemplatePath(
     ? [templateName]
     : [`${templateName}.md`, templateName]
 
-  const checkedPaths: string[] = []
+  const candidates: TemplateCandidate[] = []
 
-  // Tier 1: Workspace-local directory
+  // Tier 1: Workspace-local directories
   for (const candidate of candidateNames) {
-    const p1 = path.join(workspaceDir, 'templates', candidate)
-    checkedPaths.push(p1)
-    try {
-      const st = await fs.stat(p1)
-      if (st.isFile()) return { name: templateName, filePath: p1, source: 'workspace' }
-    } catch {}
-
-    const p2 = path.join(workspaceDir, candidate)
-    checkedPaths.push(p2)
-    try {
-      const st = await fs.stat(p2)
-      if (st.isFile()) return { name: templateName, filePath: p2, source: 'workspace' }
-    } catch {}
-
-    const p3 = path.join(workspaceDir, 'specs', candidate)
-    checkedPaths.push(p3)
-    try {
-      const st = await fs.stat(p3)
-      if (st.isFile()) return { name: templateName, filePath: p3, source: 'workspace' }
-    } catch {}
+    candidates.push({
+      filePath: path.join(workspaceDir, 'templates', candidate),
+      source: 'workspace',
+    })
+    candidates.push({ filePath: path.join(workspaceDir, candidate), source: 'workspace' })
+    candidates.push({ filePath: path.join(workspaceDir, 'specs', candidate), source: 'workspace' })
   }
 
   // Tier 2: Global user agents directory (~/.agents/templates/)
   for (const candidate of candidateNames) {
-    const p = path.join(globalTemplatesDir, candidate)
-    checkedPaths.push(p)
-    try {
-      const st = await fs.stat(p)
-      if (st.isFile()) return { name: templateName, filePath: p, source: 'global' }
-    } catch {}
+    candidates.push({ filePath: path.join(globalTemplatesDir, candidate), source: 'global' })
   }
 
   // Tier 3: Installed skill template directories (~/.agents/skills/*/templates/)
+  let skillNames: string[] = []
   try {
     const entries = await fs.readdir(skillsDir, { withFileTypes: true })
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        const skillName = entry.name
-        for (const candidate of candidateNames) {
-          const p1 = path.join(skillsDir, skillName, 'templates', candidate)
-          checkedPaths.push(p1)
-          try {
-            const st = await fs.stat(p1)
-            if (st.isFile())
-              return { name: templateName, filePath: p1, source: 'skill', skillName }
-          } catch {}
-
-          const p2 = path.join(skillsDir, skillName, candidate)
-          checkedPaths.push(p2)
-          try {
-            const st = await fs.stat(p2)
-            if (st.isFile())
-              return { name: templateName, filePath: p2, source: 'skill', skillName }
-          } catch {}
-        }
-      }
+    skillNames = entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+  } catch {
+    // No skills directory installed — tier 3 contributes no candidates.
+  }
+  for (const skillName of skillNames) {
+    for (const candidate of candidateNames) {
+      candidates.push({
+        filePath: path.join(skillsDir, skillName, 'templates', candidate),
+        source: 'skill',
+        skillName,
+      })
+      candidates.push({
+        filePath: path.join(skillsDir, skillName, candidate),
+        source: 'skill',
+        skillName,
+      })
     }
-  } catch {}
+  }
 
-  return null
+  return candidates
 }
 
-export function resolveTemplatePathSync(
+/**
+ * Returns every path template resolution would check, in precedence order.
+ * Intended for diagnostics after `resolveTemplatePath` returns null.
+ */
+export async function getTemplateSearchPaths(
   templateName: string,
   options?: MultiStoreResolverOptions,
-): SpecTemplateLocation | null {
-  const fs = require('node:fs')
-  const path = require('node:path')
-  const os = require('node:os')
+): Promise<string[]> {
+  const candidates = await buildTemplateCandidates(templateName, options)
+  return candidates.map((candidate) => candidate.filePath)
+}
 
-  const workspaceDir = options?.workspaceDir ?? process.cwd()
-  const globalTemplatesDir =
-    options?.globalTemplatesDir ?? path.join(os.homedir(), '.agents', 'templates')
-  const skillsDir = options?.skillsDir ?? path.join(os.homedir(), '.agents', 'skills')
+export async function resolveTemplatePath(
+  templateName: string,
+  options?: MultiStoreResolverOptions,
+): Promise<SpecTemplateLocation | null> {
+  const fs = await import('node:fs/promises')
+  const candidates = await buildTemplateCandidates(templateName, options)
 
-  const candidateNames = templateName.endsWith('.md')
-    ? [templateName]
-    : [`${templateName}.md`, templateName]
-
-  // Tier 1: Workspace-local directory
-  for (const candidate of candidateNames) {
-    const p1 = path.join(workspaceDir, 'templates', candidate)
-    if (fs.existsSync(p1) && fs.statSync(p1).isFile()) {
-      return { name: templateName, filePath: p1, source: 'workspace' }
-    }
-    const p2 = path.join(workspaceDir, candidate)
-    if (fs.existsSync(p2) && fs.statSync(p2).isFile()) {
-      return { name: templateName, filePath: p2, source: 'workspace' }
-    }
-    const p3 = path.join(workspaceDir, 'specs', candidate)
-    if (fs.existsSync(p3) && fs.statSync(p3).isFile()) {
-      return { name: templateName, filePath: p3, source: 'workspace' }
-    }
-  }
-
-  // Tier 2: Global user agents directory
-  for (const candidate of candidateNames) {
-    const p = path.join(globalTemplatesDir, candidate)
-    if (fs.existsSync(p) && fs.statSync(p).isFile()) {
-      return { name: templateName, filePath: p, source: 'global' }
-    }
-  }
-
-  // Tier 3: Installed skill template directories
-  if (fs.existsSync(skillsDir)) {
+  for (const candidate of candidates) {
     try {
-      const entries = fs.readdirSync(skillsDir, { withFileTypes: true })
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const skillName = entry.name
-          for (const candidate of candidateNames) {
-            const p1 = path.join(skillsDir, skillName, 'templates', candidate)
-            if (fs.existsSync(p1) && fs.statSync(p1).isFile()) {
-              return { name: templateName, filePath: p1, source: 'skill', skillName }
-            }
-            const p2 = path.join(skillsDir, skillName, candidate)
-            if (fs.existsSync(p2) && fs.statSync(p2).isFile()) {
-              return { name: templateName, filePath: p2, source: 'skill', skillName }
-            }
-          }
+      const stat = await fs.stat(candidate.filePath)
+      if (stat.isFile()) {
+        return {
+          name: templateName,
+          filePath: candidate.filePath,
+          source: candidate.source,
+          ...(candidate.skillName ? { skillName: candidate.skillName } : {}),
         }
       }
-    } catch {}
+    } catch {
+      // Path does not exist — keep walking the precedence list.
+    }
   }
 
   return null
