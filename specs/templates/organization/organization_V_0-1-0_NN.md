@@ -62,6 +62,11 @@ concept:: Roles
 type:: select
 options:: [internal, external]
 
+## NN Field Definition: image
+concept:: Person
+type:: image
+description:: Visual portrait or avatar representing the person.
+
 # NN Marker Definition
 
 ## NN Marker Definition: complexity

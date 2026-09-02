@@ -92,6 +92,11 @@ concept:: Person
 type:: string
 description:: Primary contributions, role dedication, and key deliverables.
 
+## NN Field Definition: image
+concept:: Person
+type:: image
+description:: Visual portrait or avatar representing the person.
+
 # NN Marker Definition
 
 ## NN Marker Definition: complexity

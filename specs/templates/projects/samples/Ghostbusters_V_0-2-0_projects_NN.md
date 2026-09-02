@@ -64,7 +64,10 @@ Automatic transfer switch coupling main city power to the auxiliary diesel gener
 ## NN Task: Calibrate Particle Accelerators
 status:: done
 priority:: high
+depends_on:: -
 duration:: 4d
+start_date:: "2026-08-01"
+due_date:: "2026-08-05"
 milestone:: [[Blueprint Approval Gate]]
 deliverable:: [[High-Voltage Vault Blueprint]]
 Calculate required megawatt load to stabilize high-density spectral entities in vault cells.
@@ -74,6 +77,8 @@ status:: in_progress
 priority:: critical
 depends_on:: [[Calibrate Particle Accelerators]]
 duration:: 10d
+start_date:: "2026-08-21"
+due_date:: "2026-08-31"
 milestone:: [[Auxiliary Containment Cell Installation]]
 deliverable:: [[Auxiliary Laser Matrix Cell]]
 Mount high-frequency laser emitter banks inside the subterranean vault expansion chamber.
@@ -83,6 +88,8 @@ status:: in_progress
 priority:: high
 depends_on:: [[Install Auxiliary Laser Matrix]]
 duration:: 5d
+start_date:: "2026-09-01"
+due_date:: "2026-09-06"
 milestone:: [[Auxiliary Containment Cell Installation]]
 deliverable:: [[Automated Backup Power Switch]]
 Wire the heavy auxiliary diesel generator to the containment grid automatic transfer switch.
@@ -92,6 +99,8 @@ status:: backlog
 priority:: critical
 depends_on:: [[Couple Diesel Backup Generator]]
 duration:: 3d
+start_date:: "2026-09-16"
+due_date:: "2026-09-19"
 milestone:: [[Full Grid Containment Signoff]]
 deliverable:: [[Auxiliary Laser Matrix Cell]]
 Simulate main city power shutdown to verify automatic switchover and laser grid stability.

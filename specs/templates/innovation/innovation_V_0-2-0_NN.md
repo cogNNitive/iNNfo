@@ -121,6 +121,11 @@ type:: string
 concept:: Person
 type:: image
 
+## NN Field Definition: image
+concept:: Person
+type:: image
+description:: Visual portrait or avatar representing the person.
+
 ## NN Field Definition: opportunityId
 concept:: Opportunity
 type:: string
