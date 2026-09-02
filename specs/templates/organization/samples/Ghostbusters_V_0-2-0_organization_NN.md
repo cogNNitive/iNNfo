@@ -76,30 +76,35 @@ Administrative seat managing office intake, dispatching, and financial accounts.
 position_ref:: [[Chief Scientist]]
 compensation:: Equal partner equity share (25%), $75,000 base salary, full laboratory access.
 contributions:: Invented the Proton Pack, PKE Meter, and Containment Grid; leads theoretical ecto-physics research.
+image:: assets/people/egon_spengler.png
 Dr. Egon Spengler is the chief intellectual architect of Ghostbusters Inc., specializing in quantum ecto-physics and high-energy particle containment.
 
 ## NN Person: Dr. Peter Venkman
 position_ref:: [[Operations Director]]
 compensation:: Equal partner equity share (25%), $75,000 base salary, commercial bonus commissions.
 contributions:: Leads client negotiations, marketing, press relations, and operational decision-making.
+image:: assets/people/peter_venkman.png
 Dr. Peter Venkman brings psychological insight, commercial charisma, and public leadership to the firm's business operations.
 
 ## NN Person: Dr. Raymond Stantz
 position_ref:: [[Staff Scientist & Engineer]]
 compensation:: Equal partner equity share (25%), $75,000 base salary, equipment trade access.
 contributions:: Co-developed the Proton Pack, maintains Ecto-1, and conducts field entrapment operations.
+image:: assets/people/raymond_stantz.png
 Dr. Ray Stantz combines deep enthusiasm for occult history with practical mechanical and engineering expertise.
 
 ## NN Person: Winston Zeddemore
 position_ref:: [[Field Specialist]]
 compensation:: $60,000 base salary, overtime hazard pay ($500 per captured class-V entity), healthcare benefits.
 contributions:: Operates heavy field hardware, manages Ecto-1 driving duties, and executes frontline captures.
+image:: assets/people/winston_zeddemore.png
 Winston Zeddemore joined the team during peak NYC spectral activity, providing steady discipline and reliable execution under pressure.
 
 ## NN Person: Janine Melnitz
 position_ref:: [[Office Administrator]]
 compensation:: $48,000 base salary, full health insurance, overtime dispatch bonuses.
 contributions:: Handles emergency intake calls, manages billing and legal notices, and monitors the containment grid warning alarms.
+image:: assets/people/janine_melnitz.png
 Janine Melnitz commands headquarters administration, maintaining operational focus during high-stress outbreak spikes.
 
 # NN Skills
