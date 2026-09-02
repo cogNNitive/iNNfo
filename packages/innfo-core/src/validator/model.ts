@@ -2,7 +2,14 @@ import { ParsedModel, SpecDocument, ValidationResult, ValidationError } from '..
 import { checkElementsAgainstSchema, resolveTemplateSchema } from '../schema'
 import type { IncludeResolver } from '../schema'
 import { validateReferences, validateElementFieldReferences } from './references'
+import type { SubmodelResolver } from './references'
 import { validateTaxonomyHierarchy } from './hierarchy'
+
+export interface ValidateModelOptions {
+  resolveInclude?: IncludeResolver
+  resolveSubmodel?: SubmodelResolver
+  referringPath?: string
+}
 
 /**
  * Validates model contents against template specification (level 2).
@@ -16,8 +23,17 @@ export function validateModel(
   model: ParsedModel,
   template: SpecDocument | null,
   _formatSpec: SpecDocument | null,
-  resolveInclude?: IncludeResolver,
+  resolveIncludeOrOptions?: IncludeResolver | ValidateModelOptions,
+  options?: ValidateModelOptions,
 ): ValidationResult {
+  const opts: ValidateModelOptions =
+    typeof resolveIncludeOrOptions === 'function'
+      ? { resolveInclude: resolveIncludeOrOptions, ...options }
+      : (resolveIncludeOrOptions ?? options ?? {})
+  const resolveInclude = opts.resolveInclude
+  const resolveSubmodel = opts.resolveSubmodel
+  const referringPath = opts.referringPath
+
   const errors: ValidationError[] = []
   const warnings: ValidationError[] = []
   const fm = model.frontmatter
@@ -284,7 +300,10 @@ export function validateModel(
 
   // R-IE-04: reference-typed element fields must resolve to element names
   // model-wide, respecting each field's `target_concepts` when declared.
-  for (const diag of validateElementFieldReferences(model, templateConcepts)) {
+  for (const diag of validateElementFieldReferences(model, templateConcepts, {
+    resolveSubmodel,
+    referringPath,
+  })) {
     ;(diag.severity === 'error' ? errors : warnings).push(diag)
   }
 

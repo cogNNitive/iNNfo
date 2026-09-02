@@ -65,9 +65,9 @@ const samples: SampleInfo[] = [
     id: 'sample-organization',
     template: 'organization',
     templateLabel: 'Organization',
-    sampleName: 'Engineering Team',
+    sampleName: 'Ghostbusters Inc.',
     description: 'Team structure: positions, roles, members, reporting lines, and skills matrix.',
-    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md`,
+    url: `${SAMPLE_BASE}/organization/samples/Ghostbusters_V_0-2-0_organization_NN.md`,
   },
 ]
 

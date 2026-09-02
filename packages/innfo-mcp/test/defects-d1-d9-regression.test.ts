@@ -167,11 +167,11 @@ title: "Model"
   it('D9: NN index section with wikilinks is correctly parsed', () => {
     const docWithIndex = `---
 specification_version: "V_0-1-0"
-level: 3
+level: 2
 parent_spec:
   name: Template
   url: "https://example.com/template.md"
-model_version: "V_0-1-0"
+template_version: "V_0-1-0"
 title: "Index Model"
 ---
 

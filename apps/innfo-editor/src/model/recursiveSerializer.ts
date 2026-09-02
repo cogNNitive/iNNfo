@@ -157,62 +157,64 @@ function serializeNodeContent(node: ModelNode): {
 
     collectElements(node.id)
 
-    const elementsMap = new ElementsMap()
-    for (const child of childElements) {
-      const conceptName = child.type
-      if (!elementsMap.has(conceptName)) {
-        elementsMap.set(conceptName, [])
-      }
-      const elFields: Record<string, unknown> = {}
-      if (child.fields) {
-        for (const [key, fVal] of Object.entries(child.fields)) {
-          elFields[key] = (fVal as any)?.value !== undefined ? (fVal as any).value : fVal
+    if (childElements.length > 0) {
+      const elementsMap = new ElementsMap()
+      for (const child of childElements) {
+        const conceptName = child.type
+        if (!elementsMap.has(conceptName)) {
+          elementsMap.set(conceptName, [])
         }
-      }
-      elementsMap.get(conceptName)!.push({
-        type: child.type,
-        name: child.name,
-        description: child.rawSections?.description || '',
-        fields: elFields,
-        markers: child.markers || {},
-        slug: child.slug,
-        tags: child.tags,
-      })
-    }
-    parsed.elements = elementsMap
-
-    // Synchronize hierarchy taxonomy
-    const elementNames = new Set(childElements.map((c) => c.name))
-    const conceptEdges = parsed.taxonomy.filter((edge) => !elementNames.has(edge.child))
-
-    const elementEdges: Array<{ parent: string; child: string }> = []
-    for (const child of childElements) {
-      let parentName = ''
-      if (child.parentId) {
-        if (child.parentId.startsWith('virtual:')) {
-          const parts = child.parentId.split(':')
-          parentName = parts[2] || ''
-        } else {
-          const parentNode = modelStore.getNode(child.parentId)
-          if (parentNode && parentNode.kind === 'element') {
-            parentName = parentNode.name
-          } else {
-            parentName = child.type || ''
+        const elFields: Record<string, unknown> = {}
+        if (child.fields) {
+          for (const [key, fVal] of Object.entries(child.fields)) {
+            elFields[key] = (fVal as any)?.value !== undefined ? (fVal as any).value : fVal
           }
         }
+        elementsMap.get(conceptName)!.push({
+          type: child.type,
+          name: child.name,
+          description: child.rawSections?.description || '',
+          fields: elFields,
+          markers: child.markers || {},
+          slug: child.slug,
+          tags: child.tags,
+        })
       }
-      elementEdges.push({ parent: parentName, child: child.name })
-    }
-    parsed.taxonomy = [...conceptEdges, ...elementEdges]
+      parsed.elements = elementsMap
 
-    // Synchronize item node markers
-    const nodeMarkers: Record<string, Record<string, number | string>> = {}
-    for (const child of childElements) {
-      if (child.markers && Object.keys(child.markers).length > 0) {
-        nodeMarkers[child.name] = { ...child.markers }
+      // Synchronize hierarchy taxonomy
+      const elementNames = new Set(childElements.map((c) => c.name))
+      const conceptEdges = parsed.taxonomy.filter((edge) => !elementNames.has(edge.child))
+
+      const elementEdges: Array<{ parent: string; child: string }> = []
+      for (const child of childElements) {
+        let parentName = ''
+        if (child.parentId) {
+          if (child.parentId.startsWith('virtual:')) {
+            const parts = child.parentId.split(':')
+            parentName = parts[2] || ''
+          } else {
+            const parentNode = modelStore.getNode(child.parentId)
+            if (parentNode && parentNode.kind === 'element') {
+              parentName = parentNode.name
+            } else {
+              parentName = child.type || ''
+            }
+          }
+        }
+        elementEdges.push({ parent: parentName, child: child.name })
       }
+      parsed.taxonomy = [...conceptEdges, ...elementEdges]
+
+      // Synchronize item node markers
+      const nodeMarkers: Record<string, Record<string, number | string>> = {}
+      for (const child of childElements) {
+        if (child.markers && Object.keys(child.markers).length > 0) {
+          nodeMarkers[child.name] = { ...child.markers }
+        }
+      }
+      parsed.nodeMarkers = nodeMarkers
     }
-    parsed.nodeMarkers = nodeMarkers
   }
 
   // Preserve concept-level tags from root node

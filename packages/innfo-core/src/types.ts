@@ -72,6 +72,7 @@ export interface ConceptField {
     | 'model'
   options?: string[]
   target_concepts?: string[]
+  target_template?: string
 }
 
 export interface Concept {

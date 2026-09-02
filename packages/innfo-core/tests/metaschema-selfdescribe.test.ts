@@ -53,7 +53,17 @@ describe('Metaschema (Self-Description)', () => {
       'list',
       'steps',
       'sequence',
+      'model',
     ])
+    const fieldTypeField = schema.concepts
+      .find((c) => c.name === 'Field Definition')!
+      .fields!.find((f) => f.name === 'type')!
+    expect(fieldTypeField.options).toContain('model')
+    const targetTemplateField = schema.concepts
+      .find((c) => c.name === 'Field Definition')!
+      .fields!.find((f) => f.name === 'target_template')
+    expect(targetTemplateField).toBeDefined()
+    expect(targetTemplateField?.type).toBe('string')
   })
 
   it('every shipped template validates green against the metaschema', () => {

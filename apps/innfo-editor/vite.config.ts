@@ -59,6 +59,12 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     setupFiles: ['./tests/setup.ts'],
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
     // Playwright specs under e2e/ are driven by `playwright test`, not Vitest.
     // Without this exclude, Vitest tries to collect them and fails on the
     // '@playwright/test' import.

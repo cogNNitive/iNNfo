@@ -7,6 +7,15 @@ export interface ReferenceDiagnostic {
   severity: 'error' | 'warning'
 }
 
+/**
+ * Synchronous callback supplied by host environments (Node MCP or Browser Editor)
+ * to resolve submodel files and inspect their template identities.
+ */
+export type SubmodelResolver = (
+  refPath: string,
+  referringPath?: string,
+) => { exists: boolean; templateName?: string; templateUrl?: string } | null
+
 /** Collect all element names model-wide (lowercased for case-insensitive matching). */
 function collectElementNames(model: ParsedModel): Set<string> {
   const names = new Set<string>()
@@ -124,6 +133,10 @@ export function validateReferences(model: ParsedModel): ReferenceDiagnostic[] {
 export function validateElementFieldReferences(
   model: ParsedModel,
   templateConcepts: Concept[],
+  options?: {
+    resolveSubmodel?: SubmodelResolver
+    referringPath?: string
+  },
 ): ReferenceDiagnostic[] {
   const diagnostics: ReferenceDiagnostic[] = []
   const elementNames = collectElementNames(model)
@@ -161,12 +174,46 @@ export function validateElementFieldReferences(
             value = value.slice(2, -2).trim()
           }
 
+          if (fieldDef?.type === 'model') {
+            const cleanPath = value.trim()
+            if (options?.resolveSubmodel) {
+              const res = options.resolveSubmodel(cleanPath, options.referringPath)
+              if (res) {
+                if (!res.exists) {
+                  diagnostics.push({
+                    path: `elements.${conceptName}.${el.name}.fields.${fieldDef?.name ?? fieldName}`,
+                    message: `Dangling submodel reference: field "${fieldDef?.name ?? fieldName}" references file "${cleanPath}" which does not exist`,
+                    severity: 'warning',
+                  })
+                } else if (fieldDef.target_template) {
+                  const expected = fieldDef.target_template.trim().toLowerCase()
+                  const actualName = (res.templateName ?? '').trim().toLowerCase()
+                  const actualUrl = (res.templateUrl ?? '').trim().toLowerCase()
+                  const matches =
+                    actualName === expected ||
+                    actualUrl === expected ||
+                    actualUrl.endsWith(`/${expected}`) ||
+                    actualUrl.endsWith(`/${expected}.md`) ||
+                    actualUrl.endsWith(`/${expected}_NN.md`) ||
+                    actualName.endsWith(expected)
+
+                  if (!matches) {
+                    diagnostics.push({
+                      path: `elements.${conceptName}.${el.name}.fields.${fieldDef?.name ?? fieldName}`,
+                      message: `Submodel template mismatch: field "${fieldDef?.name ?? fieldName}" expects template "${fieldDef.target_template}", but referenced file "${cleanPath}" uses template "${res.templateName || res.templateUrl}"`,
+                      severity: 'warning',
+                    })
+                  }
+                }
+              }
+            }
+            continue
+          }
+
           let isCrossModel = false
           if (value.startsWith('[') && value.includes(']')) {
             isCrossModel = true
           } else if (value.includes('::')) {
-            isCrossModel = true
-          } else if (fieldDef?.type === 'model' && (value.endsWith('.md') || value.includes('/') || value.includes('\\'))) {
             isCrossModel = true
           }
 

@@ -15,9 +15,6 @@ type: "BusinessModel"
 
 > [!NOTE] This is an iNNfo business model.
 
-# NN index
-* [[Stakeholders]]
-
 # NN Stakeholders
 ## NN Stakeholders: Ghostbusters Inc.
 `

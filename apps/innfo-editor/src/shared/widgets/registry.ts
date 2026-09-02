@@ -41,6 +41,7 @@ export type WidgetType =
   | 'number'
   | 'select'
   | 'reference'
+  | 'model'
   | 'image'
   | 'file'
   | 'video'
@@ -84,6 +85,7 @@ export const UNIFIED_WIDGET_REGISTRY: Record<string, Component> = {
   number: FieldNumber,
   select: FieldSelect,
   reference: FieldReference,
+  model: FieldString,
   // asset field-type widgets (FR-003)
   image: FieldAsset,
   image_url: FieldAsset,

@@ -3,6 +3,7 @@ import type { IncludeResolver } from '../schema'
 import { parseModel } from '../parser'
 import { validateFormatContent } from './content'
 import { validateModel } from './model'
+import type { SubmodelResolver } from './references'
 
 export interface DocumentValidation {
   /** Document hygiene: frontmatter keys, body structure, naming conventions. */
@@ -35,6 +36,8 @@ export function validateDocument(
     formatSpec?: SpecDocument | null
     expectedSpecVersion?: string
     resolveInclude?: IncludeResolver
+    resolveSubmodel?: SubmodelResolver
+    referringPath?: string
   },
 ): DocumentValidation {
   const format = validateFormatContent(content, opts.fileName, opts.expectedSpecVersion)
@@ -60,7 +63,11 @@ export function validateDocument(
       parsed,
       opts.template ?? null,
       opts.formatSpec ?? null,
-      opts.resolveInclude,
+      {
+        resolveInclude: opts.resolveInclude,
+        resolveSubmodel: opts.resolveSubmodel,
+        referringPath: opts.referringPath ?? opts.fileName,
+      },
     )
     schema = result
     errors.push(...result.errors)

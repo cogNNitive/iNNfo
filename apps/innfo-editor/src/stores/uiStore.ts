@@ -15,6 +15,13 @@ export type ExplorerFilterMode = 'all' | 'models' | 'sources' | 'artifacts'
 
 export type SidebarMode = 'workspace' | 'focused_model'
 
+export interface BreadcrumbSegment {
+  id: string | null
+  label: string
+  isRoot: boolean
+  isCurrent: boolean
+}
+
 /**
  * UI-only state that does not belong in modelStore.
  *
@@ -190,7 +197,58 @@ export const useUiStore = defineStore('ui', () => {
     focusedModelId.value = null
   }
 
+  function resolveModelAncestry(
+    modelId: string,
+    nodes?: Record<string, any>,
+  ): BreadcrumbSegment[] {
+    const segments: BreadcrumbSegment[] = [
+      {
+        id: null,
+        label: 'Workspace',
+        isRoot: true,
+        isCurrent: false,
+      },
+    ]
+
+    if (!modelId) return segments
+
+    const chain: Array<{ id: string; name: string }> = []
+    let currentId: string | null = modelId
+    const visited = new Set<string>()
+
+    while (currentId && !visited.has(currentId)) {
+      visited.add(currentId)
+      let node: any = nodes ? nodes[currentId] : null
+      if (!node && nodes) {
+        node = Object.values(nodes).find(
+          (n: any) =>
+            n.id === currentId ||
+            n.name === currentId ||
+            n.source?.path === currentId ||
+            n.source?.path?.replace(/\.md$/i, '').endsWith(currentId),
+        )
+      }
+
+      const name =
+        node?.name || node?.source?.path?.split('/').pop()?.replace(/\.md$/i, '') || currentId
+      chain.unshift({ id: node?.id || currentId, name })
+      currentId = node?.parentId || null
+    }
+
+    chain.forEach((item, idx) => {
+      segments.push({
+        id: item.id,
+        label: item.name,
+        isRoot: false,
+        isCurrent: idx === chain.length - 1,
+      })
+    })
+
+    return segments
+  }
+
   return {
+    resolveModelAncestry,
     activeModelId,
     activeConcept,
     activeView,

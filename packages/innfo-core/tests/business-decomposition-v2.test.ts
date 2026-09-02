@@ -11,8 +11,8 @@ import {
 const specsRoot = join(import.meta.dirname!, '..', '..', '..', 'specs')
 const readSpec = (p: string): string => readFileSync(join(specsRoot, p), 'utf-8')
 
-const BUSINESS_MODEL = readSpec('templates/business-model/business-model_V_0-1-0_NN.md')
-const ANALYSIS = readSpec('templates/analysis/analysis_V_0-1-0_NN.md')
+const BUSINESS_MODEL = readSpec('templates/business-model/business-model_V_0-2-0_NN.md')
+const ANALYSIS = readSpec('templates/analysis/analysis_V_0-2-0_NN.md')
 const ORG_V2 = readSpec('templates/organization/organization_V_0-2-0_NN.md')
 const PROJECTS_V2 = readSpec('templates/projects/projects_V_0-2-0_NN.md')
 const BUSINESS_V2 = readSpec('templates/business/business_V_0-2-0_NN.md')
@@ -27,7 +27,7 @@ const byName: Record<string, string> = {
 }
 const resolver = (ref: { name: string }): string | null => byName[ref.name.toLowerCase()] ?? null
 
-describe('business-model_V_0-1-0 — composite of organization + projects', () => {
+describe('business-model_V_0-2-0 — composite of organization + projects', () => {
   it('resolves with zero errors', () => {
     const { errors } = resolveTemplateSchema(BUSINESS_MODEL, resolver)
     expect(errors, JSON.stringify(errors)).toEqual([])
@@ -200,8 +200,7 @@ describe('business_V_0-2-0 — umbrella composite (D1 marker dedup)', () => {
       'Team',
       'Procedure', // business-model
       'Analysis',
-      'Validation',
-      'SWOT', // analysis
+      'Validation', // analysis
       'Organization',
       'Person',
       'Skills', // organization

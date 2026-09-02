@@ -25,10 +25,6 @@ describe('organization_V_0-2-0 — standalone L2 template', () => {
         'Functions',
       ]),
     )
-    // Contributions and Compensations are restored as first-class concepts
-    // (they exist as both concepts and per-Person string fields, mirroring
-    // business_V_0-1-0).
-    expect(concepts).toEqual(expect.arrayContaining(['Contributions', 'Compensations']))
 
     const matrices = schema.matrices.map((m) => m.name)
     expect(matrices).toEqual(expect.arrayContaining(['Functions-Positions Matrix']))

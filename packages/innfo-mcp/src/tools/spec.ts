@@ -104,6 +104,65 @@ export async function findModelFile(rootDir: string, id: string): Promise<string
     }
   }
 
+  // Recursive fallback across subdirectories
+  const recursiveMatch = await recursiveFindModel(rootDir, cleanId, id)
+  if (recursiveMatch) return recursiveMatch
+
+  return null
+}
+
+async function recursiveFindModel(
+  dir: string,
+  cleanId: string,
+  rawId: string,
+  depth = 0,
+): Promise<string | null> {
+  if (depth > 8) return null
+  const { readdir } = await import('node:fs/promises')
+  let entries
+  try {
+    entries = await readdir(dir, { withFileTypes: true })
+  } catch {
+    return null
+  }
+
+  const subdirs: string[] = []
+  const candidatesNames = new Set([
+    `${cleanId}_NN.md`.toLowerCase(),
+    `${cleanId}.md`.toLowerCase(),
+    `${cleanId}`.toLowerCase(),
+    `${rawId}`.toLowerCase(),
+    `${rawId}.md`.toLowerCase(),
+    `${rawId}_NN.md`.toLowerCase(),
+  ])
+
+  for (const entry of entries) {
+    const nameLower = entry.name.toLowerCase()
+    if (entry.isFile() && candidatesNames.has(nameLower)) {
+      return join(dir, entry.name)
+    }
+    if (entry.isDirectory()) {
+      if (
+        ![
+          'node_modules',
+          '.git',
+          'dist',
+          '.spec-cache',
+          'specs',
+          'backups',
+          'archive',
+        ].includes(nameLower)
+      ) {
+        subdirs.push(join(dir, entry.name))
+      }
+    }
+  }
+
+  for (const subdir of subdirs) {
+    const found = await recursiveFindModel(subdir, cleanId, rawId, depth + 1)
+    if (found) return found
+  }
+
   return null
 }
 

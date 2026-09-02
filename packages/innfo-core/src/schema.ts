@@ -116,6 +116,7 @@ export function extractTemplateSchema(parsed: ParsedModel): TemplateSchema {
       type: (asString(el.fields['type']) as ConceptField['type']) ?? 'string',
       options: asStringArray(el.fields['options']),
       target_concepts: asStringArray(el.fields['target_concepts']),
+      target_template: asString(el.fields['target_template']),
     }
     const list = fieldsByConcept.get(owner)
     if (list) {

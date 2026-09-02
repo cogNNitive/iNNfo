@@ -89,7 +89,7 @@ Declares a Concept. The Element name is the Concept name. Allowed properties:
 
 | Property | Type | Description |
 |---|---|---|
-| `type` | `text` \| `category` \| `weight` \| `list` \| `steps` \| `sequence` | Representation of the Concept (required) |
+| `type` | `text` \| `category` \| `weight` \| `list` \| `steps` \| `sequence` \| `model` | Representation of the Concept (required) |
 | `icon` | string | Lucide icon identifier |
 | `color` | string | Theme color |
 | `weight` | number | Display priority (higher = more prominent) |
@@ -111,9 +111,10 @@ Declares a typed Field of a Concept. The Element name is the Field name. Allowed
 | Property | Type | Description |
 |---|---|---|
 | `concept` | string | Name of the owning Concept Definition (required) |
-| `type` | `string` \| `select` \| `reference` \| `markdown_inline` \| `markdown_file` \| `image` \| `file` \| `video` \| `audio` | Field type (required) |
+| `type` | `string` \| `select` \| `reference` \| `markdown_inline` \| `markdown_file` \| `image` \| `file` \| `video` \| `audio` \| `model` | Field type (required) |
 | `options` | array | Allowed values for `select` fields |
 | `target_concepts` | array | Target concepts for `reference` fields |
+| `target_template` | string | Expected template name or stable URL for referenced submodels (optional, used when type is model) |
 | `description` | string | Human-readable explanation |
 
 ```markdown
@@ -126,6 +127,8 @@ options:: [Ideation, MVP, Validation]
 ```
 
 **Reference Fields (`type:: reference`).** Property values for fields declared with `type:: reference` MUST be formatted using WikiLink syntax `[[Target Element]]` (e.g. `location:: [[Salón-Comedor]]`). Bare string values without WikiLink delimiters are not parsed as active element-to-element graph references.
+
+**Submodel Fields (`type:: model`).** A field declared with `type:: model` references another iNNfo model document (`*_NN.md`). The field value specifies either a canonical workspace-relative path (e.g. `models/subsystems/auth_NN.md`) or a file-relative path starting with `./` or `../` (e.g. `./tokens_NN.md`). Property values MAY be enclosed in WikiLink syntax `[[...]]`, which is stripped upon resolution. When `target_template` is declared on a model field, the referenced submodel MUST conform to the specified template name or URL.
 
 
 ### Marker Definition
@@ -735,7 +738,7 @@ To validate a document `D` against a schema document `S`:
 
 When `D` is a level-2 Template, `S` is this metaschema and `D`'s Concepts are the
 reserved primitive names below; the `type` enum of a Concept Definition
-(`text | category | weight | list | steps | sequence`) is enforced by this pass —
+(`text | category | weight | list | steps | sequence | model`) is enforced by this pass —
 a value outside the set is an ERROR. When `D` is a level-3 Model, `S` is `D`'s
 resolved level-2 Template (its own Definitions plus everything it `includes`).
 
@@ -761,7 +764,7 @@ type:: list
 ## NN Field Definition: type
 concept:: Concept Definition
 type:: select
-options:: [text, category, weight, list, steps, sequence]
+options:: [text, category, weight, list, steps, sequence, model]
 description:: Representation of the Concept (required).
 
 ## NN Field Definition: icon
@@ -787,7 +790,7 @@ description:: Name of the owning Concept Definition (required).
 ## NN Field Definition: type
 concept:: Field Definition
 type:: select
-options:: [string, select, reference, markdown_inline, markdown_file, image, file, video, audio]
+options:: [string, select, reference, markdown_inline, markdown_file, image, file, video, audio, model]
 description:: Field type (required).
 
 ## NN Field Definition: options
@@ -799,6 +802,11 @@ description:: Allowed values for select fields (inline array).
 concept:: Field Definition
 type:: string
 description:: Target concepts for reference fields (inline array).
+
+## NN Field Definition: target_template
+concept:: Field Definition
+type:: string
+description:: Expected template name or stable URL for referenced submodels (optional).
 
 ## NN Field Definition: description
 concept:: Field Definition

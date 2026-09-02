@@ -64,12 +64,43 @@
       <!-- Breadcrumb navigation for Focused Model Mode -->
       <div
         v-if="uiStore.sidebarMode === 'focused_model'"
-        class="flex items-center gap-2 px-2.5 py-2 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-md border border-blue-200 dark:border-blue-800 text-xs font-semibold cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
-        @click="uiStore.returnToWorkspaceOverview()"
-        data-testid="breadcrumb-back-workspace"
+        class="flex flex-col gap-1.5 p-2 bg-blue-50/60 dark:bg-blue-950/30 rounded-md border border-blue-200 dark:border-blue-800/60 text-xs"
+        data-testid="focused-model-breadcrumbs"
       >
-        <ArrowLeft class="w-3.5 h-3.5 shrink-0" />
-        <span>Back to Workspace Overview</span>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button
+            type="button"
+            class="flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer text-xs font-medium"
+            @click="uiStore.returnToWorkspaceOverview()"
+            data-testid="breadcrumb-back-workspace"
+            title="Back to Workspace Overview"
+          >
+            <ArrowLeft class="w-3 h-3 shrink-0" />
+            <span>Workspace</span>
+            <span class="sr-only">Back to Workspace Overview</span>
+          </button>
+          <template v-for="(seg, idx) in breadcrumbs.filter((s) => !s.isRoot)" :key="seg.id || idx">
+            <span class="text-slate-300 dark:text-slate-600">/</span>
+            <span
+              v-if="seg.isCurrent"
+              class="font-semibold text-blue-700 dark:text-blue-300 truncate max-w-[120px]"
+              :title="seg.label"
+              data-testid="breadcrumb-terminal"
+            >
+              {{ seg.label }}
+            </span>
+            <button
+              v-else
+              type="button"
+              class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors cursor-pointer truncate max-w-[100px]"
+              :title="seg.label"
+              @click="seg.id ? uiStore.focusModel(seg.id) : undefined"
+              data-testid="breadcrumb-segment"
+            >
+              {{ seg.label }}
+            </button>
+          </template>
+        </div>
       </div>
 
       <!-- Workspace Mode summary metrics -->
@@ -347,24 +378,31 @@ function getModelInfo(rootId: string): { baseName: string; version: SemVer } {
   return { baseName, version }
 }
 
+const breadcrumbs = computed(() => {
+  const modelId = uiStore.focusedModelId || uiStore.activeModelId || ''
+  return uiStore.resolveModelAncestry(modelId, modelStore.nodes)
+})
+
 const visibleRootIds = computed(() => {
-  const nonTemplateRootIds = modelStore.rootIds.filter((id) => {
-    const node = modelStore.getNode(id)
-    return node && !isTemplateNode(node)
-  })
+  const candidateNodes =
+    modelStore.rootIds.length > 0
+      ? modelStore.rootIds.map((id) => modelStore.getNode(id)).filter((n): n is ModelNode => !!n)
+      : Object.values(modelStore.nodes).filter((node) => node.kind === 'root' || node.parentId === null)
+
+  const allModelRoots = candidateNodes.filter((node) => !isTemplateNode(node))
 
   // Group by baseName -> keep highest version
   const bestByBaseName = new Map<string, { id: string; version: SemVer }>()
-  for (const id of nonTemplateRootIds) {
-    const info = getModelInfo(id)
+  for (const node of allModelRoots) {
+    const info = getModelInfo(node.id)
     const existing = bestByBaseName.get(info.baseName)
     if (!existing || compareSemVer(info.version, existing.version) > 0) {
-      bestByBaseName.set(info.baseName, { id, version: info.version })
+      bestByBaseName.set(info.baseName, { id: node.id, version: info.version })
     }
   }
 
   const keptIds = new Set([...bestByBaseName.values()].map((v) => v.id))
-  const deduplicatedRoots = nonTemplateRootIds.filter((id) => keptIds.has(id))
+  const deduplicatedRoots = allModelRoots.map((n) => n.id).filter((id) => keptIds.has(id))
 
   if (uiStore.sidebarMode === 'focused_model') {
     const focused = uiStore.focusedModelId || uiStore.activeModelId
@@ -388,18 +426,23 @@ const visibleRootIds = computed(() => {
   return deduplicatedRoots
 })
 
+function isModelRoot(node: ModelNode | undefined): boolean {
+  if (!node || isTemplateNode(node)) return false
+  return node.kind === 'root' || node.parentId === null || modelStore.rootIds.includes(node.id)
+}
+
 const totalModelCount = computed(() => {
-  return modelStore.rootIds.filter((id) => {
-    const node = modelStore.getNode(id)
-    return node && !isTemplateNode(node)
-  }).length
+  return Object.values(modelStore.nodes).filter(isModelRoot).length
 })
 
 const activeSubmodelCount = computed(() => {
   let count = 0
-  for (const rootId of visibleRootIds.value) {
-    const node = modelStore.getNode(rootId)
-    if (!node?.rawContent) continue
+  for (const node of Object.values(modelStore.nodes)) {
+    if (!isModelRoot(node)) continue
+    if (!node.rawContent) {
+      count++
+      continue
+    }
     try {
       const fm = parseFrontmatter(node.rawContent) as any
       if (fm?.status === 'active' || !fm?.status) count++
@@ -412,9 +455,9 @@ const activeSubmodelCount = computed(() => {
 
 const draftSubmodelCount = computed(() => {
   let count = 0
-  for (const rootId of visibleRootIds.value) {
-    const node = modelStore.getNode(rootId)
-    if (!node?.rawContent) continue
+  for (const node of Object.values(modelStore.nodes)) {
+    if (!isModelRoot(node)) continue
+    if (!node.rawContent) continue
     try {
       const fm = parseFrontmatter(node.rawContent) as any
       if (fm?.status === 'draft') count++

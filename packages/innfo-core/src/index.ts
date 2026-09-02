@@ -57,7 +57,12 @@ export {
   validateElementFieldReferences,
   validateTaxonomyHierarchy,
 } from './validator'
-export type { ReferenceDiagnostic, DocumentValidation } from './validator'
+export type {
+  ReferenceDiagnostic,
+  DocumentValidation,
+  SubmodelResolver,
+  ValidateModelOptions,
+} from './validator'
 
 export * from './identity'
 export * from './metamodel'

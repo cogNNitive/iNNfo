@@ -64,47 +64,14 @@ export async function listModels(rootDir: string): Promise<ModelInfo[]> {
  * Returns null if the file doesn't exist or can't be parsed.
  */
 export async function readModel(rootDir: string, id: string): Promise<ParsedModel | null> {
-  const cleanId = normalizeId(id)
-  const searchDirs = [rootDir, join(rootDir, 'models')]
-  const candidates = searchDirs.flatMap((dir) => [
-    join(dir, `${cleanId}_NN.md`),
-    join(dir, `${cleanId}.md`),
-    join(dir, cleanId),
-    join(dir, id),
-    join(dir, `${id}.md`),
-  ])
-
-  for (const filePath of candidates) {
-    try {
-      const { stat } = await import('node:fs/promises')
-      await stat(filePath)
-      const content = await readFile(filePath, 'utf-8')
-      const model = parseModel(content)
-      return model
-    } catch {
-      continue
-    }
+  const { findModelFile } = await import('./spec.js')
+  const filePath = await findModelFile(rootDir, id)
+  if (!filePath) return null
+  try {
+    const content = await readFile(filePath, 'utf-8')
+    return parseModel(content)
+  } catch {
+    return null
   }
-
-  if (cleanId.toLowerCase().startsWith('workspace') || id.toLowerCase().startsWith('workspace')) {
-    const { readdir } = await import('node:fs/promises')
-    for (const dir of searchDirs) {
-      try {
-        const files = await readdir(dir)
-        const wsFile = files.find(
-          (f) => f.toLowerCase().startsWith('workspace') && f.toLowerCase().endsWith('.md'),
-        )
-        if (wsFile) {
-          const filePath = join(dir, wsFile)
-          const content = await readFile(filePath, 'utf-8')
-          return parseModel(content)
-        }
-      } catch {
-        continue
-      }
-    }
-  }
-
-  return null
 }
 

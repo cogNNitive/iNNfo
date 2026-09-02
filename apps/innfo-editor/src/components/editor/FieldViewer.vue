@@ -42,15 +42,25 @@
             </span>
           </template>
           <template v-else-if="entry.def.type === 'model'">
-            <button
-              type="button"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 cursor-pointer transition-colors"
-              @click="handleModelPillClick(entry.displayValue)"
-              data-testid="model-field-pill"
-            >
-              <Boxes class="w-3.5 h-3.5 shrink-0" />
-              <span>{{ entry.displayValue }}</span>
-            </button>
+            <div class="inline-flex items-center gap-2">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/50 cursor-pointer transition-colors"
+                @click="handleModelPillClick(entry.displayValue)"
+                data-testid="model-field-pill"
+              >
+                <Boxes class="w-3.5 h-3.5 shrink-0" />
+                <span>{{ entry.displayValue }}</span>
+              </button>
+              <span
+                v-if="entry.def.target_template"
+                class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                :title="`Expected Template: ${entry.def.target_template}`"
+                data-testid="model-target-template-badge"
+              >
+                {{ entry.def.target_template }}
+              </span>
+            </div>
           </template>
           <template v-else-if="entry.def.type === 'reference'">
             <Pill
@@ -179,6 +189,7 @@ interface FieldEntry {
     type: string
     options?: string[]
     target_concepts?: string[]
+    target_template?: string
   }
   hasValue: boolean
   displayValue: unknown
@@ -202,6 +213,7 @@ const props = withDefaults(
       type: string
       options?: string[]
       target_concepts?: string[]
+      target_template?: string
     }>
     readonly?: boolean
   }>(),

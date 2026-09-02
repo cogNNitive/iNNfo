@@ -7,6 +7,7 @@
  */
 
 import { readFile, writeFile, rm, stat, rename, readdir, mkdir } from 'node:fs/promises'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { deflateRawSync, crc32 } from 'node:zlib'
 import {
@@ -18,12 +19,14 @@ import {
   validateTemplateAgainstMetaschema,
   resolveTemplateSchema,
   SpecResolutionError,
+  parseFrontmatter,
 } from '@cognnitive/innfo-core'
 import type {
   SpecDocument,
   ValidationError,
   ParsedModel,
   ReachabilityGraph,
+  SubmodelResolver,
 } from '@cognnitive/innfo-core'
 
 import {
@@ -87,6 +90,67 @@ async function loadModel(filePath: string): Promise<ParsedModel> {
 async function saveModel(filePath: string, model: ParsedModel): Promise<void> {
   const content = serializeModel(model)
   await writeFile(filePath, content, 'utf-8')
+}
+function syncFindSubmodel(rootDir: string, cleanPath: string, referringDir?: string): string | null {
+  const directCandidates = [
+    join(rootDir, cleanPath),
+    referringDir ? join(referringDir, cleanPath) : null,
+    join(rootDir, 'models', cleanPath),
+  ].filter(Boolean) as string[]
+
+  for (const p of directCandidates) {
+    if (existsSync(p)) return p
+    if (existsSync(`${p}.md`)) return `${p}.md`
+    if (existsSync(`${p}_NN.md`)) return `${p}_NN.md`
+  }
+
+  const baseName = basename(cleanPath, '.md').replace(/_NN$/i, '')
+  const candidateNames = new Set([
+    `${baseName}_NN.md`.toLowerCase(),
+    `${baseName}.md`.toLowerCase(),
+    baseName.toLowerCase(),
+    cleanPath.toLowerCase(),
+    `${cleanPath}.md`.toLowerCase(),
+    `${cleanPath}_NN.md`.toLowerCase(),
+  ])
+
+  function searchDirSync(dir: string, depth = 0): string | null {
+    if (depth > 8) return null
+    try {
+      const entries = readdirSync(dir, { withFileTypes: true })
+      const subdirs: string[] = []
+      for (const entry of entries) {
+        const lower = entry.name.toLowerCase()
+        if (entry.isFile() && candidateNames.has(lower)) {
+          return join(dir, entry.name)
+        }
+        if (entry.isDirectory()) {
+          if (
+            ![
+              'node_modules',
+              '.git',
+              'dist',
+              '.spec-cache',
+              'specs',
+              'backups',
+              'archive',
+            ].includes(lower)
+          ) {
+            subdirs.push(join(dir, entry.name))
+          }
+        }
+      }
+      for (const subdir of subdirs) {
+        const found = searchDirSync(subdir, depth + 1)
+        if (found) return found
+      }
+    } catch {
+      return null
+    }
+    return null
+  }
+
+  return searchDirSync(rootDir)
 }
 
 /* ── validate_model ──────────────────────────────────────────── */
@@ -166,11 +230,34 @@ export async function validateModel(
 
   // One door: hygiene (validateFormatContent) + schema conformance
   // (validateModel, with `includes` composition) in a single pass.
-  const fileNameForCheck = id ? basename((await findModelFile(rootDir, id)) ?? id) : 'inline_NN.md'
+  const resolvedModelPath = id ? await findModelFile(rootDir, id) : null
+  const referringDir = resolvedModelPath ? dirname(resolvedModelPath) : rootDir
+  const fileNameForCheck = id ? basename(resolvedModelPath ?? id) : 'inline_NN.md'
+
+  const resolveSubmodel: SubmodelResolver = (refPath: string) => {
+    try {
+      const clean = refPath.replace(/^\[\[\s*/, '').replace(/\s*\]\]$/, '').trim()
+      const foundPath = syncFindSubmodel(rootDir, clean, referringDir)
+      if (!foundPath) {
+        return { exists: false }
+      }
+      const raw = readFileSync(foundPath, 'utf-8')
+      const fm = parseFrontmatter(raw)
+      const templateName =
+        fm?.parent_spec?.name ?? (typeof fm?.title === 'string' ? fm.title : undefined)
+      const templateUrl = fm?.parent_spec?.url
+      return { exists: true, templateName, templateUrl }
+    } catch {
+      return { exists: false }
+    }
+  }
+
   const doc = validateDocument(model.rawContent, {
     fileName: fileNameForCheck,
     template,
     resolveInclude,
+    resolveSubmodel,
+    referringPath: resolvedModelPath ?? undefined,
   })
   const result = { valid: doc.valid, errors: [...doc.errors], warnings: [...doc.warnings] }
   const warnings: ValidationError[] = [...result.warnings]

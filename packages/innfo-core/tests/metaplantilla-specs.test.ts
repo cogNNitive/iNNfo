@@ -218,7 +218,7 @@ Reviews the pull request.
   it('migrated samples use the unified syntax with no legacy markers', () => {
     for (const p of [
       'templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md',
-      'templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md',
+      'templates/organization/samples/Ghostbusters_V_0-2-0_organization_NN.md',
       'templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md',
       'templates/projects/samples/SoftwareReleaseProject_V_0-1-0_projects_NN.md',
     ]) {
@@ -255,13 +255,13 @@ Reviews the pull request.
     expect(parsed.matrices.some((m) => m.name.toLowerCase() === 'work-roles matrix')).toBe(true)
   })
 
-  it('parses the migrated EngineeringTeam sample with scope properties', () => {
-    const content = readSpec('templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md')
+  it('parses the migrated Ghostbusters organization sample with scope properties', () => {
+    const content = readSpec('templates/organization/samples/Ghostbusters_V_0-2-0_organization_NN.md')
     const parsed = parseModel(content)
     const roles = parsed.elements.get('Roles')!
-    expect(roles).toHaveLength(3)
+    expect(roles).toHaveLength(5)
     expect(roles[0].fields['scope']).toBe('internal')
-    expect(parsed.matrices.length).toBe(2)
+    expect(parsed.matrices.length).toBe(3)
   })
 
   it('parses the SoftwareReleaseProject sample with dependencies and RACI matrix', () => {

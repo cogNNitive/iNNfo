@@ -1,13 +1,16 @@
 import type { DirectoryHandleLike, FileHandleLike } from '../fs-types'
 import type { ModelDriver } from '../types'
+import type { TemplateSchema } from '../schema'
 import { IdentityRegistry } from '../identity'
-import type { ParseContext, RecursiveParseResult } from './types'
-import { stripMdSuffix } from './paths'
+import type { ParseContext, RecursiveParseResult, WorklistItem } from './types'
+import { stripMdSuffix, normalizePathKey, resolveSubmodelPath } from './paths'
 import { parseAndRegisterModel } from './model'
 import { parseModel } from '../parser'
 
 const INNFO_FILE_SUFFIX = '.md'
 const INDEX_MD = 'index.md'
+
+export const MAX_DEPTH = 10
 
 /** Directories whose contents are never parsed as models. */
 export const IGNORED_DIRECTORIES = new Set(['backups', 'archive', 'specs'])
@@ -135,43 +138,80 @@ async function findPrimaryWorkspaceFile(
   return null
 }
 
-function extractSubmodelRefs(
-  entrypointContent: string,
-  entrypointPath: string,
-): Array<{ name: string; path: string; author?: string }> {
-  const modelRefs: Array<{ name: string; path: string; author?: string }> = []
+export interface ExtractedSubmodelRef {
+  name: string
+  path: string
+  referringPath: string
+  author?: string
+}
+
+export function extractSubmodelRefs(
+  content: string,
+  referringPath: string,
+  templateSchema?: TemplateSchema,
+): ExtractedSubmodelRef[] {
+  const modelRefs: ExtractedSubmodelRef[] = []
 
   const addRef = (target: string, author?: string) => {
-    const cleanTarget = target.trim()
+    let cleanTarget = target.trim()
+    if (cleanTarget.startsWith('[[') && cleanTarget.endsWith(']]')) {
+      cleanTarget = cleanTarget.slice(2, -2).trim()
+    }
     if (
       cleanTarget.endsWith(INNFO_FILE_SUFFIX) &&
       cleanTarget.toLowerCase() !== INDEX_MD &&
-      cleanTarget.toLowerCase() !== entrypointPath.toLowerCase() &&
+      cleanTarget.toLowerCase() !== basenameOf(referringPath).toLowerCase() &&
       !isIgnoredPath(cleanTarget)
     ) {
       const cleanAuthor =
         typeof author === 'string' && author.trim() !== '' ? author.trim() : undefined
-      const ref = {
-        name: stripMdSuffix(basenameOf(cleanTarget)),
-        path: cleanTarget,
-        author: cleanAuthor,
-      }
-      if (!modelRefs.some((r) => r.path === ref.path)) {
-        modelRefs.push(ref)
+      const resolved = resolveSubmodelPath(cleanTarget, referringPath)
+      if (
+        normalizePathKey(resolved) !== normalizePathKey(referringPath) &&
+        !isIgnoredPath(resolved)
+      ) {
+        const ref: ExtractedSubmodelRef = {
+          name: stripMdSuffix(basenameOf(cleanTarget)),
+          path: cleanTarget,
+          referringPath,
+          author: cleanAuthor,
+        }
+        if (!modelRefs.some((r) => normalizePathKey(resolveSubmodelPath(r.path, referringPath)) === normalizePathKey(resolved))) {
+          modelRefs.push(ref)
+        }
       }
     }
   }
 
-  // 1. Extract path:: fields from ModelRef or any concept elements
-  //    (also capture a workspace-scoped author:: when the element carries one).
+  // 1. Extract path:: / file_ref:: or fields typed as model
   try {
-    const parsed = parseModel(entrypointContent)
+    const parsed = parseModel(content)
+    const modelFieldNames = new Set<string>(['path', 'file_ref'])
+    if (templateSchema?.concepts) {
+      for (const c of templateSchema.concepts) {
+        for (const f of c.fields ?? []) {
+          if (f.type === 'model') {
+            modelFieldNames.add(f.name.toLowerCase())
+          }
+        }
+      }
+    }
+
     for (const [, elementNodes] of parsed.elements.entries()) {
       for (const el of elementNodes) {
-        if (el.fields['path'] && typeof el.fields['path'] === 'string') {
-          const author =
-            typeof el.fields['author'] === 'string' ? (el.fields['author'] as string) : undefined
-          addRef(el.fields['path'], author)
+        for (const [key, val] of Object.entries(el.fields)) {
+          if (
+            modelFieldNames.has(key.toLowerCase()) ||
+            key.toLowerCase() === 'path' ||
+            key.toLowerCase() === 'file_ref'
+          ) {
+            const rawVal = typeof val === 'string' ? val : undefined
+            if (rawVal) {
+              const author =
+                typeof el.fields['author'] === 'string' ? (el.fields['author'] as string) : undefined
+              addRef(rawVal, author)
+            }
+          }
         }
       }
     }
@@ -180,7 +220,7 @@ function extractSubmodelRefs(
   }
 
   // 2. Extract Wikilinks: [[target.md]]
-  const body = entrypointContent.replace(/^---[\s\S]*?---\n?/, '').trim()
+  const body = content.replace(/^---[\s\S]*?---\n?/, '').trim()
   const wikilinkRegex = /\[\[([^\]]+)\]\]/g
   let match: RegExpExecArray | null
   while ((match = wikilinkRegex.exec(body)) !== null) {
@@ -204,7 +244,13 @@ export async function recursiveParse(
   root: DirectoryHandleLike,
   driver?: ModelDriver,
 ): Promise<RecursiveParseResult> {
-  const ctx: ParseContext = { nodes: {}, identity: new IdentityRegistry(), issues: [] }
+  const visitedPaths = new Set<string>()
+  const ctx: ParseContext = {
+    nodes: {},
+    identity: new IdentityRegistry(),
+    issues: [],
+    visitedPaths,
+  }
   const elementNameToModel = new Map<string, string>()
 
   // Step 1: Search primary entrypoint workspace_NN.md
@@ -223,6 +269,7 @@ export async function recursiveParse(
       ctx,
       elementNameToModel,
     )
+    visitedPaths.add(normalizePathKey(primary.path))
   } else {
     // Step 2: Fallback to legacy index.md
     try {
@@ -235,6 +282,7 @@ export async function recursiveParse(
         entrypointContent = await indexFile.text()
       }
       entrypointPath = INDEX_MD
+      visitedPaths.add(normalizePathKey(INDEX_MD))
     } catch (err) {
       if (!isNotFound(err)) {
         return {
@@ -266,6 +314,7 @@ export async function recursiveParse(
           const fileHandle = await resolveFileHandle(root, ref.path)
           const file = await fileHandle.getFile()
           const content = await file.text()
+          visitedPaths.add(normalizePathKey(ref.path))
           await parseAndRegisterModel(content, ref.path, ref.name, ctx, elementNameToModel)
         } catch (scanErr) {
           ctx.issues.push({
@@ -292,44 +341,104 @@ export async function recursiveParse(
     return { nodes: ctx.nodes, rootIds, issues: ctx.issues }
   }
 
-  // Step 3: Extract submodel references from entrypoint (ModelRef path:: fields, wikilinks, md links)
-  const modelRefs = extractSubmodelRefs(entrypointContent, entrypointPath)
+  // Step 3: Iterative worklist traversal
+  const queue: WorklistItem[] = []
+  const initialRefs = extractSubmodelRefs(entrypointContent, entrypointPath)
+  for (const ref of initialRefs) {
+    queue.push({
+      path: ref.path,
+      name: ref.name,
+      referringPath: entrypointPath,
+      depth: 1,
+      author: ref.author,
+    })
+  }
 
-  for (const ref of modelRefs) {
+  while (queue.length > 0) {
+    const item = queue.shift()!
+    const resolvedPath = resolveSubmodelPath(item.path, item.referringPath)
+    const normKey = normalizePathKey(resolvedPath)
+
+    if (visitedPaths.has(normKey)) {
+      ctx.issues.push({
+        path: item.path,
+        message: `Cycle detected: "${item.path}" referenced from "${item.referringPath}" is already loaded`,
+      })
+      continue
+    }
+
+    visitedPaths.add(normKey)
+
+    if (item.depth > MAX_DEPTH) {
+      ctx.issues.push({
+        path: item.path,
+        message: `Traversal depth limit exceeded (MAX_DEPTH = 10) while resolving submodel "${item.path}"`,
+      })
+      continue
+    }
+
     let content: string
     try {
       if (driver) {
-        const parsed = await driver.readModel(ref.path)
+        const parsed = await driver.readModel(resolvedPath)
         content = parsed.rawContent
       } else {
-        const fileHandle = await resolveFileHandle(root, ref.path)
+        const fileHandle = await resolveFileHandle(root, resolvedPath)
         const file = await fileHandle.getFile()
         content = await file.text()
       }
     } catch (err) {
       if (isNotFound(err)) {
         ctx.issues.push({
-          path: ref.path,
-          message: `Referenced model "${ref.path}" not found — skipping`,
+          path: item.path,
+          message: `Referenced model "${item.path}" not found — skipping`,
         })
         continue
       }
       ctx.issues.push({
-        path: ref.path,
+        path: item.path,
         message: err instanceof Error ? err.message : String(err),
       })
       continue
     }
 
-    await parseAndRegisterModel(content, ref.path, ref.name, ctx, elementNameToModel)
+    await parseAndRegisterModel(content, resolvedPath, item.name, ctx, elementNameToModel)
 
-    // Propagate the workspace-scoped author:: from the manifest's ModelRef entry
-    // onto the referenced model's root node. It is not stored in the model file.
-    if (ref.author) {
-      const rootNode = Object.values(ctx.nodes).find(
-        (n) => n.parentId === null && n.name === ref.name,
-      )
-      if (rootNode) rootNode.author = ref.author
+    // Establish parent-child relationship in graph between referring model and this model
+    const referringNorm = normalizePathKey(resolveSubmodelPath(item.referringPath))
+    const parentNode = Object.values(ctx.nodes).find((n) => {
+      if (n.kind !== 'root') return false
+      const nPath = n.source?.path ? normalizePathKey(n.source.path) : ''
+      return nPath === referringNorm
+    })
+    const childNode = Object.values(ctx.nodes).find((n) => {
+      if (n.kind !== 'root') return false
+      const nPath = n.source?.path ? normalizePathKey(n.source.path) : ''
+      return nPath === normKey
+    })
+
+    if (parentNode && childNode && childNode.id !== parentNode.id) {
+      childNode.parentId = parentNode.id
+      if (!parentNode.childIds.includes(childNode.id)) {
+        parentNode.childIds.push(childNode.id)
+      }
+    }
+
+    // Propagate workspace-scoped author from referring manifest
+    if (item.author && childNode) {
+      childNode.author = item.author
+    }
+
+    // Extract nested submodel references from this model
+    const nestedRefs = extractSubmodelRefs(content, resolvedPath)
+    for (const nRef of nestedRefs) {
+      queue.push({
+        path: nRef.path,
+        name: nRef.name,
+        referringPath: resolvedPath,
+        depth: item.depth + 1,
+        author: nRef.author,
+      })
     }
   }
 
