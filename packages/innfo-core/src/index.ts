@@ -27,6 +27,7 @@ export {
   checkWidgetConfig,
   resolveTemplateSchema,
   canonicalizeDefinition,
+  applyAliasToSchema,
 } from './schema'
 export type {
   TemplateSchema,

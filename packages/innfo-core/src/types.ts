@@ -6,6 +6,47 @@ export interface ParentRef {
   url: string
 }
 
+export interface AliasMap {
+  concepts?: Record<string, string>
+  fields?: Record<string, string>
+}
+
+export interface IncludedTemplateRef {
+  name: string
+  url: string
+  alias?: AliasMap
+}
+
+export interface TemplateProcedure {
+  id: string
+  name: string
+  path: string
+  source_template?: string
+}
+
+export interface TemplateSkill {
+  name: string
+  repo: string
+  path: string
+  source_template?: string
+}
+
+export interface ResolvedTemplatePackage {
+  name: string
+  version: string
+  packagePath: string
+  specFilePath: string
+  isPackageDir: boolean
+  tier: 'workspace-package' | 'workspace-flat' | 'global-cache' | 'installed-skill'
+}
+
+export interface ReachabilityGraph {
+  /** Set of active spec identifiers using normalized '<name>@<version>' or '<name>' keys */
+  activeSpecs: Set<string>
+  referencedBy: Map<string, string[]>
+  orphanedCandidates: string[]
+}
+
 export interface ConceptField {
   name: string
   type:
@@ -97,7 +138,10 @@ export interface SpecFrontmatter {
    * `specializes` field. Bare-string entries are tolerated on read and
    * normalized to `{ name, url: '' }`.
    */
-  includes?: ParentRef[]
+  includes?: IncludedTemplateRef[]
+  procedures?: TemplateProcedure[]
+  skills?: TemplateSkill[]
+  alias?: AliasMap
   /** Reserved, inert. Named base template for future structural inheritance. */
   specializes?: string
   title?: string

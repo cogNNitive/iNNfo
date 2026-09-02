@@ -23,8 +23,22 @@ import {
 } from '@cognnitive/innfo-core'
 import { mkdir, copyFile, readdir } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import type { SpecDocument, SpecCache } from '@cognnitive/innfo-core'
-import { resolveParentChainNode } from './resolver-node.js'
+import type {
+  SpecDocument,
+  SpecCache,
+  TemplateProcedure,
+  TemplateSkill,
+  SpecFrontmatter,
+} from '@cognnitive/innfo-core'
+import {
+  resolveParentChainNode,
+  resolveTemplatePackage,
+  hydrateTemplatePackageAtomically,
+  fetchSpecContent,
+  isLocalPath,
+  toLocalFilePath,
+  parseSpecName,
+} from './resolver-node.js'
 
 /**
  * Derive a chain-start name from a spec/template URL.
@@ -295,6 +309,7 @@ export async function listTemplates(
 
   await scanDir(join(rootDir, 'templates'), 'workspace')
   await scanDir(join(rootDir, 'specs'), 'workspace')
+  await scanDir(join(rootDir, 'specs', 'templates'), 'workspace')
   await scanDir(globalDir, 'global')
 
   try {
@@ -328,6 +343,72 @@ export async function hydrateTemplate(
   const globalTemplatesDir = opts?.globalDir ?? join(homedir(), '.agents', 'templates')
   const skillsDir = opts?.skillsDir ?? join(homedir(), '.agents', 'skills')
 
+  const pkg = await resolveTemplatePackage(rootDir, templateName, undefined, {
+    globalDir: globalTemplatesDir,
+    skillsDir,
+  })
+
+  if (pkg) {
+    let content = ''
+    try {
+      content = await readFile(pkg.specFilePath, 'utf-8')
+    } catch {
+      // Content read failed
+    }
+
+    const sourceName =
+      pkg.tier === 'global-cache'
+        ? 'global'
+        : pkg.tier === 'installed-skill'
+          ? 'skill'
+          : pkg.tier === 'workspace-package' || pkg.tier === 'workspace-flat'
+            ? 'workspace'
+            : pkg.tier
+
+    if (content) {
+      if (opts?.targetDir || !pkg.isPackageDir) {
+        const targetDir = opts?.targetDir ?? join(rootDir, 'templates')
+        await mkdir(targetDir, { recursive: true })
+        const fileName = templateName.endsWith('.md') ? templateName : `${templateName}.md`
+        const targetPath = join(targetDir, fileName)
+        try {
+          await stat(targetPath)
+          return {
+            success: true,
+            templateName,
+            targetPath,
+            source: sourceName,
+            message: `Template ${templateName} already present at ${targetPath} (write-once cache immutability)`,
+          }
+        } catch {
+          await copyFile(pkg.specFilePath, targetPath)
+          return {
+            success: true,
+            templateName,
+            targetPath,
+            source: sourceName,
+            message: `Hydrated template ${templateName} from ${sourceName} to ${targetPath}`,
+          }
+        }
+      }
+
+      // Default: hydrate into workspace package directory specs/templates/<name>/<version>/
+      const targetPkgDir = await hydrateTemplatePackageAtomically(
+        rootDir,
+        pkg.name,
+        pkg.version,
+        content,
+      )
+      return {
+        success: true,
+        templateName,
+        targetPath: targetPkgDir,
+        source: sourceName,
+        message: `Hydrated template package ${templateName} (${pkg.version}) from ${sourceName} to ${targetPkgDir}`,
+      }
+    }
+  }
+
   const location = await resolveTemplatePath(templateName, {
     workspaceDir: rootDir,
     globalTemplatesDir,
@@ -349,7 +430,18 @@ export async function hydrateTemplate(
   const fileName = templateName.endsWith('.md') ? templateName : `${templateName}.md`
   const targetPath = join(targetDir, fileName)
 
-  await copyFile(location.filePath, targetPath)
+  try {
+    await stat(targetPath)
+    return {
+      success: true,
+      templateName,
+      targetPath,
+      source: location.source,
+      message: `Template ${templateName} already present at ${targetPath} (write-once cache immutability)`,
+    }
+  } catch {
+    await copyFile(location.filePath, targetPath)
+  }
 
   return {
     success: true,
@@ -358,4 +450,228 @@ export async function hydrateTemplate(
     source: location.source,
     message: `Hydrated template ${templateName} from ${location.source} to ${targetPath}`,
   }
+}
+
+export interface ListTemplateProceduresOptions {
+  model_path?: string
+  model_id?: string
+  template_name?: string
+  version?: string
+  url?: string
+}
+
+export interface ListTemplateSkillsOptions {
+  model_path?: string
+  model_id?: string
+  template_name?: string
+  version?: string
+  url?: string
+}
+
+interface DiscoveredAssets {
+  procedures: TemplateProcedure[]
+  skills: TemplateSkill[]
+}
+
+export async function discoverTransitiveAssets(
+  rootDir: string,
+  opts?: ListTemplateProceduresOptions,
+): Promise<DiscoveredAssets> {
+  const specsDir = join(rootDir, 'specs')
+  const queue: Array<{ docName: string; fm: SpecFrontmatter; depth: number }> = []
+
+  let modelId = opts?.model_id
+  if (!modelId && opts?.model_path) {
+    modelId = opts.model_path
+  }
+
+  if (modelId) {
+    const filePath =
+      (await findModelFile(rootDir, modelId)) ??
+      (isLocalPath(modelId) ? toLocalFilePath(modelId, rootDir) : null)
+    if (filePath) {
+      const content = await readFile(filePath, 'utf-8').catch(() => null)
+      if (content) {
+        const fm = parseFrontmatter(content)
+        if (fm) {
+          queue.push({ docName: basename(filePath, '.md'), fm, depth: 0 })
+        }
+      }
+    }
+  }
+
+  if (opts?.template_name) {
+    const pkg = await resolveTemplatePackage(rootDir, opts.template_name, opts.version)
+    if (pkg) {
+      const content = await readFile(pkg.specFilePath, 'utf-8').catch(() => null)
+      if (content) {
+        const fm = parseFrontmatter(content)
+        if (fm) {
+          queue.push({
+            docName: basename(pkg.specFilePath, '.md') || opts.template_name || pkg.name,
+            fm,
+            depth: 0,
+          })
+        }
+      }
+    }
+  }
+
+  if (opts?.url) {
+    const name = opts.template_name || deriveNameFromUrl(opts.url)
+    const content = await fetchSpecContent(name, opts.url, specsDir, 10000)
+    if (content) {
+      const fm = parseFrontmatter(content)
+      if (fm) {
+        queue.push({ docName: name, fm, depth: 0 })
+      }
+    }
+  }
+
+  if (queue.length === 0) {
+    const templates = await listTemplates(rootDir)
+    for (const tmpl of templates) {
+      const content = await readFile(tmpl.filePath, 'utf-8').catch(() => null)
+      if (content) {
+        const fm = parseFrontmatter(content)
+        if (fm) {
+          queue.push({ docName: tmpl.name, fm, depth: 0 })
+        }
+      }
+    }
+  }
+
+  const procedures: TemplateProcedure[] = []
+  const skills: TemplateSkill[] = []
+  const seenProcIds = new Set<string>()
+  const seenSkillNames = new Set<string>()
+  const seenTemplates = new Set<string>()
+
+  while (queue.length > 0) {
+    const item = queue.shift()!
+    const key = item.docName.toLowerCase()
+    if (seenTemplates.has(key) || item.depth > 10) continue
+    seenTemplates.add(key)
+
+    const fm = item.fm
+
+    if (Array.isArray(fm.procedures)) {
+      for (const p of fm.procedures) {
+        if (p && typeof p === 'object' && p.id && !seenProcIds.has(p.id)) {
+          seenProcIds.add(p.id)
+          procedures.push({
+            id: String(p.id),
+            name: String(p.name ?? p.id),
+            path: String(p.path ?? ''),
+            source_template: p.source_template ? String(p.source_template) : item.docName,
+          })
+        }
+      }
+    }
+
+    if (Array.isArray(fm.skills)) {
+      for (const s of fm.skills) {
+        if (s && typeof s === 'object' && s.name && !seenSkillNames.has(s.name)) {
+          seenSkillNames.add(s.name)
+          skills.push({
+            name: String(s.name),
+            repo: String(s.repo ?? ''),
+            path: String(s.path ?? ''),
+            source_template: s.source_template ? String(s.source_template) : item.docName,
+          })
+        }
+      }
+    }
+
+    if (item.depth < 10) {
+      if (Array.isArray(fm.includes)) {
+        for (const inc of fm.includes) {
+          if (!inc || !inc.name) continue
+          const incKey = inc.name.toLowerCase()
+          if (seenTemplates.has(incKey)) continue
+
+          let incVersion: string | undefined
+          if (inc.url) {
+            const vMatch =
+              inc.url.match(/_V_(\d+[-.]\d+[-.]\d+)/i) ||
+              inc.url.match(/\/V_?(\d+[-.]\d+[-.]\d+)\//i)
+            if (vMatch) {
+              incVersion = vMatch[1]
+            } else {
+              const parsedFromUrl = parseSpecName(basename(inc.url))
+              if (parsedFromUrl.version) incVersion = parsedFromUrl.version
+            }
+          }
+
+          let incContent: string | null = null
+          const pkg = await resolveTemplatePackage(rootDir, inc.name, incVersion)
+          if (pkg) {
+            incContent = await readFile(pkg.specFilePath, 'utf-8').catch(() => null)
+          }
+          if (!incContent) {
+            incContent = await fetchSpecContent(inc.name, inc.url, specsDir, 5000)
+          }
+
+          if (incContent) {
+            const incFm = parseFrontmatter(incContent)
+            if (incFm) {
+              queue.push({ docName: inc.name, fm: incFm, depth: item.depth + 1 })
+            }
+          }
+        }
+      }
+
+      if (fm.parent_spec && typeof fm.parent_spec === 'object' && fm.parent_spec.name) {
+        const pName = fm.parent_spec.name
+        const pKey = pName.toLowerCase()
+        if (!seenTemplates.has(pKey)) {
+          let pVersion: string | undefined
+          if (fm.parent_spec.url) {
+            const vMatch =
+              fm.parent_spec.url.match(/_V_(\d+[-.]\d+[-.]\d+)/i) ||
+              fm.parent_spec.url.match(/\/V_?(\d+[-.]\d+[-.]\d+)\//i)
+            if (vMatch) {
+              pVersion = vMatch[1]
+            } else {
+              const parsedFromUrl = parseSpecName(basename(fm.parent_spec.url))
+              if (parsedFromUrl.version) pVersion = parsedFromUrl.version
+            }
+          }
+
+          let parentContent: string | null = null
+          const pkg = await resolveTemplatePackage(rootDir, pName, pVersion)
+          if (pkg) {
+            parentContent = await readFile(pkg.specFilePath, 'utf-8').catch(() => null)
+          }
+          if (!parentContent) {
+            parentContent = await fetchSpecContent(pName, fm.parent_spec.url, specsDir, 5000)
+          }
+          if (parentContent) {
+            const pFm = parseFrontmatter(parentContent)
+            if (pFm) {
+              queue.push({ docName: pName, fm: pFm, depth: item.depth + 1 })
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return { procedures, skills }
+}
+
+export async function listTemplateProcedures(
+  rootDir: string,
+  opts?: ListTemplateProceduresOptions,
+): Promise<{ procedures: TemplateProcedure[] }> {
+  const assets = await discoverTransitiveAssets(rootDir, opts)
+  return { procedures: assets.procedures }
+}
+
+export async function listTemplateSkills(
+  rootDir: string,
+  opts?: ListTemplateSkillsOptions,
+): Promise<{ skills: TemplateSkill[] }> {
+  const assets = await discoverTransitiveAssets(rootDir, opts)
+  return { skills: assets.skills }
 }

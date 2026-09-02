@@ -120,7 +120,7 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
     await rm(rootDir, { recursive: true, force: true })
   })
 
-  it('lists all 11 tools with names matching the dispatcher', async () => {
+  it('lists all 14 tools with names matching the dispatcher', async () => {
     const { tools } = await client.listTools()
     const names = tools.map((t) => t.name).sort()
     expect(names).toEqual(
@@ -131,7 +131,10 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
         'hydrate_template',
         'init_model',
         'list_models',
+        'list_template_procedures',
+        'list_template_skills',
         'list_templates',
+        'prune_orphaned_specs',
         'read_model',
         'validate_model',
         'validate_model_url',
@@ -155,7 +158,10 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
       const result = await client.callTool({ name: 'list_models', arguments: {} })
       expect(result.isError).toBeFalsy()
       const models = JSON.parse(textOf(result as CallToolResult)) as Array<{ id: string }>
-      expect(models.map((m) => m.id)).toEqual(['Alpha_V_1-0-0_business_NN', 'Beta_V_1-0-0_business_NN'])
+      expect(models.map((m) => m.id)).toEqual([
+        'Alpha_V_1-0-0_business_NN',
+        'Beta_V_1-0-0_business_NN',
+      ])
     })
 
     it('honors an explicit root override', async () => {
@@ -216,7 +222,9 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
         arguments: { url: 'https://example.com/does-not-exist_NN.md' },
       })
       expect(result.isError).toBe(true)
-      expect(textOf(result as CallToolResult)).toContain('SpecResolutionError: Failed to resolve parent')
+      expect(textOf(result as CallToolResult)).toContain(
+        'SpecResolutionError: Failed to resolve parent',
+      )
     })
   })
 
@@ -266,10 +274,12 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
       expect(result.isError).toBeFalsy()
       const parsed = JSON.parse(textOf(result as CallToolResult))
       expect(parsed.valid).toBe(false)
-      expect(parsed.errors.some((e: { message: string }) => /PARENT_RESOLUTION_FAILED/.test(e.message))).toBe(true)
-      expect(parsed.warnings.some((w: { message: string }) => /no template resolved/i.test(w.message))).toBe(
-        false,
-      )
+      expect(
+        parsed.errors.some((e: { message: string }) => /PARENT_RESOLUTION_FAILED/.test(e.message)),
+      ).toBe(true)
+      expect(
+        parsed.warnings.some((w: { message: string }) => /no template resolved/i.test(w.message)),
+      ).toBe(false)
     })
 
     it('reports a not-found result (not an MCP error) for a missing model id', async () => {
@@ -313,7 +323,11 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
     it('reports a not-found result (not an MCP error) for a missing model id', async () => {
       const result = await client.callTool({
         name: 'apply_change',
-        arguments: { id: 'Nope', op: 'add_element', args: { conceptName: 'Work', elementName: 'Review' } },
+        arguments: {
+          id: 'Nope',
+          op: 'add_element',
+          args: { conceptName: 'Work', elementName: 'Review' },
+        },
       })
       expect(result.isError).toBeFalsy()
       const parsed = JSON.parse(textOf(result as CallToolResult))
@@ -337,7 +351,10 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
       vi.spyOn(global, 'fetch').mockImplementation((input) => {
         const url = String(input)
         if (url.includes('Mutable_NN.md')) {
-          return Promise.resolve({ ok: true, text: () => Promise.resolve(MUTABLE_MODEL_CONTENT) } as Response)
+          return Promise.resolve({
+            ok: true,
+            text: () => Promise.resolve(MUTABLE_MODEL_CONTENT),
+          } as Response)
         }
         return Promise.reject(new Error('not stubbed'))
       })
@@ -349,10 +366,12 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
       expect(result.isError).toBeFalsy()
       const parsed = JSON.parse(textOf(result as CallToolResult))
       expect(parsed.valid).toBe(false)
-      expect(parsed.errors.some((e: { message: string }) => /PARENT_RESOLUTION_FAILED/.test(e.message))).toBe(true)
-      expect(parsed.warnings.some((w: { message: string }) => /no template resolved/i.test(w.message))).toBe(
-        false,
-      )
+      expect(
+        parsed.errors.some((e: { message: string }) => /PARENT_RESOLUTION_FAILED/.test(e.message)),
+      ).toBe(true)
+      expect(
+        parsed.warnings.some((w: { message: string }) => /no template resolved/i.test(w.message)),
+      ).toBe(false)
     })
 
     it('reports a not-found result (not an MCP error) when the URL fetch fails', async () => {
@@ -381,9 +400,13 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
     })
 
     it('reports a PARENT_RESOLUTION_FAILED diagnostic (not an MCP error) when parent_spec.url is missing', async () => {
-      const content = ['---', 'spec_version: "V_0-2-0"', 'level: 2', 'title: "No Parent"', '---'].join(
-        '\n',
-      )
+      const content = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 2',
+        'title: "No Parent"',
+        '---',
+      ].join('\n')
       const result = await client.callTool({ name: 'validate_template', arguments: { content } })
       expect(result.isError).toBeFalsy()
       const parsed = JSON.parse(textOf(result as CallToolResult))
@@ -424,8 +447,8 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
           id: 'test_model',
           template_name: 'test_template',
           template_url: 'https://example.com/spec_NN.md',
-          root: rootDir
-        }
+          root: rootDir,
+        },
       })
       expect(result.isError).toBeFalsy()
       const parsed = JSON.parse(textOf(result as CallToolResult))
@@ -445,11 +468,10 @@ describe('innfo-mcp server (dispatch/handler layer, real MCP client/server round
     it('hydrate_template returns error when template is missing', async () => {
       const result = await client.callTool({
         name: 'hydrate_template',
-        arguments: { template_name: 'non_existent_spec_xyz', root: rootDir }
+        arguments: { template_name: 'non_existent_spec_xyz', root: rootDir },
       })
       expect(result.isError).toBe(true)
       expect(textOf(result as CallToolResult)).toContain('Unresolved template')
     })
   })
 })
-

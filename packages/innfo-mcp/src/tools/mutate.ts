@@ -6,8 +6,9 @@
  * On validation failure, the file is NOT written (reject-without-writing).
  */
 
-import { readFile, writeFile, rm, stat, rename } from 'node:fs/promises'
+import { readFile, writeFile, rm, stat, rename, readdir, mkdir } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
+import { deflateRawSync, crc32 } from 'node:zlib'
 import {
   parseModel,
   serializeModel,
@@ -18,7 +19,12 @@ import {
   resolveTemplateSchema,
   SpecResolutionError,
 } from '@cognnitive/innfo-core'
-import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/innfo-core'
+import type {
+  SpecDocument,
+  ValidationError,
+  ParsedModel,
+  ReachabilityGraph,
+} from '@cognnitive/innfo-core'
 
 import {
   resolveTemplateWithCache,
@@ -32,6 +38,8 @@ import {
   toLocalFilePath,
   saveSpecOnce,
   buildIncludeContentMap,
+  parseSpecName,
+  normalizeVersion,
 } from './resolver-node.js'
 
 /* ── Types ───────────────────────────────────────────────────── */
@@ -281,6 +289,24 @@ async function bumpVersion(
   }
 
   model.frontmatter.model_version = next.version
+
+  // Verify git working tree cleanliness or backup consent before modifying specs
+  if (args.backup === true || args.prompt_backup === true) {
+    await createSpecsBackupZip(rootDir).catch(() => {})
+  } else {
+    try {
+      const { execSync } = await import('node:child_process')
+      const gitStatus = execSync('git status --porcelain specs', {
+        cwd: rootDir,
+        encoding: 'utf-8',
+      })
+      if (gitStatus.trim() !== '') {
+        await createSpecsBackupZip(rootDir).catch(() => {})
+      }
+    } catch {
+      // Git status non-fatal
+    }
+  }
 
   const dir = dirname(filePath)
   const base = basename(filePath)
@@ -709,7 +735,7 @@ export async function validateTemplate(
     const includeMap = await buildIncludeContentMap(rootDir, includeRefs)
     const composed = resolveTemplateSchema(
       templateContent,
-      (ref) => includeMap.get(ref.name) ?? null,
+      (ref) => includeMap.get(ref.name) ?? includeMap.get(ref.name.toLowerCase()) ?? null,
     )
     for (const diag of composed.errors) {
       ;(diag.severity === 'error' ? errors : warnings).push(diag)
@@ -920,5 +946,476 @@ title: "${title}"
     filePath,
     content: newContent,
     validation: { valid: doc.valid, errors: doc.errors, warnings: doc.warnings },
+  }
+}
+
+/* ── Reachability Graph, Backup & Spec Pruning Engine ───────── */
+
+async function getMarkdownFiles(dir: string): Promise<string[]> {
+  const files: string[] = []
+  try {
+    const entries = await readdir(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      const fullPath = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        files.push(...(await getMarkdownFiles(fullPath)))
+      } else if (entry.isFile() && /\.(md|markdown)$/i.test(entry.name)) {
+        files.push(fullPath)
+      }
+    }
+  } catch {
+    // Ignore directory reading issues
+  }
+  return files
+}
+
+interface ZipEntryInput {
+  name: string
+  buffer: Buffer
+}
+
+function buildZipArchive(entries: ZipEntryInput[]): Buffer {
+  const localHeaders: Buffer[] = []
+  const cdHeaders: Buffer[] = []
+  let currentOffset = 0
+
+  for (const entry of entries) {
+    const filenameBuf = Buffer.from(entry.name, 'utf-8')
+    const compressed = deflateRawSync(entry.buffer)
+    const crc = crc32(entry.buffer)
+    const uncompressedSize = entry.buffer.length
+    const compressedSize = compressed.length
+
+    const localHeader = Buffer.alloc(30 + filenameBuf.length)
+    localHeader.writeUInt32LE(0x04034b50, 0)
+    localHeader.writeUInt16LE(20, 4)
+    localHeader.writeUInt16LE(0, 6)
+    localHeader.writeUInt16LE(8, 8)
+    localHeader.writeUInt16LE(0, 10)
+    localHeader.writeUInt16LE(0, 12)
+    localHeader.writeUInt32LE(crc, 14)
+    localHeader.writeUInt32LE(compressedSize, 18)
+    localHeader.writeUInt32LE(uncompressedSize, 22)
+    localHeader.writeUInt16LE(filenameBuf.length, 26)
+    localHeader.writeUInt16LE(0, 28)
+    filenameBuf.copy(localHeader, 30)
+
+    localHeaders.push(localHeader, compressed)
+
+    const cdHeader = Buffer.alloc(46 + filenameBuf.length)
+    cdHeader.writeUInt32LE(0x02014b50, 0)
+    cdHeader.writeUInt16LE(20, 4)
+    cdHeader.writeUInt16LE(20, 6)
+    cdHeader.writeUInt16LE(0, 8)
+    cdHeader.writeUInt16LE(8, 10)
+    cdHeader.writeUInt16LE(0, 12)
+    cdHeader.writeUInt16LE(0, 14)
+    cdHeader.writeUInt32LE(crc, 16)
+    cdHeader.writeUInt32LE(compressedSize, 20)
+    cdHeader.writeUInt32LE(uncompressedSize, 24)
+    cdHeader.writeUInt16LE(filenameBuf.length, 28)
+    cdHeader.writeUInt16LE(0, 30)
+    cdHeader.writeUInt16LE(0, 32)
+    cdHeader.writeUInt16LE(0, 34)
+    cdHeader.writeUInt16LE(0, 36)
+    cdHeader.writeUInt32LE(0, 38)
+    cdHeader.writeUInt32LE(currentOffset, 42)
+    filenameBuf.copy(cdHeader, 46)
+
+    cdHeaders.push(cdHeader)
+    currentOffset += localHeader.length + compressed.length
+  }
+
+  const cdStartOffset = currentOffset
+  let cdSize = 0
+  for (const cd of cdHeaders) cdSize += cd.length
+
+  const eocd = Buffer.alloc(22)
+  eocd.writeUInt32LE(0x06054b50, 0)
+  eocd.writeUInt16LE(0, 4)
+  eocd.writeUInt16LE(0, 6)
+  eocd.writeUInt16LE(entries.length, 8)
+  eocd.writeUInt16LE(entries.length, 10)
+  eocd.writeUInt32LE(cdSize, 12)
+  eocd.writeUInt32LE(cdStartOffset, 16)
+  eocd.writeUInt16LE(0, 20)
+
+  return Buffer.concat([...localHeaders, ...cdHeaders, eocd])
+}
+
+/**
+ * Traverses L3 models (`models/`), root entrypoints (`workspace_NN.md`, `index.md`),
+ * and L2 templates (`templates/`) to build the workspace reference reachability graph.
+ */
+export async function calculateSpecReachability(rootDir: string): Promise<ReachabilityGraph> {
+  const activeSpecs = new Set<string>()
+  const referencedBy = new Map<string, string[]>()
+
+  const addReference = (specRef: string, sourceFile: string) => {
+    if (!specRef) return
+    const key = specRef.toLowerCase().trim()
+    activeSpecs.add(key)
+
+    // Store normalized <name>@<version> and base <name> in activeSpecs (Fix W-02 & C-01)
+    const parsed = parseSpecName(key)
+    if (parsed.base) {
+      activeSpecs.add(parsed.base)
+      if (parsed.version) {
+        activeSpecs.add(`${parsed.base}@${parsed.version}`)
+        const normVKey = `${parsed.base}_v_${parsed.version.replace(/\./g, '-')}`
+        activeSpecs.add(normVKey)
+      }
+    }
+
+    const existing = referencedBy.get(key) ?? []
+    if (!existing.includes(sourceFile)) {
+      existing.push(sourceFile)
+      referencedBy.set(key, existing)
+    }
+  }
+
+  const searchDirs = [join(rootDir, 'models'), rootDir, join(rootDir, 'templates')]
+  const scannedFiles = new Set<string>()
+
+  for (const dir of searchDirs) {
+    try {
+      const entries = await readdir(dir, { withFileTypes: true })
+      for (const entry of entries) {
+        if (entry.isFile() && /\.(md|markdown)$/i.test(entry.name)) {
+          const filePath = join(dir, entry.name)
+          if (scannedFiles.has(filePath)) continue
+          scannedFiles.add(filePath)
+
+          try {
+            const content = await readFile(filePath, 'utf-8')
+            const parsed = parseModel(content)
+            const fm = parsed.frontmatter
+            const parentName =
+              fm?.parent_spec?.name ||
+              (typeof fm?.parent === 'string' ? fm.parent : (fm?.parent as any)?.name)
+            const parentUrl = fm?.parent_spec?.url || (fm?.parent as any)?.url
+
+            if (parentName) {
+              addReference(parentName, filePath)
+            }
+            if (parentUrl) {
+              const urlStem = basename(parentUrl).replace(/\.(md|markdown)$/i, '')
+              addReference(urlStem, filePath)
+              const tmplMatch = parentUrl.match(/\/templates\/([^/]+)\/([^/]+)/i)
+              if (tmplMatch) {
+                const pkgBase = tmplMatch[1].toLowerCase()
+                const pkgVer = normalizeVersion(tmplMatch[2])
+                addReference(pkgBase, filePath)
+                addReference(`${pkgBase}@${pkgVer}`, filePath)
+              }
+            }
+
+            for (const inc of fm?.includes ?? []) {
+              if (inc.name) {
+                addReference(inc.name, filePath)
+                if (inc.url) {
+                  const urlStem = basename(inc.url).replace(/\.(md|markdown)$/i, '')
+                  addReference(urlStem, filePath)
+                  const tmplMatch = inc.url.match(/\/templates\/([^/]+)\/([^/]+)/i)
+                  if (tmplMatch) {
+                    const pkgBase = tmplMatch[1].toLowerCase()
+                    const pkgVer = normalizeVersion(tmplMatch[2])
+                    addReference(pkgBase, filePath)
+                    addReference(`${pkgBase}@${pkgVer}`, filePath)
+                  }
+                }
+              }
+            }
+          } catch {
+            // Ignore unparseable
+          }
+        }
+      }
+    } catch {
+      // Directory absent
+    }
+  }
+
+  // Helper to test if a candidate spec file matches specKey (Fix C-01)
+  const matchesCandidateFile = (filePath: string, specKey: string): boolean => {
+    const normPath = filePath.replace(/\\/g, '/').toLowerCase()
+    const keyLow = specKey.toLowerCase().trim()
+    if (normPath.includes(keyLow) || basename(filePath).toLowerCase().includes(keyLow)) return true
+
+    const keyParts = keyLow.split('@')
+    const keyBase = keyParts[0].split(/_v_/i)[0]
+    const keyVer = keyParts[1] ? normalizeVersion(keyParts[1]) : undefined
+
+    if (normPath.includes(`/templates/${keyBase}/`)) {
+      if (!keyVer) return true
+      if (
+        normPath.includes(`/${keyVer}/`) ||
+        normPath.includes(`/v_${keyVer.replace(/\./g, '-')}/`) ||
+        normPath.includes(`/v_${keyVer}/`)
+      ) {
+        return true
+      }
+    }
+    const parsedFile = parseSpecName(basename(filePath))
+    if (parsedFile.base === keyBase) {
+      if (!keyVer || !parsedFile.version || parsedFile.version === keyVer) return true
+    }
+    return false
+  }
+
+  // Transitive closure of includes up to depth 10
+  const queue = Array.from(activeSpecs)
+  const visited = new Set<string>()
+
+  while (queue.length > 0) {
+    const specKey = queue.shift()!
+    if (visited.has(specKey)) continue
+    visited.add(specKey)
+
+    const candidateFiles = await getMarkdownFiles(join(rootDir, 'specs')).catch(() => [])
+    for (const file of candidateFiles) {
+      if (matchesCandidateFile(file, specKey)) {
+        try {
+          const content = await readFile(file, 'utf-8')
+          const parsed = parseModel(content)
+          const fm = parsed.frontmatter
+          for (const inc of fm?.includes ?? []) {
+            if (inc.name) {
+              const incKey = inc.name.toLowerCase()
+              addReference(inc.name, file)
+              if (!visited.has(incKey)) queue.push(incKey)
+              if (inc.url) {
+                const urlStem = basename(inc.url).replace(/\.(md|markdown)$/i, '')
+                addReference(urlStem, file)
+                const tmplMatch = inc.url.match(/\/templates\/([^/]+)\/([^/]+)/i)
+                if (tmplMatch) {
+                  const pkgBase = tmplMatch[1].toLowerCase()
+                  const pkgVer = normalizeVersion(tmplMatch[2])
+                  addReference(pkgBase, file)
+                  addReference(`${pkgBase}@${pkgVer}`, file)
+                  if (!visited.has(`${pkgBase}@${pkgVer}`)) queue.push(`${pkgBase}@${pkgVer}`)
+                }
+              }
+            }
+          }
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  }
+
+  const orphanedCandidates: string[] = []
+  const specsDir = join(rootDir, 'specs')
+
+  try {
+    const entries = await readdir(specsDir, { withFileTypes: true })
+    for (const entry of entries) {
+      const fullPath = join(specsDir, entry.name)
+
+      if (entry.name === 'templates') {
+        try {
+          const tmplEntries = await readdir(fullPath, { withFileTypes: true })
+          for (const nameDir of tmplEntries) {
+            if (nameDir.isDirectory()) {
+              const pkgName = nameDir.name
+              const verPath = join(fullPath, pkgName)
+              const verEntries = await readdir(verPath, { withFileTypes: true })
+
+              for (const verDir of verEntries) {
+                if (verDir.isDirectory()) {
+                  const pkgVerDir = join(verPath, verDir.name)
+                  const verClean = normalizeVersion(verDir.name)
+                  const verDash = verClean.replace(/\./g, '-')
+                  const pkgNameLow = pkgName.toLowerCase()
+
+                  const isPkgActive = Array.from(activeSpecs).some((s) => {
+                    const sLow = s.toLowerCase()
+                    if (sLow === pkgNameLow) return true
+                    if (sLow === `${pkgNameLow}@${verClean}`) return true
+                    if (sLow === `${pkgNameLow}_v_${verDash}`) return true
+                    if (sLow === `${pkgNameLow}_v_${verClean}`) return true
+
+                    const parsed = parseSpecName(sLow)
+                    if (parsed.base === pkgNameLow) {
+                      if (!parsed.version || parsed.version === verClean) return true
+                    }
+
+                    if (
+                      sLow.includes(`${pkgNameLow}@${verClean}`) ||
+                      sLow.includes(`${pkgNameLow}_v_${verDash}`)
+                    ) {
+                      return true
+                    }
+
+                    return false
+                  })
+
+                  if (!isPkgActive) {
+                    orphanedCandidates.push(pkgVerDir)
+                  }
+                }
+              }
+            }
+          }
+        } catch {
+          // Ignore
+        }
+      } else if (entry.isFile() && /\.(md|markdown)$/i.test(entry.name)) {
+        const stem = entry.name.replace(/\.(md|markdown)$/i, '').toLowerCase()
+        const parsedFile = parseSpecName(stem)
+        const isFileActive = Array.from(activeSpecs).some((s) => {
+          const sLow = s.toLowerCase()
+          if (sLow === stem) return true
+          const parsedSpec = parseSpecName(sLow)
+          if (parsedSpec.base === parsedFile.base) {
+            if (
+              !parsedSpec.version ||
+              !parsedFile.version ||
+              parsedSpec.version === parsedFile.version
+            ) {
+              return true
+            }
+          }
+          if (parsedFile.version && sLow.includes(`${parsedFile.base}@${parsedFile.version}`))
+            return true
+          return stem.includes(sLow) || sLow.includes(stem)
+        })
+
+        if (!isFileActive) {
+          orphanedCandidates.push(fullPath)
+        }
+      }
+    }
+  } catch {
+    // specs directory absent
+  }
+
+  return {
+    activeSpecs,
+    referencedBy,
+    orphanedCandidates,
+  }
+}
+
+/**
+ * Packaging orphan spec candidates into .backup/specs_<timestamp>.zip before mutation.
+ */
+export async function createSpecsBackupZip(
+  rootDir: string,
+  candidatePaths?: string[],
+): Promise<string> {
+  const backupDir = join(rootDir, '.backup')
+  await mkdir(backupDir, { recursive: true })
+
+  const now = new Date()
+  const timestamp = now
+    .toISOString()
+    .replace(/[-:T.]/g, '')
+    .slice(0, 14)
+  const zipPath = join(backupDir, `specs_${timestamp}.zip`)
+
+  const filesToZip: Array<{ fullPath: string; zipRelPath: string }> = []
+
+  if (candidatePaths && candidatePaths.length > 0) {
+    for (const p of candidatePaths) {
+      const st = await stat(p).catch(() => null)
+      if (st?.isFile()) {
+        const rel = join('specs', basename(p)).replace(/\\/g, '/')
+        filesToZip.push({ fullPath: p, zipRelPath: rel })
+      } else if (st?.isDirectory()) {
+        const subFiles = await getMarkdownFiles(p)
+        for (const f of subFiles) {
+          const subRel = f
+            .replace(rootDir, '')
+            .replace(/^[/\\]/, '')
+            .replace(/\\/g, '/')
+          filesToZip.push({ fullPath: f, zipRelPath: subRel })
+        }
+      }
+    }
+  } else {
+    const specsDir = join(rootDir, 'specs')
+    const allFiles = await getMarkdownFiles(specsDir).catch(() => [])
+    for (const f of allFiles) {
+      const rel = join('specs', f.replace(specsDir, '').replace(/^[/\\]/, '')).replace(/\\/g, '/')
+      filesToZip.push({ fullPath: f, zipRelPath: rel })
+    }
+  }
+
+  const entries: ZipEntryInput[] = []
+  for (const f of filesToZip) {
+    const buffer = await readFile(f.fullPath).catch(() => null)
+    if (buffer) {
+      entries.push({ name: f.zipRelPath, buffer })
+    }
+  }
+
+  const zipBuf = buildZipArchive(entries)
+  await writeFile(zipPath, zipBuf)
+  return zipPath
+}
+
+export interface PruneOrphanedSpecsResult {
+  success: boolean
+  dryRun: boolean
+  orphanedCount: number
+  removedFiles: string[]
+  backupZip: string | null
+  message: string
+}
+
+/**
+ * Prunes orphaned spec packages and files not reachable in active workspace models.
+ * Supports parameters dry_run (default true) and backup (default true).
+ */
+export async function pruneOrphanedSpecs(
+  rootDir: string,
+  opts?: { dry_run?: boolean; backup?: boolean },
+): Promise<PruneOrphanedSpecsResult> {
+  const dryRun = opts?.dry_run ?? true
+  const backup = opts?.backup ?? true
+
+  const graph = await calculateSpecReachability(rootDir)
+  const candidates = graph.orphanedCandidates
+
+  if (candidates.length === 0) {
+    return {
+      success: true,
+      dryRun,
+      orphanedCount: 0,
+      removedFiles: [],
+      backupZip: null,
+      message: 'No orphaned specs found.',
+    }
+  }
+
+  if (dryRun) {
+    return {
+      success: true,
+      dryRun: true,
+      orphanedCount: candidates.length,
+      removedFiles: candidates,
+      backupZip: null,
+      message: `Dry run: ${candidates.length} orphaned spec candidate(s) identified for deletion.`,
+    }
+  }
+
+  let zipPath: string | null = null
+  if (backup) {
+    zipPath = await createSpecsBackupZip(rootDir, candidates)
+  }
+
+  for (const c of candidates) {
+    await rm(c, { recursive: true, force: true }).catch(() => {})
+  }
+
+  return {
+    success: true,
+    dryRun: false,
+    orphanedCount: candidates.length,
+    removedFiles: candidates,
+    backupZip: zipPath,
+    message: `Successfully pruned ${candidates.length} orphaned spec candidate(s).${zipPath ? ` Backup created at ${zipPath}` : ''}`,
   }
 }

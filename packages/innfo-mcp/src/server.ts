@@ -29,6 +29,8 @@ import {
   deriveNameFromUrl,
   listTemplates,
   hydrateTemplate,
+  listTemplateProcedures,
+  listTemplateSkills,
 } from './tools/spec.js'
 import {
   validateModel,
@@ -36,6 +38,7 @@ import {
   applyChange,
   validateTemplate,
   initModel,
+  pruneOrphanedSpecs,
 } from './tools/mutate.js'
 import { findRepoRoot } from './tools/repo-root.js'
 
@@ -269,6 +272,58 @@ const toolDefinitions: Tool[] = [
       required: ['template_name'],
     },
   },
+  {
+    name: 'prune_orphaned_specs',
+    description:
+      'Analyze reference reachability across models, templates, and entrypoints and safely prune orphaned specs with automatic backup archive generation',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dry_run: {
+          type: 'boolean',
+          description: 'Report orphaned candidates without deleting (defaults to true)',
+        },
+        backup: {
+          type: 'boolean',
+          description:
+            'Create a zip archive snapshot in .backup/ before deletion (defaults to true)',
+        },
+        root: { type: 'string', description: 'Optional workspace root directory override' },
+      },
+    },
+  },
+  {
+    name: 'list_template_procedures',
+    description:
+      'List all procedures defined in a template and its transitively included templates up to depth 10',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        model_path: { type: 'string', description: 'Optional model file path or ID' },
+        model_id: { type: 'string', description: 'Optional model ID' },
+        template_name: { type: 'string', description: 'Optional template name' },
+        version: { type: 'string', description: 'Optional template version' },
+        url: { type: 'string', description: 'Optional template URL' },
+        root: { type: 'string', description: 'Optional workspace root directory override' },
+      },
+    },
+  },
+  {
+    name: 'list_template_skills',
+    description:
+      'List all agent skills defined in a template and its transitively included templates up to depth 10',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        model_path: { type: 'string', description: 'Optional model file path or ID' },
+        model_id: { type: 'string', description: 'Optional model ID' },
+        template_name: { type: 'string', description: 'Optional template name' },
+        version: { type: 'string', description: 'Optional template version' },
+        url: { type: 'string', description: 'Optional template URL' },
+        root: { type: 'string', description: 'Optional workspace root directory override' },
+      },
+    },
+  },
 ]
 
 /* ── Tool call dispatcher ────────────────────────────────────── */
@@ -298,6 +353,12 @@ async function dispatchTool(name: string, args: Record<string, unknown>): Promis
         return await handleListTemplates(args)
       case 'hydrate_template':
         return await handleHydrateTemplate(args)
+      case 'prune_orphaned_specs':
+        return await handlePruneOrphanedSpecs(args)
+      case 'list_template_procedures':
+        return await handleListTemplateProcedures(args)
+      case 'list_template_skills':
+        return await handleListTemplateSkills(args)
       default:
         return errorResult(`Unknown tool: ${name}`)
     }
@@ -415,6 +476,40 @@ async function handleHydrateTemplate(args: Record<string, unknown>): Promise<Cal
   const root = (args.root as string) || ROOT_DIR
   const targetDir = args.target_dir as string | undefined
   const result = await hydrateTemplate(root, templateName, { targetDir })
+  return textResult(JSON.stringify(result, null, 2))
+}
+
+async function handlePruneOrphanedSpecs(args: Record<string, unknown>): Promise<CallToolResult> {
+  const root = (args.root as string) || ROOT_DIR
+  const dry_run = args.dry_run !== undefined ? Boolean(args.dry_run) : true
+  const backup = args.backup !== undefined ? Boolean(args.backup) : true
+  const result = await pruneOrphanedSpecs(root, { dry_run, backup })
+  return textResult(JSON.stringify(result, null, 2))
+}
+
+async function handleListTemplateProcedures(
+  args: Record<string, unknown>,
+): Promise<CallToolResult> {
+  const root = (args.root as string) || ROOT_DIR
+  const result = await listTemplateProcedures(root, {
+    model_path: args.model_path as string | undefined,
+    model_id: args.model_id as string | undefined,
+    template_name: args.template_name as string | undefined,
+    version: args.version as string | undefined,
+    url: args.url as string | undefined,
+  })
+  return textResult(JSON.stringify(result, null, 2))
+}
+
+async function handleListTemplateSkills(args: Record<string, unknown>): Promise<CallToolResult> {
+  const root = (args.root as string) || ROOT_DIR
+  const result = await listTemplateSkills(root, {
+    model_path: args.model_path as string | undefined,
+    model_id: args.model_id as string | undefined,
+    template_name: args.template_name as string | undefined,
+    version: args.version as string | undefined,
+    url: args.url as string | undefined,
+  })
   return textResult(JSON.stringify(result, null, 2))
 }
 

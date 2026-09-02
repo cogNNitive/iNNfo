@@ -219,7 +219,10 @@ describe('mutate tools', () => {
       vi.spyOn(global, 'fetch').mockImplementation((input) => {
         const url = String(input)
         if (url.includes('Mutable_NN.md')) {
-          return Promise.resolve({ ok: true, text: () => Promise.resolve(MUTABLE_MODEL_CONTENT) } as Response)
+          return Promise.resolve({
+            ok: true,
+            text: () => Promise.resolve(MUTABLE_MODEL_CONTENT),
+          } as Response)
         }
         return Promise.reject(new Error('not stubbed'))
       })
@@ -466,9 +469,13 @@ describe('mutate tools', () => {
     })
 
     it('reports PARENT_RESOLUTION_FAILED when parent_spec.url is missing', async () => {
-      const content = ['---', 'spec_version: "V_0-2-0"', 'level: 2', 'title: "No Parent"', '---'].join(
-        '\n',
-      )
+      const content = [
+        '---',
+        'spec_version: "V_0-2-0"',
+        'level: 2',
+        'title: "No Parent"',
+        '---',
+      ].join('\n')
       const result = await validateTemplate(rootDir, undefined, content)
       expect(result.valid).toBe(false)
       expect(result.errors[0].message).toMatch(/PARENT_RESOLUTION_FAILED/)
@@ -604,7 +611,147 @@ describe('mutate tools', () => {
         value: 'models/auth_v2.md',
       })
       expect(updateRes.success).toBe(true)
-      expect(updateRes.model?.elements.get('ModelRef')?.[0].fields['path']).toBe('models/auth_v2.md')
+      expect(updateRes.model?.elements.get('ModelRef')?.[0].fields['path']).toBe(
+        'models/auth_v2.md',
+      )
+    })
+  })
+
+  describe('Version Migration, Backup & Pruning Tooling (Batch 4)', () => {
+    it('calculates spec reachability graph identifying active vs orphaned spec candidates', async () => {
+      const { calculateSpecReachability } = await import('./mutate')
+
+      // Create active model referencing business_V_0-2-0
+      const modelsDir = join(rootDir, 'models')
+      await mkdir(modelsDir, { recursive: true })
+      await writeFile(
+        join(modelsDir, 'Alpha_V_0-1-0_NN.md'),
+        [
+          '---',
+          'parent_spec:',
+          '  name: "business_V_0-2-0"',
+          '  url: "https://example.com/business_V_0-2-0_NN.md"',
+          '---',
+        ].join('\n'),
+      )
+
+      // Create spec package for active business_V_0-2-0 and orphaned legacy_V_0-1-0
+      const activePkgDir = join(specsDir, 'templates', 'business', 'V_0-2-0')
+      const orphanPkgDir = join(specsDir, 'templates', 'legacy', 'V_0-1-0')
+      await mkdir(activePkgDir, { recursive: true })
+      await mkdir(orphanPkgDir, { recursive: true })
+      await writeFile(join(activePkgDir, 'spec_NN.md'), '---\nspec_version: "V_0-2-0"\n---')
+      await writeFile(join(orphanPkgDir, 'spec_NN.md'), '---\nspec_version: "V_0-1-0"\n---')
+
+      const graph = await calculateSpecReachability(rootDir)
+
+      expect(graph.activeSpecs.has('business_v_0-2-0') || graph.activeSpecs.has('business')).toBe(
+        true,
+      )
+      expect(graph.orphanedCandidates).toContain(orphanPkgDir)
+      expect(graph.orphanedCandidates).not.toContain(activePkgDir)
+    })
+
+    it('creates timestamped backup zip snapshot packaging candidate specs', async () => {
+      const { createSpecsBackupZip } = await import('./mutate')
+      const orphanPkgDir = join(specsDir, 'templates', 'legacy', 'V_0-1-0')
+      await mkdir(orphanPkgDir, { recursive: true })
+      await writeFile(join(orphanPkgDir, 'spec_NN.md'), 'Orphan spec content')
+
+      const zipPath = await createSpecsBackupZip(rootDir, [orphanPkgDir])
+
+      expect(zipPath).toContain(join('.backup', 'specs_'))
+      expect(zipPath.endsWith('.zip')).toBe(true)
+
+      const { stat } = await import('node:fs/promises')
+      const st = await stat(zipPath)
+      expect(st.isFile()).toBe(true)
+      expect(st.size).toBeGreaterThan(0)
+    })
+
+    it('pruneOrphanedSpecs in dry_run mode reports deletion candidates without deleting', async () => {
+      const { pruneOrphanedSpecs } = await import('./mutate')
+      const orphanPkgDir = join(specsDir, 'templates', 'orphan_package', 'V_0-1-0')
+      await mkdir(orphanPkgDir, { recursive: true })
+      await writeFile(join(orphanPkgDir, 'spec_NN.md'), 'Orphan content')
+
+      const result = await pruneOrphanedSpecs(rootDir, { dry_run: true, backup: true })
+
+      expect(result.success).toBe(true)
+      expect(result.dryRun).toBe(true)
+      expect(result.orphanedCount).toBeGreaterThan(0)
+      expect(result.removedFiles).toContain(orphanPkgDir)
+
+      // Verify directory was NOT deleted
+      const { stat } = await import('node:fs/promises')
+      const st = await stat(orphanPkgDir)
+      expect(st.isDirectory()).toBe(true)
+    })
+
+    it('pruneOrphanedSpecs with dry_run false creates backup zip and deletes orphaned specs', async () => {
+      const { pruneOrphanedSpecs } = await import('./mutate')
+      const orphanPkgDir = join(specsDir, 'templates', 'to_delete', 'V_0-1-0')
+      await mkdir(orphanPkgDir, { recursive: true })
+      await writeFile(join(orphanPkgDir, 'spec_NN.md'), 'To delete')
+
+      const result = await pruneOrphanedSpecs(rootDir, { dry_run: false, backup: true })
+
+      expect(result.success).toBe(true)
+      expect(result.dryRun).toBe(false)
+      expect(result.backupZip).not.toBeNull()
+
+      // Verify directory was deleted
+      const { stat } = await import('node:fs/promises')
+      await expect(stat(orphanPkgDir)).rejects.toThrow()
+    })
+
+    it('C-01 & W-02: calculates reachability correctly on canonical package layout (spec_NN.md) and populates normalized <name>@<version> keys', async () => {
+      const { calculateSpecReachability } = await import('./mutate')
+
+      // Create model pointing to parent package template via URL and name
+      const modelsDir = join(rootDir, 'models')
+      await mkdir(modelsDir, { recursive: true })
+      await writeFile(
+        join(modelsDir, 'App_Model_V_1-0-0_NN.md'),
+        [
+          '---',
+          'parent_spec:',
+          '  name: "canonical_pkg"',
+          '  url: "https://example.com/specs/templates/canonical_pkg/V_1-0-0/spec_NN.md"',
+          '---',
+        ].join('\n'),
+      )
+
+      // Create canonical package directory for canonical_pkg V_1-0-0
+      const activePkgDir = join(specsDir, 'templates', 'canonical_pkg', 'V_1-0-0')
+      const subPkgDir = join(specsDir, 'templates', 'sub_pkg', 'V_0-5-0')
+      await mkdir(activePkgDir, { recursive: true })
+      await mkdir(subPkgDir, { recursive: true })
+
+      // activePkg includes sub_pkg via canonical package layout
+      await writeFile(
+        join(activePkgDir, 'spec_NN.md'),
+        [
+          '---',
+          'spec_version: "V_1-0-0"',
+          'includes:',
+          '  - name: "sub_pkg"',
+          '    url: "https://example.com/specs/templates/sub_pkg/V_0-5-0/spec_NN.md"',
+          '---',
+        ].join('\n'),
+      )
+
+      await writeFile(join(subPkgDir, 'spec_NN.md'), '---\nspec_version: "V_0-5-0"\n---')
+
+      const graph = await calculateSpecReachability(rootDir)
+
+      // Verify activeSpecs contains normalized <name>@<version> keys (Fix W-02)
+      expect(graph.activeSpecs.has('canonical_pkg@1.0.0')).toBe(true)
+      expect(graph.activeSpecs.has('sub_pkg@0.5.0')).toBe(true)
+
+      // Verify canonical package directories are NOT identified as orphaned (Fix C-01)
+      expect(graph.orphanedCandidates).not.toContain(activePkgDir)
+      expect(graph.orphanedCandidates).not.toContain(subPkgDir)
     })
   })
 })

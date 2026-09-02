@@ -18,7 +18,12 @@ export function parseFrontmatter(content: string): SpecFrontmatter | null {
   if ((parsed as any).parent && !(parsed as any).parent_spec) {
     if (typeof (parsed as any).parent === 'string') {
       const url = (parsed as any).parent
-      const name = url.split(/[/\\]/).pop()?.replace(/\.(md|markdown)$/i, '').replace(/_(NN|FORMAT|F)$/i, '') || ''
+      const name =
+        url
+          .split(/[/\\]/)
+          .pop()
+          ?.replace(/\.(md|markdown)$/i, '')
+          .replace(/_(NN|FORMAT|F)$/i, '') || ''
       ;(parsed as any).parent_spec = { url, name }
     } else {
       ;(parsed as any).parent_spec = (parsed as any).parent
@@ -33,7 +38,7 @@ export function parseFrontmatter(content: string): SpecFrontmatter | null {
     ;(parsed as any).spec_url = (parsed as any).specification_url
   }
   // Normalize `includes` entries: a bare string is shorthand for a name with
-  // no explicit URL (resolved locally by name). Objects pass through.
+  // no explicit URL (resolved locally by name). Objects pass through with optional `alias`.
   const includes = (parsed as any).includes
   if (Array.isArray(includes)) {
     ;(parsed as any).includes = includes
@@ -42,13 +47,78 @@ export function parseFrontmatter(content: string): SpecFrontmatter | null {
           const name = entry.replace(/\.(md|markdown)$/i, '').replace(/_(NN|FORMAT|F)$/i, '')
           return { name, url: '' }
         }
-        if (entry && typeof entry === 'object') {
+        if (entry && typeof entry === 'object' && entry !== null) {
           const e = entry as Record<string, unknown>
-          return { name: String(e.name ?? ''), url: String(e.url ?? '') }
+          const res: any = { name: String(e.name ?? ''), url: String(e.url ?? '') }
+          if (e.alias && typeof e.alias === 'object' && e.alias !== null) {
+            const aliasObj = e.alias as Record<string, unknown>
+            const aliasMap: any = {}
+            if (aliasObj.concepts && typeof aliasObj.concepts === 'object') {
+              aliasMap.concepts = aliasObj.concepts
+            }
+            if (aliasObj.fields && typeof aliasObj.fields === 'object') {
+              aliasMap.fields = aliasObj.fields
+            }
+            res.alias = aliasMap
+          }
+          return res
         }
         return null
       })
       .filter((e: unknown): e is { name: string; url: string } => !!e && !!(e as any).name)
+  }
+  // Normalize `procedures` block
+  const procedures = (parsed as any).procedures
+  if (Array.isArray(procedures)) {
+    ;(parsed as any).procedures = procedures
+      .map((p: unknown) => {
+        if (p && typeof p === 'object' && p !== null) {
+          const obj = p as Record<string, unknown>
+          return {
+            id: String(obj.id ?? ''),
+            name: String(obj.name ?? ''),
+            path: String(obj.path ?? ''),
+            ...(obj.source_template ? { source_template: String(obj.source_template) } : {}),
+          }
+        }
+        return null
+      })
+      .filter(
+        (p: unknown): p is { id: string; name: string; path: string } => !!p && !!(p as any).id,
+      )
+  }
+  // Normalize `skills` block
+  const skills = (parsed as any).skills
+  if (Array.isArray(skills)) {
+    ;(parsed as any).skills = skills
+      .map((s: unknown) => {
+        if (s && typeof s === 'object' && s !== null) {
+          const obj = s as Record<string, unknown>
+          return {
+            name: String(obj.name ?? ''),
+            repo: String(obj.repo ?? ''),
+            path: String(obj.path ?? ''),
+            ...(obj.source_template ? { source_template: String(obj.source_template) } : {}),
+          }
+        }
+        return null
+      })
+      .filter(
+        (s: unknown): s is { name: string; repo: string; path: string } => !!s && !!(s as any).name,
+      )
+  }
+  // Normalize top-level `alias` block
+  const topAlias = (parsed as any).alias
+  if (topAlias && typeof topAlias === 'object' && topAlias !== null) {
+    const aliasObj = topAlias as Record<string, unknown>
+    const aliasMap: any = {}
+    if (aliasObj.concepts && typeof aliasObj.concepts === 'object') {
+      aliasMap.concepts = aliasObj.concepts
+    }
+    if (aliasObj.fields && typeof aliasObj.fields === 'object') {
+      aliasMap.fields = aliasObj.fields
+    }
+    ;(parsed as any).alias = aliasMap
   }
   // Normalize legacy matrix params → values (R-MM-08 / 4.5 reader tolerance)
   const matrices = (parsed as any).matrices
