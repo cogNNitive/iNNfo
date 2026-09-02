@@ -1,7 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { join } from 'node:path'
 import { rm, mkdir, writeFile } from 'node:fs/promises'
-import { getSpec, getTemplateFromUrl, getTemplateFromModel, listTemplates, hydrateTemplate } from './spec'
+import {
+  getSpec,
+  getTemplateFromUrl,
+  getTemplateFromModel,
+  listTemplates,
+  hydrateTemplate,
+  listTemplateProcedures,
+  listTemplateSkills,
+} from './spec'
 import { validateModel } from './mutate'
 
 const rootDir = join(import.meta.dirname!, '..', '..', 'temp-test-spec')
@@ -186,13 +194,18 @@ describe('Spec Tools Integration (URL- and model-derived, no hardcoding)', () =>
 
     await writeFile(join(rootDir, 'templates', 'ws_tmpl.md'), '---\nversion: V_1-0-0\n---')
     await writeFile(join(globalDir, 'global_tmpl.md'), '---\nversion: V_1-0-0\n---')
-    await writeFile(join(skillsDir, 'nn-innfo', 'templates', 'skill_tmpl.md'), '---\nversion: V_1-0-0\n---')
+    await writeFile(
+      join(skillsDir, 'nn-innfo', 'templates', 'skill_tmpl.md'),
+      '---\nversion: V_1-0-0\n---',
+    )
 
     const discovered = await listTemplates(rootDir, { globalDir, skillsDir })
 
     expect(discovered.some((t) => t.name === 'ws_tmpl' && t.source === 'workspace')).toBe(true)
     expect(discovered.some((t) => t.name === 'global_tmpl' && t.source === 'global')).toBe(true)
-    expect(discovered.some((t) => t.name === 'skill_tmpl' && t.source === 'skill:nn-innfo')).toBe(true)
+    expect(discovered.some((t) => t.name === 'skill_tmpl' && t.source === 'skill:nn-innfo')).toBe(
+      true,
+    )
   })
 
   it('hydrateTemplate copies template from global or skill store into workspace ./templates/', async () => {
@@ -200,7 +213,10 @@ describe('Spec Tools Integration (URL- and model-derived, no hardcoding)', () =>
     const skillsDir = join(rootDir, 'skills')
     await mkdir(globalDir, { recursive: true })
 
-    await writeFile(join(globalDir, 'workspace_spec_NN.md'), '# NN concept: Workspace\n* type:: text')
+    await writeFile(
+      join(globalDir, 'workspace_spec_NN.md'),
+      '# NN concept: Workspace\n* type:: text',
+    )
 
     const res = await hydrateTemplate(rootDir, 'workspace_spec_NN', { globalDir, skillsDir })
 
@@ -213,5 +229,106 @@ describe('Spec Tools Integration (URL- and model-derived, no hardcoding)', () =>
     const st = await statFs(targetFile)
     expect(st.isFile()).toBe(true)
   })
-})
 
+  it('listTemplateProcedures and listTemplateSkills dynamically discover transitive procedures and skills across includes trees', async () => {
+    const templatesDir = join(rootDir, 'templates')
+    await mkdir(templatesDir, { recursive: true })
+
+    await writeFile(
+      join(templatesDir, 'base_spec_NN.md'),
+      [
+        '---',
+        'level: 2',
+        'title: "Base Template"',
+        'procedures:',
+        '  - id: "proc-base"',
+        '    name: "Base Procedure"',
+        '    path: "procedures/base.md"',
+        'skills:',
+        '  - name: "nn-base"',
+        '    repo: "cogNNitive/actioNN"',
+        '    path: "skills/nn-base"',
+        'includes:',
+        '  - name: "included_spec_NN"',
+        '---',
+      ].join('\n'),
+      'utf-8',
+    )
+
+    await writeFile(
+      join(templatesDir, 'included_spec_NN.md'),
+      [
+        '---',
+        'level: 2',
+        'title: "Included Template"',
+        'procedures:',
+        '  - id: "proc-included"',
+        '    name: "Included Procedure"',
+        '    path: "procedures/included.md"',
+        '  - id: "proc-base"',
+        '    name: "Duplicate Base Procedure"',
+        '    path: "procedures/dup.md"',
+        'skills:',
+        '  - name: "nn-included"',
+        '    repo: "cogNNitive/actioNN"',
+        '    path: "skills/nn-included"',
+        '  - name: "nn-base"',
+        '    repo: "cogNNitive/actioNN"',
+        '    path: "skills/dup"',
+        '---',
+      ].join('\n'),
+      'utf-8',
+    )
+
+    const procsRes = await listTemplateProcedures(rootDir, { template_name: 'base_spec_NN' })
+    expect(procsRes.procedures).toHaveLength(2)
+    expect(procsRes.procedures.map((p) => p.id)).toEqual(['proc-base', 'proc-included'])
+    expect(procsRes.procedures[0].source_template).toBe('base_spec_NN')
+
+    const skillsRes = await listTemplateSkills(rootDir, { template_name: 'base_spec_NN' })
+    expect(skillsRes.skills).toHaveLength(2)
+    expect(skillsRes.skills.map((s) => s.name)).toEqual(['nn-base', 'nn-included'])
+    expect(skillsRes.skills[0].source_template).toBe('base_spec_NN')
+  })
+
+  it('S-01: discoverTransitiveAssets parses version strings from inc.url to resolve package templates', async () => {
+    const pkgDir = join(specsDir, 'templates', 'sec_pkg', 'V_2-0-0')
+    await mkdir(pkgDir, { recursive: true })
+
+    await writeFile(
+      join(pkgDir, 'spec_NN.md'),
+      [
+        '---',
+        'level: 2',
+        'spec_version: "V_2-0-0"',
+        'title: "Security Package"',
+        'procedures:',
+        '  - id: "proc-sec-v2"',
+        '    name: "Security Audit V2"',
+        '    path: "procedures/audit_v2.md"',
+        '---',
+      ].join('\n'),
+      'utf-8',
+    )
+
+    const templatesDir = join(rootDir, 'templates')
+    await mkdir(templatesDir, { recursive: true })
+
+    await writeFile(
+      join(templatesDir, 'main_tmpl_NN.md'),
+      [
+        '---',
+        'level: 2',
+        'title: "Main Template"',
+        'includes:',
+        '  - name: "sec_pkg"',
+        '    url: "https://example.com/specs/templates/sec_pkg/V_2-0-0/spec_NN.md"',
+        '---',
+      ].join('\n'),
+      'utf-8',
+    )
+
+    const procsRes = await listTemplateProcedures(rootDir, { template_name: 'main_tmpl_NN' })
+    expect(procsRes.procedures.some((p) => p.id === 'proc-sec-v2')).toBe(true)
+  })
+})

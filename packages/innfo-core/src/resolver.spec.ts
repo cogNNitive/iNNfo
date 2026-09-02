@@ -8,6 +8,7 @@ import {
   UnresolvedTemplateError,
   validateModel,
   parseModel,
+  resolveTemplateSchema,
 } from './index'
 import type { SpecDocument } from './types'
 
@@ -154,5 +155,204 @@ parent_spec:
     const res = validateModel(parsed, templateDoc, null)
     expect(res.valid).toBe(true)
     expect(res.errors.length).toBe(0)
+  })
+})
+
+describe('Composition & Alias Engine (resolver / resolveTemplateSchema)', () => {
+  it('applies concept and field aliases during template composition', () => {
+    const baseA = `---
+level: 2
+title: "Base A"
+---
+
+# NN Concept Definition
+## NN Concept Definition: Task
+type:: list
+
+# NN Field Definition
+## NN Field Definition: status
+concept:: Task
+type:: string
+
+# NN Matrix Definition
+## NN Matrix Definition: TaskDep
+source:: Task
+target:: Task
+`
+
+    const composite = `---
+level: 2
+title: "Composite"
+includes:
+  - name: "base_a"
+    url: "https://example.com/base_a.md"
+    alias:
+      concepts:
+        "Task": "BusinessTask"
+      fields:
+        "Task.status": "Task.business_status"
+---
+`
+
+    const { schema, errors } = resolveTemplateSchema(composite, (ref) =>
+      ref.name === 'base_a' ? baseA : null,
+    )
+
+    expect(errors).toEqual([])
+    expect(schema.concepts.map((c) => c.name)).toEqual(['BusinessTask'])
+    const bTask = schema.concepts.find((c) => c.name === 'BusinessTask')!
+    expect(bTask.fields?.map((f) => f.name)).toEqual(['business_status'])
+    expect(schema.matrices[0].source).toBe('BusinessTask')
+    expect(schema.matrices[0].target).toBe('BusinessTask')
+  })
+
+  it('detects un-aliased concept collision across base templates and emits [COMPOSITION_COLLISION]', () => {
+    const baseA = `---
+level: 2
+title: "Base A"
+---
+
+# NN Concept Definition
+## NN Concept Definition: Task
+type:: list
+`
+
+    const baseB = `---
+level: 2
+title: "Base B"
+---
+
+# NN Concept Definition
+## NN Concept Definition: Task
+type:: text
+`
+
+    const composite = `---
+level: 2
+title: "Composite"
+includes:
+  - name: "base_a"
+    url: "https://example.com/base_a.md"
+  - name: "base_b"
+    url: "https://example.com/base_b.md"
+---
+`
+
+    const { errors } = resolveTemplateSchema(composite, (ref) => {
+      if (ref.name === 'base_a') return baseA
+      if (ref.name === 'base_b') return baseB
+      return null
+    })
+
+    const collision = errors.find((e) => e.message.includes('[COMPOSITION_COLLISION]'))
+    expect(collision).toBeDefined()
+    expect(collision?.message).toMatch(/Base A/)
+    expect(collision?.message).toMatch(/Base B/)
+    expect(collision?.message).toMatch(/Task/)
+  })
+
+  it('detects un-aliased field collision across base templates', () => {
+    const baseA = `---
+level: 2
+title: "Base A"
+---
+
+# NN Concept Definition
+## NN Concept Definition: ItemA
+type:: list
+
+# NN Field Definition
+## NN Field Definition: status
+concept:: ItemA
+type:: string
+`
+
+    const baseBWithField = `---
+level: 2
+title: "Base B"
+---
+
+# NN Concept Definition
+## NN Concept Definition: ItemB
+type:: list
+
+# NN Field Definition
+## NN Field Definition: status
+concept:: ItemB
+type:: select
+options:: [open, closed]
+`
+
+    const composite = `---
+level: 2
+title: "Composite"
+includes:
+  - name: "base_a"
+    url: "https://example.com/base_a.md"
+  - name: "base_b"
+    url: "https://example.com/base_b.md"
+    alias:
+      concepts:
+        "ItemB": "ItemA"
+---
+`
+
+    const { errors } = resolveTemplateSchema(composite, (ref) => {
+      if (ref.name === 'base_a') return baseA
+      if (ref.name === 'base_b') return baseBWithField
+      return null
+    })
+
+    const collision = errors.find((e) => e.message.includes('[COMPOSITION_COLLISION]'))
+    expect(collision).toBeDefined()
+    expect(collision?.message).toMatch(/ItemA/)
+  })
+
+  it('handles multi-level inheritance resolution up to depth 10 and rejects cycle', () => {
+    const tplA = `---
+level: 2
+title: "Tpl A"
+includes:
+  - name: "tpl_b"
+    url: "b"
+---
+`
+    const tplB = `---
+level: 2
+title: "Tpl B"
+includes:
+  - name: "tpl_a"
+    url: "a"
+---
+`
+
+    const { errors } = resolveTemplateSchema(tplA, (ref) => {
+      if (ref.name === 'tpl_b') return tplB
+      if (ref.name === 'tpl_a') return tplA
+      return null
+    })
+
+    expect(errors.some((e) => /cyclic/i.test(e.message))).toBe(true)
+  })
+
+  it('enforces maximum inclusion depth of 10', () => {
+    // Construct a chain of 11 templates: T1 -> T2 -> ... -> T11
+    const getTpl = (n: number) => `---
+level: 2
+title: "Tpl ${n}"
+includes:
+  - name: "tpl_${n + 1}"
+    url: "x"
+---
+`
+    const { errors } = resolveTemplateSchema(getTpl(1), (ref) => {
+      const match = ref.name.match(/^tpl_(\d+)$/)
+      if (match) {
+        return getTpl(parseInt(match[1], 10))
+      }
+      return null
+    })
+
+    expect(errors.some((e) => e.message.includes('Max inclusion depth of 10 exceeded'))).toBe(true)
   })
 })

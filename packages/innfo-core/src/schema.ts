@@ -1,6 +1,8 @@
 import type {
+  AliasMap,
   Concept,
   ConceptField,
+  IncludedTemplateRef,
   Marker,
   MatrixDecl,
   ParsedModel,
@@ -186,7 +188,7 @@ export function extractTemplateSchemaFromContent(content: string): TemplateSchem
 /** Resolve the raw content of an included template by name (and optionally
  *  URL). Returns null when it cannot be resolved. Supplied by the host
  *  (innfo-mcp / the editor) so this module stays I/O-free. */
-export type IncludeResolver = (ref: { name: string; url: string }) => string | null
+export type IncludeResolver = (ref: IncludedTemplateRef) => string | null
 
 export interface ResolvedTemplateSchema {
   schema: TemplateSchema
@@ -234,6 +236,91 @@ export function canonicalizeDefinition(def: Concept | Marker | MatrixDecl): stri
   return JSON.stringify(canonicalValue(def))
 }
 
+/**
+ * Applies frontmatter `alias` map to a TemplateSchema, renaming concepts, field scopes,
+ * matrix source/target concepts, marker applies_to concepts, and taxonomy edges.
+ */
+export function applyAliasToSchema(schema: TemplateSchema, alias?: AliasMap): TemplateSchema {
+  if (!alias || (!alias.concepts && !alias.fields)) {
+    return schema
+  }
+
+  const conceptMap = alias.concepts ?? {}
+  const fieldMap = alias.fields ?? {}
+
+  const conceptRenameLookup = new Map<string, string>()
+  for (const [oldName, newName] of Object.entries(conceptMap)) {
+    conceptRenameLookup.set(oldName.toLowerCase(), newName)
+  }
+
+  const fieldRenameLookup = new Map<string, string>()
+  for (const [oldKey, newKey] of Object.entries(fieldMap)) {
+    fieldRenameLookup.set(oldKey.toLowerCase(), newKey)
+  }
+
+  const concepts: Concept[] = schema.concepts.map((c) => {
+    const oldName = c.name
+    const newConceptName = conceptRenameLookup.get(oldName.toLowerCase()) ?? oldName
+
+    const fields = c.fields?.map((f) => {
+      const oldFieldKey = `${oldName.toLowerCase()}.${f.name.toLowerCase()}`
+      const aliasVal = fieldRenameLookup.get(oldFieldKey)
+      let newFieldName = f.name
+      if (aliasVal) {
+        newFieldName = aliasVal.includes('.') ? aliasVal.split('.').pop()! : aliasVal
+      }
+
+      let target_concepts = f.target_concepts
+      if (target_concepts) {
+        target_concepts = target_concepts.map(
+          (tc) => conceptRenameLookup.get(tc.toLowerCase()) ?? tc,
+        )
+      }
+
+      return {
+        ...f,
+        name: newFieldName,
+        ...(target_concepts ? { target_concepts } : {}),
+      }
+    })
+
+    return {
+      ...c,
+      name: newConceptName,
+      ...(fields ? { fields } : {}),
+    }
+  })
+
+  const markers: Marker[] = schema.markers.map((m) => {
+    let applies_to = m.applies_to
+    if (applies_to) {
+      applies_to = applies_to.map((ac) => conceptRenameLookup.get(ac.toLowerCase()) ?? ac)
+    }
+    return {
+      ...m,
+      ...(applies_to ? { applies_to } : {}),
+    }
+  })
+
+  const matrices: MatrixDecl[] = schema.matrices.map((mx) => {
+    const source = conceptRenameLookup.get(mx.source.toLowerCase()) ?? mx.source
+    const target = conceptRenameLookup.get(mx.target.toLowerCase()) ?? mx.target
+    return {
+      ...mx,
+      source,
+      target,
+    }
+  })
+
+  const taxonomy: TaxonomyEdge[] = schema.taxonomy.map((edge) => {
+    const parent = conceptRenameLookup.get(edge.parent.toLowerCase()) ?? edge.parent
+    const child = conceptRenameLookup.get(edge.child.toLowerCase()) ?? edge.child
+    return { parent, child }
+  })
+
+  return { concepts, markers, matrices, taxonomy }
+}
+
 interface Provenanced<T> {
   source: string
   def: T
@@ -250,9 +337,8 @@ interface Provenance {
  * Merge one already-resolved schema into the accumulator. A same-named
  * Definition from a different source is silently dropped when its body is
  * AST-identical to the one already merged, and is an ERROR (naming both
- * sources) when the bodies differ.
+ * sources) when the bodies differ or un-aliased collisions occur.
  */
-/** Returns true when `incoming` was added as a new entry (not a dup / not a clash). */
 function mergeDefinition<T extends Concept | Marker | MatrixDecl>(
   incoming: T,
   incomingSource: string,
@@ -260,18 +346,27 @@ function mergeDefinition<T extends Concept | Marker | MatrixDecl>(
   seen: Map<string, Provenanced<T>>,
   target: T[],
   errors: ValidationError[],
+  isHost: boolean = false,
 ): boolean {
   const key = incoming.name.toLowerCase()
   const prior = seen.get(key)
   if (prior) {
     if (canonicalizeDefinition(prior.def) !== canonicalizeDefinition(incoming)) {
-      errors.push({
-        path: `includes.${kindLabel}.${incoming.name}`,
-        message: `${kindLabel} Definition "${incoming.name}" is declared with different bodies by both "${prior.source}" and "${incomingSource}" — \`includes\` composition is additive and MUST NOT redeclare a Definition differently`,
-        severity: 'error',
-      })
+      if (!isHost && prior.source !== incomingSource) {
+        errors.push({
+          path: `includes.${kindLabel}.${incoming.name}`,
+          message: `[COMPOSITION_COLLISION] ${kindLabel} Definition "${incoming.name}" collision detected between included templates "${prior.source}" and "${incomingSource}". Use frontmatter \`alias\` to resolve collisions.`,
+          severity: 'error',
+        })
+      } else {
+        errors.push({
+          path: `includes.${kindLabel}.${incoming.name}`,
+          message: `${kindLabel} Definition "${incoming.name}" is declared with different bodies by both "${prior.source}" and "${incomingSource}" — \`includes\` composition is additive and MUST NOT redeclare a Definition differently`,
+          severity: 'error',
+        })
+      }
     }
-    // AST-identical → already merged, nothing to do.
+    // AST-identical → deduplicate silently
     return false
   }
   seen.set(key, { source: incomingSource, def: incoming })
@@ -285,26 +380,44 @@ function mergeSchemaInto(
   incomingSource: string,
   provenance: Provenance,
   errors: ValidationError[],
+  isHost: boolean = false,
 ): void {
   for (const c of incoming.concepts) {
-    if (mergeDefinition(c, incomingSource, 'Concept', provenance.concept, acc.concepts, errors)) {
-      for (const f of c.fields ?? []) {
-        provenance.field.set(`${c.name.toLowerCase()}.${f.name.toLowerCase()}`, incomingSource)
+    mergeDefinition(c, incomingSource, 'Concept', provenance.concept, acc.concepts, errors, isHost)
+    for (const f of c.fields ?? []) {
+      const fieldKey = `${c.name.toLowerCase()}.${f.name.toLowerCase()}`
+      const priorFieldSource = provenance.field.get(fieldKey)
+      if (priorFieldSource && priorFieldSource !== incomingSource && !isHost) {
+        const existingConcept = acc.concepts.find(
+          (ac) => ac.name.toLowerCase() === c.name.toLowerCase(),
+        )
+        const existingField = existingConcept?.fields?.find(
+          (af) => af.name.toLowerCase() === f.name.toLowerCase(),
+        )
+        if (existingField && JSON.stringify(existingField) !== JSON.stringify(f)) {
+          errors.push({
+            path: `includes.Field.${c.name}.${f.name}`,
+            message: `[COMPOSITION_COLLISION] Field "${c.name}.${f.name}" collision detected between included templates "${priorFieldSource}" and "${incomingSource}". Use frontmatter \`alias\` to resolve collisions.`,
+            severity: 'error',
+          })
+        }
+      } else {
+        provenance.field.set(fieldKey, incomingSource)
       }
     }
   }
   for (const m of incoming.markers) {
-    mergeDefinition(m, incomingSource, 'Marker', provenance.marker, acc.markers, errors)
+    mergeDefinition(m, incomingSource, 'Marker', provenance.marker, acc.markers, errors, isHost)
   }
   for (const mx of incoming.matrices) {
-    mergeDefinition(mx, incomingSource, 'Matrix', provenance.matrix, acc.matrices, errors)
+    mergeDefinition(mx, incomingSource, 'Matrix', provenance.matrix, acc.matrices, errors, isHost)
   }
   for (const edge of incoming.taxonomy) acc.taxonomy.push(edge)
 }
 
 /**
  * Resolve a level-2 template's effective schema, composing every template it
- * `includes` (recursively, depth-first, left to right) on top of a base of
+ * `includes` (recursively, depth-first, left to right up to depth 10) on top of a base of
  * the included schemas. Returns the merged schema plus any composition
  * errors (name collisions, cycles, unresolved includes). When the template
  * declares no `includes`, or no resolver is supplied, this is just
@@ -314,12 +427,26 @@ export function resolveTemplateSchema(
   templateContent: string,
   resolveInclude?: IncludeResolver,
   _seen: Set<string> = new Set(),
+  _depth: number = 0,
 ): ResolvedTemplateSchema {
   const parsed = parseModel(templateContent)
   const local = extractTemplateSchema(parsed)
   const includes = parsed.frontmatter?.includes ?? []
   if (!resolveInclude || includes.length === 0) {
     return { schema: local, errors: [] }
+  }
+
+  if (_depth >= 10) {
+    return {
+      schema: local,
+      errors: [
+        {
+          path: 'includes',
+          message: 'Max inclusion depth of 10 exceeded',
+          severity: 'error',
+        },
+      ],
+    }
   }
 
   const selfLabel = String(parsed.frontmatter?.title ?? 'this template')
@@ -351,14 +478,20 @@ export function resolveTemplateSchema(
       })
       continue
     }
-    const nested = resolveTemplateSchema(content, resolveInclude, new Set([..._seen, key]))
+    const nested = resolveTemplateSchema(
+      content,
+      resolveInclude,
+      new Set([..._seen, key]),
+      _depth + 1,
+    )
     errors.push(...nested.errors)
+    const aliasedSchema = ref.alias ? applyAliasToSchema(nested.schema, ref.alias) : nested.schema
     const includedLabel = String(parseModel(content).frontmatter?.title ?? ref.name)
-    mergeSchemaInto(base, nested.schema, includedLabel, provenance, errors)
+    mergeSchemaInto(base, aliasedSchema, includedLabel, provenance, errors, false)
   }
 
   // The composite template's own definitions apply on top of the union.
-  mergeSchemaInto(base, local, selfLabel, provenance, errors)
+  mergeSchemaInto(base, local, selfLabel, provenance, errors, true)
 
   return { schema: base, errors }
 }

@@ -183,9 +183,11 @@ describe('NodeSpecResolver', () => {
       '---',
       'Canonical Content',
     ].join('\n')
-    const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation(() =>
-      Promise.resolve({ ok: true, text: () => Promise.resolve(remoteContent) } as Response),
-    )
+    const fetchSpy = vi
+      .spyOn(global, 'fetch')
+      .mockImplementation(() =>
+        Promise.resolve({ ok: true, text: () => Promise.resolve(remoteContent) } as Response),
+      )
 
     const result = await resolveParentChainNode(
       rootDir,
@@ -357,6 +359,92 @@ describe('NodeSpecResolver', () => {
       await saveSpecOnce(specsDir, 'pinned_NN.md', 'original content')
       await saveSpecOnce(specsDir, 'pinned_NN.md', 'different content')
       expect(await readFile(join(specsDir, 'pinned_NN.md'), 'utf-8')).toBe('original content')
+    })
+  })
+
+  describe('4-Tier Package Resolver & Immutability (Batch 3)', () => {
+    it('resolves Tier 1 workspace package directory first', async () => {
+      const { resolveTemplatePackage } = await import('./resolver-node')
+      const pkgDir = join(specsDir, 'templates', 'business', 'V_0-2-0')
+      await mkdir(pkgDir, { recursive: true })
+      await writeFile(join(pkgDir, 'spec_NN.md'), '---\nspec_version: "V_0-2-0"\nlevel: 2\n---')
+
+      const res = await resolveTemplatePackage(rootDir, 'business_V_0-2-0')
+      expect(res).not.toBeNull()
+      expect(res?.tier).toBe('workspace-package')
+      expect(res?.isPackageDir).toBe(true)
+      expect(res?.specFilePath).toBe(join(pkgDir, 'spec_NN.md'))
+    })
+
+    it('falls back to Tier 2 workspace flat spec when workspace package dir is missing', async () => {
+      const { resolveTemplatePackage } = await import('./resolver-node')
+      await writeFile(
+        join(specsDir, 'business_V_0-2-0_NN.md'),
+        '---\nspec_version: "V_0-2-0"\nlevel: 2\n---',
+      )
+
+      const res = await resolveTemplatePackage(rootDir, 'business_V_0-2-0')
+      expect(res).not.toBeNull()
+      expect(res?.tier).toBe('workspace-flat')
+      expect(res?.isPackageDir).toBe(false)
+    })
+
+    it('falls back to Tier 3 global user cache when absent in workspace', async () => {
+      const { resolveTemplatePackage } = await import('./resolver-node')
+      const globalDir = join(rootDir, 'global_agents')
+      const globalPkgDir = join(globalDir, 'projects', 'V_0-2-0')
+      await mkdir(globalPkgDir, { recursive: true })
+      await writeFile(join(globalPkgDir, 'spec_NN.md'), '---\nspec_version: "V_0-2-0"\n---')
+
+      const res = await resolveTemplatePackage(rootDir, 'projects_V_0-2-0', undefined, {
+        globalDir,
+      })
+      expect(res).not.toBeNull()
+      expect(res?.tier).toBe('global-cache')
+      expect(res?.isPackageDir).toBe(true)
+    })
+
+    it('falls back to Tier 4 installed skill directory', async () => {
+      const { resolveTemplatePackage } = await import('./resolver-node')
+      const skillsDir = join(rootDir, 'skills')
+      const skillPkgDir = join(skillsDir, 'nn-innfo', 'templates', 'custom', 'V_0-1-0')
+      await mkdir(skillPkgDir, { recursive: true })
+      await writeFile(join(skillPkgDir, 'spec_NN.md'), '---\nspec_version: "V_0-1-0"\n---')
+
+      const res = await resolveTemplatePackage(rootDir, 'custom_V_0-1-0', undefined, { skillsDir })
+      expect(res).not.toBeNull()
+      expect(res?.tier).toBe('installed-skill')
+    })
+
+    it('hydrateTemplatePackageAtomically creates package directory via staging rename and enforces write-once immutability', async () => {
+      const { hydrateTemplatePackageAtomically } = await import('./resolver-node')
+      const pkgPath = await hydrateTemplatePackageAtomically(
+        rootDir,
+        'business',
+        'V_0-2-0',
+        'Content V1',
+      )
+      expect(await readFile(join(pkgPath, 'spec_NN.md'), 'utf-8')).toBe('Content V1')
+
+      // Write-once immutability: second call does not overwrite existing package contents
+      await hydrateTemplatePackageAtomically(rootDir, 'business', 'V_0-2-0', 'Content V2')
+      expect(await readFile(join(pkgPath, 'spec_NN.md'), 'utf-8')).toBe('Content V1')
+    })
+
+    it('W-01: buildIncludeContentMap normalizes case lookup for frontmatter includes', async () => {
+      const { buildIncludeContentMap } = await import('./resolver-node')
+
+      await writeFile(
+        join(specsDir, 'security_V_1-0-0_NN.md'),
+        '---\nspec_version: "V_1-0-0"\nlevel: 2\ntitle: "Security"\n---\n',
+        'utf-8',
+      )
+
+      const map = await buildIncludeContentMap(rootDir, [{ name: 'Security_V_1-0-0', url: '' }])
+
+      // Must be retrievable by original name AND lowercase normalized key (Fix W-01)
+      expect(map.get('Security_V_1-0-0')).toBeDefined()
+      expect(map.get('security_v_1-0-0')).toBeDefined()
     })
   })
 })
