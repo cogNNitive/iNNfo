@@ -26,10 +26,11 @@ async function loadFile(file: File): Promise<void> {
     workspace.reset()
     workspace.isSampleSession = false
 
+    const rootIds = [rootId]
     const { nodes } = normalizeSingleModel(content, file.name, rootId)
 
-    await resolveParentSpecs(nodes, [rootId])
-    modelStore.setGraph(nodes, [rootId])
+    await resolveParentSpecs(nodes, rootIds)
+    modelStore.setGraph(nodes, rootIds)
 
     workspace.hasParsed = true
     workspace.parseCount += 1
