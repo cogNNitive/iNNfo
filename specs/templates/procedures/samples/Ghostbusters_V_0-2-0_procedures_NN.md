@@ -10,13 +10,6 @@ title: "Ghostbusters Inc. Standard Containment Procedure Model"
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
 
-# NN index
-
-* [[Work]]
-* [[Artifact]]
-* [[Tools]]
-* [[Roles]]
-
 # NN Work
 
 ## NN Work: Standard Ghost Containment Protocol

@@ -10,17 +10,6 @@ title: "Ghostbusters Inc. Spectral Risk & Business Analysis Model"
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
 
-# NN index
-
-* [[Analysis]]
-  * [[Assumptions]]
-  * [[Risks]]
-  * [[Keys]]
-  * [[Suggestions]]
-* [[Validation]]
-  * [[Coherence]]
-  * [[Experiments]]
-
 # NN Analysis
 
 Strategic assessment of Ghostbusters Inc. market expansion into corporate commercial spectral removal in NYC high-rise properties.

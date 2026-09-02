@@ -10,16 +10,6 @@ title: "Ghostbusters Subterranean Containment Upgrade Project"
 > [!NOTE]
 > This is an **iNNfo document** — a plain-text Markdown file. Open it with any text editor or view and edit it with [cogNNitive](https://innfo.cognnitive.com/app/innfo-doc).
 
-# NN index
-
-* [[Project]]
-  * [[Phases]]
-    * [[Milestone]]
-  * [[Deliverable]]
-  * [[Task]]
-  * [[Risk]]
-  * [[Project roles]]
-
 # NN Project
 
 The Ghostbusters Subterranean Containment Grid Upgrade Project aims to expand spectral vault storage capacity by 400%, integrate automated diesel backup power switching, and reinforce high-voltage laser confinement barriers at headquarters.
