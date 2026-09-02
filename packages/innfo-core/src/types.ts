@@ -76,6 +76,7 @@ export interface ConceptField {
 
 export interface Concept {
   name: string
+  parent?: string
   icon?: string
   type: ConceptType
   color?: string

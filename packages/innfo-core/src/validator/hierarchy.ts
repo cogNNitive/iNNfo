@@ -36,8 +36,8 @@ export function validateTaxonomyHierarchy(
   templateTaxonomy?: TaxonomyEdge[],
 ): ReferenceDiagnostic[] {
   const diagnostics: ReferenceDiagnostic[] = []
-
-  const effectiveTaxonomy = model.taxonomy.length > 0 ? model.taxonomy : (templateTaxonomy ?? [])
+  const effectiveTaxonomy =
+    templateTaxonomy && templateTaxonomy.length > 0 ? templateTaxonomy : model.taxonomy
 
   // child concept (lowercased) -> parent concept name, from index nesting.
   const parentOfConcept = new Map<string, string>()

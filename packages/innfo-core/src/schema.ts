@@ -74,6 +74,17 @@ function asObject(v: unknown): Record<string, unknown> | undefined {
     : undefined
 }
 
+function cleanWikilink(v: unknown): string | undefined {
+  const str = asString(v)
+  if (!str) return undefined
+  const trimmed = str.trim()
+  if (trimmed.startsWith('[[') && trimmed.endsWith(']]')) {
+    const inner = trimmed.slice(2, -2).trim()
+    return inner !== '' ? inner : undefined
+  }
+  return trimmed !== '' ? trimmed : undefined
+}
+
 /**
  * Extracts a template schema from a parsed document's body elements.
  * Returns empty arrays when the document does not instantiate the root
@@ -84,8 +95,10 @@ export function extractTemplateSchema(parsed: ParsedModel): TemplateSchema {
   const fieldsByConcept = new Map<string, ConceptField[]>()
 
   for (const el of parsed.elements.get(CONCEPT_DEFINITION) ?? []) {
+    const parent = cleanWikilink(el.fields['parent'])
     const concept: Concept = {
       name: el.name,
+      parent,
       type: (asString(el.fields['type']) as Concept['type']) ?? 'text',
       icon: asString(el.fields['icon']),
       color: asString(el.fields['color']),
@@ -154,7 +167,20 @@ export function extractTemplateSchema(parsed: ParsedModel): TemplateSchema {
     return decl
   })
 
-  return { concepts, markers, matrices, taxonomy: parsed.taxonomy }
+  let taxonomy: TaxonomyEdge[] = []
+  const hasParentField = concepts.some((c) => c.parent !== undefined)
+  if (hasParentField) {
+    for (const concept of concepts) {
+      taxonomy.push({
+        parent: concept.parent ?? '',
+        child: concept.name,
+      })
+    }
+  } else {
+    taxonomy = parsed.taxonomy
+  }
+
+  return { concepts, markers, matrices, taxonomy }
 }
 
 /**
