@@ -1,4 +1,12 @@
-import type { Concept, ConceptField, Marker, MatrixDecl, ParsedModel, TaxonomyEdge, ValidationError } from './types'
+import type {
+  Concept,
+  ConceptField,
+  Marker,
+  MatrixDecl,
+  ParsedModel,
+  TaxonomyEdge,
+  ValidationError,
+} from './types'
 import { parseModel } from './parser'
 
 /**
@@ -59,7 +67,9 @@ function asNumber(v: unknown): number | undefined {
 }
 
 function asObject(v: unknown): Record<string, unknown> | undefined {
-  return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : undefined
+  return v && typeof v === 'object' && !Array.isArray(v)
+    ? (v as Record<string, unknown>)
+    : undefined
 }
 
 /**
@@ -161,8 +171,15 @@ export function extractTemplateSchemaFromContent(content: string): TemplateSchem
  * into its effective schema **additively** (iNNfo "Level 2 Template
  * Structure"). Resolution is depth-first, left to right; each included
  * template is itself composed through its own `includes`. Composition never
- * overrides or removes an inherited Definition — a name collision between two
- * sources is a validation ERROR that names both. `includes` is orthogonal to
+ * overrides or removes an inherited Definition.
+ *
+ * When two sources declare a Definition with the same name (case-insensitive):
+ *   - AST-identical bodies  → the duplicate is silently merged (one entry).
+ *   - bodies that differ    → a validation ERROR that names both sources.
+ *
+ * "AST-identical" is decided by `canonicalizeDefinition` (property order,
+ * surrounding whitespace and the order of set-like arrays such as `applies_to`
+ * / `options` / `target_concepts` do not count). `includes` is orthogonal to
  * the vertical `parent_spec` chain and to the inert `specializes` field.
  */
 
@@ -177,62 +194,110 @@ export interface ResolvedTemplateSchema {
   errors: ValidationError[]
 }
 
+/** Keys whose array values are sets (order carries no meaning). */
+const SET_LIKE_KEYS = new Set(['applies_to', 'options', 'target_concepts'])
+
+function canonicalValue(v: unknown, key?: string): unknown {
+  if (Array.isArray(v)) {
+    const items = v.map((x) => canonicalValue(x))
+    if (key === 'fields') {
+      return [...items]
+        .map((x) => JSON.stringify(x))
+        .sort()
+        .map((s) => JSON.parse(s) as unknown)
+    }
+    if (key && SET_LIKE_KEYS.has(key)) {
+      return [...items].map((x) => JSON.stringify(x)).sort()
+    }
+    return items
+  }
+  if (v && typeof v === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const k of Object.keys(v as Record<string, unknown>).sort()) {
+      const val = (v as Record<string, unknown>)[k]
+      if (val === undefined || val === null) continue
+      out[k] = canonicalValue(val, k)
+    }
+    return out
+  }
+  if (typeof v === 'string') return v.trim()
+  return v
+}
+
+/**
+ * A stable string form of a Concept / Marker / Matrix Definition, used to decide
+ * whether two same-named Definitions coming from different `includes` sources are
+ * "the same". Insensitive to property order, surrounding whitespace and the order
+ * of set-like arrays; sensitive to every actual value.
+ */
+export function canonicalizeDefinition(def: Concept | Marker | MatrixDecl): string {
+  return JSON.stringify(canonicalValue(def))
+}
+
+interface Provenanced<T> {
+  source: string
+  def: T
+}
+
+interface Provenance {
+  concept: Map<string, Provenanced<Concept>>
+  marker: Map<string, Provenanced<Marker>>
+  matrix: Map<string, Provenanced<MatrixDecl>>
+  field: Map<string, string>
+}
+
+/**
+ * Merge one already-resolved schema into the accumulator. A same-named
+ * Definition from a different source is silently dropped when its body is
+ * AST-identical to the one already merged, and is an ERROR (naming both
+ * sources) when the bodies differ.
+ */
+/** Returns true when `incoming` was added as a new entry (not a dup / not a clash). */
+function mergeDefinition<T extends Concept | Marker | MatrixDecl>(
+  incoming: T,
+  incomingSource: string,
+  kindLabel: 'Concept' | 'Marker' | 'Matrix',
+  seen: Map<string, Provenanced<T>>,
+  target: T[],
+  errors: ValidationError[],
+): boolean {
+  const key = incoming.name.toLowerCase()
+  const prior = seen.get(key)
+  if (prior) {
+    if (canonicalizeDefinition(prior.def) !== canonicalizeDefinition(incoming)) {
+      errors.push({
+        path: `includes.${kindLabel}.${incoming.name}`,
+        message: `${kindLabel} Definition "${incoming.name}" is declared with different bodies by both "${prior.source}" and "${incomingSource}" — \`includes\` composition is additive and MUST NOT redeclare a Definition differently`,
+        severity: 'error',
+      })
+    }
+    // AST-identical → already merged, nothing to do.
+    return false
+  }
+  seen.set(key, { source: incomingSource, def: incoming })
+  target.push(incoming)
+  return true
+}
+
 function mergeSchemaInto(
   acc: TemplateSchema,
   incoming: TemplateSchema,
   incomingSource: string,
-  provenance: {
-    concept: Map<string, string>
-    marker: Map<string, string>
-    matrix: Map<string, string>
-    field: Map<string, string>
-  },
+  provenance: Provenance,
   errors: ValidationError[],
 ): void {
   for (const c of incoming.concepts) {
-    const key = c.name.toLowerCase()
-    const prior = provenance.concept.get(key)
-    if (prior) {
-      errors.push({
-        path: `includes.Concept.${c.name}`,
-        message: `Concept Definition "${c.name}" is declared by both "${prior}" and "${incomingSource}" — \`includes\` composition is additive and MUST NOT redeclare a Definition`,
-        severity: 'error',
-      })
-      continue
-    }
-    provenance.concept.set(key, incomingSource)
-    acc.concepts.push(c)
-    for (const f of c.fields ?? []) {
-      provenance.field.set(`${key}.${f.name.toLowerCase()}`, incomingSource)
+    if (mergeDefinition(c, incomingSource, 'Concept', provenance.concept, acc.concepts, errors)) {
+      for (const f of c.fields ?? []) {
+        provenance.field.set(`${c.name.toLowerCase()}.${f.name.toLowerCase()}`, incomingSource)
+      }
     }
   }
   for (const m of incoming.markers) {
-    const key = m.name.toLowerCase()
-    const prior = provenance.marker.get(key)
-    if (prior) {
-      errors.push({
-        path: `includes.Marker.${m.name}`,
-        message: `Marker Definition "${m.name}" is declared by both "${prior}" and "${incomingSource}" — \`includes\` composition is additive`,
-        severity: 'error',
-      })
-      continue
-    }
-    provenance.marker.set(key, incomingSource)
-    acc.markers.push(m)
+    mergeDefinition(m, incomingSource, 'Marker', provenance.marker, acc.markers, errors)
   }
   for (const mx of incoming.matrices) {
-    const key = mx.name.toLowerCase()
-    const prior = provenance.matrix.get(key)
-    if (prior) {
-      errors.push({
-        path: `includes.Matrix.${mx.name}`,
-        message: `Matrix Definition "${mx.name}" is declared by both "${prior}" and "${incomingSource}" — \`includes\` composition is additive`,
-        severity: 'error',
-      })
-      continue
-    }
-    provenance.matrix.set(key, incomingSource)
-    acc.matrices.push(mx)
+    mergeDefinition(mx, incomingSource, 'Matrix', provenance.matrix, acc.matrices, errors)
   }
   for (const edge of incoming.taxonomy) acc.taxonomy.push(edge)
 }
@@ -260,11 +325,11 @@ export function resolveTemplateSchema(
   const selfLabel = String(parsed.frontmatter?.title ?? 'this template')
   const errors: ValidationError[] = []
   const base: TemplateSchema = { concepts: [], markers: [], matrices: [], taxonomy: [] }
-  const provenance = {
-    concept: new Map<string, string>(),
-    marker: new Map<string, string>(),
-    matrix: new Map<string, string>(),
-    field: new Map<string, string>(),
+  const provenance: Provenance = {
+    concept: new Map(),
+    marker: new Map(),
+    matrix: new Map(),
+    field: new Map(),
   }
 
   for (const ref of includes) {
@@ -371,7 +436,8 @@ export function checkElementsAgainstSchema(
       continue
     }
     const fieldByName = new Map((def.fields ?? []).map((f) => [f.name.toLowerCase(), f]))
-    const required = opts.requiredByConcept?.[def.name] ?? opts.requiredByConcept?.[conceptName] ?? []
+    const required =
+      opts.requiredByConcept?.[def.name] ?? opts.requiredByConcept?.[conceptName] ?? []
 
     for (const el of elements) {
       for (const key of required) {

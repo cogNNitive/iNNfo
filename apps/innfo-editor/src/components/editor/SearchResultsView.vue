@@ -29,7 +29,7 @@ function setCollapsed(nodeId: string, val: boolean): void {
 const matchingNodes = computed(() => {
   const query = uiStore.searchQuery.trim().toLowerCase()
 
-  if (query.length < 3) {
+  if (query.length < 3 && uiStore.selectedTagFilters.length === 0) {
     return []
   }
 
@@ -46,17 +46,47 @@ const matchingNodes = computed(() => {
       continue
     }
 
+    // Calculate effective tags (node tags + concept-level tags from root)
+    const activeRootId = modelStore.activeNodeId
+    const rootNode = activeRootId ? modelStore.getNode(activeRootId) : null
+    const conceptTags = rootNode?.conceptTags?.[conceptName] || []
+    const effectiveTags = Array.from(new Set([...(node.tags || []), ...conceptTags]))
+
+    // Apply UI Tags Filter
+    if (uiStore.selectedTagFilters.length > 0) {
+      const hasAllTags = uiStore.selectedTagFilters.every((tag) => effectiveTags.includes(tag))
+      if (!hasAllTags) continue
+    }
+
+    // Parse Text Search Query for #tags
+    const queryParts = query.split(' ')
+    const queryTags = queryParts
+      .filter((p) => p.startsWith('#'))
+      .map((p) => p.slice(1).toLowerCase())
+    const queryText = queryParts.filter((p) => !p.startsWith('#')).join(' ')
+
+    if (queryTags.length > 0) {
+      const hasQueryTags = queryTags.every((tag) => effectiveTags.includes(tag))
+      if (!hasQueryTags) continue
+    }
+
+    // If there is no text query but we matched tags, include and skip text match
+    if (!queryText && (queryTags.length > 0 || uiStore.selectedTagFilters.length > 0)) {
+      results.push(node)
+      continue
+    }
+
     // Apply Text Search Query
-    const nameMatch = node.name?.toLowerCase().includes(query)
-    const typeMatch = node.type?.toLowerCase().includes(query)
-    const conceptMatch = conceptName.toLowerCase().includes(query)
-    const descMatch = node.rawSections?.description?.toLowerCase().includes(query)
+    const nameMatch = node.name?.toLowerCase().includes(queryText)
+    const typeMatch = node.type?.toLowerCase().includes(queryText)
+    const conceptMatch = conceptName.toLowerCase().includes(queryText)
+    const descMatch = node.rawSections?.description?.toLowerCase().includes(queryText)
 
     let fieldMatch = false
     if (node.fields) {
       for (const [key, fv] of Object.entries(node.fields)) {
         const valStr = String((fv as any)?.value ?? fv).toLowerCase()
-        if (key.toLowerCase().includes(query) || valStr.includes(query)) {
+        if (key.toLowerCase().includes(queryText) || valStr.includes(queryText)) {
           fieldMatch = true
           break
         }
@@ -76,9 +106,7 @@ const matchingNodes = computed(() => {
 function getConceptFieldsForNode(node: ModelNode) {
   const conceptName = node.conceptBinding?.name ?? node.name ?? node.type
   const metamodelFields =
-    metamodelStore.getConceptFields(conceptName) ??
-    metamodelStore.getConceptFields(node.type) ??
-    []
+    metamodelStore.getConceptFields(conceptName) ?? metamodelStore.getConceptFields(node.type) ?? []
   return metamodelFields
 }
 
@@ -106,7 +134,9 @@ function handleNavigate(nodeId: string) {
 <template>
   <div class="flex flex-col flex-1 space-y-4 p-4 overflow-y-auto" data-testid="search-results-view">
     <!-- Header summary of results -->
-    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+    <div
+      class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700"
+    >
       <div class="flex items-center gap-2">
         <Search class="w-4 h-4 text-primary" />
         <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -129,10 +159,10 @@ function handleNavigate(nodeId: string) {
 
     <!-- Query too short state -->
     <div
-      v-if="uiStore.searchQuery.trim().length < 3"
+      v-if="uiStore.searchQuery.trim().length < 3 && uiStore.selectedTagFilters.length === 0"
       class="text-center py-16 text-slate-400 dark:text-slate-500 italic text-sm bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700"
     >
-      Ingresá al menos 3 caracteres para iniciar la búsqueda.
+      Ingresá al menos 3 caracteres para iniciar la búsqueda o seleccioná una etiqueta.
     </div>
 
     <!-- Empty state -->
@@ -150,7 +180,9 @@ function handleNavigate(nodeId: string) {
         :key="node.id"
         :block="toBlock(node)"
         :kind="node.kind === 'concept' ? 'concept' : 'instance'"
-        :concept-name="node.conceptBinding?.name || (node.kind === 'concept' ? node.name : node.type)"
+        :concept-name="
+          node.conceptBinding?.name || (node.kind === 'concept' ? node.name : node.type)
+        "
         :concept-type="node.type"
         :concept-fields="getConceptFieldsForNode(node)"
         :collapsed="isCollapsed(node.id)"
@@ -160,7 +192,6 @@ function handleNavigate(nodeId: string) {
         @update:collapsed="(val) => setCollapsed(node.id, val)"
         @navigate-to-node="handleNavigate"
       />
-
     </div>
   </div>
 </template>

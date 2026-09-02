@@ -30,7 +30,13 @@ import {
   listTemplates,
   hydrateTemplate,
 } from './tools/spec.js'
-import { validateModel, validateModelUrl, applyChange, validateTemplate, initModel } from './tools/mutate.js'
+import {
+  validateModel,
+  validateModelUrl,
+  applyChange,
+  validateTemplate,
+  initModel,
+} from './tools/mutate.js'
 import { findRepoRoot } from './tools/repo-root.js'
 
 /**
@@ -41,9 +47,13 @@ import { findRepoRoot } from './tools/repo-root.js'
  * sibling/parent directory when the server is started from an unexpected
  * cwd), falling back to `process.cwd()` itself when no `.git` is found.
  */
-const ROOT_DIR: string = process.env.INNFO_MODELS_DIR ?? findRepoRoot(process.cwd()) ?? process.cwd()
+const ROOT_DIR: string =
+  process.env.INNFO_MODELS_DIR ?? findRepoRoot(process.cwd()) ?? process.cwd()
 
-export const server = new Server({ name: 'innfo-mcp', version: '0.2.1' }, { capabilities: { tools: {} } })
+export const server = new Server(
+  { name: 'innfo-mcp', version: '0.2.1' },
+  { capabilities: { tools: {} } },
+)
 
 /* ── Tool definitions ───────────────────────────────────────── */
 
@@ -180,7 +190,8 @@ const toolDefinitions: Tool[] = [
         },
         template_url: {
           type: 'string',
-          description: 'Optional explicit template URL when the model has no resolvable parent_spec.url',
+          description:
+            'Optional explicit template URL when the model has no resolvable parent_spec.url',
         },
       },
       required: ['model_url'],
@@ -202,15 +213,26 @@ const toolDefinitions: Tool[] = [
   },
   {
     name: 'init_model',
-    description: 'Initialize or repair a level-3 model file: writes canonical YAML frontmatter and, when the file has no concept sections and the template resolves, scaffolds a starter body (index block + one section per Concept) from the template schema. Returns templateResolved / scaffolded / warnings.',
+    description:
+      'Initialize or repair a level-3 model file: writes canonical YAML frontmatter and, when the file has no concept sections and the template resolves, scaffolds a starter body (index block + one section per Concept) from the template schema. Returns templateResolved / scaffolded / warnings.',
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', description: 'Model ID/filename stem (e.g. arenzano_V_0-1-0_cogNNitive)' },
+        id: {
+          type: 'string',
+          description: 'Model ID/filename stem (e.g. arenzano_V_0-1-0_cogNNitive)',
+        },
         template_url: { type: 'string', description: 'Immutable URL of the parent template' },
-        template_name: { type: 'string', description: 'Name of the parent template (e.g. cogNNitive_V_0-1-0)' },
+        template_name: {
+          type: 'string',
+          description: 'Name of the parent template (e.g. cogNNitive_V_0-1-0)',
+        },
         title: { type: 'string', description: 'Logical title of the model (defaults to ID)' },
-        model_version: { type: 'string', description: 'Initial version of the model (e.g. V_0-1-0, defaults to V_0-1-0)' },
+        model_version: {
+          type: 'string',
+          description:
+            'Initial version of the model (e.g. V_0-1-0, defaults to V_0-1-0). The model is scaffolded against the adopted L1 spec iNNfo_V_0-2-0.',
+        },
         root: { type: 'string', description: 'Optional models root directory override' },
       },
       required: ['id', 'template_url', 'template_name'],
@@ -234,9 +256,15 @@ const toolDefinitions: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        template_name: { type: 'string', description: 'Name of template to hydrate (e.g. workspace_spec_NN)' },
+        template_name: {
+          type: 'string',
+          description: 'Name of template to hydrate (e.g. workspace_spec_NN)',
+        },
         root: { type: 'string', description: 'Optional workspace root directory override' },
-        target_dir: { type: 'string', description: 'Optional target directory override (defaults to ./templates/)' },
+        target_dir: {
+          type: 'string',
+          description: 'Optional target directory override (defaults to ./templates/)',
+        },
       },
       required: ['template_name'],
     },
@@ -420,7 +448,8 @@ async function main() {
 
 // Only auto-start the stdio transport when this file is run directly
 // (e.g. `node dist/server.js`), never when imported by tests or other modules.
-const isDirectRun = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
+const isDirectRun =
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href
 
 if (isDirectRun) {
   main().catch((err) => {

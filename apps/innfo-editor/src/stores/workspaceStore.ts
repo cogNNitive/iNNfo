@@ -46,7 +46,10 @@ async function resolveFileHandleForWrite(
   root: DirectoryHandleLike,
   refPath: string,
 ): Promise<FileHandleLike> {
-  const segments = refPath.replace(/\\/g, '/').split('/').filter((p) => p && p !== '.')
+  const segments = refPath
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter((p) => p && p !== '.')
   let current: DirectoryHandleLike = root
   for (let i = 0; i < segments.length - 1; i++) {
     current = await current.getDirectoryHandle(segments[i], { create: true })
@@ -55,6 +58,20 @@ async function resolveFileHandleForWrite(
   return current.getFileHandle(last, { create: true })
 }
 
+async function removeFileByPath(root: DirectoryHandleLike, refPath: string): Promise<void> {
+  const segments = refPath
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter((p) => p && p !== '.')
+  let current: DirectoryHandleLike = root
+  for (let i = 0; i < segments.length - 1; i++) {
+    current = await current.getDirectoryHandle(segments[i])
+  }
+  const last = segments[segments.length - 1]
+  if (current.removeEntry) {
+    await current.removeEntry(last)
+  }
+}
 
 /**
  * workspaceStore owns the FS directory handle, permission verification,
@@ -348,7 +365,9 @@ export const useWorkspaceStore = defineStore('workspace', {
       const uiStore = useUiStore()
       const modelStore = useModelStore()
       const rootId =
-        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId]
+          ? uiStore.activeModelId
+          : undefined) ??
         modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
         modelStore.rootIds[0]
       if (!rootId) return
@@ -418,7 +437,11 @@ export const useWorkspaceStore = defineStore('workspace', {
         }
 
         const modelStore = useModelStore()
-        const reports = await recursiveSerialize(modelStore.nodes, modelStore.dirtyIds, this.driver ?? undefined)
+        const reports = await recursiveSerialize(
+          modelStore.nodes,
+          modelStore.dirtyIds,
+          this.driver ?? undefined,
+        )
 
         if (!this.driver) {
           // If no driver is set, write the dirty model files directly using the directory handle
@@ -481,24 +504,32 @@ export const useWorkspaceStore = defineStore('workspace', {
       const modelStore = useModelStore()
       const rootId =
         targetRootId ??
-        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId]
+          ? uiStore.activeModelId
+          : undefined) ??
         modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
         modelStore.rootIds[0]
       const rootNode = rootId ? modelStore.getNode(rootId) : null
       if (!rootNode) throw new Error('No root node found to rename')
 
-      let cleanNewFilename = newFilename.trim()
-      if (!cleanNewFilename.endsWith('.md')) {
-        cleanNewFilename += '.md'
+      const oldPath = rootNode.source.path.replace(/\\/g, '/')
+      const pathSegments = oldPath.split('/')
+      pathSegments.pop()
+      const dirPath = pathSegments.join('/')
+
+      let cleanNewFilenameOnly = newFilename.trim()
+      if (!cleanNewFilenameOnly.endsWith('.md')) {
+        cleanNewFilenameOnly += '.md'
       }
-      cleanNewFilename = cleanNewFilename.replace(/[^a-zA-Z0-9._-]/g, '_')
+      cleanNewFilenameOnly = cleanNewFilenameOnly.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const cleanNewFilename = dirPath ? `${dirPath}/${cleanNewFilenameOnly}` : cleanNewFilenameOnly
 
       if (this.handle) {
         const oldFilename = rootNode.source.path
         if (oldFilename === cleanNewFilename) return
 
         // Create new file and copy content
-        const newFileHandle = await this.handle.getFileHandle(cleanNewFilename, { create: true })
+        const newFileHandle = await resolveFileHandleForWrite(this.handle, cleanNewFilename)
         if (!newFileHandle.createWritable) {
           throw new Error(`File handle for "${cleanNewFilename}" does not support writing`)
         }
@@ -508,17 +539,20 @@ export const useWorkspaceStore = defineStore('workspace', {
 
         // Delete old file
         try {
-          await this.handle.removeEntry?.(oldFilename)
+          await removeFileByPath(this.handle, oldFilename)
         } catch (e) {
           console.warn(`Failed to delete old file "${oldFilename}":`, e)
         }
       }
 
       // Update in memory path for root node and all child nodes belonging to this model
-      const oldPath = rootNode.source.path
+      const oldPathRef = rootNode.source.path
       rootNode.source.path = cleanNewFilename
       for (const node of Object.values(modelStore.nodes)) {
-        if (node.source && (node.source.path === oldPath || modelStore.getModelRootForNode(node.id) === rootId)) {
+        if (
+          node.source &&
+          (node.source.path === oldPathRef || modelStore.getModelRootForNode(node.id) === rootId)
+        ) {
           node.source.path = cleanNewFilename
         }
       }
@@ -535,24 +569,32 @@ export const useWorkspaceStore = defineStore('workspace', {
       const modelStore = useModelStore()
       const rootId =
         targetRootId ??
-        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId]
+          ? uiStore.activeModelId
+          : undefined) ??
         modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
         modelStore.rootIds[0]
       const rootNode = modelStore.getNode(rootId)
       if (!rootNode) throw new Error('No root node found for version bump')
 
-      const parsed = parseFormatFilename(rootNode.source.path)
+      const oldPath = rootNode.source.path.replace(/\\/g, '/')
+      const pathSegments = oldPath.split('/')
+      const oldFilenameOnly = pathSegments.pop() || ''
+      const dirPath = pathSegments.join('/')
+
+      const parsed = parseFormatFilename(oldFilenameOnly)
       if (!parsed) throw new Error('Could not parse filename for version bump')
 
       const newVersion = bumpVersion(parsed.version, level)
-      const newFilename = buildFormatFilename(parsed.baseName, parsed.templateName, newVersion)
+      const newFilenameOnly = buildFormatFilename(parsed.baseName, parsed.templateName, newVersion)
       const versionStr = formatVersionString(newVersion)
       const oldFilename = rootNode.source.path
 
-      const cleanNewFilename = newFilename.replace(/[^a-zA-Z0-9._-]/g, '_').trim()
+      const cleanNewFilenameOnly = newFilenameOnly.replace(/[^a-zA-Z0-9._-]/g, '_').trim()
+      const cleanNewFilename = dirPath ? `${dirPath}/${cleanNewFilenameOnly}` : cleanNewFilenameOnly
 
       // Create the new file and write current content
-      const newFileHandle = await this.handle.getFileHandle(cleanNewFilename, { create: true })
+      const newFileHandle = await resolveFileHandleForWrite(this.handle, cleanNewFilename)
       if (!newFileHandle.createWritable) {
         throw new Error(`New file handle "${cleanNewFilename}" does not support writing`)
       }
@@ -564,16 +606,16 @@ export const useWorkspaceStore = defineStore('workspace', {
       if (oldFilename !== cleanNewFilename) {
         try {
           const archiveDir = await this.handle.getDirectoryHandle('Archive', { create: true })
-          const oldFileHandle = await this.handle.getFileHandle(oldFilename)
+          const oldFileHandle = await resolveFileHandleForWrite(this.handle, oldFilename)
           const oldFile = await oldFileHandle.getFile()
           const oldContent = await oldFile.text()
-          const archiveFileHandle = await archiveDir.getFileHandle(oldFilename, { create: true })
+          const archiveFileHandle = await resolveFileHandleForWrite(archiveDir, oldFilename)
           if (archiveFileHandle.createWritable) {
             const archiveWritable = await archiveFileHandle.createWritable()
             await archiveWritable.write(oldContent)
             await archiveWritable.close()
           }
-          await this.handle.removeEntry?.(oldFilename)
+          await removeFileByPath(this.handle, oldFilename)
         } catch (err) {
           console.warn('[version-bump] Failed to archive previous version:', err)
         }
@@ -590,7 +632,10 @@ export const useWorkspaceStore = defineStore('workspace', {
       // Update the root node's source path and all child nodes belonging to this model
       rootNode.source.path = cleanNewFilename
       for (const node of Object.values(modelStore.nodes)) {
-        if (node.source && (node.source.path === oldFilename || modelStore.getModelRootForNode(node.id) === rootId)) {
+        if (
+          node.source &&
+          (node.source.path === oldFilename || modelStore.getModelRootForNode(node.id) === rootId)
+        ) {
           node.source.path = cleanNewFilename
         }
       }

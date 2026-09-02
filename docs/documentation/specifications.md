@@ -18,35 +18,107 @@ lists the current file for each spec.
 
 The **iNNfo** specification. Every model is a single `_NN.md` document with optional structural children — concepts, elements, fields, markers, and matrices.
 
-| Spec | Source |
-|------|--------|
-| **iNNfo** V 0.1.0 | [`specs/iNNfo_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/iNNfo_V_0-1-0_NN.md) |
+The `status` frontmatter field on a spec file uses the `defiNNe` vocabulary
+`Draft | Stable | Deprecated`. `iNNfo_V_0-2-0` is the adopted L1 (`status: "Stable"`).
+The **adopted** version is defined by `DEFAULT_INNFO_VERSION` in
+`apps/innfo-editor/src/utils/constants.ts`, not by mutating older spec files:
+`iNNfo_V_0-1-0_NN.md` is immutable (`spec-versioning` R-SV-02) and keeps whatever
+`status` it was published with; it is simply no longer the default, and stays
+resolvable forever for models authored against it.
+
+| Spec | Role | Source |
+|------|------|--------|
+| **iNNfo** V 0.2.0 | Adopted (`status: "Stable"`) | [`specs/iNNfo_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/iNNfo_V_0-2-0_NN.md) |
+| iNNfo V 0.1.0 | Superseded — frozen, still resolvable | [`specs/iNNfo_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/iNNfo_V_0-1-0_NN.md) |
 
 ## Level 2 — Templates
 
-Domain-specific templates. Each declares concepts, markers, matrices, and relationship types for a specific domain, and its own `template_version` (independent of `spec_version`).
+Domain-specific templates. Each declares concepts, markers, matrices, and relationship types for a specific domain, and its own `template_version` (independent of `spec_version`, which tracks L1 compliance). All templates are L1-compliant with `iNNfo_V_0-2-0`. `business_V_0-2-0` is a pure composite that `includes` `business-model` + `analysis`; `analysis` and `business-model` are first-revision templates carved out of the former monolithic `business` template, so they carry `spec_version: V_0-2-0` with `template_version: V_0-1-0`.
 
-| Template | Source |
-|----------|--------|
-| **Blank** | [`specs/templates/blank/blank_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/blank/blank_V_0-1-0_NN.md) |
-| **Business** | [`specs/templates/business/business_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business/business_V_0-1-0_NN.md) |
-| **Innovation** | [`specs/templates/innovation/innovation_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/innovation/innovation_V_0-1-0_NN.md) |
-| **cogNNitive** | [`specs/templates/cogNNitive/cogNNitive_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/cogNNitive/cogNNitive_V_0-1-0_NN.md) |
-| **Organization** | [`specs/templates/organization/organization_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/organization/organization_V_0-1-0_NN.md) |
-| **Procedures** | [`specs/templates/procedures/procedures_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/procedures_V_0-1-0_NN.md) |
-| **Projects** | [`specs/templates/projects/projects_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/projects/projects_V_0-1-0_NN.md) |
+| Template | `template_version` | Source |
+|----------|--------------------|--------|
+| **Blank** | V_0-2-0 | [`specs/templates/blank/blank_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/blank/blank_V_0-2-0_NN.md) |
+| **Business** (composite) | V_0-2-0 | [`specs/templates/business/business_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business/business_V_0-2-0_NN.md) |
+| **Business Model** | V_0-1-0 | [`specs/templates/business-model/business-model_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business-model/business-model_V_0-1-0_NN.md) |
+| **Analysis** | V_0-1-0 | [`specs/templates/analysis/analysis_V_0-1-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/analysis/analysis_V_0-1-0_NN.md) |
+| **Innovation** | V_0-2-0 | [`specs/templates/innovation/innovation_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/innovation/innovation_V_0-2-0_NN.md) |
+| **cogNNitive** | V_0-2-0 | [`specs/templates/cogNNitive/cogNNitive_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/cogNNitive/cogNNitive_V_0-2-0_NN.md) |
+| **Organization** | V_0-2-0 | [`specs/templates/organization/organization_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/organization/organization_V_0-2-0_NN.md) |
+| **Procedures** | V_0-2-0 | [`specs/templates/procedures/procedures_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/procedures_V_0-2-0_NN.md) |
+| **Projects** | V_0-2-0 | [`specs/templates/projects/projects_V_0-2-0_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/projects/projects_V_0-2-0_NN.md) |
+
+Each template's `_V_0-1-0_` file (where one existed) stays frozen and resolvable for models still pinned to it.
 
 ## Level 3 — Sample models
 
-Concrete data instances. Lightweight — just data and a parent pointer to their template.
+Concrete data instances. Lightweight — just data and a parent pointer to their template. Each sample stays pinned to the template version it was authored against; a `_V_0-1-0_` sample remains valid after the adoption.
 
 | Model | Template | Source |
 |-------|----------|--------|
-| **Ghostbusters** | business | [`specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business/samples/Ghostbusters_V_0-1-0_business_NN.md) |
-| **DeLorean Time Travel Ventures** | innovation | [`specs/templates/innovation/samples/DeLoreanTimeTravel_V_0-1-0_innovation_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/innovation/samples/DeLoreanTimeTravel_V_0-1-0_innovation_NN.md) |
-| **Code Review Process** | procedures | [`specs/templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md) |
-| **Engineering Team** | organization | [`specs/templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md) |
-| **Software Release Project** | projects | [`specs/templates/projects/samples/SoftwareReleaseProject_V_0-1-0_projects_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/projects/samples/SoftwareReleaseProject_V_0-1-0_projects_NN.md) |
+| **Ghostbusters** | business V_0-2-0 | [`specs/templates/business/samples/Ghostbusters_V_0-2-0_business_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/business/samples/Ghostbusters_V_0-2-0_business_NN.md) |
+| **DeLorean Time Travel Ventures** | innovation V_0-2-0 | [`specs/templates/innovation/samples/DeLoreanTimeTravel_V_0-2-0_innovation_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/innovation/samples/DeLoreanTimeTravel_V_0-2-0_innovation_NN.md) |
+| **Code Review Process** | procedures V_0-2-0 | [`specs/templates/procedures/samples/CodeReviewProcess_V_0-2-0_procedures_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/procedures/samples/CodeReviewProcess_V_0-2-0_procedures_NN.md) |
+| **Engineering Team** | organization V_0-2-0 | [`specs/templates/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md) |
+| **Software Release Project** | projects V_0-2-0 | [`specs/templates/projects/samples/SoftwareReleaseProject_V_0-2-0_projects_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/projects/samples/SoftwareReleaseProject_V_0-2-0_projects_NN.md) |
+| **Startup Validation** | analysis V_0-1-0 | [`specs/templates/analysis/samples/StartupValidation_V_0-1-0_analysis_NN.md`](https://github.com/iNNfo/iNNfo/blob/main/specs/templates/analysis/samples/StartupValidation_V_0-1-0_analysis_NN.md) |
+
+## Traceability & change propagation
+
+The format spec (L0 `defiNNe` → L1 `iNNfo` → L2 templates) is consumed by every other
+part of the project. What reads it, and how a change flows through:
+
+| Consumer | How it reads the spec | Source |
+|---|---|---|
+| `@cognnitive/innfo-core` | Parses the parent chain, extracts template schema, validates models | `packages/innfo-core/src/resolver.ts`, `schema.ts`, `validator/` |
+| `innfo-mcp` (MCP server) | Wraps core. Resolves local `specs/` first, then network `fetch`, then persists write-once into `specs/` | `packages/innfo-mcp/src/tools/spec.ts`, `resolver-node.ts` |
+| `innfo-editor` (UI) | `resolveParentSpecs()` — workspace `specs/` handle → dev-only `/specs/…` → network. URLs built from one constant | `apps/innfo-editor/src/services/SpecResolverService.ts`, `utils/constants.ts` |
+| `cogNNitive/actioNN` skill `nn-innfo` | Delegates all resolution/validation to `innfo-mcp`; bundles a copy of `workspace_spec_NN` | `actioNN/skills/nn-innfo/` |
+| `cogNNitive/eNNvironment` manifest | Pins L2 templates by `repo` + `path` + `version` + `commit`; CI validates | `eNNvironment/docs/use/manifest.md` |
+| Docs | Describe the resolver protocol and level system | `docs/documentation/ecosystem.md`, this page |
+
+### Invariants
+
+- **Immutable, filename-encoded.** Every file under `specs/` carries its version in the
+  filename. A bump always creates a new file; a published file is never edited in place
+  or deleted while a model still references it (`spec-versioning` R-SV-01/R-SV-02).
+- **Single source of the version string.** `apps/innfo-editor/src/utils/constants.ts`
+  (`DEFAULT_INNFO_VERSION`, `DEFAULT_TEMPLATE_VERSION`). No `.ts`/`.vue` file hardcodes the
+  version elsewhere.
+- **`parent_spec.url` pins a versioned filename** — never a mutable alias (R-SV-08).
+- **Write-once persistence is the whole integrity guarantee** — nothing is silently
+  replaced, so there is nothing to hash-verify (`spec-resolution` R-LSR-02).
+
+### When a format spec changes
+
+The mechanical procedure lives in the dev skill
+`.agents/skills/nn-dev-spec-version-propagator/`; the canonical detection tool is
+`scripts/check-spec-version.mjs` (`npm run check:spec-version` / `check:spec-urls`).
+
+1. **New file.** Author `specs/…_V_x-y-z_NN.md` (SemVer per `defiNNe` §7). The old file stays.
+2. **Engine.** Update `innfo-core` (parser / `schema.ts` / validator) and its fixtures.
+   `innfo-mcp` inherits core; rebuild the bundle.
+3. **Version constant.** Update `DEFAULT_INNFO_VERSION` / `DEFAULT_TEMPLATE_VERSION`.
+4. **Sweep stale references.**
+   `node scripts/check-spec-version.mjs --version <old> --check --by-type --with-skills`
+   lists every doc, sample, test, fixture and skill file still on the old version — update each.
+5. **URLs.** `npm run check:spec-urls` must stay green (also gated in CI, job `spec-integrity`).
+6. **Templates.** Each L2 template must be compliant with the new L1. Templates that only
+   exist at the old version must get a new-version file before the L1 can be made the default.
+7. **Skills.** Sync any bundled copy in `cogNNitive/actioNN` (today: `workspace_spec_NN`) from
+   the canonical file here. Bump `version` + `commit` in `eNNvironment`'s manifest.
+8. **Docs.** Update this page's tables and `ecosystem.md`.
+9. **Existing L3 models are not migrated.** They keep resolving their old, immutable parent
+   until an author repoints `parent_spec.url`. No silent fallbacks.
+
+> **V_0-2-0 adopted (2026-09-01).** L1 `iNNfo_V_0-2-0` is `status: Stable` and is the
+> value of `DEFAULT_INNFO_VERSION`. `iNNfo_V_0-1-0_NN.md` is immutable (R-SV-02) and
+> unchanged — it is simply no longer the default. Every shipped L2
+> template resolves at `iNNfo_V_0-2-0`. The V_0-2-0 rule changes (the four
+> frontmatter-block forms `concepts:` / `markers:` / `matrices:` removed in favour of
+> body-element definitions; `includes` duplicate-name entries with AST-identical bodies
+> merged instead of erroring; `model` added to the `Concept Definition` and
+> `Field Definition` `type` enums) are all in the engine. Existing L3 models pinned to
+> `iNNfo_V_0-1-0` templates keep resolving unchanged.
 
 ## Related Standards
 

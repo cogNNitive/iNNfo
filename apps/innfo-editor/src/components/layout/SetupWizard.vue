@@ -50,7 +50,7 @@ const samples: SampleInfo[] = [
     templateLabel: 'Business',
     sampleName: 'Ghostbusters',
     description: 'Ghost-catching franchise: SWOT, risks, market, finance, legal, and operations.',
-    url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-1-0_business_NN.md`,
+    url: `${SAMPLE_BASE}/business/samples/Ghostbusters_V_0-2-0_business_NN.md`,
   },
   {
     id: 'sample-procedures',
@@ -59,7 +59,7 @@ const samples: SampleInfo[] = [
     sampleName: 'Code Review Process',
     description:
       'PR-based code reviews: roles, step-by-step workflow, tool bindings, and hotfix path.',
-    url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_0-1-0_procedures_NN.md`,
+    url: `${SAMPLE_BASE}/procedures/samples/CodeReviewProcess_V_0-2-0_procedures_NN.md`,
   },
   {
     id: 'sample-organization',
@@ -67,7 +67,7 @@ const samples: SampleInfo[] = [
     templateLabel: 'Organization',
     sampleName: 'Engineering Team',
     description: 'Team structure: positions, roles, members, reporting lines, and skills matrix.',
-    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-1-0_organization_NN.md`,
+    url: `${SAMPLE_BASE}/organization/samples/EngineeringTeam_V_0-2-0_organization_NN.md`,
   },
 ]
 
@@ -211,10 +211,10 @@ async function finishWizard(): Promise<void> {
     if (templateChoice.value === 'blank') {
       const loader = useUrlDocLoader()
       const frontmatter = {
-        spec_version: 'V_0-1-5',
+        spec_version: 'V_0-2-0',
         model_version: 'V_0-1-0',
         title: name,
-        template: { name: 'business', version: 'V_0-1-0' },
+        template: { name: 'business', version: 'V_0-2-0' },
         concepts: [{ name: 'Topic', type: 'topic', icon: 'wrench', color: '#059669' }],
         markers: [],
       }
@@ -349,9 +349,9 @@ const stepTitles = [
         <div class="wizard__icon">🧠</div>
         <h2 class="wizard__title">Welcome to iNNfo</h2>
         <p class="wizard__desc">
-          iNNfo lets you create structured knowledge models — like a database for ideas,
-          processes, and data. Your models are plain Markdown files stored on YOUR computer —
-          nothing is uploaded to the cloud.
+          iNNfo lets you create structured knowledge models — like a database for ideas, processes,
+          and data. Your models are plain Markdown files stored on YOUR computer — nothing is
+          uploaded to the cloud.
         </p>
         <p class="wizard__desc">We'll guide you through the setup in just a few steps.</p>
 
@@ -375,12 +375,7 @@ const stepTitles = [
         <div v-if="folderHandle" class="wizard__folder-selected">
           <span class="wizard__folder-icon">&#128193;</span>
           <span>{{ folderPath }}</span>
-          <button
-            class="wizard__btn-link"
-            @click="clearFolderSelection"
-          >
-            Change
-          </button>
+          <button class="wizard__btn-link" @click="clearFolderSelection">Change</button>
         </div>
 
         <div v-else class="wizard__folder-actions">
@@ -404,9 +399,7 @@ const stepTitles = [
       <div v-if="currentStep === 3" class="wizard__step">
         <div class="wizard__icon">📄</div>
         <h2 class="wizard__title">Workspace contents</h2>
-        <p class="wizard__desc">
-          iNNfo will create these files and folders in your workspace:
-        </p>
+        <p class="wizard__desc">iNNfo will create these files and folders in your workspace:</p>
 
         <div class="wizard__file-list">
           <div class="wizard__file">
@@ -432,7 +425,6 @@ const stepTitles = [
             <code>specs/</code>
             <span>Template specifications downloaded automatically</span>
           </div>
-
         </div>
 
         <div class="wizard__actions">
@@ -524,15 +516,15 @@ const stepTitles = [
           <div class="wizard__editor-card">
             <strong>iNNfo editor</strong>
             <p>
-              Open <code>iNNfo.html</code> in your workspace folder to launch the app. Use the
-              full UI: tree navigation, graph view, matrices, and structured fields.
+              Open <code>iNNfo.html</code> in your workspace folder to launch the app. Use the full
+              UI: tree navigation, graph view, matrices, and structured fields.
             </p>
           </div>
           <div class="wizard__editor-card">
             <strong>AI agent</strong>
             <p>
-              Edit via natural language with Claude Code, OpenCode Desktop, or Antigravity. In the editor,
-              click <strong>"Use AI"</strong> in the top bar for setup instructions.
+              Edit via natural language with Claude Code, OpenCode Desktop, or Antigravity. In the
+              editor, click <strong>"Use AI"</strong> in the top bar for setup instructions.
             </p>
           </div>
         </div>

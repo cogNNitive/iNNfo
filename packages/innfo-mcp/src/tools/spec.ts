@@ -18,6 +18,7 @@ import {
   parseFrontmatter,
   SpecResolutionError,
   resolveTemplatePath,
+  getTemplateSearchPaths,
   UnresolvedTemplateError,
 } from '@cognnitive/innfo-core'
 import { mkdir, copyFile, readdir } from 'node:fs/promises'
@@ -210,7 +211,7 @@ export async function resolveTemplateWithCache(
     }
     cache = null
   }
-  const template = cache ? coreGetTemplate(cache) ?? cache.specs.get(name) ?? null : null
+  const template = cache ? (coreGetTemplate(cache) ?? cache.specs.get(name) ?? null) : null
   const resolveInclude = (ref: { name: string; url: string }): string | null => {
     if (!cache) return null
     const direct = cache.specs.get(ref.name)
@@ -254,7 +255,11 @@ export async function listTemplates(
   const discovered: DiscoveredTemplate[] = []
   const seenNames = new Set<string>()
 
-  const scanDir = async (dir: string, source: 'workspace' | 'global' | 'skill', skillName?: string) => {
+  const scanDir = async (
+    dir: string,
+    source: 'workspace' | 'global' | 'skill',
+    skillName?: string,
+  ) => {
     try {
       const files = await readdir(dir, { withFileTypes: true })
       for (const file of files) {
@@ -270,7 +275,9 @@ export async function listTemplates(
             const fm = parseFrontmatter(content)
             if (fm?.version) version = String(fm.version)
             else if (fm?.spec_version) version = String(fm.spec_version)
-          } catch {}
+          } catch {
+            // Unreadable or malformed template — fall back to the default version.
+          }
 
           discovered.push({
             name: stem,
@@ -281,7 +288,9 @@ export async function listTemplates(
           })
         }
       }
-    } catch {}
+    } catch {
+      // Directory absent for this tier — contributes no templates.
+    }
   }
 
   await scanDir(join(rootDir, 'templates'), 'workspace')
@@ -296,7 +305,9 @@ export async function listTemplates(
         await scanDir(join(skillsDir, entry.name), 'skill', entry.name)
       }
     }
-  } catch {}
+  } catch {
+    // No skills directory installed — skip the skill tier.
+  }
 
   return discovered
 }
@@ -324,11 +335,11 @@ export async function hydrateTemplate(
   })
 
   if (!location) {
-    const checkedPaths = [
-      join(rootDir, 'templates', `${templateName}.md`),
-      join(globalTemplatesDir, `${templateName}.md`),
-      join(skillsDir, '*', 'templates', `${templateName}.md`),
-    ]
+    const checkedPaths = await getTemplateSearchPaths(templateName, {
+      workspaceDir: rootDir,
+      globalTemplatesDir,
+      skillsDir,
+    })
     throw new UnresolvedTemplateError(templateName, checkedPaths)
   }
 
@@ -348,4 +359,3 @@ export async function hydrateTemplate(
     message: `Hydrated template ${templateName} from ${location.source} to ${targetPath}`,
   }
 }
-

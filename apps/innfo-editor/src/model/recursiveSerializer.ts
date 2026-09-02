@@ -1,4 +1,11 @@
-import { parseModel, serializeModel, type ParsedModel, type MatrixCell, type ElementNode, ElementsMap } from '@cognnitive/innfo-core'
+import {
+  parseModel,
+  serializeModel,
+  type ParsedModel,
+  type MatrixCell,
+  type ElementNode,
+  ElementsMap,
+} from '@cognnitive/innfo-core'
 import type { ModelNode } from './types'
 import type { ModelDriver } from '@cognnitive/innfo-core'
 import { useModelStore } from '../stores/modelStore'
@@ -84,7 +91,9 @@ export function syncMatrixFieldsToParsedModel(node: ModelNode, parsed: ParsedMod
   }
 
   for (const [matrixName, cellMap] of cellsByMatrix.entries()) {
-    const alreadyParsed = parsed.matrices.some((m) => m.name.toLowerCase() === matrixName.toLowerCase())
+    const alreadyParsed = parsed.matrices.some(
+      (m) => m.name.toLowerCase() === matrixName.toLowerCase(),
+    )
     if (!alreadyParsed && cellMap.size > 0) {
       const decl = allDecls.find((d) => String(d.name).toLowerCase() === matrixName.toLowerCase())
       const updatedCells: MatrixCell[] = []
@@ -167,6 +176,7 @@ function serializeNodeContent(node: ModelNode): {
         fields: elFields,
         markers: child.markers || {},
         slug: child.slug,
+        tags: child.tags,
       })
     }
     parsed.elements = elementsMap
@@ -174,7 +184,7 @@ function serializeNodeContent(node: ModelNode): {
     // Synchronize hierarchy taxonomy
     const elementNames = new Set(childElements.map((c) => c.name))
     const conceptEdges = parsed.taxonomy.filter((edge) => !elementNames.has(edge.child))
-    
+
     const elementEdges: Array<{ parent: string; child: string }> = []
     for (const child of childElements) {
       let parentName = ''
@@ -205,30 +215,56 @@ function serializeNodeContent(node: ModelNode): {
     parsed.nodeMarkers = nodeMarkers
   }
 
+  // Preserve concept-level tags from root node
+  if (node.kind === 'root' && node.conceptTags) {
+    parsed.conceptTags = { ...(parsed.conceptTags ?? {}), ...node.conceptTags }
+  }
+
   // Apply any edited `text`-concept sections (rawSections) onto the parsed
   // model so they round-trip back to disk.
   if (node.rawSections && Object.keys(node.rawSections).length > 0) {
     parsed.rawSections = { ...(parsed.rawSections ?? {}), ...node.rawSections }
   }
 
-  // Synchronize dynamic relational matrices declarations (__matrix_defs) to frontmatter
+  // Synchronize dynamic relational matrices declarations (__matrix_defs)
   const matrixDefs = (node.fields['__matrix_defs'] as any)?.value
   if (Array.isArray(matrixDefs)) {
-    parsed.frontmatter.matrices = matrixDefs.map((m: any) => ({
-      name: m.name,
-      source: m.source,
-      target: m.target,
-      params: m.params,
-      values: m.values,
-      widgetType: m.widgetType,
-      ...(m.widgetConfig && Object.keys(m.widgetConfig).length > 0
-        ? { widget_config: m.widgetConfig }
-        : {}),
-      description: m.description,
-      min_color: m.min_color,
-      max_color: m.max_color,
-      label: m.label,
-    }))
+    const isLevel3 = parsed.frontmatter?.level === 3
+    if (!isLevel3) {
+      parsed.frontmatter.matrices = matrixDefs.map((m: any) => ({
+        name: m.name,
+        source: m.source,
+        target: m.target,
+        params: m.params,
+        values: m.values,
+        widgetType: m.widgetType,
+        ...(m.widgetConfig && Object.keys(m.widgetConfig).length > 0
+          ? { widget_config: m.widgetConfig }
+          : {}),
+        description: m.description,
+        min_color: m.min_color,
+        max_color: m.max_color,
+        label: m.label,
+      }))
+    } else {
+      for (const def of matrixDefs) {
+        const existing = parsed.matrices.find(
+          (m) => m.name.toLowerCase() === String(def.name).toLowerCase(),
+        )
+        if (!existing) {
+          // A `# NN matrices:` body block carries only the grid itself: name,
+          // axis labels and cells. Widget metadata lives in the frontmatter
+          // `matrices:` declaration, which L3 models do not emit — serializeModel
+          // reads none of it off MatrixData, so passing it here would be a no-op.
+          parsed.matrices.push({
+            name: def.name,
+            source: def.source || '',
+            target: def.target || '',
+            cells: [],
+          })
+        }
+      }
+    }
   }
 
   // Apply matrix cell edits from node.fields into parsed.matrices
@@ -272,4 +308,3 @@ export async function recursiveSerialize(
 
   return report
 }
-

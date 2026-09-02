@@ -90,6 +90,7 @@ export interface ParsedConceptSection {
   /** Free-form Markdown content that precedes/falls outside any element
    *  (the full section body for `text` concepts; leading prose for others). */
   content: string
+  tags?: string[]
 }
 
 export function parseConceptSection(conceptName: string, content: string): ParsedConceptSection {
@@ -111,6 +112,8 @@ export function parseConceptSection(conceptName: string, content: string): Parse
     return node
   }
 
+  let conceptTags: string[] | undefined
+
   for (const line of lines) {
     // Unified element heading: `## NN Concept: Element`
     const headingName = parseElementHeading(line)
@@ -125,9 +128,23 @@ export function parseConceptSection(conceptName: string, content: string): Parse
       if (prop !== null) {
         if (prop[0] === 'slug') {
           current.slug = String(prop[1])
+        } else if (prop[0] === 'tags') {
+          current.tags = String(prop[1])
+            .split(',')
+            .map((t) => t.trim().toLowerCase())
+            .filter(Boolean)
         } else {
           current.fields[prop[0]] = parsePropertyValue(prop[1])
         }
+        continue
+      }
+    } else {
+      const prop = parsePropertyLine(line)
+      if (prop !== null && prop[0] === 'tags') {
+        conceptTags = String(prop[1])
+          .split(',')
+          .map((t) => t.trim().toLowerCase())
+          .filter(Boolean)
         continue
       }
     }
@@ -149,6 +166,7 @@ export function parseConceptSection(conceptName: string, content: string): Parse
   return {
     elements: nodes,
     content: leadingLines.join('\n').trim(),
+    tags: conceptTags,
   }
 }
 

@@ -33,7 +33,14 @@ describe('Metaschema (Self-Description)', () => {
     ])
     const matrixDef = schema.concepts.find((c) => c.name === 'Matrix Definition')!
     expect(matrixDef.fields!.map((f) => f.name)).toEqual(
-      expect.arrayContaining(['source', 'target', 'values', 'widget', 'widget_config', 'description']),
+      expect.arrayContaining([
+        'source',
+        'target',
+        'values',
+        'widget',
+        'widget_config',
+        'description',
+      ]),
     )
     const conceptTypeField = schema.concepts
       .find((c) => c.name === 'Concept Definition')!
@@ -96,9 +103,7 @@ describe('Metaschema (Self-Description)', () => {
     ].join('\n')
     const diags = validateTemplateAgainstMetaschema(badTemplate, iNNfo)
     expect(
-      diags.some(
-        (d) => d.severity === 'error' && d.message.includes('Invalid value "importance"'),
-      ),
+      diags.some((d) => d.severity === 'error' && d.message.includes('Invalid value "importance"')),
     ).toBe(true)
   })
 
@@ -117,8 +122,47 @@ describe('Metaschema (Self-Description)', () => {
       '',
     ].join('\n')
     const diags = validateTemplateAgainstMetaschema(badTemplate, iNNfo)
-    expect(
-      diags.some((d) => d.severity === 'warning' && d.message.includes('bogus_prop')),
-    ).toBe(true)
+    expect(diags.some((d) => d.severity === 'warning' && d.message.includes('bogus_prop'))).toBe(
+      true,
+    )
+  })
+})
+
+describe('iNNfo_V_0-2-0 — metaschema still self-consistent', () => {
+  const iNNfoV2 = readSpec('iNNfo_V_0-2-0_NN.md')
+
+  it('carries a resolvable metaschema block describing the four root primitives', () => {
+    const meta = extractMetaschema(iNNfoV2)
+    expect(meta).not.toBeNull()
+    const names = extractTemplateSchemaFromContent(meta!)
+      .concepts.map((c) => c.name)
+      .sort()
+    expect(names).toEqual([
+      'Concept Definition',
+      'Field Definition',
+      'Marker Definition',
+      'Matrix Definition',
+    ])
+  })
+
+  it('the metaschema validates against itself (bootstrap axiom)', () => {
+    const meta = extractMetaschema(iNNfoV2)!
+    const asTemplate = ['---', 'level: 2', 'title: Metaschema', '---', '', meta, ''].join('\n')
+    const diags = validateTemplateAgainstMetaschema(asTemplate, iNNfoV2)
+    expect(diags.filter((d) => d.severity === 'error')).toEqual([])
+  })
+
+  it('every shipped V_0-1-0 template still validates green against it', () => {
+    for (const rel of [
+      'templates/blank/blank_V_0-1-0_NN.md',
+      'templates/business/business_V_0-1-0_NN.md',
+      'templates/organization/organization_V_0-1-0_NN.md',
+      'templates/projects/projects_V_0-1-0_NN.md',
+    ]) {
+      const errors = validateTemplateAgainstMetaschema(readSpec(rel), iNNfoV2).filter(
+        (d) => d.severity === 'error',
+      )
+      expect(errors, `${rel}: ${JSON.stringify(errors)}`).toEqual([])
+    }
   })
 })

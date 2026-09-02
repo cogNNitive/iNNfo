@@ -53,6 +53,7 @@ export function parseModel(content: string): ParsedModel {
   const matrices: MatrixData[] = []
   const nodeMarkers: Record<string, Record<string, number | string>> = {}
   let taxonomy: TaxonomyEdge[] = []
+  const conceptTags: Record<string, string[]> = {}
 
   const body = normalizedContent.replace(YAML_BLOCK_RE, '').trim()
   const sections = body.split(/(?=^#\s)/m)
@@ -72,6 +73,9 @@ export function parseModel(content: string): ParsedModel {
       const parsed = parseConceptSection(name, bodyContent)
       if (parsed.elements.length > 0) {
         elements.set(name, parsed.elements)
+      }
+      if (parsed.tags) {
+        conceptTags[name] = parsed.tags
       }
       // Preserve the concept's raw body for round-trip fidelity AND as the
       // concept-level description/content of `text` concepts. Concepts with
@@ -139,6 +143,7 @@ export function parseModel(content: string): ParsedModel {
     nodeMarkers,
     slugCollisions,
     parseWarnings: parseWarnings.length > 0 ? parseWarnings : undefined,
+    conceptTags: Object.keys(conceptTags).length > 0 ? conceptTags : undefined,
     rawSections: Object.keys(rawSections).length > 0 ? rawSections : undefined,
     rawContent: content,
   }

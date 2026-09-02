@@ -26,6 +26,7 @@ export {
   checkElementsAgainstSchema,
   checkWidgetConfig,
   resolveTemplateSchema,
+  canonicalizeDefinition,
 } from './schema'
 export type {
   TemplateSchema,
@@ -41,7 +42,7 @@ export {
   getDefiNNe,
   SpecResolutionError,
   resolveTemplatePath,
-  resolveTemplatePathSync,
+  getTemplateSearchPaths,
   UnresolvedTemplateError,
 } from './resolver'
 export type { SpecResolver, MultiStoreResolverOptions, SpecTemplateLocation } from './resolver'

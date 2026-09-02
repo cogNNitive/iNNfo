@@ -8,11 +8,31 @@
 
 import { readFile, writeFile, rm, stat, rename } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
-import { parseModel, serializeModel, validateDocument, validateModel as coreValidate, applyMutation as coreApplyMutation, validateTemplateAgainstMetaschema, resolveTemplateSchema, SpecResolutionError } from '@cognnitive/innfo-core'
+import {
+  parseModel,
+  serializeModel,
+  validateDocument,
+  validateModel as coreValidate,
+  applyMutation as coreApplyMutation,
+  validateTemplateAgainstMetaschema,
+  resolveTemplateSchema,
+  SpecResolutionError,
+} from '@cognnitive/innfo-core'
 import type { SpecDocument, ValidationError, ParsedModel } from '@cognnitive/innfo-core'
 
-import { resolveTemplateWithCache, findModelFile, deriveNameFromUrl, getSpec, normalizeId } from './spec.js'
-import { isLocalPath, toLocalFilePath, saveSpecOnce, buildIncludeContentMap } from './resolver-node.js'
+import {
+  resolveTemplateWithCache,
+  findModelFile,
+  deriveNameFromUrl,
+  getSpec,
+  normalizeId,
+} from './spec.js'
+import {
+  isLocalPath,
+  toLocalFilePath,
+  saveSpecOnce,
+  buildIncludeContentMap,
+} from './resolver-node.js'
 
 /* ── Types ───────────────────────────────────────────────────── */
 
@@ -33,7 +53,10 @@ export interface ApplyChangeResult {
 async function resolveTemplateForModel(
   rootDir: string,
   model: ParsedModel,
-): Promise<{ template: SpecDocument | null; resolveInclude: (ref: { name: string; url: string }) => string | null }> {
+): Promise<{
+  template: SpecDocument | null
+  resolveInclude: (ref: { name: string; url: string }) => string | null
+}> {
   const parent = model.frontmatter.parent_spec
   if (parent?.url && parent?.name) {
     const r = await resolveTemplateWithCache(rootDir, parent.url, parent.name)
@@ -167,7 +190,7 @@ export async function validateModel(
   }
 
   // D8: Decorate errors and warnings with originating file path
-  const modelPath = id ? (await findModelFile(rootDir, id)) ?? id : 'inline'
+  const modelPath = id ? ((await findModelFile(rootDir, id)) ?? id) : 'inline'
   const templatePath = template?.name ? `${template.name}_NN.md` : 'parent_spec'
 
   const errors = result.errors.map((e) => ({
@@ -291,10 +314,7 @@ async function bumpVersion(
 
         // Compute new parent spec name
         const currentParentName = model.frontmatter.parent_spec.name
-        newParentName = currentParentName.replace(
-          /_V_\d+-\d+-\d+$/,
-          `_V_${parentVerSegment}`,
-        )
+        newParentName = currentParentName.replace(/_V_\d+-\d+-\d+$/, `_V_${parentVerSegment}`)
 
         // Read and update the template file's frontmatter
         const rawParentContent = await readFile(localParentPath, 'utf-8')
@@ -434,8 +454,10 @@ export async function applyChange(
 
   if (op === 'generate_index') {
     try {
-      const { template: idxTemplate, resolveInclude: idxInclude } =
-        await resolveTemplateForModel(rootDir, model)
+      const { template: idxTemplate, resolveInclude: idxInclude } = await resolveTemplateForModel(
+        rootDir,
+        model,
+      )
       if (idxTemplate) {
         // Compose the taxonomy across `includes` too, not just the composite.
         const { schema } = resolveTemplateSchema(idxTemplate.rawContent, idxInclude)
@@ -484,7 +506,11 @@ export async function applyChange(
   // Write updated model
   try {
     await saveModel(filePath, model)
-    if (op === 'rename_element' && typeof args.elementName === 'string' && typeof args.newName === 'string') {
+    if (
+      op === 'rename_element' &&
+      typeof args.elementName === 'string' &&
+      typeof args.newName === 'string'
+    ) {
       try {
         const modelDir = dirname(filePath)
         const oldSlug = args.elementName.toLowerCase().replace(/[^a-z0-9-]/g, '_')
@@ -532,7 +558,13 @@ export async function validateModelUrl(
     if (!response.ok) {
       return {
         valid: false,
-        errors: [{ path: '', message: `Failed to fetch model URL: ${response.status} ${response.statusText}`, severity: 'error' }],
+        errors: [
+          {
+            path: '',
+            message: `Failed to fetch model URL: ${response.status} ${response.statusText}`,
+            severity: 'error',
+          },
+        ],
         warnings: [],
       }
     }
@@ -684,7 +716,7 @@ export async function validateTemplate(
     }
   }
 
-  const templatePath = id ? (await findModelFile(rootDir, id)) ?? id : 'inline'
+  const templatePath = id ? ((await findModelFile(rootDir, id)) ?? id) : 'inline'
   const decoratedErrors = errors.map((e) => ({ ...e, filePath: templatePath }))
   const decoratedWarnings = warnings.map((w) => ({ ...w, filePath: templatePath }))
 
@@ -706,7 +738,11 @@ export async function validateTemplate(
  * the declared Marker columns when any Marker is declared.
  */
 function scaffoldBodyFromSchema(schema: {
-  concepts: Array<{ name: string; type: string; fields?: Array<{ name: string; type: string; options?: string[] }> }>
+  concepts: Array<{
+    name: string
+    type: string
+    fields?: Array<{ name: string; type: string; options?: string[] }>
+  }>
   markers?: Array<{ name: string }>
   matrices: Array<{ name: string; source?: string; target?: string }>
 }): string {
@@ -774,7 +810,7 @@ export async function initModel(
     template_name: string
     title?: string
     model_version?: string
-  }
+  },
 ): Promise<{
   success: boolean
   filePath: string
@@ -799,7 +835,9 @@ export async function initModel(
     } catch {
       /* no models/ dir — write beside the repo root */
     }
-    filePath = useModelsDir ? join(modelsDir, `${cleanId}_NN.md`) : join(rootDir, `${cleanId}_NN.md`)
+    filePath = useModelsDir
+      ? join(modelsDir, `${cleanId}_NN.md`)
+      : join(rootDir, `${cleanId}_NN.md`)
   }
 
   let body = ''
@@ -824,7 +862,10 @@ export async function initModel(
       templateResolved = true
       const hasConceptSections = /^#\s+NN\s+(?!index\b)\S/im.test(body)
       if (!hasConceptSections) {
-        const composed = resolveTemplateSchema(resolved.template.rawContent, resolved.resolveInclude)
+        const composed = resolveTemplateSchema(
+          resolved.template.rawContent,
+          resolved.resolveInclude,
+        )
         for (const e of composed.errors) warnings.push(`${e.path}: ${e.message}`)
         const scaffold = scaffoldBodyFromSchema(composed.schema)
         body = body ? `${scaffold}\n${body}` : scaffold
@@ -850,8 +891,8 @@ export async function initModel(
   const title = args.title || cleanId
 
   const frontmatter = `---
-spec_version: "V_0-1-0"
-spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md"
+spec_version: "V_0-2-0"
+spec_url: "https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-2-0_NN.md"
 level: 3
 parent_spec:
   name: "${args.template_name}"

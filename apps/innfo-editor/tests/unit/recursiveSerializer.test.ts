@@ -195,7 +195,7 @@ matrices:
   it('persists dynamic relational matrix definitions from node.fields to serialized markdown', async () => {
     const docWithoutMatrix = `---
 spec_version: "V_0-1-1"
-level: 3
+level: 1
 title: "Matrix Definitions Test"
 ---
 
@@ -255,4 +255,3 @@ title: "Matrix Definitions Test"
     expect(writtenContent!).toContain('    description: "A scale matrix."')
   })
 })
-

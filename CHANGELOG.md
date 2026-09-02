@@ -1,5 +1,56 @@
 ﻿# Changelog
 
+## Unreleased (2026-09-01)
+
+### iNNfo L1 spec — `iNNfo_V_0-2-0` adopted
+- **`iNNfo_V_0-2-0` is now the adopted L1** (`status: "Stable"`,
+  `DEFAULT_INNFO_VERSION = 'V_0-2-0'`). The adopted version is defined by that
+  constant, not by editing older spec files: `iNNfo_V_0-1-0_NN.md` is immutable
+  (`spec-versioning` R-SV-02), stays byte-unchanged, and remains resolvable forever
+  for models authored against it. `status` uses the `defiNNe` vocabulary
+  `Draft | Stable | Deprecated`; `iNNfo_V_0-2-0` moves from `Draft` to `Stable` as
+  part of adoption.
+- **`includes` duplicate-name rule.** When two composition sources declare a
+  Definition of the same primitive with the same name, an **AST-identical** body
+  is now silently merged into a single entry (previously any duplicate name was an
+  ERROR). Bodies that differ are still an ERROR naming both sources. This lets two
+  independent templates each carry a shared Definition (e.g. two slices of a
+  former template both declaring the same `importance` Marker) and still compose.
+- **`model` added to the type enums.** `Concept Definition` and `Field Definition`
+  both accept `type:: model` (a field/concept whose value is a reference to another
+  iNNfo model). Already present in `innfo-core` (`ConceptType`, `ConceptField.type`);
+  now sanctioned by the L1 spec.
+
+### Templates
+- **`business` decomposed.** `business_V_0-2-0` is a pure composite that
+  `includes` two new first-revision templates: `business-model` and `analysis`
+  (each `spec_version: V_0-2-0`, `template_version: V_0-1-0`, carved out of the
+  former monolithic `business_V_0-1-0`). `business_V_0-1-0_NN.md` stays frozen.
+- **`blank`, `cogNNitive`, `innovation`, `procedures`** gain a `_V_0-2-0_NN.md`
+  file (`parent_spec: iNNfo_V_0-2-0`, `template_version: V_0-2-0`, body copied
+  verbatim). Their `_V_0-1-0_` files stay frozen.
+- `organization` and `projects` already shipped `_V_0-2-0_` variants on this branch.
+- New shipped samples `DeLoreanTimeTravel_V_0-2-0_innovation_NN.md` and
+  `CodeReviewProcess_V_0-2-0_procedures_NN.md`.
+
+### Core (`@cognnitive/innfo-core`)
+- `resolveTemplateSchema` / `mergeSchemaInto`: same-named Definitions from
+  different `includes` sources are compared by a new `canonicalizeDefinition`
+  (exported) — property order, surrounding whitespace and the order of set-like
+  arrays (`applies_to` / `options` / `target_concepts`) do not count. Identical →
+  merged; different → collision ERROR (unchanged for the differing case).
+
+### Editor (`@cognnitive/innfo-editor`)
+- `DEFAULT_INNFO_VERSION` / `DEFAULT_TEMPLATE_VERSION` → `V_0-2-0`;
+  `SHIPPED_TEMPLATE_VERSIONS` now maps all nine template slugs. Home/setup starter
+  sample URLs re-pointed to the `_V_0-2-0_` samples.
+
+### Tooling
+- `npm run check:spec-version` / `check:spec-urls` / `check:specs` wired in
+  `package.json`; CI job `spec-integrity` runs `check:spec-urls`.
+  `scripts/check-spec-version.mjs` gains `--with-skills` to also scan
+  `../actioNN/skills`.
+
 ## Unreleased (2026-08-19)
 
 ### Spec tree consolidation
@@ -8,7 +59,9 @@
   level-2 templates under `specs/templates/{name}/` with their own `samples/`.
 - Level-2 templates gain their own `template_version` field, independent from
   `specification_version` (previously templates had no version identity of their own).
-- Deleted 3 orphan templates with zero code references (`businessV2`, `cogNNitive`, `biz`).
+- Deleted 2 orphan template folders with zero code references (`businessV2`, `biz`).
+  (An earlier draft of this entry also listed `cogNNitive`; that template was kept
+  and later given a `_V_0-2-0_` file — see Unreleased 2026-09-01.)
 - `parent_spec` stays `{name, url}` (not collapsed to a bare `parent:` string) to keep
   the resolver's write-once immutability guarantee and version-bump detection working.
 - See `openspec/changes/spec-version-simplification/` for the full proposal/spec/design.

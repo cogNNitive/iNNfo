@@ -63,7 +63,16 @@ node scripts/check-spec-version.mjs --inventory
 # Verify every hardcoded raw.githubusercontent.com URL in source files still
 # resolves to an existing file under the current specs/ tree
 node scripts/check-spec-version.mjs --check-urls
+
+# Extend any scan to the bundled skill docs/templates in cogNNitive/actioNN
+# (auto-detects ../actioNN/skills; silently skipped if not checked out)
+node scripts/check-spec-version.mjs --check-urls --with-skills
+node scripts/check-spec-version.mjs --version V_0-1-2 --by-type --with-skills
 ```
+
+The `npm run` aliases wrap the common cases: `check:spec-version`,
+`check:spec-urls`, and `check:specs` (urls + inventory). CI runs `check:spec-urls`
+in the `spec-integrity` job.
 
 > **Note:** By default, `archive/` and any directory named `archive` inside
 > `openspec/` are excluded. Use `--include-archives` for a comprehensive scan when

@@ -138,10 +138,10 @@ async function findPrimaryWorkspaceFile(
 function extractSubmodelRefs(
   entrypointContent: string,
   entrypointPath: string,
-): Array<{ name: string; path: string }> {
-  const modelRefs: Array<{ name: string; path: string }> = []
+): Array<{ name: string; path: string; author?: string }> {
+  const modelRefs: Array<{ name: string; path: string; author?: string }> = []
 
-  const addRef = (target: string) => {
+  const addRef = (target: string, author?: string) => {
     const cleanTarget = target.trim()
     if (
       cleanTarget.endsWith(INNFO_FILE_SUFFIX) &&
@@ -149,7 +149,13 @@ function extractSubmodelRefs(
       cleanTarget.toLowerCase() !== entrypointPath.toLowerCase() &&
       !isIgnoredPath(cleanTarget)
     ) {
-      const ref = { name: stripMdSuffix(basenameOf(cleanTarget)), path: cleanTarget }
+      const cleanAuthor =
+        typeof author === 'string' && author.trim() !== '' ? author.trim() : undefined
+      const ref = {
+        name: stripMdSuffix(basenameOf(cleanTarget)),
+        path: cleanTarget,
+        author: cleanAuthor,
+      }
       if (!modelRefs.some((r) => r.path === ref.path)) {
         modelRefs.push(ref)
       }
@@ -157,12 +163,15 @@ function extractSubmodelRefs(
   }
 
   // 1. Extract path:: fields from ModelRef or any concept elements
+  //    (also capture a workspace-scoped author:: when the element carries one).
   try {
     const parsed = parseModel(entrypointContent)
     for (const [, elementNodes] of parsed.elements.entries()) {
       for (const el of elementNodes) {
         if (el.fields['path'] && typeof el.fields['path'] === 'string') {
-          addRef(el.fields['path'])
+          const author =
+            typeof el.fields['author'] === 'string' ? (el.fields['author'] as string) : undefined
+          addRef(el.fields['path'], author)
         }
       }
     }
@@ -207,7 +216,13 @@ export async function recursiveParse(
   if (primary) {
     entrypointContent = primary.content
     entrypointPath = primary.path
-    await parseAndRegisterModel(primary.content, primary.path, primary.name, ctx, elementNameToModel)
+    await parseAndRegisterModel(
+      primary.content,
+      primary.path,
+      primary.name,
+      ctx,
+      elementNameToModel,
+    )
   } else {
     // Step 2: Fallback to legacy index.md
     try {
@@ -307,6 +322,15 @@ export async function recursiveParse(
     }
 
     await parseAndRegisterModel(content, ref.path, ref.name, ctx, elementNameToModel)
+
+    // Propagate the workspace-scoped author:: from the manifest's ModelRef entry
+    // onto the referenced model's root node. It is not stored in the model file.
+    if (ref.author) {
+      const rootNode = Object.values(ctx.nodes).find(
+        (n) => n.parentId === null && n.name === ref.name,
+      )
+      if (rootNode) rootNode.author = ref.author
+    }
   }
 
   const rootIds = Object.values(ctx.nodes)

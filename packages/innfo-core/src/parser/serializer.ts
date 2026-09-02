@@ -12,7 +12,9 @@ function serializePropertyValue(value: unknown): string {
     }
   } else if (Array.isArray(value)) {
     // If it contains a WikiLink, serialize elements individually
-    const hasWikiLink = value.some((v) => typeof v === 'string' && v.trim().startsWith('[[') && v.trim().endsWith(']]'))
+    const hasWikiLink = value.some(
+      (v) => typeof v === 'string' && v.trim().startsWith('[[') && v.trim().endsWith(']]'),
+    )
     if (hasWikiLink) {
       return `[${value.map(serializePropertyValue).join(', ')}]`
     }
@@ -25,7 +27,10 @@ export function serializeModel(model: ParsedModel): string {
   const fm = model.frontmatter
   lines.push('---')
   if (fm.level !== 3 || fm.spec_version) {
-    lines.push(`spec_version: "${fm.spec_version || 'V_0-1-0'}"`)
+    // Fallback only reached for a non-level-3 doc that somehow lacks an
+    // explicit spec_version; track the adopted L1 (iNNfo_V_0-2-0), not the
+    // superseded one.
+    lines.push(`spec_version: "${fm.spec_version || 'V_0-2-0'}"`)
   }
   if (fm.spec_url) {
     lines.push(`spec_url: "${fm.spec_url}"`)
@@ -144,8 +149,14 @@ export function serializeModel(model: ParsedModel): string {
 
   for (const [conceptName, elementNodes] of model.elements.entries()) {
     lines.push(`# NN ${conceptName}`)
+    if (model.conceptTags?.[conceptName] && model.conceptTags[conceptName].length > 0) {
+      lines.push(`tags:: ${model.conceptTags[conceptName].join(', ')}`)
+    }
     for (const node of elementNodes) {
       lines.push(`## NN ${conceptName}: ${node.name}`)
+      if (node.tags && node.tags.length > 0) {
+        lines.push(`  tags:: ${node.tags.join(', ')}`)
+      }
       for (const [k, v] of Object.entries(node.fields)) {
         lines.push(`  ${k}:: ${serializePropertyValue(v)}`)
       }

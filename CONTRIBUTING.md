@@ -130,20 +130,44 @@ Lo que hace que el código parezca escrito por **una sola cabeza**, no por diez.
 
 ### 3.4 Calidad general y tooling
 
-- [ ] **No hay linter.** No existe ESLint/Biome en ningún workspace. Recomendación:
-      añadir **ESLint 9 (flat config) + `eslint-plugin-vue` + `typescript-eslint`**, o
-      **Biome** si se prioriza velocidad. Un script `lint` en la raíz y en cada workspace.
-- [ ] **No hay formateador.** Sin Prettier/Biome-format, el estilo depende de la
-      disciplina de cada uno. Añadir formateador con config compartida en la raíz.
-- [ ] **No hay CI.** No existe `.github/workflows/`. Añadir un workflow que en cada PR corra:
-      `vue-tsc --noEmit`, `vitest run`, build de packages, y `lint`.
-- [ ] **Typecheck real.** El build del app ya hace `vue-tsc --noEmit` (bien). Asegurá que
-      los packages también typecheckean en CI, no solo compilan.
-- [ ] **Tests.** Hay buena base: ~49 specs, golden tests (`tests/golden/`) y e2e Playwright.
+- [x] **Linter.** ESLint 9 flat config (`eslint.config.mjs`) + `eslint-plugin-vue` +
+      `typescript-eslint`. Scripts `lint` / `lint:fix` en la raíz.
+- [x] **Formateador.** Prettier con `format` / `format:check` en la raíz. CI lo chequea en
+      *ratchet mode* (solo los archivos tocados en el PR), así que corré `npm run format`
+      local antes de mergear lo que hayas cambiado.
+- [x] **CI.** `.github/workflows/ci.yml` corre en cada push/PR a `main`/`dev`: lint,
+      format-check de cambios, `vue-tsc --noEmit` del app, tests de `innfo-core` /
+      `innfo-mcp` / app, y build del app. `deploy.yml` publica a GitHub Pages desde `main`.
+- [x] **Integridad de specs.** Job `spec-integrity` en CI: `npm run check:spec-urls`
+      falla si alguna URL `raw.githubusercontent.com/cogNNitive/iNNfo/...` hardcodeada
+      apunta a un archivo inexistente. `npm run check:spec-version -- --inventory` lista
+      todas las versiones de spec presentes (informativo). Para barrer también los skills
+      bundleados en `cogNNitive/actioNN`: `node scripts/check-spec-version.mjs
+      --check-urls --with-skills`.
+- [ ] **Typecheck de packages.** El build del app hace `vue-tsc --noEmit`. `innfo-core` /
+      `innfo-mcp` solo compilan; falta un `--noEmit` explícito de packages en CI.
+- [ ] **Tests.** Buena base: ~49 specs, fixtures en `tests/fixtures/` y e2e Playwright.
 - [ ] **`console.*` fuera de producción.** Hay ~5 llamadas `console` en el app. Definí una
       política: logger centralizado o eliminarlas antes de mergear.
 - [ ] **Dependencias sin fijar / duplicadas.** `@cognnitive/innfo-core` está referenciado como
       `"*"` en el app y `"^0.1.0"` en el mcp. Unificá el criterio de versionado interno.
+
+### 3.5 Trazabilidad de la spec de formato iNNfo
+
+La cadena de dependencia de la spec del DSL (L0 `defiNNe` → L1 `iNNfo` → L2 templates)
+está descrita en `docs/documentation/specifications.md` (sección *Trazabilidad y
+propagación*). El procedimiento mecánico de un bump vive en el skill
+`.agents/skills/nn-dev-spec-version-propagator/`. Reglas que se chequean en revisión:
+
+- [ ] **Inmutabilidad.** Ningún archivo bajo `specs/` se edita in-place. Un cambio de
+      versión crea archivo nuevo con la versión en el nombre (`spec-versioning` R-SV-02).
+- [ ] **Fuente única de la versión.** `apps/innfo-editor/src/utils/constants.ts`
+      (`DEFAULT_INNFO_VERSION` / `DEFAULT_TEMPLATE_VERSION`) es la única fuente. Si la
+      bumpeás, corré `npm run check:spec-version -- --version <vieja> --check --by-type`
+      y actualizá cada archivo que la liste (docs, samples, skills, fixtures).
+- [ ] **URLs vivas.** `npm run check:spec-urls` en verde.
+- [ ] **Skills en sync.** Si tocaste una L2 que `cogNNitive/actioNN` bundlea (hoy
+      `workspace_spec_NN`), sincronizá la copia bundleada desde la canónica de `iNNfo`.
 
 ---
 
@@ -151,11 +175,14 @@ Lo que hace que el código parezca escrito por **una sola cabeza**, no por diez.
 
 ```
 [ ] vue-tsc --noEmit pasa sin errores
-[ ] vitest run verde (unit + golden)
+[ ] vitest run verde (unit + fixtures)
+[ ] npm run lint verde
+[ ] npm run check:spec-urls verde
 [ ] No hay v-html sin sanitizar nuevos
 [ ] No hay any nuevos en dominio (innfo-core) ni en fronteras públicas
 [ ] Ningún SFC nuevo supera ~300 líneas sin justificación
 [ ] Imports siguen la convención de su capa
 [ ] No quedan console.* ni código comentado
-[ ] Si toca el modelo, los golden se actualizaron leyendo el diff
+[ ] Si toca el modelo, las fixtures se actualizaron leyendo el diff
+[ ] Si toca specs/: archivo nuevo versionado (no edición in-place) y check:spec-version limpio
 ```

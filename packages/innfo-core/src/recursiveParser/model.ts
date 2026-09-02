@@ -77,6 +77,8 @@ export function normalizeSingleModel(
     kind: 'root',
     fields: toFieldValues(parsed.frontmatter as Record<string, unknown>),
     markers: {},
+    tags: [],
+    conceptTags: parsed.conceptTags,
     relationships: [],
     rawSections: parsed.rawSections ?? {},
     rawContent: content,

@@ -11,6 +11,8 @@
 //   node scripts/check-spec-version.mjs --inventory
 //   node scripts/check-spec-version.mjs --inventory --include-archives
 //   node scripts/check-spec-version.mjs --check-urls
+//   node scripts/check-spec-version.mjs --version V_0-1-2 --with-skills
+//   node scripts/check-spec-version.mjs --check-urls --with-skills ../actioNN/skills
 //
 // Modes:
 //   default         â€” Print all files referencing the given version
@@ -19,6 +21,11 @@
 //   --include-archives â€” Include archive/ and openspec/changes/archive/ in scan
 //   --inventory     â€” Print ALL spec versions found in the repo
 //   --check-urls    â€” Verify all hardcoded raw.githubusercontent.com URLs in source files point to existing files
+//   --with-skills [path] â€” Also scan a sibling skills tree (default: ../actioNN/skills,
+//                          ../../actioNN/skills). Lets the scan cover bundled skill
+//                          docs/templates that live in the cogNNitive/actioNN repo.
+//                          Silently skipped when the path does not exist (e.g. CI
+//                          checkouts that only contain iNNfo).
 
 import { readFileSync, existsSync } from 'node:fs'
 import { readdirSync, statSync } from 'node:fs'
@@ -32,7 +39,8 @@ const ARCHIVE_DIRS = new Set(['archive', 'node_modules', '.git', '.playwright-mc
 const ACTIVE_IGNORE = new Set(['node_modules', '.git', '.playwright-mcp', 'home-page'])
 
 const FORMAT_VERSION_RE = /V_\d+-\d+-\d+/g
-const GITHUB_RAW_URL_RE = /https:\/\/raw\.githubusercontent\.com\/cogNNitive\/iNNfo\/(?:main|v[\d.]+)\/([^\s"')\]]+)/g
+const GITHUB_RAW_URL_RE =
+  /https:\/\/raw\.githubusercontent\.com\/cogNNitive\/iNNfo\/(?:main|v[\d.]+)\/([^\s"')\]]+)/g
 
 // â”€â”€ File Collection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -93,6 +101,9 @@ function classifyFile(relPath) {
     return 'source'
   if (relPath.startsWith('docs') && relPath.endsWith('.md')) return 'doc'
   if (relPath.startsWith('.agents') && relPath.endsWith('.md')) return 'skill'
+  // Sibling skills tree scanned via --with-skills (e.g. ../actioNN/skills/...).
+  const normalized = relPath.replace(/\\/g, '/')
+  if (normalized.includes('actioNN/skills/') && relPath.endsWith('.md')) return 'skill'
   // specs/CHANGELOG.md was removed by spec-versioning — root CHANGELOG.md is
   // now the only changelog.
   if (relPath === 'CHANGELOG.md') return 'doc'
@@ -159,7 +170,9 @@ function extractVersionRefs(relPath, content) {
     }
 
     // parent_spec block â€” name
-    const psn = fm.match(/^parent_spec:\s*\n\s+name:\s*['"]?([^\s'"]+_V_\d+-\d+-\d+[^\s'"]*)['"]?\s*$/m)
+    const psn = fm.match(
+      /^parent_spec:\s*\n\s+name:\s*['"]?([^\s'"]+_V_\d+-\d+-\d+[^\s'"]*)['"]?\s*$/m,
+    )
     if (psn) {
       const parentSpecVer = psn[1].match(/V_\d+-\d+-\d+/)
       if (parentSpecVer)
@@ -167,7 +180,9 @@ function extractVersionRefs(relPath, content) {
     }
 
     // parent_spec block â€” url
-    const psu = fm.match(/^parent_spec:\s*\n(?:\s+.*\n)*?\s+url:\s*['"](https?:\/\/[^'"]+)['"]\s*$/m)
+    const psu = fm.match(
+      /^parent_spec:\s*\n(?:\s+.*\n)*?\s+url:\s*['"](https?:\/\/[^'"]+)['"]\s*$/m,
+    )
     if (psu) {
       const urlVer = psu[1].match(/V_\d+-\d+-\d+/)
       if (urlVer) refs.push({ field: 'parent_spec.url', value: urlVer[0], location: relPath })
@@ -392,6 +407,7 @@ function parseArgs() {
   let inventory = false
   let includeArchives = false
   let checkUrls = false
+  let withSkills = null // null = off, true = auto-detect, string = explicit path
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -413,25 +429,88 @@ function parseArgs() {
       case '--check-urls':
         checkUrls = true
         break
+      case '--with-skills': {
+        const next = args[i + 1]
+        if (next && !next.startsWith('--')) {
+          withSkills = next
+          i++
+        } else {
+          withSkills = true
+        }
+        break
+      }
     }
   }
-  return { version, byType, checkMode, inventory, includeArchives, checkUrls }
+  return { version, byType, checkMode, inventory, includeArchives, checkUrls, withSkills }
+}
+
+// â”€â”€ Sibling skills tree (cogNNitive/actioNN) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+const DEFAULT_SKILL_DIRS = ['../actioNN/skills', '../../actioNN/skills']
+
+// Resolve the sibling skills directory. `spec` is `true` (auto-detect the known
+// relative locations) or an explicit path. Returns an absolute path or null.
+function resolveSkillsDir(spec) {
+  const candidates = spec === true ? DEFAULT_SKILL_DIRS : [spec]
+  for (const c of candidates) {
+    const abs = resolve(ROOT, c)
+    if (existsSync(abs) && statSync(abs).isDirectory()) return abs
+  }
+  return null
+}
+
+// Recursively collect .md files under a skills directory (skips .git etc).
+function collectSkillFiles(dir) {
+  const files = []
+  try {
+    for (const entry of readdirSync(dir)) {
+      if (ACTIVE_IGNORE.has(entry)) continue
+      const full = join(dir, entry)
+      const st = statSync(full)
+      if (st.isDirectory()) files.push(...collectSkillFiles(full))
+      else if (entry.endsWith('.md')) files.push(full)
+    }
+  } catch {
+    /* unreadable */
+  }
+  return files
 }
 
 function main() {
-  const { version, byType, checkMode, inventory, includeArchives, checkUrls } = parseArgs()
+  const { version, byType, checkMode, inventory, includeArchives, checkUrls, withSkills } =
+    parseArgs()
 
   const allFiles = collectFiles(ROOT, includeArchives).filter(
     (f) => f.endsWith('.md') || f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue'),
   )
 
+  if (withSkills) {
+    const skillsDir = resolveSkillsDir(withSkills)
+    if (skillsDir) {
+      const skillFiles = collectSkillFiles(skillsDir)
+      allFiles.push(...skillFiles)
+      console.log(
+        `  [+] Also scanning ${skillFiles.length} skill file(s) under ${relative(ROOT, skillsDir)}\n`,
+      )
+    } else if (withSkills !== true) {
+      console.error(`  [!] --with-skills path not found: ${withSkills}`)
+      process.exit(1)
+    } else {
+      console.log(
+        '  [i] --with-skills: no sibling actioNN/skills tree found, scanning iNNfo only\n',
+      )
+    }
+  }
+
   if (checkUrls) {
-    const sourceFiles = allFiles.filter(
-      (f) =>
-        (f.endsWith('.ts') || f.endsWith('.vue')) &&
-        !f.endsWith('.test.ts') &&
-        !f.endsWith('.spec.ts'),
-    )
+    const sourceFiles = allFiles.filter((f) => {
+      if (f.endsWith('.test.ts') || f.endsWith('.spec.ts')) return false
+      if (f.endsWith('.ts') || f.endsWith('.vue')) return true
+      // Skill docs/templates carry hardcoded raw URLs in their frontmatter and
+      // fenced examples; scan them too when --with-skills brought them in.
+      const norm = f.replace(/\\/g, '/')
+      return f.endsWith('.md') && norm.includes('actioNN/skills/')
+    })
     const broken = scanUrls(sourceFiles)
     printUrlResults(broken)
     process.exit(broken.length > 0 ? 1 : 0)
