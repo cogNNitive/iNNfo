@@ -47,23 +47,26 @@ const matchingNodes = computed(() => {
     }
 
     // Calculate effective tags (node tags + concept-level tags from root)
-    const rootNode = modelStore.activeModelRootId ? modelStore.getNode(modelStore.activeModelRootId) : null
+    const activeRootId = modelStore.activeNodeId
+    const rootNode = activeRootId ? modelStore.getNode(activeRootId) : null
     const conceptTags = rootNode?.conceptTags?.[conceptName] || []
     const effectiveTags = Array.from(new Set([...(node.tags || []), ...conceptTags]))
 
     // Apply UI Tags Filter
     if (uiStore.selectedTagFilters.length > 0) {
-      const hasAllTags = uiStore.selectedTagFilters.every(tag => effectiveTags.includes(tag))
+      const hasAllTags = uiStore.selectedTagFilters.every((tag) => effectiveTags.includes(tag))
       if (!hasAllTags) continue
     }
 
     // Parse Text Search Query for #tags
     const queryParts = query.split(' ')
-    const queryTags = queryParts.filter(p => p.startsWith('#')).map(p => p.slice(1).toLowerCase())
-    const queryText = queryParts.filter(p => !p.startsWith('#')).join(' ')
+    const queryTags = queryParts
+      .filter((p) => p.startsWith('#'))
+      .map((p) => p.slice(1).toLowerCase())
+    const queryText = queryParts.filter((p) => !p.startsWith('#')).join(' ')
 
     if (queryTags.length > 0) {
-      const hasQueryTags = queryTags.every(tag => effectiveTags.includes(tag))
+      const hasQueryTags = queryTags.every((tag) => effectiveTags.includes(tag))
       if (!hasQueryTags) continue
     }
 
@@ -103,9 +106,7 @@ const matchingNodes = computed(() => {
 function getConceptFieldsForNode(node: ModelNode) {
   const conceptName = node.conceptBinding?.name ?? node.name ?? node.type
   const metamodelFields =
-    metamodelStore.getConceptFields(conceptName) ??
-    metamodelStore.getConceptFields(node.type) ??
-    []
+    metamodelStore.getConceptFields(conceptName) ?? metamodelStore.getConceptFields(node.type) ?? []
   return metamodelFields
 }
 
@@ -133,7 +134,9 @@ function handleNavigate(nodeId: string) {
 <template>
   <div class="flex flex-col flex-1 space-y-4 p-4 overflow-y-auto" data-testid="search-results-view">
     <!-- Header summary of results -->
-    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+    <div
+      class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700"
+    >
       <div class="flex items-center gap-2">
         <Search class="w-4 h-4 text-primary" />
         <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -177,7 +180,9 @@ function handleNavigate(nodeId: string) {
         :key="node.id"
         :block="toBlock(node)"
         :kind="node.kind === 'concept' ? 'concept' : 'instance'"
-        :concept-name="node.conceptBinding?.name || (node.kind === 'concept' ? node.name : node.type)"
+        :concept-name="
+          node.conceptBinding?.name || (node.kind === 'concept' ? node.name : node.type)
+        "
         :concept-type="node.type"
         :concept-fields="getConceptFieldsForNode(node)"
         :collapsed="isCollapsed(node.id)"
@@ -187,7 +192,6 @@ function handleNavigate(nodeId: string) {
         @update:collapsed="(val) => setCollapsed(node.id, val)"
         @navigate-to-node="handleNavigate"
       />
-
     </div>
   </div>
 </template>
