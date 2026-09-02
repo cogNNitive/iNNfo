@@ -236,3 +236,40 @@ describe('Pill.vue — Ghost visual state (R-TN-04)', () => {
     expect(el.style.opacity).toBe('')
   })
 })
+
+describe('Pill.vue — Shape & noWrap props', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('renders with rounded-full when shape="pill"', () => {
+    const wrapper = mount(Pill, {
+      props: {
+        name: 'PillBadge',
+        shape: 'pill',
+      },
+    })
+    expect(wrapper.classes()).toContain('rounded-full')
+  })
+
+  it('renders with rounded-lg by default', () => {
+    const wrapper = mount(Pill, {
+      props: {
+        name: 'DefaultBadge',
+      },
+    })
+    expect(wrapper.classes()).toContain('rounded-lg')
+  })
+
+  it('applies whitespace-nowrap and removes max-w-full when noWrap is true', () => {
+    const wrapper = mount(Pill, {
+      props: {
+        name: 'Long Badge Name',
+        noWrap: true,
+      },
+    })
+    expect(wrapper.classes()).toContain('whitespace-nowrap')
+    expect(wrapper.classes()).not.toContain('max-w-full')
+  })
+})
+

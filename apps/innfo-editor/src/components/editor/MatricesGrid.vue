@@ -182,6 +182,8 @@
                     :fields="getNodeFields(columns[vCol.index])"
                     :concept-fields="getConceptFields(activeMatrix.target)"
                     hide-empty
+                    shape="pill"
+                    no-wrap
                   />
                 </div>
               </div>

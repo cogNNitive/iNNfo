@@ -28,8 +28,9 @@
         :class="{
           italic: isEmpty,
           'text-slate-400': isEmpty,
-          truncate: props.lines === 1,
+          truncate: props.lines === 1 && !props.noWrap,
           'line-clamp-2': props.lines === 2,
+          'whitespace-nowrap': props.noWrap || props.lines === 1,
         }"
       >
         <slot>
@@ -199,6 +200,10 @@ const props = withDefaults(
     hideEmpty?: boolean
     /** Truncate the name text after a specific number of lines (0 or undefined for no truncation). */
     lines?: number
+    /** Shape / border-radius variant: 'rounded' (default rounded-lg) or 'pill' (rounded-full). */
+    shape?: 'rounded' | 'pill'
+    /** When true, prevents text wrapping and width-clamping (useful for rotated labels in table headers). */
+    noWrap?: boolean
   }>(),
   {
     selected: false,
@@ -209,6 +214,8 @@ const props = withDefaults(
     showMarkers: true,
     conceptFields: () => [],
     lines: 0,
+    shape: 'rounded',
+    noWrap: false,
   },
 )
 
@@ -496,14 +503,35 @@ const pillStyle = computed(() => {
 
 // ── Pill classes ────────────────────────────────────────────────
 const pillClasses = computed(() => {
-  const baseClasses = [
-    props.fullWidth ? 'flex w-full items-center' : 'inline-flex items-center max-w-full',
-    props.lines ? 'px-1.5 py-1 text-[11px] gap-0.5' : 'px-2 py-1.5 text-xs gap-1',
-    props.lines === 1
-      ? 'rounded-lg font-normal whitespace-nowrap overflow-hidden transition-all duration-200 select-none min-w-0'
+  const radiusClass = props.shape === 'pill' ? 'rounded-full' : 'rounded-lg'
+
+  const paddingClass =
+    props.shape === 'pill'
+      ? props.lines
+        ? 'px-2.5 py-0.5 text-[11px] gap-1'
+        : 'px-3 py-1 text-xs gap-1.5'
+      : props.lines
+        ? 'px-1.5 py-1 text-[11px] gap-0.5'
+        : 'px-2 py-1.5 text-xs gap-1'
+
+  const widthClass = props.fullWidth
+    ? 'flex w-full items-center'
+    : props.noWrap
+      ? 'inline-flex items-center whitespace-nowrap shrink-0'
+      : 'inline-flex items-center max-w-full'
+
+  const textWrapClass = props.noWrap
+    ? `${radiusClass} font-normal whitespace-nowrap transition-all duration-200 select-none min-w-0`
+    : props.lines === 1
+      ? `${radiusClass} font-normal whitespace-nowrap overflow-hidden transition-all duration-200 select-none min-w-0`
       : props.lines && props.lines > 1
-        ? 'rounded-lg font-normal whitespace-normal overflow-hidden transition-all duration-200 select-none min-w-0'
-        : 'rounded-lg font-normal whitespace-normal break-words transition-all duration-200 select-none min-w-0',
+        ? `${radiusClass} font-normal whitespace-normal overflow-hidden transition-all duration-200 select-none min-w-0`
+        : `${radiusClass} font-normal whitespace-normal break-words transition-all duration-200 select-none min-w-0`
+
+  const baseClasses = [
+    widthClass,
+    paddingClass,
+    textWrapClass,
     props.interactive
       ? 'cursor-pointer active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1'
       : '',

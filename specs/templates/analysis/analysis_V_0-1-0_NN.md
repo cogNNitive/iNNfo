@@ -27,7 +27,6 @@ relationship_types:
 * [[Analysis]]
   * [[Assumptions]]
   * [[Risks]]
-  * [[SWOT]]
   * [[Keys]]
   * [[Suggestions]]
 * [[Validation]]
@@ -59,12 +58,6 @@ icon:: messages-square
 type:: weight
 color:: red
 weight:: 30
-
-## NN Concept Definition: SWOT
-icon:: layout-grid
-type:: text
-color:: red
-weight:: 10
 
 ## NN Concept Definition: Keys
 icon:: key-round

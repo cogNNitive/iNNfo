@@ -15,7 +15,6 @@ title: "Ghostbusters Inc. Spectral Risk & Business Analysis Model"
 * [[Analysis]]
   * [[Assumptions]]
   * [[Risks]]
-  * [[SWOT]]
   * [[Keys]]
   * [[Suggestions]]
 * [[Validation]]
@@ -41,10 +40,6 @@ Excess entity containment in subterranean storage vault triggers catastrophic vo
 
 ## NN Risks: Municipal Regulatory Interference
 Environmental protection agency officials attempt to shut down headquarters operation due to unlicensed nuclear particle pack usage.
-
-# NN SWOT
-
-Internal Strengths: Proprietary nuclear particle accelerator tech, experienced scientific founders, strong brand recognition. Internal Weaknesses: Heavy debt load from Ecto-1 fleet maintenance and firehouse mortgage lease. External Opportunities: Commercial high-rise hotel retainers and municipal utility contracts. External Threats: EPA regulatory interference and city power grid failures.
 
 # NN Keys
 
