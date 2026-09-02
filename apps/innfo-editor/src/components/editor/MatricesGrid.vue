@@ -274,8 +274,9 @@
                     <input
                       type="checkbox"
                       :checked="
-                        getVal(rows[vRow.index], columns[vCol.index]) === 'X' ||
-                        getVal(rows[vRow.index], columns[vCol.index]) === true
+                        getVal(rows[vRow.index], columns[vCol.index]) !== '-' &&
+                        getVal(rows[vRow.index], columns[vCol.index]) !== '' &&
+                        getVal(rows[vRow.index], columns[vCol.index]) !== false
                       "
                       @change="
                         setVal(
