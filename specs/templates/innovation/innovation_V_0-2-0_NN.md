@@ -292,11 +292,13 @@ color:: green
 source:: Program
 target:: Initiative
 values:: [Govern]
+widget:: boolean
 
 ## NN Matrix Definition: opportunity-initiative matrix
 source:: Opportunity
 target:: Initiative
 values:: [Address]
+widget:: boolean
 
 ## NN Matrix Definition: person-initiative matrix
 source:: Person
@@ -385,6 +387,12 @@ title: "<Innovation Portfolio Title>"
 * [[Opportunity]]
 * [[Initiative]]
 ```
+
+## Examples
+
+### Canonical Sample
+
+The official sample for this template is at `specs/templates/innovation/samples/Ghostbusters_V_0-2-0_innovation_NN.md`. It exercises R&D programs, personnel roles, opportunity pipelines, execution initiatives, and governance matrices.
 
 # Concept Guidance Documentation
 
