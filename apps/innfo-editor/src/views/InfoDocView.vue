@@ -5,7 +5,7 @@ import { normalizeSingleModel } from '@cognnitive/innfo-core'
 import { useModelStore } from '../stores/modelStore'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import { resolveParentSpecs } from '../services/SpecResolverService'
-import { Play, Layout, FileText } from 'lucide-vue-next'
+import { FileText } from 'lucide-vue-next'
 
 const router = useRouter()
 const modelStore = useModelStore()
@@ -15,7 +15,6 @@ const busy = ref(false)
 const error = ref<string | null>(null)
 const dragOver = ref(false)
 const fileInputRef = ref<HTMLInputElement | null>(null)
-const targetMode = ref<'workspace' | 'standalone'>('workspace')
 
 async function loadFile(file: File): Promise<void> {
   error.value = null
@@ -23,12 +22,6 @@ async function loadFile(file: File): Promise<void> {
   try {
     const content = await file.text()
     const rootId = file.name.replace(/\.md$/i, '')
-
-    if (targetMode.value === 'standalone' && file.name.includes('procedures')) {
-      // Navigate to standalone procedure view
-      router.push({ name: 'view-procedure' })
-      return
-    }
 
     workspace.reset()
     workspace.isSampleSession = false
@@ -84,39 +77,8 @@ function onDrop(event: DragEvent): void {
           <p
             class="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto mt-1 leading-relaxed"
           >
-            Open your <code>_NN.md</code> document in the full <strong>Workspace Editor</strong> or
-            launch it directly in the <strong>Standalone Procedure Viewer</strong>.
+            Open your <code>_NN.md</code> document in the <strong>Workspace Editor</strong>.
           </p>
-        </div>
-
-        <!-- Mode Toggle Selector -->
-        <div
-          class="flex items-center justify-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/70 rounded-xl max-w-sm mx-auto"
-        >
-          <button
-            @click="targetMode = 'workspace'"
-            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-            :class="
-              targetMode === 'workspace'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs'
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            "
-          >
-            <Layout class="w-3.5 h-3.5 text-blue-500" />
-            <span>Workspace Editor</span>
-          </button>
-          <button
-            @click="targetMode = 'standalone'"
-            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-            :class="
-              targetMode === 'standalone'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs'
-                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-            "
-          >
-            <Play class="w-3.5 h-3.5 text-emerald-500" />
-            <span>Standalone Viewer</span>
-          </button>
         </div>
 
         <!-- File Dropzone -->
@@ -141,7 +103,7 @@ function onDrop(event: DragEvent): void {
               >Loading document&hellip;</span
             >
             <span v-else class="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-              Drop your <code class="text-purple-600 dark:text-purple-400">_NN.md</code> file here
+              Drop your <code class="text-purple-600 dark:text-purple-400">*****_NN.md</code> file here
             </span>
             <span class="text-2xs text-slate-500 dark:text-slate-400"
               >or click to browse your local filesystem</span
