@@ -90,8 +90,7 @@ async function resolvePathInHandle(
  * `business_V_0-1-0`); the template lives under its own `specs/templates/{slug}/`
  * folder alongside its samples (see `spec-versioning`, R-SV-01).
  */
-async function tryDevLocalTemplate(parentName: string): Promise<string | null> {
-  if (!import.meta.env.DEV) return null
+async function tryBundledTemplate(parentName: string): Promise<string | null> {
   const slug = parentName.replace(/_V_\d+-\d+-\d+$/, '')
   if (!slug || slug === parentName) return null
   const localUrl = `/specs/templates/${slug}/${parentName}_NN.md`
@@ -127,7 +126,7 @@ async function fetchIncludeText(
       /* not a resolvable local path */
     }
   }
-  const dev = await tryDevLocalTemplate(ref.name)
+  const dev = await tryBundledTemplate(ref.name)
   if (dev) return dev
   if (ref.url && isHttpUrl(ref.url)) {
     try {
@@ -263,14 +262,14 @@ export async function resolveParentSpecs(
     }
 
     if (!text) {
-      const devLocal = await tryDevLocalTemplate(parentName)
+      const devLocal = await tryBundledTemplate(parentName)
       if (devLocal) {
         text = devLocal
         specFilename = `spec:${parentName}`
       }
     }
 
-    if (!text && isHttpUrl(parentUrl)) {
+    if (!text && parentUrl) {
       try {
         const resp = await fetch(parentUrl)
         if (!resp.ok) {
