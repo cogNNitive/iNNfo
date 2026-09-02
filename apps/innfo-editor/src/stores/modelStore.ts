@@ -96,7 +96,9 @@ export const useModelStore = defineStore('model', {
     },
 
     validateModel(): void {
-      const nonTemplateRoots = this.rootIds.filter((id) => !id.startsWith('spec:') && this.nodes[id])
+      const nonTemplateRoots = this.rootIds.filter(
+        (id) => !id.startsWith('spec:') && this.nodes[id],
+      )
       if (nonTemplateRoots.length === 0) {
         this.validationReport = null
         this.validationReports = {}
@@ -285,7 +287,9 @@ export const useModelStore = defineStore('model', {
       const uiStore = useUiStore()
       const rootId =
         targetModelId ??
-        (uiStore.activeModelId && this.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        (uiStore.activeModelId && this.nodes[uiStore.activeModelId]
+          ? uiStore.activeModelId
+          : undefined) ??
         this.rootIds.find((id) => !id.startsWith('spec:')) ??
         this.rootIds[0]
       if (!rootId) throw new Error('No root node — cannot add element')
@@ -300,7 +304,9 @@ export const useModelStore = defineStore('model', {
       const uiStore = useUiStore()
       const rootId =
         targetModelId ??
-        (uiStore.activeModelId && this.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        (uiStore.activeModelId && this.nodes[uiStore.activeModelId]
+          ? uiStore.activeModelId
+          : undefined) ??
         this.rootIds.find((id) => !id.startsWith('spec:')) ??
         this.rootIds[0]
       if (!rootId) throw new Error('No root node — cannot add section')

@@ -149,8 +149,13 @@ function extractSubmodelRefs(
       cleanTarget.toLowerCase() !== entrypointPath.toLowerCase() &&
       !isIgnoredPath(cleanTarget)
     ) {
-      const cleanAuthor = typeof author === 'string' && author.trim() !== '' ? author.trim() : undefined
-      const ref = { name: stripMdSuffix(basenameOf(cleanTarget)), path: cleanTarget, author: cleanAuthor }
+      const cleanAuthor =
+        typeof author === 'string' && author.trim() !== '' ? author.trim() : undefined
+      const ref = {
+        name: stripMdSuffix(basenameOf(cleanTarget)),
+        path: cleanTarget,
+        author: cleanAuthor,
+      }
       if (!modelRefs.some((r) => r.path === ref.path)) {
         modelRefs.push(ref)
       }
@@ -211,7 +216,13 @@ export async function recursiveParse(
   if (primary) {
     entrypointContent = primary.content
     entrypointPath = primary.path
-    await parseAndRegisterModel(primary.content, primary.path, primary.name, ctx, elementNameToModel)
+    await parseAndRegisterModel(
+      primary.content,
+      primary.path,
+      primary.name,
+      ctx,
+      elementNameToModel,
+    )
   } else {
     // Step 2: Fallback to legacy index.md
     try {

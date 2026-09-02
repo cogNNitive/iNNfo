@@ -16,7 +16,14 @@ describe('organization_V_0-2-0 — standalone L2 template', () => {
 
     const concepts = schema.concepts.map((c) => c.name)
     expect(concepts).toEqual(
-      expect.arrayContaining(['Organization', 'Roles', 'Position', 'Person', 'Skills', 'Functions']),
+      expect.arrayContaining([
+        'Organization',
+        'Roles',
+        'Position',
+        'Person',
+        'Skills',
+        'Functions',
+      ]),
     )
     // Contributions and Compensations are restored as first-class concepts
     // (they exist as both concepts and per-Person string fields, mirroring
@@ -31,7 +38,9 @@ describe('organization_V_0-2-0 — standalone L2 template', () => {
     const { schema } = resolveTemplateSchema(ORG_V2, () => null)
     const person = schema.concepts.find((c) => c.name === 'Person')!
     const fields = (person.fields ?? []).map((f) => f.name)
-    expect(fields).toEqual(expect.arrayContaining(['position_ref', 'compensation', 'contributions']))
+    expect(fields).toEqual(
+      expect.arrayContaining(['position_ref', 'compensation', 'contributions']),
+    )
   })
 
   it('validates green against the iNNfo_V_0-2-0 metaschema', () => {

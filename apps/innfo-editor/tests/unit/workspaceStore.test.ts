@@ -234,7 +234,10 @@ describe('workspaceStore.open()', () => {
           kind: 'element',
           type: 'Business',
           fields: {
-            status: { value: 'Old Status', provenance: { author: { kind: 'user', id: 'test' }, timestamp: '' } }
+            status: {
+              value: 'Old Status',
+              provenance: { author: { kind: 'user', id: 'test' }, timestamp: '' },
+            },
           },
           markers: {},
           relationships: [],
@@ -254,7 +257,10 @@ describe('workspaceStore.open()', () => {
     // Modify status field value on the child node
     const child = modelStore.getNode('child-1')
     if (child) {
-      child.fields['status'] = { value: 'New Status', provenance: { author: { kind: 'user', id: 'test' }, timestamp: '' } }
+      child.fields['status'] = {
+        value: 'New Status',
+        provenance: { author: { kind: 'user', id: 'test' }, timestamp: '' },
+      }
     }
     modelStore.markDirty('child-1') // This should also mark the root node dirty
 

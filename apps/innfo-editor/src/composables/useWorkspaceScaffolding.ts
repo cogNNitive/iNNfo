@@ -15,8 +15,6 @@ export async function initWorkspaceStructure(
   // Create application-managed directories
   await handle.getDirectoryHandle('specs', { create: true })
 
-
-
   // Create README
   const readmeContent = `# ${modelName}
 
@@ -192,7 +190,10 @@ title: "${modelName} Index"
  * and pre-populates specs/ so both the editor and AI agents have
  * local copies without fetching on first use.
  */
-export async function prepopulateSpecs(handle: DirectoryHandleLike, starterUrl: string): Promise<void> {
+export async function prepopulateSpecs(
+  handle: DirectoryHandleLike,
+  starterUrl: string,
+): Promise<void> {
   const starterResp = await window.fetch(starterUrl)
   if (!starterResp.ok) return
   const starterFm = parseFrontmatter(await starterResp.text())

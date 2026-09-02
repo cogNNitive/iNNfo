@@ -33,7 +33,14 @@ describe('Metaschema (Self-Description)', () => {
     ])
     const matrixDef = schema.concepts.find((c) => c.name === 'Matrix Definition')!
     expect(matrixDef.fields!.map((f) => f.name)).toEqual(
-      expect.arrayContaining(['source', 'target', 'values', 'widget', 'widget_config', 'description']),
+      expect.arrayContaining([
+        'source',
+        'target',
+        'values',
+        'widget',
+        'widget_config',
+        'description',
+      ]),
     )
     const conceptTypeField = schema.concepts
       .find((c) => c.name === 'Concept Definition')!
@@ -96,9 +103,7 @@ describe('Metaschema (Self-Description)', () => {
     ].join('\n')
     const diags = validateTemplateAgainstMetaschema(badTemplate, iNNfo)
     expect(
-      diags.some(
-        (d) => d.severity === 'error' && d.message.includes('Invalid value "importance"'),
-      ),
+      diags.some((d) => d.severity === 'error' && d.message.includes('Invalid value "importance"')),
     ).toBe(true)
   })
 
@@ -117,9 +122,9 @@ describe('Metaschema (Self-Description)', () => {
       '',
     ].join('\n')
     const diags = validateTemplateAgainstMetaschema(badTemplate, iNNfo)
-    expect(
-      diags.some((d) => d.severity === 'warning' && d.message.includes('bogus_prop')),
-    ).toBe(true)
+    expect(diags.some((d) => d.severity === 'warning' && d.message.includes('bogus_prop'))).toBe(
+      true,
+    )
   })
 })
 

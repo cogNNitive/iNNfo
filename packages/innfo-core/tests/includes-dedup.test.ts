@@ -145,7 +145,9 @@ describe('canonicalizeDefinition', () => {
   it('treats set-like arrays (applies_to) as order-insensitive', () => {
     expect(
       canonicalizeDefinition({ name: 'certainty', applies_to: ['Element', 'Concept'] } as never),
-    ).toBe(canonicalizeDefinition({ name: 'certainty', applies_to: ['Concept', 'Element'] } as never))
+    ).toBe(
+      canonicalizeDefinition({ name: 'certainty', applies_to: ['Concept', 'Element'] } as never),
+    )
   })
 
   it('distinguishes definitions that actually differ', () => {

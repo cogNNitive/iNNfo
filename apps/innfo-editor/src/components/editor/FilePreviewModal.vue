@@ -13,9 +13,14 @@
         @keydown.escape="close"
       >
         <!-- Modal Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+        <div
+          class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 shrink-0"
+        >
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center border" :class="meta.iconWrap">
+            <div
+              class="w-9 h-9 rounded-xl flex items-center justify-center border"
+              :class="meta.iconWrap"
+            >
               <component :is="meta.headerIcon" class="w-5 h-5" />
             </div>
             <div>
@@ -26,28 +31,44 @@
                 <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 font-mono">
                   {{ fileName }}
                 </h2>
-                <span v-if="slug" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                <span
+                  v-if="slug"
+                  class="text-xs font-mono px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
+                >
                   {{ resolvedSection ? resolvedSection.heading.text : slug }}
                 </span>
               </div>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono truncate max-w-xl">
+              <p
+                class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono truncate max-w-xl"
+              >
                 {{ filePath }}
               </p>
             </div>
 
             <!-- Toggle Mode (only if Markdown) -->
-            <div v-if="isMarkdown" class="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-2xs ml-4 shrink-0">
+            <div
+              v-if="isMarkdown"
+              class="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-2xs ml-4 shrink-0"
+            >
               <button
                 @click="viewMode = 'preview'"
                 class="px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer"
-                :class="viewMode === 'preview' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-2xs font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                :class="
+                  viewMode === 'preview'
+                    ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-2xs font-bold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                "
               >
                 Vista Previa
               </button>
               <button
                 @click="viewMode = 'code'"
                 class="px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer"
-                :class="viewMode === 'code' ? 'bg-white dark:bg-slate-700 text-slate-850 dark:text-white shadow-2xs font-bold' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'"
+                :class="
+                  viewMode === 'code'
+                    ? 'bg-white dark:bg-slate-700 text-slate-850 dark:text-white shadow-2xs font-bold'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                "
               >
                 Código
               </button>
@@ -63,13 +84,22 @@
         </div>
 
         <!-- Metadata Panel -->
-        <div class="px-6 py-3 bg-slate-100/60 dark:bg-slate-850 border-b border-slate-200/80 dark:border-slate-800 shrink-0">
+        <div
+          class="px-6 py-3 bg-slate-100/60 dark:bg-slate-850 border-b border-slate-200/80 dark:border-slate-800 shrink-0"
+        >
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700">
+            <div
+              class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700"
+            >
               <FileText class="w-4 h-4 shrink-0" :class="meta.metaIcon" />
               <div class="min-w-0 flex-1">
-                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none">Archivo Original</span>
-                <span class="font-mono text-xs truncate block font-medium" :title="metadata.source_file || filePath">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none"
+                  >Archivo Original</span
+                >
+                <span
+                  class="font-mono text-xs truncate block font-medium"
+                  :title="metadata.source_file || filePath"
+                >
                   {{ metadata.source_file || 'N/A' }}
                 </span>
               </div>
@@ -85,30 +115,45 @@
               </button>
             </div>
 
-            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700">
+            <div
+              class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700"
+            >
               <Hash class="w-4 h-4 text-indigo-500 shrink-0" />
               <div class="min-w-0">
-                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none">SHA-256 Hash</span>
-                <span class="font-mono text-[11px] truncate block font-medium" :title="metadata.sha256 || 'N/A'">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none"
+                  >SHA-256 Hash</span
+                >
+                <span
+                  class="font-mono text-[11px] truncate block font-medium"
+                  :title="metadata.sha256 || 'N/A'"
+                >
                   {{ metadata.sha256 ? metadata.sha256.substring(0, 14) + '...' : 'Trazable' }}
                 </span>
               </div>
             </div>
 
-            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700">
+            <div
+              class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700"
+            >
               <HardDrive class="w-4 h-4 text-emerald-500 shrink-0" />
               <div class="min-w-0">
-                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none">Tamaño / Estado</span>
+                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none"
+                  >Tamaño / Estado</span
+                >
                 <span class="font-mono text-xs truncate block font-medium">
                   {{ metadata.size_bytes ? formatBytes(metadata.size_bytes) : 'Normalizado' }}
                 </span>
               </div>
             </div>
 
-            <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700">
+            <div
+              class="flex items-center gap-2 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200/60 dark:border-slate-700"
+            >
               <Clock class="w-4 h-4 text-amber-500 shrink-0" />
               <div class="min-w-0">
-                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none">Normalizado At</span>
+                <span class="text-[10px] uppercase font-bold text-slate-400 block leading-none"
+                  >Normalizado At</span
+                >
                 <span class="font-mono text-[11px] truncate block font-medium">
                   {{ metadata.normalized_at ? formatDate(metadata.normalized_at) : 'Reciente' }}
                 </span>
@@ -126,15 +171,24 @@
           :class="[
             viewMode === 'preview' && isMarkdown
               ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-8 max-w-none'
-              : 'font-mono text-xs leading-relaxed bg-slate-900 text-slate-100 dark:bg-slate-950'
+              : 'font-mono text-xs leading-relaxed bg-slate-900 text-slate-100 dark:bg-slate-950',
           ]"
         >
-          <div v-if="loading" class="flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
-            <div class="w-7 h-7 border-2 border-t-transparent rounded-full animate-spin" :class="meta.spinner"></div>
+          <div
+            v-if="loading"
+            class="flex flex-col items-center justify-center py-16 gap-3 text-slate-400"
+          >
+            <div
+              class="w-7 h-7 border-2 border-t-transparent rounded-full animate-spin"
+              :class="meta.spinner"
+            ></div>
             <span>Cargando contenido...</span>
           </div>
 
-          <div v-else-if="error" class="p-4 rounded-xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs">
+          <div
+            v-else-if="error"
+            class="p-4 rounded-xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs"
+          >
             <p class="font-bold flex items-center gap-2">
               <X class="w-4 h-4 text-red-400" />
               No se pudo cargar el archivo
@@ -143,17 +197,31 @@
           </div>
 
           <!-- Preview Mode for Images -->
-          <div v-else-if="viewMode === 'preview' && isImage" class="flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-900 rounded-xl h-[60vh] overflow-auto">
-            <img :src="objectUrl" class="max-w-full max-h-full object-contain rounded-lg shadow-md border border-slate-200 dark:border-slate-800" :alt="fileName" />
+          <div
+            v-else-if="viewMode === 'preview' && isImage"
+            class="flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-900 rounded-xl h-[60vh] overflow-auto"
+          >
+            <img
+              :src="objectUrl"
+              class="max-w-full max-h-full object-contain rounded-lg shadow-md border border-slate-200 dark:border-slate-800"
+              :alt="fileName"
+            />
           </div>
 
           <!-- Preview Mode for PDFs -->
-          <div v-else-if="viewMode === 'preview' && isPdf" class="w-full h-[60vh] bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden">
+          <div
+            v-else-if="viewMode === 'preview' && isPdf"
+            class="w-full h-[60vh] bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden"
+          >
             <iframe :src="objectUrl" class="w-full h-full border-0 rounded-xl"></iframe>
           </div>
 
           <!-- Preview Mode for Markdown -->
-          <div v-else-if="viewMode === 'preview' && isMarkdown" class="markdown-body" v-html="formattedHtml"></div>
+          <div
+            v-else-if="viewMode === 'preview' && isMarkdown"
+            class="markdown-body"
+            v-html="formattedHtml"
+          ></div>
 
           <!-- Code / Text Line-by-Line Mode -->
           <div v-else class="space-y-1">
@@ -164,7 +232,9 @@
               class="flex items-start gap-4 px-2 py-0.5 rounded transition-colors"
               :class="isLineTargeted(idx + 1) ? `font-bold border-l-4 pl-3 ${meta.highlight}` : ''"
             >
-              <span class="w-8 shrink-0 text-right select-none text-slate-600 text-[11px] font-mono">
+              <span
+                class="w-8 shrink-0 text-right select-none text-slate-600 text-[11px] font-mono"
+              >
                 {{ idx + 1 }}
               </span>
               <span class="whitespace-pre-wrap break-words flex-1 font-mono">
@@ -175,7 +245,9 @@
         </div>
 
         <!-- Modal Footer -->
-        <div class="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between shrink-0">
+        <div
+          class="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between shrink-0"
+        >
           <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <CheckCircle2 class="w-4 h-4 text-emerald-500" />
             Trazabilidad verificada con especificación iNNfo V_0-2-0
@@ -194,7 +266,18 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
-import { Link, FileOutput, Sparkles, X, FileText, Hash, HardDrive, Clock, CheckCircle2, ExternalLink } from 'lucide-vue-next'
+import {
+  Link,
+  FileOutput,
+  Sparkles,
+  X,
+  FileText,
+  Hash,
+  HardDrive,
+  Clock,
+  CheckCircle2,
+  ExternalLink,
+} from 'lucide-vue-next'
 import { useWorkspaceStore } from '../../stores/workspaceStore'
 import { resolveHeadingSection } from '../../utils/sourceRef'
 import { parseFrontmatter } from '@cognnitive/innfo-core'
@@ -218,41 +301,52 @@ const KIND_META = {
   source: {
     label: 'Fuente',
     headerIcon: Link,
-    iconWrap: 'bg-slate-600/10 dark:bg-slate-400/20 text-slate-600 dark:text-slate-300 border-slate-500/20',
-    badge: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-600',
+    iconWrap:
+      'bg-slate-600/10 dark:bg-slate-400/20 text-slate-600 dark:text-slate-300 border-slate-500/20',
+    badge:
+      'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300/60 dark:border-slate-600',
     spinner: 'border-slate-500',
     metaIcon: 'text-slate-500',
-    openHover: 'hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60',
+    openHover:
+      'hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60',
     highlight: 'bg-slate-700/60 text-slate-100 border-slate-400',
   },
   artifact: {
     label: 'Artefacto',
     headerIcon: FileOutput,
-    iconWrap: 'bg-slate-900/10 dark:bg-slate-100/10 text-slate-900 dark:text-slate-100 border-slate-900/20',
-    badge: 'bg-slate-900/10 dark:bg-slate-100/10 text-slate-900 dark:text-slate-100 border-slate-900/30 dark:border-slate-100/30',
+    iconWrap:
+      'bg-slate-900/10 dark:bg-slate-100/10 text-slate-900 dark:text-slate-100 border-slate-900/20',
+    badge:
+      'bg-slate-900/10 dark:bg-slate-100/10 text-slate-900 dark:text-slate-100 border-slate-900/30 dark:border-slate-100/30',
     spinner: 'border-slate-900 dark:border-slate-100',
     metaIcon: 'text-slate-900 dark:text-slate-100',
-    openHover: 'hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60',
+    openHover:
+      'hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60',
     highlight: 'bg-slate-900/70 text-white border-slate-400',
   },
   model: {
     label: 'Modelo',
     headerIcon: Sparkles,
-    iconWrap: 'bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
-    badge: 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-300/60 dark:border-indigo-700',
+    iconWrap:
+      'bg-indigo-600/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
+    badge:
+      'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-300/60 dark:border-indigo-700',
     spinner: 'border-indigo-500',
     metaIcon: 'text-indigo-500',
-    openHover: 'hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40',
+    openHover:
+      'hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40',
     highlight: 'bg-indigo-900/60 text-indigo-100 border-indigo-500',
   },
   file: {
     label: 'Archivo',
     headerIcon: FileText,
     iconWrap: 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/20',
-    badge: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-600',
+    badge:
+      'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-300/60 dark:border-slate-600',
     spinner: 'border-slate-400',
     metaIcon: 'text-slate-400',
-    openHover: 'hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60',
+    openHover:
+      'hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60',
     highlight: 'bg-slate-600/60 text-slate-100 border-slate-400',
   },
 } as const
@@ -279,7 +373,9 @@ const extension = computed(() => {
 })
 
 const isMarkdown = computed(() => extension.value === 'md')
-const isImage = computed(() => ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(extension.value))
+const isImage = computed(() =>
+  ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(extension.value),
+)
 const isPdf = computed(() => extension.value === 'pdf')
 const formattedHtml = computed(() => renderMarkdown(rawContent.value))
 
@@ -312,7 +408,11 @@ function formatDate(dateStr?: string): string {
   if (!dateStr) return 'N/A'
   try {
     const d = new Date(dateStr)
-    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return (
+      d.toLocaleDateString() +
+      ' ' +
+      d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    )
   } catch {
     return dateStr
   }
@@ -435,7 +535,7 @@ watch(
       if (props.slug) {
         viewMode.value = 'code'
       } else {
-        viewMode.value = (isMarkdown.value || isImage.value || isPdf.value) ? 'preview' : 'code'
+        viewMode.value = isMarkdown.value || isImage.value || isPdf.value ? 'preview' : 'code'
       }
       loadFileContent()
     } else {
@@ -448,34 +548,125 @@ watch(
 
 <style scoped>
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes scale-in {
-  from { transform: scale(0.96); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
-.animate-fade-in { animation: fade-in 0.15s ease-out forwards; }
-.animate-scale-in { animation: scale-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out forwards;
+}
+.animate-scale-in {
+  animation: scale-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
-.markdown-body :deep(h1) { font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem; }
-.markdown-body :deep(h2) { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; }
-.markdown-body :deep(h3) { font-size: 1.1rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; }
-.markdown-body :deep(p) { margin-bottom: 0.75rem; line-height: 1.6; }
-.markdown-body :deep(ul) { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
-.markdown-body :deep(ol) { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
-.markdown-body :deep(li) { margin-bottom: 0.25rem; }
-.markdown-body :deep(code) { font-family: monospace; font-size: 0.85em; background-color: #f1f5f9; padding: 0.15rem 0.3rem; border-radius: 0.25rem; }
-.dark .markdown-body :deep(code) { background-color: #1e293b; color: #f1f5f9; }
-.markdown-body :deep(pre) { background-color: #f8fafc; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
-.dark .markdown-body :deep(pre) { background-color: #0f172a; }
-.markdown-body :deep(pre code) { background-color: transparent; padding: 0; }
-.markdown-body :deep(a) { color: #6366f1; text-decoration: underline; }
-.markdown-body :deep(blockquote) { border-left: 4px solid #e2e8f0; padding-left: 1rem; color: #64748b; font-style: italic; margin-bottom: 1rem; }
-.dark .markdown-body :deep(blockquote) { border-left-color: #334155; color: #94a3b8; }
-.markdown-body :deep(table) { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-.markdown-body :deep(th), .markdown-body :deep(td) { border: 1px solid #e2e8f0; padding: 0.5rem; text-align: left; }
-.dark .markdown-body :deep(th), .dark .markdown-body :deep(td) { border-color: #334155; }
-.markdown-body :deep(th) { background-color: #f8fafc; }
-.dark .markdown-body :deep(th) { background-color: #1e293b; }
+.markdown-body :deep(h1) {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.25rem;
+}
+.markdown-body :deep(h2) {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.markdown-body :deep(h3) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.markdown-body :deep(p) {
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
+}
+.markdown-body :deep(ul) {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.markdown-body :deep(ol) {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.markdown-body :deep(li) {
+  margin-bottom: 0.25rem;
+}
+.markdown-body :deep(code) {
+  font-family: monospace;
+  font-size: 0.85em;
+  background-color: #f1f5f9;
+  padding: 0.15rem 0.3rem;
+  border-radius: 0.25rem;
+}
+.dark .markdown-body :deep(code) {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+.markdown-body :deep(pre) {
+  background-color: #f8fafc;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+.dark .markdown-body :deep(pre) {
+  background-color: #0f172a;
+}
+.markdown-body :deep(pre code) {
+  background-color: transparent;
+  padding: 0;
+}
+.markdown-body :deep(a) {
+  color: #6366f1;
+  text-decoration: underline;
+}
+.markdown-body :deep(blockquote) {
+  border-left: 4px solid #e2e8f0;
+  padding-left: 1rem;
+  color: #64748b;
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+.dark .markdown-body :deep(blockquote) {
+  border-left-color: #334155;
+  color: #94a3b8;
+}
+.markdown-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  text-align: left;
+}
+.dark .markdown-body :deep(th),
+.dark .markdown-body :deep(td) {
+  border-color: #334155;
+}
+.markdown-body :deep(th) {
+  background-color: #f8fafc;
+}
+.dark .markdown-body :deep(th) {
+  background-color: #1e293b;
+}
 </style>

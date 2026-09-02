@@ -1,4 +1,11 @@
-import type { ElementNode, ParsedModel, FieldValue, LocalMetamodel, ModelNode, TaxonomyEdge } from '../types'
+import type {
+  ElementNode,
+  ParsedModel,
+  FieldValue,
+  LocalMetamodel,
+  ModelNode,
+  TaxonomyEdge,
+} from '../types'
 import { extractTemplateSchema } from '../schema'
 import { normalizeSeparators } from '../parser/slug'
 import type { ParseContext } from './types'
@@ -169,7 +176,11 @@ export function normalizeElementsIntoGraph(
       normalizedNameById.set(key, { id, originalName: name })
     }
   }
-  function resolveMatrixEndpoint(name: string, matrixName: string, side: 'row' | 'col'): string | undefined {
+  function resolveMatrixEndpoint(
+    name: string,
+    matrixName: string,
+    side: 'row' | 'col',
+  ): string | undefined {
     const exact = qualifiedIdByElementName.get(name)
     if (exact) return exact
     const normalized = normalizedNameById.get(normalizeSeparators(name))

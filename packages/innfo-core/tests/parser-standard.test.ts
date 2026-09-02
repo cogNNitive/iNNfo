@@ -100,7 +100,9 @@ En España fallecieron 439.146 personas en 2024 (INE).
     expect(model.rawSections!['Market size']).toContain(
       'En España fallecieron 439.146 personas en 2024 (INE).',
     )
-    expect(model.rawSections!['Market size']).toContain('**TAM:** ~500.000 procesos de reparto anuales.')
+    expect(model.rawSections!['Market size']).toContain(
+      '**TAM:** ~500.000 procesos de reparto anuales.',
+    )
     // Element-bearing concepts are serialized from `elements`; their raw body
     // is not duplicated in rawSections.
     expect(model.rawSections!['Stakeholders']).toBeUndefined()
@@ -149,10 +151,10 @@ tags:: el-tag1 , EL-tag2, , el-tag3
 This is an element with tags.
 `
     const parsed = parseModel(modelContent)
-    
+
     // Check Concept tags
     expect(parsed.conceptTags).toBeDefined()
-    expect(parsed.conceptTags!['Some Concept']).toEqual(['tag1', 'tag2', 'tag3', 'tag1']) 
+    expect(parsed.conceptTags!['Some Concept']).toEqual(['tag1', 'tag2', 'tag3', 'tag1'])
 
     // Check Element tags
     const elements = parsed.elements.get('Some Concept')
@@ -166,6 +168,10 @@ This is an element with tags.
 
     const reParsed = parseModel(serialized)
     expect(reParsed.conceptTags!['Some Concept']).toEqual(['tag1', 'tag2', 'tag3', 'tag1'])
-    expect(reParsed.elements.get('Some Concept')![0].tags).toEqual(['el-tag1', 'el-tag2', 'el-tag3'])
+    expect(reParsed.elements.get('Some Concept')![0].tags).toEqual([
+      'el-tag1',
+      'el-tag2',
+      'el-tag3',
+    ])
   })
 })

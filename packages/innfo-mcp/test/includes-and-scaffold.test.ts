@@ -26,7 +26,8 @@ describe('MCP — includes composition + init_model scaffolding', () => {
     await rm(root, { recursive: true, force: true })
   })
 
-  const l1Url = () => 'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md'
+  const l1Url = () =>
+    'https://raw.githubusercontent.com/cogNNitive/iNNfo/main/specs/iNNfo_V_0-1-0_NN.md'
 
   async function writeTemplate(name: string, body: string, extraFm = ''): Promise<string> {
     const file = join(specsDir, `${name}_NN.md`)

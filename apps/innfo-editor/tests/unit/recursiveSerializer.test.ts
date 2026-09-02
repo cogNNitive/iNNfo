@@ -255,4 +255,3 @@ title: "Matrix Definitions Test"
     expect(writtenContent!).toContain('    description: "A scale matrix."')
   })
 })
-

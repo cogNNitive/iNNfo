@@ -18,9 +18,9 @@ const isFocused = ref(false)
 
 const filteredTags = computed(() => {
   const query = inputValue.value.toLowerCase().trim()
-  const unselected = availableTags.value.filter(tag => !props.modelValue.includes(tag))
+  const unselected = availableTags.value.filter((tag) => !props.modelValue.includes(tag))
   if (!query) return unselected
-  return unselected.filter(tag => tag.toLowerCase().includes(query))
+  return unselected.filter((tag) => tag.toLowerCase().includes(query))
 })
 
 function addTag(tag: string) {
@@ -67,14 +67,9 @@ function handleBlur() {
         class="tag-input-field"
       />
     </div>
-    
+
     <ul v-if="isFocused && filteredTags.length > 0" class="tag-dropdown">
-      <li 
-        v-for="tag in filteredTags" 
-        :key="tag" 
-        @click="addTag(tag)"
-        class="tag-option"
-      >
+      <li v-for="tag in filteredTags" :key="tag" @click="addTag(tag)" class="tag-option">
         {{ tag }}
       </li>
     </ul>
@@ -137,7 +132,7 @@ function handleBlur() {
   max-height: 150px;
   overflow-y: auto;
   z-index: 100;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .tag-option {
   padding: 6px 10px;

@@ -1,7 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import type { Component } from 'vue'
-import { Building2, ClipboardList, Users, FlaskConical, BookOpen, Play, Layout, Sparkles, Terminal, Copy, Check } from 'lucide-vue-next'
+import {
+  Building2,
+  ClipboardList,
+  Users,
+  FlaskConical,
+  BookOpen,
+  Play,
+  Layout,
+  Sparkles,
+  Terminal,
+  Copy,
+  Check,
+} from 'lucide-vue-next'
 import { useRouter, useRoute } from 'vue-router'
 import { useWorkspaceStore } from '../stores/workspaceStore'
 import type { DirectoryHandleLike } from '../model/fs-types'
@@ -32,7 +44,9 @@ const urlBusy = ref(false)
 const history = ref<FolderHistoryEntry[]>([])
 const reopenBusy = ref<string | null>(null)
 
-const samplePrompt = ref('Analiza este proyecto y genera la documentación siguiendo el metamodelo iNNfo.')
+const samplePrompt = ref(
+  'Analiza este proyecto y genera la documentación siguiendo el metamodelo iNNfo.',
+)
 const copiedPrompt = ref(false)
 
 function copyPromptToClipboard(): void {
@@ -212,7 +226,8 @@ async function openWorkspace(): Promise<void> {
       history.value = await loadHistory()
       await router.push({ path: '/workspace', query: route.query, hash: route.hash })
     } else {
-      error.value = 'Your browser does not support the File System Access API. Using fallback folder picker (read-only).'
+      error.value =
+        'Your browser does not support the File System Access API. Using fallback folder picker (read-only).'
       folderInputRef.value?.click()
     }
   } catch (err) {
@@ -333,9 +348,15 @@ function openStandaloneSample(sample: ExampleModel): void {
 <template>
   <div class="home max-w-5xl mx-auto p-6 space-y-8">
     <!-- Setup Wizard Modal -->
-    <div v-if="showWizard" class="fixed inset-0 z-50 flex items-start justify-center p-4 bg-slate-950/50 backdrop-blur-xs overflow-y-auto">
+    <div
+      v-if="showWizard"
+      class="fixed inset-0 z-50 flex items-start justify-center p-4 bg-slate-950/50 backdrop-blur-xs overflow-y-auto"
+    >
       <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6">
-        <button class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="showWizard = false">
+        <button
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+          @click="showWizard = false"
+        >
           &times;
         </button>
         <SetupWizard @done="showWizard = false" />
@@ -344,10 +365,15 @@ function openStandaloneSample(sample: ExampleModel): void {
 
     <!-- Hero Card -->
     <section class="hero text-center space-y-4">
-      <div class="bg-gradient-to-br from-purple-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 border-2 border-purple-900/30 dark:border-purple-900/50 rounded-2xl p-8 shadow-sm">
-        <h1 class="text-3xl font-black text-purple-950 dark:text-purple-300">iNNfo Editor &amp; Modeler</h1>
+      <div
+        class="bg-gradient-to-br from-purple-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 border-2 border-purple-900/30 dark:border-purple-900/50 rounded-2xl p-8 shadow-sm"
+      >
+        <h1 class="text-3xl font-black text-purple-950 dark:text-purple-300">
+          iNNfo Editor &amp; Modeler
+        </h1>
         <p class="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto mt-2 leading-relaxed">
-          Open a folder containing iNNfo model files, explore live sample models in the workspace or run them standalone.
+          Open a folder containing iNNfo model files, explore live sample models in the workspace or
+          run them standalone.
         </p>
 
         <div class="flex flex-wrap items-center justify-center gap-3 mt-5">
@@ -368,7 +394,11 @@ function openStandaloneSample(sample: ExampleModel): void {
           </button>
         </div>
 
-        <p v-if="error" class="mt-4 p-3 rounded-lg text-xs bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300" role="alert">
+        <p
+          v-if="error"
+          class="mt-4 p-3 rounded-lg text-xs bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300"
+          role="alert"
+        >
           {{ error }}
         </p>
 
@@ -386,7 +416,9 @@ function openStandaloneSample(sample: ExampleModel): void {
     <!-- Recent Models -->
     <section v-if="history.length" class="space-y-2">
       <div class="flex items-center justify-between">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Recent Models</h3>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          Recent Models
+        </h3>
         <button
           class="text-2xs font-semibold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
           @click="clearAllHistory"
@@ -409,10 +441,18 @@ function openStandaloneSample(sample: ExampleModel): void {
             <Layout class="w-4 h-4" />
           </span>
           <span class="flex-1 min-w-0">
-            <span class="block text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{{ entry.name }}</span>
-            <span v-if="entry.path && entry.path !== entry.name" class="block text-3xs text-slate-400 dark:text-slate-500 truncate">{{ entry.path }}</span>
+            <span class="block text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{{
+              entry.name
+            }}</span>
+            <span
+              v-if="entry.path && entry.path !== entry.name"
+              class="block text-3xs text-slate-400 dark:text-slate-500 truncate"
+              >{{ entry.path }}</span
+            >
           </span>
-          <span class="text-3xs text-slate-400 dark:text-slate-500 shrink-0">{{ formatTimestamp(entry.timestamp) }}</span>
+          <span class="text-3xs text-slate-400 dark:text-slate-500 shrink-0">{{
+            formatTimestamp(entry.timestamp)
+          }}</span>
           <span
             class="p-1 rounded-md text-slate-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
             role="button"
@@ -422,7 +462,14 @@ function openStandaloneSample(sample: ExampleModel): void {
             @keydown.enter.prevent="removeEntry(entry.handleKey)"
             @keydown.space.prevent="removeEntry(entry.handleKey)"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </span>
@@ -433,55 +480,102 @@ function openStandaloneSample(sample: ExampleModel): void {
     <!-- OpenCode Model Generation Section -->
     <section class="space-y-4">
       <div class="flex items-center justify-between">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Creating Models from Templates</h3>
-        <span class="px-2 py-0.5 rounded text-3xs font-bold uppercase bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          Creating Models from Templates
+        </h3>
+        <span
+          class="px-2 py-0.5 rounded text-3xs font-bold uppercase bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300"
+        >
           Recommended: OpenCode + AI Skill
         </span>
       </div>
 
-      <div class="p-6 rounded-2xl border border-purple-900/20 dark:border-purple-900/40 bg-gradient-to-br from-purple-50/50 via-white to-slate-50 dark:from-slate-900/90 dark:via-slate-900 dark:to-slate-950 shadow-xs space-y-5">
+      <div
+        class="p-6 rounded-2xl border border-purple-900/20 dark:border-purple-900/40 bg-gradient-to-br from-purple-50/50 via-white to-slate-50 dark:from-slate-900/90 dark:via-slate-900 dark:to-slate-950 shadow-xs space-y-5"
+      >
         <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-xl bg-purple-900/10 dark:bg-purple-900/30 text-purple-900 dark:text-purple-300 flex items-center justify-center shrink-0">
+          <div
+            class="w-10 h-10 rounded-xl bg-purple-900/10 dark:bg-purple-900/30 text-purple-900 dark:text-purple-300 flex items-center justify-center shrink-0"
+          >
             <Sparkles class="w-5 h-5 text-purple-600 dark:text-purple-400" />
           </div>
           <div class="space-y-1">
-            <h4 class="text-base font-bold text-slate-900 dark:text-slate-100">Creación Inteligente con OpenCode y el Skill iNNfo</h4>
+            <h4 class="text-base font-bold text-slate-900 dark:text-slate-100">
+              Creación Inteligente con OpenCode y el Skill iNNfo
+            </h4>
             <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Las plantillas estáticas "Starter" han sido sustituidas por la generación dinámica mediante Inteligencia Artificial. La forma recomendada de crear un modelo completo y actualizado desde cualquier plantilla (Business, Procedures, Organization) es utilizando <strong>OpenCode</strong> con el skill <strong>iNNfo</strong>.
+              Las plantillas estáticas "Starter" han sido sustituidas por la generación dinámica
+              mediante Inteligencia Artificial. La forma recomendada de crear un modelo completo y
+              actualizado desde cualquier plantilla (Business, Procedures, Organization) es
+              utilizando <strong>OpenCode</strong> con el skill <strong>iNNfo</strong>.
             </p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2">
-          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 space-y-1">
-            <div class="text-2xs font-black uppercase text-purple-600 dark:text-purple-400">Paso 1</div>
+          <div
+            class="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 space-y-1"
+          >
+            <div class="text-2xs font-black uppercase text-purple-600 dark:text-purple-400">
+              Paso 1
+            </div>
             <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Abre OpenCode</div>
-            <p class="text-3xs text-slate-500 dark:text-slate-400">Ejecuta <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">npx opencode</code> en el directorio de tu proyecto.</p>
+            <p class="text-3xs text-slate-500 dark:text-slate-400">
+              Ejecuta
+              <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">npx opencode</code> en el
+              directorio de tu proyecto.
+            </p>
           </div>
 
-          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 space-y-1">
-            <div class="text-2xs font-black uppercase text-purple-600 dark:text-purple-400">Paso 2</div>
+          <div
+            class="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 space-y-1"
+          >
+            <div class="text-2xs font-black uppercase text-purple-600 dark:text-purple-400">
+              Paso 2
+            </div>
             <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Instruye a la IA</div>
-            <p class="text-3xs text-slate-500 dark:text-slate-400">Pídele al agente que cree un modelo usando la plantilla de nivel 2 (ej. Business v0.2.0).</p>
+            <p class="text-3xs text-slate-500 dark:text-slate-400">
+              Pídele al agente que cree un modelo usando la plantilla de nivel 2 (ej. Business
+              v0.2.0).
+            </p>
           </div>
 
-          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 space-y-1">
-            <div class="text-2xs font-black uppercase text-purple-600 dark:text-purple-400">Paso 3</div>
-            <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Generación directa</div>
-            <p class="text-3xs text-slate-500 dark:text-slate-400">El agente generará el archivo <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">_NN.md</code> completo y sincronizado.</p>
+          <div
+            class="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 space-y-1"
+          >
+            <div class="text-2xs font-black uppercase text-purple-600 dark:text-purple-400">
+              Paso 3
+            </div>
+            <div class="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Generación directa
+            </div>
+            <p class="text-3xs text-slate-500 dark:text-slate-400">
+              El agente generará el archivo
+              <code class="bg-slate-100 dark:bg-slate-700 px-1 rounded">_NN.md</code> completo y
+              sincronizado.
+            </p>
           </div>
 
-          <div class="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 space-y-1">
-            <div class="text-2xs font-black uppercase text-purple-600 dark:text-purple-400">Paso 4</div>
+          <div
+            class="p-3.5 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-800 space-y-1"
+          >
+            <div class="text-2xs font-black uppercase text-purple-600 dark:text-purple-400">
+              Paso 4
+            </div>
             <div class="text-xs font-bold text-slate-800 dark:text-slate-200">Abre en Editor</div>
-            <p class="text-3xs text-slate-500 dark:text-slate-400">Abre el workspace aquí para explorar las matrices y el árbol interactivo.</p>
+            <p class="text-3xs text-slate-500 dark:text-slate-400">
+              Abre el workspace aquí para explorar las matrices y el árbol interactivo.
+            </p>
           </div>
         </div>
 
         <!-- Prompt Copy Box -->
         <div class="p-3.5 rounded-xl bg-slate-900 text-slate-200 space-y-2">
           <div class="flex items-center justify-between text-3xs font-mono text-slate-400">
-            <span class="flex items-center gap-1.5"><Terminal class="w-3.5 h-3.5 text-purple-400" /> Prompt de ejemplo para OpenCode:</span>
+            <span class="flex items-center gap-1.5"
+              ><Terminal class="w-3.5 h-3.5 text-purple-400" /> Prompt de ejemplo para
+              OpenCode:</span
+            >
             <button
               class="flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors cursor-pointer text-xs font-sans font-semibold"
               @click="copyPromptToClipboard"
@@ -491,7 +585,9 @@ function openStandaloneSample(sample: ExampleModel): void {
               <span>{{ copiedPrompt ? '¡Copiado!' : 'Copiar Prompt' }}</span>
             </button>
           </div>
-          <code class="block text-xs font-mono text-purple-200 leading-relaxed bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
+          <code
+            class="block text-xs font-mono text-purple-200 leading-relaxed bg-slate-950/60 p-2.5 rounded-lg border border-slate-800"
+          >
             {{ samplePrompt }}
           </code>
         </div>
@@ -504,7 +600,10 @@ function openStandaloneSample(sample: ExampleModel): void {
             @click="loadSandbox"
           >
             <FlaskConical class="w-4 h-4 text-amber-600" />
-            <span>¿Quieres probar la interfaz sin crear archivos? Probar Sandbox Instantáneo &rarr;</span>
+            <span
+              >¿Quieres probar la interfaz sin crear archivos? Probar Sandbox Instantáneo
+              &rarr;</span
+            >
           </button>
         </div>
       </div>
@@ -513,8 +612,12 @@ function openStandaloneSample(sample: ExampleModel): void {
     <!-- Sample Models Section with Workspace vs Standalone buttons -->
     <section class="space-y-4">
       <div>
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Explore Example Models</h3>
-        <p class="text-2xs text-slate-500">Launch live samples in full Workspace Editor or Standalone Viewer mode.</p>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          Explore Example Models
+        </h3>
+        <p class="text-2xs text-slate-500">
+          Launch live samples in full Workspace Editor or Standalone Viewer mode.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -526,11 +629,15 @@ function openStandaloneSample(sample: ExampleModel): void {
           <div>
             <div class="flex items-center justify-between gap-2 mb-1.5">
               <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100">{{ s.name }}</h4>
-              <span class="px-2 py-0.5 rounded text-3xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+              <span
+                class="px-2 py-0.5 rounded text-3xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+              >
                 {{ s.templateName }}
               </span>
             </div>
-            <p class="text-2xs text-slate-500 dark:text-slate-400 leading-relaxed">{{ s.description }}</p>
+            <p class="text-2xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              {{ s.description }}
+            </p>
           </div>
 
           <div class="flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
@@ -557,8 +664,12 @@ function openStandaloneSample(sample: ExampleModel): void {
     </section>
 
     <!-- Load from URL -->
-    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-3">
-      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Load Model from URL</h3>
+    <section
+      class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-3"
+    >
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        Load Model from URL
+      </h3>
       <div class="flex gap-2">
         <input
           v-model="urlInput"
@@ -577,7 +688,9 @@ function openStandaloneSample(sample: ExampleModel): void {
       </div>
       <p class="text-3xs text-slate-400 flex items-center gap-1">
         <BookOpen class="w-3 h-3" />
-        Learn more in the <a :href="docsUrl" target="_blank" class="underline hover:text-purple-600">documentation</a>.
+        Learn more in the
+        <a :href="docsUrl" target="_blank" class="underline hover:text-purple-600">documentation</a
+        >.
       </p>
     </section>
   </div>

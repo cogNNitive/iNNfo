@@ -46,7 +46,10 @@ async function resolveFileHandleForWrite(
   root: DirectoryHandleLike,
   refPath: string,
 ): Promise<FileHandleLike> {
-  const segments = refPath.replace(/\\/g, '/').split('/').filter((p) => p && p !== '.')
+  const segments = refPath
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter((p) => p && p !== '.')
   let current: DirectoryHandleLike = root
   for (let i = 0; i < segments.length - 1; i++) {
     current = await current.getDirectoryHandle(segments[i], { create: true })
@@ -56,7 +59,10 @@ async function resolveFileHandleForWrite(
 }
 
 async function removeFileByPath(root: DirectoryHandleLike, refPath: string): Promise<void> {
-  const segments = refPath.replace(/\\/g, '/').split('/').filter((p) => p && p !== '.')
+  const segments = refPath
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter((p) => p && p !== '.')
   let current: DirectoryHandleLike = root
   for (let i = 0; i < segments.length - 1; i++) {
     current = await current.getDirectoryHandle(segments[i])
@@ -66,7 +72,6 @@ async function removeFileByPath(root: DirectoryHandleLike, refPath: string): Pro
     await current.removeEntry(last)
   }
 }
-
 
 /**
  * workspaceStore owns the FS directory handle, permission verification,
@@ -360,7 +365,9 @@ export const useWorkspaceStore = defineStore('workspace', {
       const uiStore = useUiStore()
       const modelStore = useModelStore()
       const rootId =
-        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId]
+          ? uiStore.activeModelId
+          : undefined) ??
         modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
         modelStore.rootIds[0]
       if (!rootId) return
@@ -430,7 +437,11 @@ export const useWorkspaceStore = defineStore('workspace', {
         }
 
         const modelStore = useModelStore()
-        const reports = await recursiveSerialize(modelStore.nodes, modelStore.dirtyIds, this.driver ?? undefined)
+        const reports = await recursiveSerialize(
+          modelStore.nodes,
+          modelStore.dirtyIds,
+          this.driver ?? undefined,
+        )
 
         if (!this.driver) {
           // If no driver is set, write the dirty model files directly using the directory handle
@@ -493,7 +504,9 @@ export const useWorkspaceStore = defineStore('workspace', {
       const modelStore = useModelStore()
       const rootId =
         targetRootId ??
-        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId]
+          ? uiStore.activeModelId
+          : undefined) ??
         modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
         modelStore.rootIds[0]
       const rootNode = rootId ? modelStore.getNode(rootId) : null
@@ -536,7 +549,10 @@ export const useWorkspaceStore = defineStore('workspace', {
       const oldPathRef = rootNode.source.path
       rootNode.source.path = cleanNewFilename
       for (const node of Object.values(modelStore.nodes)) {
-        if (node.source && (node.source.path === oldPathRef || modelStore.getModelRootForNode(node.id) === rootId)) {
+        if (
+          node.source &&
+          (node.source.path === oldPathRef || modelStore.getModelRootForNode(node.id) === rootId)
+        ) {
           node.source.path = cleanNewFilename
         }
       }
@@ -553,7 +569,9 @@ export const useWorkspaceStore = defineStore('workspace', {
       const modelStore = useModelStore()
       const rootId =
         targetRootId ??
-        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+        (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId]
+          ? uiStore.activeModelId
+          : undefined) ??
         modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
         modelStore.rootIds[0]
       const rootNode = modelStore.getNode(rootId)
@@ -614,7 +632,10 @@ export const useWorkspaceStore = defineStore('workspace', {
       // Update the root node's source path and all child nodes belonging to this model
       rootNode.source.path = cleanNewFilename
       for (const node of Object.values(modelStore.nodes)) {
-        if (node.source && (node.source.path === oldFilename || modelStore.getModelRootForNode(node.id) === rootId)) {
+        if (
+          node.source &&
+          (node.source.path === oldFilename || modelStore.getModelRootForNode(node.id) === rootId)
+        ) {
           node.source.path = cleanNewFilename
         }
       }

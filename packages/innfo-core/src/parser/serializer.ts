@@ -12,7 +12,9 @@ function serializePropertyValue(value: unknown): string {
     }
   } else if (Array.isArray(value)) {
     // If it contains a WikiLink, serialize elements individually
-    const hasWikiLink = value.some((v) => typeof v === 'string' && v.trim().startsWith('[[') && v.trim().endsWith(']]'))
+    const hasWikiLink = value.some(
+      (v) => typeof v === 'string' && v.trim().startsWith('[[') && v.trim().endsWith(']]'),
+    )
     if (hasWikiLink) {
       return `[${value.map(serializePropertyValue).join(', ')}]`
     }

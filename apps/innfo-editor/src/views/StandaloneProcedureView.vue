@@ -1,13 +1,18 @@
 <template>
   <div class="min-h-screen flex flex-col bg-slate-900 text-slate-100 font-sans antialiased">
     <!-- Top Minimal Navigation Bar -->
-    <header class="h-12 px-6 border-b border-slate-800 bg-slate-950 flex items-center justify-between shrink-0">
+    <header
+      class="h-12 px-6 border-b border-slate-800 bg-slate-950 flex items-center justify-between shrink-0"
+    >
       <div class="flex items-center gap-3">
-        <div class="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-xs">
+        <div
+          class="w-6 h-6 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-xs"
+        >
           P
         </div>
         <span class="text-xs font-bold text-slate-200 tracking-wide uppercase">
-          iNNfo Procedure Viewer <span class="text-slate-500 text-3xs lowercase font-normal">(Standalone)</span>
+          iNNfo Procedure Viewer
+          <span class="text-slate-500 text-3xs lowercase font-normal">(Standalone)</span>
         </span>
       </div>
 
@@ -25,13 +30,20 @@
     <div class="flex-1 flex flex-col min-h-0">
       <!-- Loading State -->
       <div v-if="loading" class="flex-1 flex flex-col items-center justify-center gap-3">
-        <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <div
+          class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"
+        ></div>
         <p class="text-xs text-slate-400 font-medium">Loading Procedure Model...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto">
-        <div class="w-12 h-12 rounded-full bg-rose-950/60 text-rose-400 flex items-center justify-center mb-3">
+      <div
+        v-else-if="error"
+        class="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto"
+      >
+        <div
+          class="w-12 h-12 rounded-full bg-rose-950/60 text-rose-400 flex items-center justify-center mb-3"
+        >
           !
         </div>
         <h3 class="text-sm font-bold text-rose-300 mb-1">Failed to load Procedure Model</h3>
@@ -45,11 +57,7 @@
       </div>
 
       <!-- Rendered Procedure Extension -->
-      <GuidedProcedureView
-        v-else
-        :context="standaloneAdapter.context.value"
-        :standalone="true"
-      />
+      <GuidedProcedureView v-else :context="standaloneAdapter.context.value" :standalone="true" />
     </div>
   </div>
 </template>
@@ -246,7 +254,11 @@ async function loadModel() {
       markdown = await response.text()
     }
 
-    const { nodes } = normalizeSingleModel(markdown, targetUrl || 'sample://CodeReviewProcess', sourceId)
+    const { nodes } = normalizeSingleModel(
+      markdown,
+      targetUrl || 'sample://CodeReviewProcess',
+      sourceId,
+    )
     standaloneAdapter.setNodes(nodes as any)
   } catch (err) {
     error.value = err instanceof Error ? err.message : String(err)

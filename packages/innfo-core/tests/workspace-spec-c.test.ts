@@ -17,7 +17,7 @@ function createFakeDirectoryHandle(files: Record<string, string>): DirectoryHand
     const handle: FileHandleLike = {
       kind: 'file',
       name: path.split('/').pop()!,
-      getFile: async () => ({ text: async () => content } as File),
+      getFile: async () => ({ text: async () => content }) as File,
     }
     fileHandles.set(path, handle)
   }

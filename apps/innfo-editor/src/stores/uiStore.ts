@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-
 export type ActiveView =
   | 'editor'
   | 'explorer'
@@ -139,8 +138,6 @@ export const useUiStore = defineStore('ui', () => {
     showAiModal.value = val
   }
 
-
-
   function toggleSearchOpen(): void {
     isSearchOpen.value = !isSearchOpen.value
     if (!isSearchOpen.value) {
@@ -239,5 +236,3 @@ export const useUiStore = defineStore('ui', () => {
     returnToWorkspaceOverview,
   }
 })
-
-

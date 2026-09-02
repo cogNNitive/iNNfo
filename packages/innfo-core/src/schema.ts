@@ -1,4 +1,12 @@
-import type { Concept, ConceptField, Marker, MatrixDecl, ParsedModel, TaxonomyEdge, ValidationError } from './types'
+import type {
+  Concept,
+  ConceptField,
+  Marker,
+  MatrixDecl,
+  ParsedModel,
+  TaxonomyEdge,
+  ValidationError,
+} from './types'
 import { parseModel } from './parser'
 
 /**
@@ -59,7 +67,9 @@ function asNumber(v: unknown): number | undefined {
 }
 
 function asObject(v: unknown): Record<string, unknown> | undefined {
-  return v && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : undefined
+  return v && typeof v === 'object' && !Array.isArray(v)
+    ? (v as Record<string, unknown>)
+    : undefined
 }
 
 /**
@@ -426,7 +436,8 @@ export function checkElementsAgainstSchema(
       continue
     }
     const fieldByName = new Map((def.fields ?? []).map((f) => [f.name.toLowerCase(), f]))
-    const required = opts.requiredByConcept?.[def.name] ?? opts.requiredByConcept?.[conceptName] ?? []
+    const required =
+      opts.requiredByConcept?.[def.name] ?? opts.requiredByConcept?.[conceptName] ?? []
 
     for (const el of elements) {
       for (const key of required) {

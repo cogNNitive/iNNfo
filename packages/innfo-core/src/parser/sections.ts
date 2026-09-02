@@ -129,7 +129,10 @@ export function parseConceptSection(conceptName: string, content: string): Parse
         if (prop[0] === 'slug') {
           current.slug = String(prop[1])
         } else if (prop[0] === 'tags') {
-          current.tags = String(prop[1]).split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
+          current.tags = String(prop[1])
+            .split(',')
+            .map((t) => t.trim().toLowerCase())
+            .filter(Boolean)
         } else {
           current.fields[prop[0]] = parsePropertyValue(prop[1])
         }
@@ -138,7 +141,10 @@ export function parseConceptSection(conceptName: string, content: string): Parse
     } else {
       const prop = parsePropertyLine(line)
       if (prop !== null && prop[0] === 'tags') {
-        conceptTags = String(prop[1]).split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
+        conceptTags = String(prop[1])
+          .split(',')
+          .map((t) => t.trim().toLowerCase())
+          .filter(Boolean)
         continue
       }
     }

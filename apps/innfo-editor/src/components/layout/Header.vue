@@ -15,8 +15,20 @@
       </button>
 
       <div class="flex items-center gap-2 shrink-0">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" class="w-6 h-6 shrink-0 text-primary" aria-label="iNNfo Logo">
-          <path d="M 160 490 L 160 295 Q 160 270 180 285 L 330 475 Q 350 490 350 470 L 350 235 Q 350 210 370 225 L 530 415 Q 550 430 550 410 L 550 90 L 495 145 L 550 90 L 605 145" fill="none" stroke="currentColor" stroke-width="82" stroke-linecap="round" stroke-linejoin="round" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 800 600"
+          class="w-6 h-6 shrink-0 text-primary"
+          aria-label="iNNfo Logo"
+        >
+          <path
+            d="M 160 490 L 160 295 Q 160 270 180 285 L 330 475 Q 350 490 350 470 L 350 235 Q 350 210 370 225 L 530 415 Q 550 430 550 410 L 550 90 L 495 145 L 550 90 L 605 145"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="82"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
         <span class="font-mono text-lg font-black text-primary select-none leading-none">NN</span>
         <h1 class="text-sm font-semibold tracking-tight">iNNfo Modeler</h1>
@@ -63,7 +75,9 @@
           class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-bold transition-all cursor-pointer rounded-md border border-transparent"
           :class="[
             statusClass,
-            isBlinking ? 'animate-header-blink ring-2 ring-amber-400/80 dark:ring-amber-500/80 shadow-md scale-105' : ''
+            isBlinking
+              ? 'animate-header-blink ring-2 ring-amber-400/80 dark:ring-amber-500/80 shadow-md scale-105'
+              : '',
           ]"
           :title="statusTitle"
         >
@@ -94,7 +108,9 @@
           data-testid="header-search-popup"
         >
           <!-- Top Row: Input + Clear + Close -->
-          <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900/60 rounded-lg px-2.5 py-1.5 border border-slate-200/80 dark:border-slate-700/80">
+          <div
+            class="flex items-center gap-2 bg-slate-100 dark:bg-slate-900/60 rounded-lg px-2.5 py-1.5 border border-slate-200/80 dark:border-slate-700/80"
+          >
             <Search class="w-4 h-4 text-slate-400 shrink-0" />
             <input
               :value="uiStore.searchQuery"
@@ -123,7 +139,9 @@
 
           <!-- Tags Filter -->
           <div class="px-0.5 mt-1 mb-2">
-            <span class="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1">
+            <span
+              class="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-1"
+            >
               Etiquetas
             </span>
             <TagInput v-model="uiStore.selectedTagFilters" />
@@ -131,7 +149,9 @@
 
           <!-- Concept Picklist Header: Title + Select All / Deselect All -->
           <div v-if="availableConcepts.length > 0" class="flex items-center justify-between px-0.5">
-            <span class="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <span
+              class="text-2xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+            >
               Conceptos ({{ selectedConceptCount }}/{{ availableConcepts.length }})
             </span>
             <div class="flex items-center gap-1.5">
@@ -191,15 +211,16 @@
         </div>
       </div>
 
-
-
-
       <!-- Use AI Button — opens unified modal -->
 
       <button
         @click="uiStore.setActiveView('ai-guide')"
         class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition-all cursor-pointer bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 ring-purple-300 dark:ring-purple-700/50 hover:bg-purple-50 dark:hover:bg-purple-950/30"
-        :class="uiStore.activeView === 'ai-guide' ? 'bg-purple-50 dark:bg-purple-950/30 ring-purple-400 dark:ring-purple-600' : ''"
+        :class="
+          uiStore.activeView === 'ai-guide'
+            ? 'bg-purple-50 dark:bg-purple-950/30 ring-purple-400 dark:ring-purple-600'
+            : ''
+        "
         title="Use AI to edit models"
       >
         <Sparkles class="w-3.5 h-3.5" />
@@ -240,9 +261,19 @@
             class="absolute right-0 top-full mt-1.5 w-80 rounded-lg bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-slate-600 py-2.5 z-50"
           >
             <div class="px-3.5 pt-0.5">
-              <div v-if="activeModelName" class="mb-2 pb-1.5 border-b border-slate-100 dark:border-slate-700/60">
-                <span class="text-2xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5">Target Model</span>
-                <span class="font-mono text-xs font-bold text-slate-800 dark:text-slate-100 break-all select-all block leading-snug" :title="activeModelName">{{ activeModelName }}</span>
+              <div
+                v-if="activeModelName"
+                class="mb-2 pb-1.5 border-b border-slate-100 dark:border-slate-700/60"
+              >
+                <span
+                  class="text-2xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-0.5"
+                  >Target Model</span
+                >
+                <span
+                  class="font-mono text-xs font-bold text-slate-800 dark:text-slate-100 break-all select-all block leading-snug"
+                  :title="activeModelName"
+                  >{{ activeModelName }}</span
+                >
               </div>
               <div class="flex items-center justify-between mb-2">
                 <span
@@ -250,7 +281,9 @@
                 >
                   Current Version
                 </span>
-                <span class="font-mono text-xs font-extrabold text-primary">{{ modelVersion }}</span>
+                <span class="font-mono text-xs font-extrabold text-primary">{{
+                  modelVersion
+                }}</span>
               </div>
               <p
                 v-if="bumpError"
@@ -321,7 +354,6 @@ import { useToast } from '../../shared/useToast'
 import Pill from '../editor/Pill.vue'
 import TagInput from '../ui/TagInput.vue'
 import { getConceptMeta } from '../../composables/useConceptVisuals'
-
 
 import { extensionRegistry } from '../../extensions/registry'
 import {
@@ -401,7 +433,7 @@ watch(
   () => {
     triggerBlink()
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const saveDropdownOpen = ref(false)
@@ -412,7 +444,9 @@ const bumpError = ref('')
 
 const rootNode = computed(() => {
   const activeId =
-    (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId] ? uiStore.activeModelId : undefined) ??
+    (uiStore.activeModelId && modelStore.nodes[uiStore.activeModelId]
+      ? uiStore.activeModelId
+      : undefined) ??
     modelStore.rootIds.find((id) => !id.startsWith('spec:')) ??
     modelStore.rootIds[0]
   if (!activeId) return null
@@ -424,7 +458,8 @@ const hasRootNode = computed(() => rootNode.value !== null)
 const availableConcepts = computed(() => {
   const concepts = new Set<string>()
   for (const node of Object.values(modelStore.nodes)) {
-    const conceptName = node.conceptBinding?.name || (node.kind === 'concept' ? node.name : node.type)
+    const conceptName =
+      node.conceptBinding?.name || (node.kind === 'concept' ? node.name : node.type)
     if (conceptName && conceptName !== 'root') {
       concepts.add(conceptName)
     }
@@ -454,8 +489,6 @@ const selectedConceptCount = computed(() => {
 })
 
 const searchContainerRef = ref<HTMLElement | null>(null)
-
-
 
 const filePath = computed(() => {
   const node = rootNode.value
@@ -606,7 +639,6 @@ onUnmounted(() => {
   if (blinkTimer) clearTimeout(blinkTimer)
   window.removeEventListener('click', closeDropdown)
 })
-
 </script>
 
 <style scoped>
@@ -636,7 +668,8 @@ onUnmounted(() => {
 }
 
 @keyframes header-blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
